@@ -256,7 +256,7 @@ export function registerSidebar(chapter) {
   
   // <!-- ══ QUIZ LOGIC ═══════════════════════════════════════ -->
 
-  (function () {
+  if (document.getElementById('quiz-score')) (function () {
     const TOTAL = 20;
     let score = 0;
     let answered = 0;
