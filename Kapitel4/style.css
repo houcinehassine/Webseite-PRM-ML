@@ -1,30 +1,4 @@
-/* ── Kapitel4 Hero & Pills ───────────────────────────────────── */
-/* Shared card/grid/section-label styles → assets/kapitel-overview.css */
-.k4-hero {
-  padding: clamp(3rem, 10vw, 5rem) 0 clamp(2rem, 6vw, 3rem);
-  text-align: center;
-}
-.k4-hero .eyebrow {
-  margin-bottom: var(--space-4);
-}
-.k4-hero h1 {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  line-height: 1.08;
-  text-transform: none;
-  margin: var(--space-4) auto var(--space-4);
-  max-width: 20ch;
-}
-.k4-hero p {
-  color: var(--color-text-muted);
-  font-size: var(--text-base);
-  max-width: 60ch;
-  margin-inline: auto;
-}
-.k4-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  justify-content: center;
-  margin-top: var(--space-6);
-}
+/* ── Kapitel4: spezifische Grid-Varianten ─────────────────────── */
+/* Hero + Pills → assets/kapitel-overview.css (.kapitel-hero, .kapitel-pills) */
+.pages-grid.examples-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); margin-top: 0; }
+.pages-grid.pruefung-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); margin-top: 0; }
