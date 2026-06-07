@@ -1,4 +1,4 @@
-import { registerSidebar } from '../script.js';
+import { registerSidebar } from '../assets/script.js';
 
 const chapter = {
   title: 'Kapitel 4 · Clustering',

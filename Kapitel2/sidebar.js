@@ -2,7 +2,7 @@
 //  Kapitel2/Sidebar.js  –  Nur Daten, Logik kommt aus Core
 //  Pfad: V4/Kapitel2/Sidebar.js
 // ─────────────────────────────────────────────────────────
-import { registerSidebar } from '../script.js';
+import { registerSidebar } from '../assets/script.js';
 
 const chapter = {
   title: 'Kapitel 2 · Einführung in Machine Learning',

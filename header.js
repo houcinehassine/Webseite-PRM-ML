@@ -28,14 +28,8 @@ class SiteHeader extends HTMLElement {
     // --- CSS ---
     const css = document.createElement('link');
     css.rel = 'stylesheet';
-    css.href = 'style.css';
+    css.href = new URL('./assets/style.css', import.meta.url).href;
     document.head.appendChild(css);
-
-    // ── MathJax ──
-    const mj = document.createElement('script');
-    mj.src = 'script.js';
-    mj.defer = true;
-    document.head.appendChild(mj);
 
     /* ── Highlight.js ── */
     const hljsCss  = document.createElement('link');
@@ -65,11 +59,6 @@ class SiteHeader extends HTMLElement {
     };
     document.head.appendChild(pyodideScript);
 
-    /* ── Copy Buttons ── */
-    const copyScript = document.createElement('script');
-    copyScript.src = 'script.js';
-    copyScript.defer = true;
-    document.head.appendChild(copyScript);
 
     /* ── Header HTML ── */
     this.innerHTML = `

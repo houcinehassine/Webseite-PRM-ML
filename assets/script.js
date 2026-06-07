@@ -12,7 +12,7 @@ export function loadStyles() {
   const link = document.createElement('link');
   link.id   = 'sidebar-styles-link';
   link.rel  = 'stylesheet';
-  link.href = new URL('../styles.css', import.meta.url).href;
+  link.href = new URL('./style.css', import.meta.url).href;
   document.head.appendChild(link);
 }
 
