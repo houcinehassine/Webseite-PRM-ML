@@ -7,6 +7,7 @@
   <script type="module" src="../header.js"></script>
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/quiz.css">
     <link rel="stylesheet" href="style.css">
 
 </head>
@@ -20,23 +21,23 @@
     <main class="content" id="main-content">
 
       <!-- ══ SCORE-BAR (sticky) ═══════════════════════════ -->
-      <div class="quiz-score-bar">
-        <div class="quiz-score-nums">
-          <span class="quiz-score-label">Richtig</span>
-          <span class="quiz-score-big" id="quiz-score">0</span>
-          <span class="quiz-score-sep">/</span>
+      <div class="quiz-hud">
+        <div class="quiz-hud-stat">
+          <span class="quiz-hud-label">Richtig</span>
+          <span class="quiz-hud-num" id="quiz-score">0</span>
+          <span class="quiz-hud-sep">/</span>
           <span id="quiz-total" style="font-size:var(--text-lg); color:var(--color-text-muted)">20</span>
         </div>
-        <div class="quiz-progress-wrap">
-          <div class="quiz-progress-text">
+        <div class="quiz-hud-bar">
+          <div class="quiz-hud-text">
             <span id="quiz-answered">0</span> von
             <span id="quiz-total-2">20</span> beantwortet
           </div>
-          <div class="quiz-progress-track">
-            <div class="quiz-progress-fill" id="quiz-progress-bar"></div>
+          <div class="quiz-hud-track">
+            <div class="quiz-hud-fill" id="quiz-progress-bar"></div>
           </div>
         </div>
-        <button id="quiz-reset">↺ Neustart</button>
+        <button id="quiz-reset" class="quiz-hud-reset">↺ Neustart</button>
       </div>
 
 
@@ -67,8 +68,8 @@
         <!-- ════════════════════════════════════════════════
              KATEGORIE 1: KONZEPTFRAGEN
         ════════════════════════════════════════════════════ -->
-        <div class="quiz-cat-label">
-          <span class="quiz-cat-label-text">💡 Konzeptfragen</span>
+        <div class="quiz-cat">
+          <span class="quiz-cat-title">💡 Konzeptfragen</span>
           <span class="quiz-cat-line" style="flex:1; height:1px; background:var(--color-border); margin:0 var(--space-3)"></span>
           <span class="quiz-cat-count">Fragen 1–5</span>
         </div>
@@ -81,19 +82,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               GMM ist deutlich schneller als k-means
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               GMM liefert Wahrscheinlichkeiten (weiche Zuweisung) und kann elliptische Cluster modellieren
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               GMM braucht weniger Komponenten als k-means Cluster
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               GMM kann nur mit normalverteilten Daten umgehen
             </button>
           </div>
@@ -109,19 +110,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Das Modell generiert automatisch bessere Hyperparameter
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Das Modell modelliert die vollständige Datenverteilung und kann neue Datenpunkte via <code>.sample()</code> erzeugen
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               Das Modell generiert intern mehr Trainingsdaten um genauer zu werden
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Das Modell generiert Visualisierungen der Cluster automatisch
             </button>
           </div>
@@ -137,19 +138,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Generative Modelle sind immer genauer als diskriminative
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Diskriminative Modelle brauchen immer Labels, generative nie
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               Generative Modelle modellieren \(p(\mathbf{x})\) (vollständige Verteilung), diskriminative modellieren \(p(y|\mathbf{x})\) (Entscheidungsgrenze)
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Es gibt keinen relevanten Unterschied bei unüberwachtem Lernen
             </button>
           </div>
@@ -165,19 +166,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               <code>'full'</code>
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               <code>'diag'</code>
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               <code>'spherical'</code>
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               <code>'tied'</code>
             </button>
           </div>
@@ -193,19 +194,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               200 Datenpunkte sind zu wenig für ein GMM
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Gauß-Komponenten erzeugen immer elliptische Formen – Mondformen sind nicht elliptisch und können so nicht abgebildet werden
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               GMM erfordert immer mehr als 5 Komponenten
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Der <code>random_state=0</code> führt zu einer schlechten Initialisierung
             </button>
           </div>
@@ -217,8 +218,8 @@
         <!-- ════════════════════════════════════════════════
              KATEGORIE 2: FORMELFRAGEN
         ════════════════════════════════════════════════════ -->
-        <div class="quiz-cat-label" style="margin-top:var(--space-8)">
-          <span class="quiz-cat-label-text">∑ Formelfragen</span>
+        <div class="quiz-cat" style="margin-top:var(--space-8)">
+          <span class="quiz-cat-title">∑ Formelfragen</span>
           <span style="flex:1; height:1px; background:var(--color-border); margin:0 var(--space-3)"></span>
           <span class="quiz-cat-count">Fragen 6–10</span>
         </div>
@@ -231,19 +232,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Die neuen Mittelwerte \(\boldsymbol{\mu}_k\)
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Die neuen Kovarianzmatrizen \(\boldsymbol{\Sigma}_k\)
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               Die Responsibilities \(r_{nk}\) – die Clusterzugehörigkeitswahrscheinlichkeiten für jeden Datenpunkt
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Den BIC-Wert des aktuellen Modells
             </button>
           </div>
@@ -259,19 +260,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Maximum von BIC und Maximum von AIC
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Maximum von BIC, Minimum von AIC
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               Minimum von BIC und Minimum von AIC
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Minimum von BIC, Maximum von AIC
             </button>
           </div>
@@ -287,19 +288,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               BIC hat keinen Strafterm, AIC schon
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               BIC nutzt \(m\ln(n)\) als Strafterm – wächst mit der Datenmenge \(n\). AIC nutzt \(2m\) – konstant unabhängig von \(n\)
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               AIC nutzt \(m\ln(n)\), BIC nutzt \(2m\)
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Beide haben identische Strafterme
             </button>
           </div>
@@ -315,19 +316,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Einfacher Durchschnitt aller Datenpunkte (wie bei k-means)
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Gewichteter Durchschnitt – Datenpunkte gewichtet mit den Responsibilities \(r_{nk}\)
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               Gewichteter Durchschnitt – Datenpunkte gewichtet mit den Komponentengewichten \(w_k\)
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Median aller Datenpunkte in Cluster \(k\)
             </button>
           </div>
@@ -343,19 +344,19 @@
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Weil die Anzahl der Parameter zu groß ist
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Weil die Daten nicht i.i.d. sind
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               Weil in der Log-Likelihood ein <code>log</code> vor einer <code>Summe</code> steht – das lässt sich nicht vereinfachen
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Weil GMM keine konvexe Kostenfunktion hat
             </button>
           </div>
@@ -367,8 +368,8 @@
         <!-- ════════════════════════════════════════════════
              KATEGORIE 3: CODE-FRAGEN
         ════════════════════════════════════════════════════ -->
-        <div class="quiz-cat-label" style="margin-top:var(--space-8)">
-          <span class="quiz-cat-label-text">⌨️ Code-Fragen</span>
+        <div class="quiz-cat" style="margin-top:var(--space-8)">
+          <span class="quiz-cat-title">⌨️ Code-Fragen</span>
           <span style="flex:1; height:1px; background:var(--color-border); margin:0 var(--space-3)"></span>
           <span class="quiz-cat-count">Fragen 11–15</span>
         </div>
@@ -385,19 +386,19 @@ print(probs.shape, probs[0].sum().round(2))</code></pre>
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               <code>(n_samples,)</code> und <code>K</code> (Anzahl Komponenten)
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               <code>(n_samples, K)</code> und <code>1.0</code> (jede Zeile summiert zu 1)
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               <code>(K, n_samples)</code> und <code>1.0</code>
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               <code>(n_samples, K)</code> und <code>K</code>
             </button>
           </div>
@@ -417,19 +418,19 @@ plt.scatter(X[:, 0], X[:, 1], c=labels, s=size)</code></pre>
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Er normalisiert die Größen auf einen Bereich von 0–1
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Er verstärkt die Unterschiede: sichere Punkte (p≈1.0) werden viel größer, unsichere (p≈0.25) bleiben sehr klein
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               Er berechnet die 4. Ableitung der Likelihood
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Er stellt sicher, dass alle Punkte gleich groß sind
             </button>
           </div>
@@ -451,19 +452,19 @@ aics = [m.aic(X) for m in models]
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               <code>best_k = n_components[np.argmax(aics)]</code>
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               <code>best_k = n_components[np.argmin(aics)]</code>
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               <code>best_k = np.max(n_components)</code>
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               <code>best_k = n_components[aics.index(max(aics))]</code>
             </button>
           </div>
@@ -479,19 +480,19 @@ aics = [m.aic(X) for m in models]
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Ein Array mit Shape <code>(100,)</code> – 100 Cluster-Labels
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Ein Tupel <code>(X_new, labels)</code> mit <code>X_new.shape = (100, n_features)</code>
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               Ein Array mit Shape <code>(100, K)</code> – Wahrscheinlichkeiten für 100 Punkte
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Einen einzelnen Float – die Log-Likelihood der 100 Samples
             </button>
           </div>
@@ -515,19 +516,19 @@ aics = [m.aic(data) for m in models]</code></pre>
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               <code>load_digits()</code> muss mit <code>.target</code> geladen werden
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Der Range 1–20 ist für 64-dimensionale Daten viel zu klein – mindestens 50–200 Komponenten nötig
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               Die Daten müssen auf [0,1] normalisiert werden
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Es fehlt <code>covariance_type='full'</code>
             </button>
           </div>
@@ -539,8 +540,8 @@ aics = [m.aic(data) for m in models]</code></pre>
         <!-- ════════════════════════════════════════════════
              KATEGORIE 4: FALLEN-FRAGEN
         ════════════════════════════════════════════════════ -->
-        <div class="quiz-cat-label" style="margin-top:var(--space-8)">
-          <span class="quiz-cat-label-text">🪤 Fallen-Fragen</span>
+        <div class="quiz-cat" style="margin-top:var(--space-8)">
+          <span class="quiz-cat-title">🪤 Fallen-Fragen</span>
           <span style="flex:1; height:1px; background:var(--color-border); margin:0 var(--space-3)"></span>
           <span class="quiz-cat-count">Fragen 16–20</span>
         </div>
@@ -553,11 +554,11 @@ aics = [m.aic(data) for m in models]</code></pre>
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Richtig – hohes BIC = hohe Likelihood = gutes Modell
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Falsch – das Optimum liegt beim Minimum von BIC, nicht beim Maximum
             </button>
           </div>
@@ -573,11 +574,11 @@ aics = [m.aic(data) for m in models]</code></pre>
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Richtig – GMM wird in sklearn.mixture für Clustering verwendet
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Falsch – GMM ist primär ein Dichteschätzer; Clustering ist nur ein Nebenprodukt
             </button>
           </div>
@@ -600,19 +601,19 @@ best_model = models[np.argmax(aics)]  # ← ??</code></pre>
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               <code>argmax</code> statt <code>argmin</code> – das Optimum von AIC ist das Minimum
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               <code>covariance_type='full'</code> ist falsch – man muss <code>'spherical'</code> verwenden
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">C</span>
+              <span class="quiz-option-letter">C</span>
               <code>models[...]</code> ist falsch – man braucht <code>n_components[...]</code>
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">D</span>
+              <span class="quiz-option-letter">D</span>
               Es gibt keinen Fehler im Code
             </button>
           </div>
@@ -628,11 +629,11 @@ best_model = models[np.argmax(aics)]  # ← ??</code></pre>
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Richtig – man gibt <code>weights=[0.5, 0.3, 0.2]</code> an
             </button>
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Falsch – \(w_k\) sind gelernte Parameter, die durch MLE (M-Schritt) optimiert werden
             </button>
           </div>
@@ -648,11 +649,11 @@ best_model = models[np.argmax(aics)]  # ← ??</code></pre>
           </div>
           <div class="quiz-options">
             <button class="quiz-option" data-correct="true">
-              <span class="opt-letter">A</span>
+              <span class="quiz-option-letter">A</span>
               Richtig – <code>full</code> erlaubt beliebig rotierte Ellipsen; <code>spherical</code> erzwingt Kreisform
             </button>
             <button class="quiz-option" data-correct="false">
-              <span class="opt-letter">B</span>
+              <span class="quiz-option-letter">B</span>
               Falsch – <code>spherical</code> ist flexibler, weil es weniger Parameter hat
             </button>
           </div>
@@ -665,17 +666,17 @@ best_model = models[np.argmax(aics)]  # ← ??</code></pre>
              ERGEBNIS-KARTE
         ════════════════════════════════════════════════════ -->
         <div id="quiz-result">
-          <div class="result-card">
-            <div class="result-emoji" id="result-emoji">🎓</div>
-            <div class="result-title" id="result-msg">Quiz abgeschlossen!</div>
-            <div class="result-sub">Dein Ergebnis:</div>
-            <span class="result-score-big" id="result-score">–</span>
+          <div class="quiz-result-card">
+            <div class="quiz-result-emoji" id="quiz-result-emoji">🎓</div>
+            <div class="quiz-result-title" id="result-msg">Quiz abgeschlossen!</div>
+            <div class="quiz-result-sub">Dein Ergebnis:</div>
+            <span class="quiz-result-score" id="result-score">–</span>
             <div class="result-bar-wrap">
-              <div class="result-bar-track">
-                <div class="result-bar-fill" id="result-bar"></div>
+              <div class="quiz-result-bar-track">
+                <div class="quiz-result-bar" id="result-bar"></div>
               </div>
             </div>
-            <div class="result-grades">
+            <div class="quiz-result-grades">
               <span>≥ 90% 🏆 Sehr gut</span>
               <span>≥ 70% 👍 Gut</span>
               <span>≥ 50% 📚 Weiterüben</span>

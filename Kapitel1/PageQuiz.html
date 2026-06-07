@@ -7,6 +7,7 @@
   <script type="module" src="../header.js"></script>
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/quiz.css">
     <link rel="stylesheet" href="style.css">
 
 </head>
@@ -32,30 +33,30 @@
 
       <!-- ═══ HUD (sticky) ════════════════════════════════ -->
       <div class="quiz-hud">
-        <div class="hud-stat">
-          <span class="hud-num" id="quiz-score" style="color:var(--color-success)">0</span>
-          <span class="hud-label">&nbsp;/ 20 richtig</span>
+        <div class="quiz-hud-stat">
+          <span class="quiz-hud-num" id="quiz-score" style="color:var(--color-success)">0</span>
+          <span class="quiz-hud-label">&nbsp;/ 20 richtig</span>
         </div>
-        <div class="hud-stat">
-          <span class="hud-num" id="quiz-answered" style="color:var(--color-text-muted)">0</span>
-          <span class="hud-label">&nbsp;beantwortet</span>
+        <div class="quiz-hud-stat">
+          <span class="quiz-hud-num" id="quiz-answered" style="color:var(--color-text-muted)">0</span>
+          <span class="quiz-hud-label">&nbsp;beantwortet</span>
         </div>
-        <div class="hud-bar-wrap">
+        <div class="quiz-hud-bar">
           <div id="quiz-progress-bar"></div>
         </div>
-        <button class="hud-reset-btn" id="quiz-reset">↺ Reset</button>
+        <button class="quiz-hud-reset" id="quiz-reset">↺ Reset</button>
       </div>
 
       <!-- ══════════════════════════════════════════════════
            SECTION 1 – Konzepte & Definitionen
       ═══════════════════════════════════════════════════ -->
       <div id="konzept-fragen"></div>
-      <div class="quiz-section-head">
-        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">
+      <div class="quiz-cat">
+        <span class="quiz-cat-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">
           🧱 Konzepte
         </span>
-        <span class="quiz-sec-title">Definitionen &amp; Grundlagen</span>
-        <span class="quiz-sec-count">Fragen 1–5</span>
+        <span class="quiz-cat-title">Definitionen &amp; Grundlagen</span>
+        <span class="quiz-cat-count">Fragen 1–5</span>
       </div>
 
       <!-- Q01 -->
@@ -238,12 +239,12 @@
            SECTION 2 – Encoding & Text
       ═══════════════════════════════════════════════════ -->
       <div id="code-fragen"></div>
-      <div class="quiz-section-head">
-        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface-2));color:var(--color-success)">
+      <div class="quiz-cat">
+        <span class="quiz-cat-badge" style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface-2));color:var(--color-success)">
           🔤 Encoding
         </span>
-        <span class="quiz-sec-title">Encoding &amp; Text Features</span>
-        <span class="quiz-sec-count">Fragen 6–8</span>
+        <span class="quiz-cat-title">Encoding &amp; Text Features</span>
+        <span class="quiz-cat-count">Fragen 6–8</span>
       </div>
 
       <!-- Q06 -->
@@ -363,12 +364,12 @@ print(enc.fit_transform(categories))</div>
            SECTION 3 – sklearn API & Data Leakage
       ═══════════════════════════════════════════════════ -->
       <div id="fallen-fragen"></div>
-      <div class="quiz-section-head">
-        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">
+      <div class="quiz-cat">
+        <span class="quiz-cat-badge" style="background:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">
           ⚙️ sklearn API
         </span>
-        <span class="quiz-sec-title">sklearn API &amp; Data Leakage</span>
-        <span class="quiz-sec-count">Fragen 9–11</span>
+        <span class="quiz-cat-title">sklearn API &amp; Data Leakage</span>
+        <span class="quiz-cat-count">Fragen 9–11</span>
       </div>
 
       <!-- Q09 -->
@@ -483,12 +484,12 @@ X_test_s  = scaler.fit_transform(X_test)   # ← Zeile 3</div>
       <!-- ══════════════════════════════════════════════════
            SECTION 4 – Feature Selection
       ═══════════════════════════════════════════════════ -->
-      <div class="quiz-section-head">
-        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">
+      <div class="quiz-cat">
+        <span class="quiz-cat-badge" style="background:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">
           🎯 Selection
         </span>
-        <span class="quiz-sec-title">Feature Selection</span>
-        <span class="quiz-sec-count">Fragen 12–15</span>
+        <span class="quiz-cat-title">Feature Selection</span>
+        <span class="quiz-cat-count">Fragen 12–15</span>
       </div>
 
       <!-- Q12 -->
@@ -641,12 +642,12 @@ print(X_new.shape)</div>
       <!-- ══════════════════════════════════════════════════
            SECTION 5 – Feature Scaling
       ═══════════════════════════════════════════════════ -->
-      <div class="quiz-section-head">
-        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface-2));color:var(--color-success)">
+      <div class="quiz-cat">
+        <span class="quiz-cat-badge" style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface-2));color:var(--color-success)">
           ⚖️ Scaling
         </span>
-        <span class="quiz-sec-title">Feature Scaling &amp; Normalisierung</span>
-        <span class="quiz-sec-count">Fragen 16–18</span>
+        <span class="quiz-cat-title">Feature Scaling &amp; Normalisierung</span>
+        <span class="quiz-cat-count">Fragen 16–18</span>
       </div>
 
       <!-- Q16 -->
@@ -760,12 +761,12 @@ print(X_new.shape)</div>
            SECTION 6 – Berechnungen
       ═══════════════════════════════════════════════════ -->
       <div id="formel-fragen"></div>
-      <div class="quiz-section-head">
-        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">
+      <div class="quiz-cat">
+        <span class="quiz-cat-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">
           📐 Formeln
         </span>
-        <span class="quiz-sec-title">Rechenaufgaben</span>
-        <span class="quiz-sec-count">Fragen 19–20</span>
+        <span class="quiz-cat-title">Rechenaufgaben</span>
+        <span class="quiz-cat-count">Fragen 19–20</span>
       </div>
 
       <!-- Q19 -->
@@ -844,7 +845,7 @@ print(X_new.shape)</div>
            ERGEBNIS-SCREEN
       ═══════════════════════════════════════════════════ -->
       <div id="quiz-result">
-        <div class="result-emoji-big" id="result-emoji">🎉</div>
+        <div class="quiz-result-emoji" id="result-emoji">🎉</div>
         <div id="result-score">0 / 20 (0%)</div>
         <div id="result-msg">Ergebnis wird berechnet...</div>
         <div class="result-bar-wrap">

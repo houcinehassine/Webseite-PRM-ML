@@ -7,6 +7,7 @@
   <script type="module" src="../header.js"></script>
   <script type="module" src="Sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/quiz.css">
 
 </head>
 <body>
@@ -51,7 +52,7 @@
 
       <!-- ══ FORTSCHRITT ════════════════════════════════════════ -->
       <div style="padding: 0 var(--space-6)">
-        <p class="progress-label" id="progress-label">0 von 20 aufgeklappt</p>
+        <p class="quiz-progress-label" id="quiz-progress-label">0 von 20 aufgeklappt</p>
         <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
       </div>
 
@@ -60,9 +61,9 @@
            KATEGORIE 1: KONZEPTFRAGEN
       ═══════════════════════════════════════════════════════ -->
       <section class="section" id="konzept-fragen">
-        <div class="quiz-category">
+        <div class="quiz-cat">
           <h2>🧠 Konzeptfragen</h2>
-          <span class="cat-count">7 Fragen</span>
+          <span class="quiz-cat-count">7 Fragen</span>
           <span class="badge badge-konzept">Konzept</span>
         </div>
 
@@ -197,9 +198,9 @@
            KATEGORIE 2: FORMELFRAGEN
       ═══════════════════════════════════════════════════════ -->
       <section class="section" id="formel-fragen">
-        <div class="quiz-category">
+        <div class="quiz-cat">
           <h2>📐 Formelfragen</h2>
-          <span class="cat-count">5 Fragen</span>
+          <span class="quiz-cat-count">5 Fragen</span>
           <span class="badge badge-formel">Formeln</span>
         </div>
 
@@ -294,9 +295,9 @@
            KATEGORIE 3: CODE-FRAGEN
       ═══════════════════════════════════════════════════════ -->
       <section class="section" id="code-fragen">
-        <div class="quiz-category">
+        <div class="quiz-cat">
           <h2>💻 Code-Fragen</h2>
-          <span class="cat-count">5 Fragen</span>
+          <span class="quiz-cat-count">5 Fragen</span>
           <span class="badge badge-code">Code</span>
         </div>
 
@@ -432,9 +433,9 @@ mean_tpr /= n_classes</code></pre>
            KATEGORIE 4: FALLEN-FRAGEN
       ═══════════════════════════════════════════════════════ -->
       <section class="section" id="fallen-fragen">
-        <div class="quiz-category">
+        <div class="quiz-cat">
           <h2>🪤 Fallen-Fragen</h2>
-          <span class="cat-count">3 Fragen</span>
+          <span class="quiz-cat-count">3 Fragen</span>
           <span class="badge badge-falle">Fallen</span>
         </div>
 
@@ -507,7 +508,7 @@ roc_auc_score(y_test, y_score_matrix,
     /* Fortschrittsbalken aktualisieren */
     const total = 20;
     const fill  = document.getElementById('progress-fill');
-    const label = document.getElementById('progress-label');
+    const label = document.getElementById('quiz-progress-label');
     const open  = new Set();
 
     document.querySelectorAll('details.frage').forEach(det => {
