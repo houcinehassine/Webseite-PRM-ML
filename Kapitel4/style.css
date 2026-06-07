@@ -1,4 +1,3 @@
-/* ── Kapitel4: spezifische Grid-Varianten ─────────────────────── */
-/* Hero + Pills → assets/kapitel-overview.css (.kapitel-hero, .kapitel-pills) */
+/* ── Kapitel4: Grid-Variante (mehrfach genutzt) ───────────────────── */
+/* pruefung-grid → inline in Kapitel4.html */
 .pages-grid.examples-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); margin-top: 0; }
-.pages-grid.pruefung-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); margin-top: 0; }
