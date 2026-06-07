@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Praxisbeispiel: Kugellager</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page7" title="Kapitel 7 · Praxisbeispiel: Kugellager"></site-header>
+  <div class="layout">
+    <site-sidebar active="page-beispiel"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 7 · Praxisbeispiel</span>
+            <h1>Cheap &amp; Expensive <span class="key" style="--key-color:var(--color-success)">Bearings</span></h1>
+            <p>
+              Ein Maschinenbauunternehmen will teure und günstige Kugellager unterschiedlich behandeln.
+              Baue eine Funktion, die ein trainiertes Modell auf die Use-Case-Anforderungen anpasst.
+            </p>
+            <div class="pill-row">
+              <span class="pill">adjusted_predict()</span>
+              <span class="pill">fpr ≈ 0.023</span>
+              <span class="pill">tpr ≈ 0.97</span>
+              <span class="pill">bearing_model.pkl</span>
+              <span class="pill">ROC-Marker</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Aufgabe</h2>
+            <p>
+              Baue eine Funktion, die ein trainiertes Modell und einen Testdatensatz aufnimmt,
+              die angepassten Vorhersagen zurückgibt <strong>und</strong> den Punkt in der ROC-Kurve markiert.
+              Teuer = FPR ≤ 0.023, Günstig = TPR ≥ 0.97.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. AUFGABENSTELLUNG
+           ════════════════════════════════════════════ -->
+      <section class="section" id="aufgabe">
+        <div class="section-head">
+          <h2>Aufgabenstellung</h2>
+        </div>
+        <div class="note note-primary">
+          <strong>Kontext:</strong>
+          In einem Maschinenbauunternehmen sind überall Kugellager verbaut – teure große und billige kleine.
+          Ein ML-Modell (<code>bearing_model.pkl</code>) klassifiziert sie als „gut" oder „beschädigt".
+          <br><br>
+          Dein Vorgesetzter will:
+          <ul style="margin-top:var(--space-3)">
+            <li>
+              <strong>Teure Lager:</strong> Sollen <em>nicht zu häufig fälschlicherweise</em> ausgetauscht werden.
+              → Ziel: <code>fpr ≈ 0.023</code>
+            </li>
+            <li>
+              <strong>Günstige Lager:</strong> Sollen zum <em>richtigen Zeitpunkt</em> ausgetauscht werden.
+              → Ziel: <code>tpr ≈ 0.97</code>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Funktion-Signatur</span></h3>
+            <pre style="margin-top:var(--space-3)"><code>def adjusted_predict(model, Xtest, ytest,
+                     tpfp_value, tp=True):
+    """
+    model       : trainiertes sklearn-Modell
+    Xtest       : Test-Features
+    ytest       : wahre Testlabels
+    tpfp_value  : Zielwert (TPR oder FPR)
+    tp          : True → TPR-Ziel, False → FPR-Ziel
+    Rückgabe    : ypredicted_new (bool-Array)
+    """</code></pre>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Was brauchen wir zusätzlich?</span></h3>
+            <p>
+              Überlege: Welche Eingabeparameter fehlen noch?
+            </p>
+            <ul>
+              <li>Um teuer vs. günstig zu unterscheiden, müssen wir wissen, <strong>ob TPR oder FPR</strong> das Ziel ist</li>
+              <li>→ Der Parameter <code>tp=True</code> (TPR-Ziel) bzw. <code>tp=False</code> (FPR-Ziel)</li>
+              <li>Damit kann dieselbe Funktion für beide Lagerarten genutzt werden</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. DATENGENERIERUNG UND MODELLTRAINING
+           ════════════════════════════════════════════ -->
+      <section class="section" id="daten-modell">
+        <div class="section-head">
+          <h2>Schritt 1 – Daten generieren und Modell trainieren</h2>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Daten + Modell
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+import joblib
+from sklearn.datasets import make_blobs
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.svm import SVC
+from sklearn.metrics import roc_curve, RocCurveDisplay
+
+# Synthetische Kugellager-Daten erzeugen
+X, y = make_blobs(n_samples=1000, centers=2,
+                  cluster_std=1.5, random_state=0)
+Xtrain, Xtest, ytrain, ytest = train_test_split(X, y)
+
+# Daten visualisieren
+plt.figure()
+plt.scatter(Xtrain[:, 0], Xtrain[:, 1],
+            c=ytrain, s=40, cmap='viridis', edgecolors='gray')
+plt.title("Kugellager-Trainingsdaten")
+plt.xlabel("Feature 1 (z.B. Vibration)")
+plt.ylabel("Feature 2 (z.B. Temperatur)")
+
+# SVC trainieren
+model = SVC().fit(Xtrain, ytrain)
+print("CV-Score:", cross_val_score(model, Xtrain, ytrain).mean())
+
+# Modell speichern (für später)
+joblib.dump(model, 'bearing_model.pkl')
+np.save('bearing_xtest.npy', Xtest)
+np.save('bearing_ytest.npy', ytest)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>CV-Score: 0.87</pre>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li><code>cluster_std=1.5</code>: leichte Überlappung → realistisch</li>
+                <li>CV-Score ≈ 87 % – ausbaufähig, aber Basis für Threshold-Tuning</li>
+                <li><code>joblib.dump()</code>: Modell für späteres Laden speichern</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. LÖSUNG: adjusted_predict()
+           ════════════════════════════════════════════ -->
+      <section class="section" id="loesung">
+        <div class="section-head">
+          <h2>Schritt 2 – Lösung: <code>adjusted_predict()</code></h2>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Vollständige Lösung
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># Modell und Testdaten laden (gespeichertes Modell)
+model = joblib.load('bearing_model.pkl')
+Xtest = np.load('bearing_xtest.npy')
+ytest = np.load('bearing_ytest.npy')
+
+def adjusted_predict(model, Xtest, ytest, tpfp_value, tp=True):
+    """
+    Gibt angepasste Vorhersagen zurück für einen gewünschten
+    TPR- oder FPR-Wert auf der ROC-Kurve.
+    """
+    # Schritt 1: Kontinuierliche Scores berechnen
+    yscore = model.decision_function(Xtest)
+
+    # Schritt 2: Alle (FPR, TPR, Threshold)-Tripel berechnen
+    fpr, tpr, thresholds = roc_curve(ytest, yscore)
+
+    # Schritt 3: Wähle Ziel-Metrik (TPR oder FPR)
+    if tp:
+        tpfpr = tpr    # Suche nach TPR-Zielwert
+    else:
+        tpfpr = fpr    # Suche nach FPR-Zielwert
+
+    # Schritt 4: Nächsten Index zum Zielwert finden
+    index_of_tpfp_value = np.argmin(np.abs(tpfpr - tpfp_value))
+    threshold = thresholds[index_of_tpfp_value]
+
+    print(f"Gewählter Threshold: {threshold:.4f}")
+    print(f"Resultierender TPR: {tpr[index_of_tpfp_value]:.4f}")
+    print(f"Resultierender FPR: {fpr[index_of_tpfp_value]:.4f}")
+
+    # Schritt 5: ROC-Kurve mit markiertem Punkt plotten
+    plt.figure(figsize=(7, 6))
+    plt.plot([0, 1], [0, 1], linestyle='--',
+             color='gray', label='No Skill')
+    plt.plot(fpr, tpr, marker='.', color='steelblue',
+             label='Modell-ROC')
+    plt.scatter(fpr[index_of_tpfp_value],
+                tpr[index_of_tpfp_value],
+                marker='o', color='black', s=120, zorder=5,
+                label=f'Gewählter Punkt')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC-Kurve mit angepasstem Threshold')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+
+    # Schritt 6: Angepasste Vorhersagen zurückgeben
+    return yscore > threshold</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Schritt-für-Schritt-Erklärung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.2">
+                <li><strong>S1:</strong> <code>decision_function()</code> → kontinuierliche Scores (nicht 0/1)</li>
+                <li><strong>S2:</strong> <code>roc_curve()</code> → alle Tripel (fpr, tpr, threshold)</li>
+                <li><strong>S3:</strong> <code>if tp</code> → wähle Ziel-Array (tpr oder fpr)</li>
+                <li><strong>S4:</strong> <code>np.argmin(np.abs(...))</code> → nächster Index</li>
+                <li><strong>S5:</strong> Schwarzer Punkt auf ROC-Kurve = neue Position</li>
+                <li><strong>S6:</strong> <code>yscore > threshold</code> → bool-Array</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. ANWENDUNG
+           ════════════════════════════════════════════ -->
+      <section class="section" id="anwendung">
+        <div class="section-head">
+          <h2>Schritt 3 – Anwendung für beide Lagerarten</h2>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Anwendung
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># Teure Lager: FPR ≤ 0.023 (max. 2.3% Fehlalarme bei Negativen)
+# tp=False bedeutet: Wir suchen nach einem FPR-Zielwert
+print("=== TEURE LAGER (FPR-Ziel: 0.023) ===")
+ypredicted_fpr = adjusted_predict(
+    model, Xtest, ytest,
+    tpfp_value=0.023,
+    tp=False
+)
+
+print()
+
+# Günstige Lager: TPR ≥ 0.97 (mind. 97% der Defekten erkannt)
+# tp=True bedeutet: Wir suchen nach einem TPR-Zielwert
+print("=== GÜNSTIGE LAGER (TPR-Ziel: 0.97) ===")
+ypredicted_tpr = adjusted_predict(
+    model, Xtest, ytest,
+    tpfp_value=0.97,
+    tp=True
+)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Erwarteter Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>=== TEURE LAGER (FPR-Ziel: 0.023) ===
+Gewählter Threshold: 1.2847
+Resultierender TPR: 0.5714
+Resultierender FPR: 0.0229
+
+=== GÜNSTIGE LAGER (TPR-Ziel: 0.97) ===
+Gewählter Threshold: -0.8432
+Resultierender TPR: 0.9714
+Resultierender FPR: 0.2457</pre>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-3) 0 0; padding-left:1rem; line-height:1.9">
+                <li>Teure Lager: Hoher Threshold → hohe Präzision, aber weniger Recall</li>
+                <li>Günstige Lager: Niedriger Threshold → hoher Recall, mehr FP</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3 style="color:var(--color-warning)">Teure Lager – Analyse</h3>
+            <ul>
+              <li><strong>FPR ≈ 2.3 %</strong>: Von 100 guten Lagern werden ≤ 2–3 fälschlich als defekt markiert</li>
+              <li>Der hohe Threshold filtert nur wirklich eindeutige Defekte heraus</li>
+              <li>Konsequenz: Manche defekten Lager werden übersehen (niedrigere TPR)</li>
+              <li>Akzeptabler Preis für Schutz der teuren Lager</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3 style="color:var(--color-success)">Günstige Lager – Analyse</h3>
+            <ul>
+              <li><strong>TPR ≈ 97 %</strong>: Von 100 defekten Lagern werden ≥ 97 erkannt</li>
+              <li>Der niedrige Threshold lässt viele Vorhersagen als „defekt" durch</li>
+              <li>Konsequenz: Mehr Fehlalarme (FPR steigt auf ~24 %)</li>
+              <li>Günstige Lager vorzeitig tauschen ist günstiger als Ausfall</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Fazit:</strong>
+          Dasselbe Modell, aber zwei verschiedene Threshold-Einstellungen für zwei verschiedene Use Cases.
+          Das Modell selbst wird nicht neu trainiert – nur der Entscheidungspunkt auf der ROC-Kurve
+          wird verschoben. Die AUC bleibt unverändert.
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <section class="section" id="navigation">
+        <div class="card-grid">
+          <a href="Page07.html" class="card" style="text-decoration:none">
+            <h3>← Seite 7</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              Multi-Class ROC Curves
+            </p>
+          </a>
+          <a href="PageCheatsheet.html" class="card"
+            style="text-decoration:none; border-color:color-mix(in oklab, var(--color-warning) 60%, transparent);
+              background:color-mix(in oklab,var(--color-warning) 5%,var(--color-surface-2))">
+            <h3 style="color:color-mix(in oklab, var(--color-warning) 80%, #000)">→ Cheatsheet</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              Alle Formeln, sklearn API, Entscheidungsregeln auf einer Seite
+            </p>
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 7 · Praxisbeispiel · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

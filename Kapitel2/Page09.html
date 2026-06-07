@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Polynomiale Regression, Validierungskurven &amp; Learning Curves</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ── SCATTER + FIT PAIRS ────────────────────────── */
+    .scatter-card { background:var(--color-surface-2); border:1px solid var(--color-border);
+      border-radius:var(--radius-xl); overflow:hidden; margin-top:var(--space-5); }
+    .scatter-card-title { padding:var(--space-3) var(--space-4); font-size:var(--text-xs);
+      font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+      background:var(--color-surface-offset); border-bottom:1px solid var(--color-border);
+      text-align:center; color:var(--color-text-muted); }
+    .scatter-card svg { width:100%; height:auto; display:block; padding:var(--space-2); }
+
+    /* ── SIDE-BY-SIDE SCATTER PAIR ──────────────────── */
+    .scatter-pair { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); margin-top:var(--space-5); }
+    @media (max-width:640px) { .scatter-pair { grid-template-columns:1fr; } }
+
+    /* ── DOCSTRING BOX ──────────────────────────────── */
+    .docstring-box {
+      background: var(--color-surface-offset);
+      border: 1px solid var(--color-border);
+      border-left: 3px solid var(--doc-color, var(--color-primary));
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      padding: var(--space-4) var(--space-5);
+      margin: var(--space-4) 0;
+    }
+    .docstring-label {
+      font-size: 0.65rem; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--doc-color, var(--color-primary));
+      margin-bottom: var(--space-3);
+    }
+    .docstring-box pre {
+      margin: 0; font-size: var(--text-xs); line-height: 1.7;
+      color: var(--color-text-muted); white-space: pre-wrap; font-family: var(--font-mono);
+    }
+
+    /* ── FORMULA DISPLAY ────────────────────────────── */
+    .formula-display {
+      margin: var(--space-5) 0;
+      padding: var(--space-5) var(--space-6);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      text-align: center;
+    }
+    .formula-math {
+      font-family: var(--font-mono);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: var(--space-3);
+    }
+    .formula-sub { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.7; }
+
+    /* ── CURVE SVG WRAPPER ──────────────────────────── */
+    .curve-wrap {
+      margin-top: var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      padding: var(--space-4);
+    }
+    .curve-title {
+      font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--color-text-faint); margin-bottom: var(--space-3); text-align: center;
+    }
+    .curve-wrap svg { width:100%; height:auto; display:block; }
+
+    /* ── SO WHAT + FRAGE BOX ────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Validierungskurven &amp; Learning Curves"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page9"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Seite 9 · Folien 38–45</span>
+            <h1>Polynomiale Regression,
+              <span class="key" style="--key-color:var(--color-primary)">Validierungskurven</span>
+              &amp;
+              <span class="key" style="--key-color:var(--color-success)">Learning Curves</span>
+            </h1>
+            <p>
+              Von der Formel zur Code-Kurve:
+              Polynomiale Regression als konkreter Modell-Vertreter,
+              <code>validation_curve()</code> zum Sweepen des Polynomgrads,
+              und <code>learning_curve()</code> um zu sehen, wann mehr Daten helfen.
+            </p>
+            <div class="pill-row">
+              <span class="pill">f(x) = aₙxⁿ+…+a₀</span>
+              <span class="pill">PolynomialFeatures</span>
+              <span class="pill">validation_curve</span>
+              <span class="pill">degree=3 optimal</span>
+              <span class="pill">learning_curve</span>
+              <span class="pill">Konvergenz</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kannst <code>validation_curve()</code> anwenden, das Ergebnis
+              interpretieren und den <strong>optimalen Polynomgrad</strong> ablesen.
+              Du verstehst, wie <code>learning_curve()</code> zeigt,
+              ob <strong>mehr Daten</strong> helfen würden –
+              und erkennst den Unterschied zwischen degree=2 und degree=9.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           9.1  POLYNOMIALE REGRESSION  (Folie 38)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="polynomiale-regression">
+        <div class="section-head">
+          <h2>9.1 Polynomiale Regression – Unser Modell-Vertreter</h2>
+          <p>
+            Wir nutzen die <span class="key" style="--key-color:var(--color-primary)">Polynomiale Regression</span>
+            als konkreten Repräsentanten eines ML-Modells –
+            der Polynomgrad ist der Hyperparameter, der die
+            <span class="key" style="--key-color:var(--color-warning)">Modellkomplexität</span>
+            repräsentiert.
+          </p>
+        </div>
+
+        <!-- Formel -->
+        <div class="formula-display">
+          <div class="formula-math">f(x) = aₙxⁿ + … + a₁x + a₀</div>
+          <div class="formula-sub">
+            <span style="color:var(--color-primary)">f(x) = a₁x + a₀</span>
+            &nbsp;&nbsp;(degree=1, gerade Linie)
+            &nbsp;&nbsp;·&nbsp;&nbsp;
+            <span style="color:var(--color-success)">f(x) = a₂x² + a₁x + a₀</span>
+            &nbsp;&nbsp;(degree=2, Parabel)
+            &nbsp;&nbsp;·&nbsp;&nbsp;…
+          </div>
+        </div>
+
+        <!-- Scatter + 3 Fits SVG -->
+        <div class="scatter-card">
+          <div class="scatter-card-title">Polynomial Fits: degree=1 (blau) · degree=3 (grün) · degree=5 (rot)</div>
+          <svg viewBox="0 0 450 220" xmlns="http://www.w3.org/2000/svg">
+            <!-- Axis -->
+            <line x1="45" y1="190" x2="420" y2="190" stroke="var(--color-border)" stroke-width="1.5"/>
+            <line x1="45" y1="15"  x2="45"  y2="190" stroke="var(--color-border)" stroke-width="1.5"/>
+            <text x="232" y="208" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">x (0.0 bis 1.0)</text>
+            <text x="20" y="103" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 20 103)">y (0 bis 12)</text>
+            <!-- Data points (roughly following a saturation curve with noise) -->
+            <circle cx="55"  cy="185" r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="65"  cy="175" r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="80"  cy="160" r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="95"  cy="147" r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="105" cy="135" r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="120" cy="125" r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="135" cy="115" r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="150" cy="107" r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="165" cy="100" r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="180" cy="94"  r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="200" cy="88"  r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="220" cy="83"  r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="245" cy="79"  r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="270" cy="76"  r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="295" cy="73"  r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="320" cy="71"  r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="350" cy="69"  r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="380" cy="67"  r="4" fill="#1f2937" opacity=".85"/>
+            <circle cx="410" cy="65"  r="4" fill="#1f2937" opacity=".85"/>
+            <!-- Noise variation (additional scattered points) -->
+            <circle cx="75"  cy="170" r="3" fill="#1f2937" opacity=".6"/>
+            <circle cx="110" cy="140" r="3" fill="#1f2937" opacity=".6"/>
+            <circle cx="145" cy="120" r="3" fill="#1f2937" opacity=".6"/>
+            <circle cx="190" cy="80"  r="3" fill="#1f2937" opacity=".6"/>
+            <circle cx="235" cy="93"  r="3" fill="#1f2937" opacity=".6"/>
+            <circle cx="280" cy="68"  r="3" fill="#1f2937" opacity=".6"/>
+            <circle cx="335" cy="78"  r="3" fill="#1f2937" opacity=".6"/>
+            <circle cx="395" cy="62"  r="3" fill="#1f2937" opacity=".6"/>
+            <!-- degree=1: straight blue line (High-Bias, does not fit curve) -->
+            <line x1="52" y1="178" x2="415" y2="80" stroke="#3b82f6" stroke-width="2.5"/>
+            <!-- degree=3: smooth green curve (Good fit) -->
+            <path d="M52,182 C80,160 110,130 150,108 S210,84 260,76 S330,68 415,65"
+                  fill="none" stroke="#10b981" stroke-width="2.5"/>
+            <!-- degree=5: slightly more wiggly red curve -->
+            <path d="M52,183 C65,168 85,145 110,123 S145,103 175,95 S225,80 270,74 S330,67 415,64"
+                  fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="none"/>
+            <!-- Legend -->
+            <line x1="250" y1="165" x2="275" y2="165" stroke="#3b82f6" stroke-width="2.5"/>
+            <text x="280" y="169" font-size="9" fill="#3b82f6" font-family="sans-serif">degree=1 (High-Bias)</text>
+            <line x1="250" y1="178" x2="275" y2="178" stroke="#10b981" stroke-width="2.5"/>
+            <text x="280" y="182" font-size="9" fill="#10b981" font-family="sans-serif">degree=3 (Good fit)</text>
+            <line x1="250" y1="191" x2="275" y2="191" stroke="#ef4444" stroke-width="2.5"/>
+            <text x="280" y="195" font-size="9" fill="#ef4444" font-family="sans-serif">degree=5 (High-Var.)</text>
+          </svg>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">Polynomgrad</span>
+              = Hyperparameter = Modellkomplexität
+            </h3>
+            <ul>
+              <li>Unser ML-Modell: eine
+                <span class="key" style="--key-color:var(--color-primary)">Polynomfunktion beliebigen Grades</span>
+              </li>
+              <li>Diese wird per <strong>Polynomial Regression</strong> an die Daten angepasst</li>
+              <li>Durch die Anpassung werden die <strong>Koeffizienten geschätzt</strong> (a₀, a₁, ...)</li>
+              <li>Hyperparameter = Anzahl Summanden / Grad des Polynoms → repräsentiert die <span class="key" style="--key-color:var(--color-warning)">Modellkomplexität</span></li>
+              <li>Werden getuned / geswept: erst degree=1, dann 2, 3, ...</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>High-Bias vs. High-Variance bei Polynomen</h3>
+            <ul>
+              <li><span class="key" style="--key-color:#3b82f6">degree=1</span> → gerade Linie → <strong>High-Bias</strong> (zu simpel)</li>
+              <li><span class="key" style="--key-color:#10b981">degree=3</span> → sanfte Kurve → <strong>Guter Fit</strong></li>
+              <li><span class="key" style="--key-color:#ef4444">degree=5+</span> → komplex/wellig → <strong>High-Variance</strong> (Overfitting)</li>
+              <li>Ziel: optimalen Grad finden → <code>validation_curve()</code></li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfragen aus der Vorlesung</div>
+          <p>„Was bedeutet ‚angepasst' bzgl. der Formel?" &nbsp;·&nbsp; „Was sind hier unsere Hyperparameter?" &nbsp;·&nbsp; „Was ist hier ein High-Bias und High-Variance Model?"</p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           9.2  POLYNOMIALFEATURES + DOCSTRINGS  (Folie 39)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="polynomiale-docstrings">
+        <div class="section-head">
+          <h2>9.2 PolynomialFeatures &amp; LinearRegression in sklearn</h2>
+          <p>
+            Um eine Polynomiale Regression durchzuführen, kombinieren wir
+            <span class="key" style="--key-color:var(--color-primary)">PolynomialFeatures</span>
+            (erweitert die Feature-Matrix) mit
+            <span class="key" style="--key-color:var(--color-success)">LinearRegression</span>
+            (fittet das lineare Modell auf die erweiterten Features) in einer
+            <strong>Pipeline</strong>.
+          </p>
+        </div>
+
+        <!-- PolynomialFeatures Docstring -->
+        <div class="docstring-box" style="--doc-color: var(--color-primary)">
+          <div class="docstring-label">📄 sklearn · PolynomialFeatures – Docstring</div>
+          <pre>Generate polynomial and interaction features.
+
+Generate a new feature matrix consisting of all polynomial
+combinations of the features with degree less than or equal
+to the specified degree.
+
+For example, if an input sample is two dimensional and of
+the form [a, b], the degree-2 polynomial features are:
+[1, a, b, a², ab, b²].</pre>
+        </div>
+
+        <!-- LinearRegression Docstring -->
+        <div class="docstring-box" style="--doc-color: var(--color-success)">
+          <div class="docstring-label">📄 sklearn · LinearRegression – Docstring</div>
+          <pre>LinearRegression fits a linear model with coefficients
+w = (w1, ..., wp) to minimize the residual sum of squares
+between the observed targets in the dataset, and the targets
+predicted by the linear approximation.</pre>
+        </div>
+
+        <!-- Hilfsfunktionen Code -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-5) 0 var(--space-3)">
+          Schritt 1 — Hilfsfunktionen definieren
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir definieren zwei Hilfsfunktionen:
+          <code class="key" style="--key-color:var(--color-primary)">PolynomialRegression()</code>
+          baut eine sklearn-Pipeline aus PolynomialFeatures + LinearRegression,
+          <code class="key" style="--key-color:var(--color-success)">make_data()</code>
+          generiert einen synthetischen Datensatz.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Hilfsfunktionen
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+
+# PolynomialRegression: Pipeline aus PF + LR
+def PolynomialRegression(degree=2, **kwargs):
+    return make_pipeline(
+        PolynomialFeatures(degree),
+        LinearRegression(**kwargs))
+
+# make_data: synthetische Daten generieren
+def make_data(N, err=1.0, rseed=1):
+    rng = np.random.RandomState(rseed)
+    X = rng.rand(N, 1) ** 2
+    y = 10 - 1. / (X.ravel() + 0.1)
+    if err > 0:
+        y += err * rng.randn(N)
+    return X, y</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Erklärung</span></div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li><code>make_pipeline(PolynomialFeatures(degree), LinearRegression())</code> = Pipeline</li>
+                <li>Pipeline: Step 1 = Feature-Erweiterung, Step 2 = lin. Regression</li>
+                <li><code>param_name='polynomialfeatures__degree'</code> (double-underscore für Pipelines)</li>
+                <li><code>make_data(N)</code>: Kurve y = 10 - 1/(x+0.1) + Rauschen</li>
+                <li>rseed=1 → reproduzierbar</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daten generieren + scatter -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-5) 0 var(--space-3)">
+          Schritt 2 — Daten generieren &amp; visualisieren
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          50 Datenpunkte generieren und direkt als Scatter-Plot darstellen –
+          so sehen wir die Kurve, die wir fitten wollen.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Daten generieren
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>X, y = make_data(50)
+plt.scatter(X.ravel(), y, color='black', s=20)
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Trainingsdaten (N=50)')
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Beobachtung</span></div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>📊 Scatter: X in [0,1], Y in [0,10]</li>
+                <li>Sättigungskurve: steigt schnell, dann flacher</li>
+                <li>Mit Rauschen (err=1.0)</li>
+                <li>50 Punkte → später mit 200 vergleichen</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           9.3  VALIDATION_CURVE  (Folie 40)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="validation-curve">
+        <div class="section-head">
+          <h2>9.3 validation_curve in sklearn</h2>
+          <p>
+            Wir sweepen den Polynomgrad von 0 bis 20 und berechnen für jeden Grad
+            den Trainings- und Validierungs-Score mit 7-Fold Cross-Validation.
+            Werkzeug:
+            <span class="key" style="--key-color:var(--color-primary)">validation_curve()</span>.
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom:var(--space-5)">
+          <h3>sklearn API</h3>
+          <ul>
+            <li>
+              <code class="key" style="--key-color:var(--color-primary)">validation_curve(model, X, y, param_name=..., param_range=..., cv=...)</code>
+            </li>
+            <li>Führt für jeden Wert in <code>param_range</code> eine Cross-Validation durch</li>
+            <li>Gibt zurück: <code>train_scores, val_scores</code> als Arrays (Shape: n_params × n_cv_folds)</li>
+            <li>Zum Plotten: <code>np.median(scores, 1)</code> oder <code>np.mean(scores, 1)</code> (aggregiert über Folds)</li>
+          </ul>
+        </div>
+
+        <!-- validation_curve Code -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Schritt 3 — validation_curve berechnen
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir sweepen den Polynomgrad von 0 bis 20.
+          Der Parameter heißt in der Pipeline
+          <code>polynomialfeatures__degree</code>
+          (sklearn-Konvention: Stufenname + doppelter Unterstrich + Parametername).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – validation_curve berechnen
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.model_selection import validation_curve
+
+degree = np.arange(0, 21)  # degree 0 bis 20
+
+train_score, val_score = validation_curve(
+    PolynomialRegression(), X, y,
+    param_name='polynomialfeatures__degree',
+    param_range=degree,
+    cv=7)
+
+print("train_score.shape:", train_score.shape)
+print("val_score.shape:  ", val_score.shape)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Ausgabe</span></div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                train_score.shape: (21, 7)<br>
+                val_score.shape:   (21, 7)
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>21 Degree-Werte × 7 CV-Folds</li>
+                <li>Median über Folds aggregieren</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plotten -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-5) 0 var(--space-3)">
+          Schritt 4 — Validierungskurve plotten
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir plotten den Median der Scores über alle 7 Folds.
+          Trainings-Score (blau) und Validierungs-Score (rot) gegen den Polynomgrad.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Validierungskurve plotten
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>plt.plot(degree, np.median(train_score, 1),
+         color='blue', label='training score')
+plt.plot(degree, np.median(val_score, 1),
+         color='red', label='validation score')
+plt.legend(loc='lower center')
+plt.ylim(0, 1)
+plt.xlabel('degree')
+plt.ylabel('score')
+plt.title('Validierungskurve – Polynomiale Regression')
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Beobachtung</span></div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>Blaue Kurve: Training-Score bleibt konstant hoch (~0.98+)</li>
+                <li>Rote Kurve: steigt → Peak → fällt wieder</li>
+                <li><strong>Optimum:</strong> degree ≈ 3 (Maximum der roten Kurve)</li>
+                <li>Ab degree &gt; 5: High-Variance → deutliche Divergenz</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>„Was ist nun das Optimum? Wie findet man nun den optimalen Hyperparameter?"</p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           9.4  VALIDIERUNGSKURVEN ERGEBNIS  (Folie 41)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="validierungskurven-ergebnis">
+        <div class="section-head">
+          <h2>9.4 Validierungskurven – Ergebnis &amp; Interpretation</h2>
+          <p>
+            Das Ergebnis: der optimale Polynomgrad liegt bei
+            <span class="key" style="--key-color:var(--color-success)">degree = 3</span>.
+            Hier hat der Validierungs-Score sein Maximum.
+          </p>
+        </div>
+
+        <!-- Validation Curve Result SVG -->
+        <div class="curve-wrap">
+          <div class="curve-title">Ergebnis der Validierungskurve (Folie 41 · degree 0–20)</div>
+          <svg viewBox="0 0 500 230" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background zones -->
+            <rect x="45" y="15" width="100" height="190" fill="color-mix(in oklab,#3b82f6 5%,transparent)" rx="3"/>
+            <rect x="145" y="15" width="80" height="190" fill="color-mix(in oklab,var(--color-success) 8%,transparent)" rx="3"/>
+            <rect x="225" y="15" width="245" height="190" fill="color-mix(in oklab,#ef4444 5%,transparent)" rx="3"/>
+            <!-- Axes -->
+            <line x1="45" y1="205" x2="480" y2="205" stroke="var(--color-text-muted)" stroke-width="1.5"/>
+            <line x1="45" y1="205" x2="45"  y2="15"  stroke="var(--color-text-muted)" stroke-width="1.5"/>
+            <!-- X-axis labels (degree 0 to 20) -->
+            <text x="45"  y="218" text-anchor="middle" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">0</text>
+            <text x="112" y="218" text-anchor="middle" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">3</text>
+            <text x="179" y="218" text-anchor="middle" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">6</text>
+            <text x="263" y="218" text-anchor="middle" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">10</text>
+            <text x="480" y="218" text-anchor="middle" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">20</text>
+            <!-- Y-axis labels -->
+            <text x="38" y="208" text-anchor="end" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">0</text>
+            <text x="38" y="115" text-anchor="end" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">0.5</text>
+            <text x="38" y="22"  text-anchor="end" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">1.0</text>
+            <!-- Axis labels -->
+            <text x="262" y="228" text-anchor="middle" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif">degree →</text>
+            <text x="22" y="113" text-anchor="middle" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif" transform="rotate(-90 22 113)">score</text>
+            <!-- Training Score (blue) - high and stays high -->
+            <path d="M45,185 C65,125 80,45 100,35 S140,28 200,24 S300,22 380,21 S440,21 475,20"
+                  fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+            <!-- Validation Score (red) - rises then falls -->
+            <path d="M45,205 C55,190 75,155 100,110 S130,70 145,55 C155,45 162,42 175,45 S210,65 240,90 S310,130 380,155 S450,175 475,185"
+                  fill="none" stroke="#ef4444" stroke-width="2.5"/>
+            <!-- Best Model marker -->
+            <circle cx="162" cy="42" r="7" fill="var(--color-success)" stroke="#fff" stroke-width="2"/>
+            <line x1="162" y1="42" x2="162" y2="17" stroke="var(--color-success)" stroke-width="1.5" stroke-dasharray="3,2"/>
+            <text x="162" y="13" text-anchor="middle" font-size="9" fill="var(--color-success)" font-family="sans-serif" font-weight="800">Best: degree=3</text>
+            <!-- Zone labels -->
+            <text x="95"  y="32" text-anchor="middle" font-size="9" fill="#3b82f6" font-family="sans-serif" font-weight="700">High Bias</text>
+            <text x="185" y="32" text-anchor="middle" font-size="9" fill="var(--color-success)" font-family="sans-serif" font-weight="700">Optimum</text>
+            <text x="352" y="32" text-anchor="middle" font-size="9" fill="#ef4444" font-family="sans-serif" font-weight="700">High Variance</text>
+            <!-- Legend -->
+            <line x1="320" y1="170" x2="345" y2="170" stroke="#3b82f6" stroke-width="2.5"/>
+            <text x="350" y="174" font-size="8" fill="#3b82f6" font-family="sans-serif">training_score</text>
+            <line x1="320" y1="183" x2="345" y2="183" stroke="#ef4444" stroke-width="2.5"/>
+            <text x="350" y="187" font-size="8" fill="#ef4444" font-family="sans-serif">validation_score</text>
+          </svg>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? (Folie 41)</div>
+          <p>
+            Unser optimaler Hyperparameter liegt bei einem
+            <span class="key" style="--key-color:var(--color-success)">Polynomgrad von 3</span>.
+            Hier hat unser Validierungs-Score das Maximum.
+            Wir hätten dieses Ergebnis auch allein durch Maximierung des Validierungs-Scores erhalten können –
+            aber die <strong>Visualisierung beider Kurven</strong> gibt uns weitere Einsichten in das Modell.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           9.5  LEARNING CURVES – KONZEPT  (Folien 42-43)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="learning-curves-konzept">
+        <div class="section-head">
+          <h2>9.5 Learning Curves – Konzept</h2>
+          <p>
+            Die Validierungskurve hängt nicht nur von der Modellkomplexität ab,
+            sondern auch von der
+            <span class="key" style="--key-color:var(--color-primary)">Datenmenge</span>.
+            Mit mehr Daten kann man eine höhere Komplexität verwenden.
+          </p>
+        </div>
+
+        <!-- Mehr Daten Code -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Schritt 5 — Mehr Daten generieren (N=200)
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir generieren 200 statt 50 Datenpunkte –
+          und schauen, wie sich die Validierungskurve verändert.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Mehr Daten + Validierungskurve
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code># 200 Datenpunkte generieren
+X2, y2 = make_data(200)
+plt.scatter(X2.ravel(), y2, color='blue', s=8)
+plt.title('Mehr Daten: N=200')
+plt.xlabel('x'); plt.ylabel('y')
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Beobachtung</span></div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>📊 Scatter: 200 Punkte (statt 50)</li>
+                <li>Gleiche Kurvenform, aber dichter besetzt</li>
+                <li>Mit mehr Daten → höhere Komplexität möglich</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-cell-split" style="margin-top:var(--space-4)">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Validierungskurven Vergleich (N=50 vs N=200)
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>degree = np.arange(21)
+
+# N=50
+train_s, val_s = validation_curve(
+    PolynomialRegression(), X, y,
+    param_name='polynomialfeatures__degree',
+    param_range=degree, cv=7)
+
+# N=200
+train_s2, val_s2 = validation_curve(
+    PolynomialRegression(), X2, y2,
+    param_name='polynomialfeatures__degree',
+    param_range=degree, cv=7)
+
+plt.plot(degree, np.median(val_s2, 1),
+         color='red', label='val (N=200)')
+plt.plot(degree, np.median(val_s, 1),
+         color='red', alpha=0.3, linestyle='--',
+         label='val (N=50)')
+plt.legend(loc='lower center')
+plt.ylim(0, 1); plt.xlabel('degree')
+plt.ylabel('score')
+plt.title('Mehr Daten → höhere Komplexität möglich')
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Beobachtung (Folie 43)</span></div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>Rote Kurve (N=200) liegt höher als gestrichelt (N=50)</li>
+                <li>Mit mehr Daten: Optimum verschiebt sich nach rechts</li>
+                <li>→ Höhere Komplexität wird möglich</li>
+                <li>→ Validierungskurve ≠ nur Funktion der Komplexität</li>
+                <li>→ auch Funktion der <strong>Datenmenge</strong>!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfragen aus der Vorlesung</div>
+          <p>„Was können wir erkennen?" &nbsp;·&nbsp; „Wie können wir unser Modell noch verbessern?" &nbsp;·&nbsp; „Wie sieht die Learning Curve aus?"</p>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Learning Curves</span>
+              – Was sie zeigen
+            </h3>
+            <ul>
+              <li>Mittels <span class="key" style="--key-color:var(--color-primary)">Learning Curves</span>: Einfluss der <strong>Datensatzgröße</strong> auf Model-Performance untersuchen</li>
+              <li>Man wählt eine Modellkomplexität und trägt Validierungs- und Trainings-Score gegen die <strong>Datensatzgröße</strong> auf</li>
+              <li>Frage: ab wie vielen Daten bringt mehr kein Mehrwert mehr?</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Verbindung zur Validierungskurve</h3>
+            <ul>
+              <li>Validierungskurve (Page08): X-Achse = Modellkomplexität</li>
+              <li>Learning Curve: X-Achse = Datensatzgröße</li>
+              <li>Beide Achsen beeinflussen die Performance!</li>
+              <li>→ Aus der Untersuchung des Datensatzgrößen-Einflusses resultieren die <strong>Learning Curves</strong></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           9.6  LEARNING CURVES SCHEMA  (Folie 44)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="learning-curves-schema">
+        <div class="section-head">
+          <h2>9.6 Learning Curves – Schema &amp; Charakteristiken</h2>
+          <p>
+            Das allgemeine Schema der Learning Curve:
+            <span class="key" style="--key-color:#3b82f6">Training-Score</span>
+            startet bei 1.0 und fällt, während
+            <span class="key" style="--key-color:#ef4444">Validation-Score</span>
+            steigt und sich annähert.
+          </p>
+        </div>
+
+        <!-- Learning Curve Schema SVG -->
+        <div class="curve-wrap">
+          <div class="curve-title">Learning Curve Schema (Folie 44)</div>
+          <svg viewBox="0 0 500 240" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background zones -->
+            <rect x="45" y="15" width="200" height="195" fill="color-mix(in oklab,#ef4444 5%,transparent)" rx="3"/>
+            <rect x="245" y="15" width="235" height="195" fill="color-mix(in oklab,var(--color-success) 6%,transparent)" rx="3"/>
+            <!-- Axes -->
+            <line x1="45" y1="210" x2="490" y2="210" stroke="var(--color-text-muted)" stroke-width="1.5"/>
+            <line x1="45" y1="210" x2="45"  y2="15"  stroke="var(--color-text-muted)" stroke-width="1.5"/>
+            <polygon points="490,210 480,205 480,215" fill="var(--color-text-muted)"/>
+            <polygon points="45,15 40,25 50,25" fill="var(--color-text-muted)"/>
+            <!-- Axis labels -->
+            <text x="490" y="225" text-anchor="middle" font-size="10" fill="var(--color-text-muted)" font-family="sans-serif">training set size →</text>
+            <text x="22" y="113" text-anchor="middle" font-size="10" fill="var(--color-text-muted)" font-family="sans-serif" transform="rotate(-90 22 113)">model score</text>
+            <!-- Y-axis labels -->
+            <text x="38" y="213" text-anchor="end" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">0</text>
+            <text x="38" y="115" text-anchor="end" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">0.5</text>
+            <text x="38" y="22"  text-anchor="end" font-size="8" fill="var(--color-text-faint)" font-family="sans-serif">1.0</text>
+            <!-- Training score shaded region -->
+            <path d="M55,27 C80,28 130,32 200,40 S300,52 390,60 S450,63 475,65 L475,75 C450,73 390,70 300,62 S200,50 130,42 S80,38 55,37 Z"
+                  fill="#3b82f6" opacity=".15"/>
+            <!-- Training score curve (blue) – starts 1.0, gently falls -->
+            <path d="M55,27 C80,28 130,32 200,40 S300,52 390,60 S450,63 475,65"
+                  fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+            <!-- Validation score shaded region -->
+            <path d="M55,200 C80,175 130,140 200,110 S300,85 390,78 S450,74 475,70 L475,82 C450,86 390,90 300,97 S200,122 130,152 S80,187 55,210 Z"
+                  fill="#ef4444" opacity=".15"/>
+            <!-- Validation score curve (red) – starts low, rises toward training -->
+            <path d="M55,200 C80,175 130,140 200,110 S300,85 390,78 S450,74 475,70"
+                  fill="none" stroke="#ef4444" stroke-width="2.5"/>
+            <!-- Zone labels -->
+            <text x="145" y="35" text-anchor="middle" font-size="10" fill="#ef4444" font-family="sans-serif" font-weight="700">High Variance</text>
+            <text x="145" y="48" text-anchor="middle" font-size="9"  fill="#ef4444" font-family="sans-serif">(großer Gap)</text>
+            <text x="362" y="35" text-anchor="middle" font-size="10" fill="var(--color-success)" font-family="sans-serif" font-weight="700">Good Fit</text>
+            <text x="362" y="48" text-anchor="middle" font-size="9"  fill="var(--color-success)" font-family="sans-serif">(Konvergenz)</text>
+            <!-- Legend -->
+            <line x1="310" y1="185" x2="335" y2="185" stroke="#3b82f6" stroke-width="2.5"/>
+            <text x="340" y="189" font-size="9" fill="#3b82f6" font-family="sans-serif">training score</text>
+            <line x1="310" y1="200" x2="335" y2="200" stroke="#ef4444" stroke-width="2.5"/>
+            <text x="340" y="204" font-size="9" fill="#ef4444" font-family="sans-serif">validation score</text>
+          </svg>
+        </div>
+
+        <!-- Charakteristiken -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>Allgemeine Charakteristiken (Folie 44)</h3>
+            <ul>
+              <li>
+                Bei gegebener Modellkomplexität und <strong>kleinem Datensatz</strong>:
+                <span class="key" style="--key-color:#ef4444">Overfitting</span>
+                (großer Gap zwischen Kurven)
+              </li>
+              <li>
+                Bei gegebener Modellkomplexität und <strong>großem Datensatz</strong>:
+                <span class="key" style="--key-color:#3b82f6">Underfitting</span>
+                (Kurven konvergieren, aber zu niedrig)
+              </li>
+              <li>
+                Der Validierungs-Score wird <strong>nie</strong> (außer durch Zufall)
+                größer als der Trainings-Score
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Konvergenz</span>
+              – So What?
+            </h3>
+            <ul>
+              <li>Mit zunehmender Datensatzgröße nähern sich die Kurven an</li>
+              <li><strong>Konvergenz</strong> = Good Fit Zone</li>
+              <li>
+                Ab einem gewissen Punkt bringt die Vergrößerung des Datensatzes
+                <span class="key" style="--key-color:var(--color-warning)">keinen Mehrwert mehr!</span>
+              </li>
+              <li>Das Learning-Curve-Bild sagt uns, ob wir mehr Daten oder ein komplexeres Modell brauchen</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfragen aus der Vorlesung (Folie 44)</div>
+          <p>„Bei fester Modellkomplexität, welches Verhalten würden wir mit zunehmender Datensatzgröße erwarten?" &nbsp;·&nbsp; „Wodurch können wir nun noch die Model Performance erhöhen?" &nbsp;·&nbsp; „Was passiert also mit zunehmender Datensatzgröße?"</p>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? – Folie 44</div>
+          <p>
+            „Es kommt zu einer <strong>Konvergenz</strong> mit zunehmender Datensatzgröße!
+            Ab einem gewissen Punkt bringt die Vergrößerung des Datensatzes keinen Mehrwert mehr!"
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           9.7  LEARNING CURVES IN SKLEARN  (Folie 45)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="learning-curves-sklearn">
+        <div class="section-head">
+          <h2>9.7 Learning Curves in sklearn</h2>
+          <p>
+            sklearn stellt
+            <span class="key" style="--key-color:var(--color-success)">learning_curve()</span>
+            bereit. Wir vergleichen degree=2 (gutes Modell) vs. degree=9 (zu komplex).
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom:var(--space-5)">
+          <h3>sklearn API</h3>
+          <ul>
+            <li>
+              <code class="key" style="--key-color:var(--color-success)">learning_curve(model, X, y, cv=..., train_sizes=...)</code>
+            </li>
+            <li>
+              <code>train_sizes</code> = Array von Trainingsgrößen (z.B. <code>np.linspace(0.3, 1, 25)</code>)
+            </li>
+            <li>Gibt zurück: <code>N, train_scores, val_scores</code> (absolute Trainingsgrößen + Score-Arrays)</li>
+            <li>Zum Plotten: <code>np.mean(scores, 1)</code> über CV-Folds aggregieren</li>
+          </ul>
+        </div>
+
+        <!-- Learning Curves Code: degree=2 vs degree=9 -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Schritt 6 — Learning Curves berechnen: degree=2 vs. degree=9
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir berechnen und plotten Learning Curves für zwei verschiedene Polynomgrade.
+          Vertikales Layout (<code>figsize=(6,8)</code>, <code>subplot(2,1)</code>) um die
+          Graphen gut vergleichen zu können.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Learning Curves (degree=2 vs degree=9)
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.model_selection import learning_curve
+
+# Vertikales Layout: (2,1) statt (1,2)
+fig, axes = plt.subplots(2, 1, figsize=(6, 8))
+
+for i, degree in enumerate([2, 9]):
+    N, train_lc, val_lc = learning_curve(
+        PolynomialRegression(degree), X, y,
+        cv=7,
+        train_sizes=np.linspace(0.3, 1, 25))
+
+    axes[i].plot(N, np.mean(train_lc, 1),
+                 color='blue',
+                 label='training score')
+    axes[i].plot(N, np.mean(val_lc, 1),
+                 color='red',
+                 label='validation score')
+    axes[i].hlines(0.9, N[0], N[-1],
+                   linestyle='--', alpha=0.3)
+    axes[i].set_ylim(0, 1)
+    axes[i].set_xlabel('training size')
+    axes[i].set_ylabel('score')
+    axes[i].set_title(f'degree = {degree}')
+    axes[i].legend(loc='lower right')
+
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Beobachtung (Folie 45)</span></div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>
+                  <strong>degree=2</strong> (oben):
+                  Val-Score steigt schnell auf ~0.9, konvergiert mit Training → gutes Modell
+                </li>
+                <li>
+                  <strong>degree=9</strong> (unten):
+                  Val-Score bleibt niedrig bei ~0.8, großer Gap zu Training → Overfitting
+                </li>
+                <li>degree=9: mehr Daten würden helfen (Kurven konvergieren langsam)</li>
+                <li>degree=2: bereits bei ~25 Samples gut, mehr Daten kaum Mehrwert</li>
+                <li>Vertikales Layout erlaubt direkten optischen Vergleich</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>„Was zeigt uns das Konvergenzverhalten? Was bedeutet das für unsere Datenstrategie?"</p>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">degree=2</span>
+              – Gutes Modell
+            </h3>
+            <ul>
+              <li>Training-Score startet hoch, fällt leicht ab</li>
+              <li>Validation-Score steigt schnell an</li>
+              <li>Kurven <strong>konvergieren</strong> bei ~30 Samples</li>
+              <li>→ Mehr Daten bringen kaum Mehrwert</li>
+              <li>→ Modell ist richtig komplex für den Datensatz</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:#ef4444">degree=9</span>
+              – Overfitting
+            </h3>
+            <ul>
+              <li>Training-Score bleibt nahe 1.0</li>
+              <li>Validation-Score bleibt niedrig, steigt langsam</li>
+              <li>Großer <strong>Gap</strong> zwischen Training und Validation</li>
+              <li>→ Mehr Daten würden helfen</li>
+              <li>→ Oder: Komplexität reduzieren (degree=3)</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? – Zusammenfassung Seite 9</div>
+          <p>
+            <code>validation_curve()</code> zeigt, welches
+            <span class="key" style="--key-color:var(--color-primary)">Hyperparameter</span>
+            optimal ist.
+            <code>learning_curve()</code> zeigt, ob
+            <span class="key" style="--key-color:var(--color-success)">mehr Daten</span>
+            helfen würden.
+            Zusammen ermöglichen sie fundierte Entscheidungen über Modellkomplexität <em>und</em> Datenstrategie –
+            ohne blindes Raten.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Seite 9 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

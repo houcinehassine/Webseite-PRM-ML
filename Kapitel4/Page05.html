@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K-means Variationen</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · K-means Variationen"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page5"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Seite 5</span>
+            <h1>K-means <span class="key" style="--key-color:var(--color-primary)">Variationen</span></h1>
+            <p>
+              K-means versagt bei nicht-linear separierbaren Problemen.
+              Spectral Clustering, k-means++ und k-Median zeigen,
+              wie man diese Grenzen überwindet.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Nicht-lineare Probleme</span>
+              <span class="pill">Kernel-Trick</span>
+              <span class="pill">Spectral Clustering</span>
+              <span class="pill">k-means++</span>
+              <span class="pill">k-Median</span>
+              <span class="pill">Manhattan Distanz</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du verstehst, warum k-means bei komplexen Geometrien versagt,
+              kennst den Kernel-Trick als Lösung und weißt,
+              welche Variationen für welche Probleme geeignet sind.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. NICHT-LINEARE PROBLEME
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="nichtlineare-probleme">
+        <div class="section-head">
+          <h2>5.1 Nicht-lineare Probleme</h2>
+          <p>
+            Sehen wir uns an, wo k-means strukturell scheitert –
+            am Beispiel eines <code>make_moons</code>-Datensatzes.
+          </p>
+        </div>
+
+        <div class="note" style="margin-bottom:var(--space-5)">
+          <strong>Szenario:</strong>
+          Zwei halbmondförmige Cluster –
+          nicht-linear separierbar, aber für das menschliche Auge
+          klar erkennbar. Was macht k-means daraus?
+        </div>
+
+        <!-- Schritt 1: Rohdaten -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin-bottom:var(--space-2)">
+          Schritt 1 · Datensatz erzeugen
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+from sklearn.datasets import make_moons
+from sklearn.cluster import KMeans
+
+# Zwei halbmondförmige Cluster
+X, y = make_moons(200, noise=.05, random_state=0)
+
+# Rohdaten – ohne Labels
+plt.scatter(X[:, 0], X[:, 1], s=50)
+plt.title("make_moons – Rohdaten")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Info
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li><code style="color:var(--color-primary)">make_moons</code> – zwei ineinandergreifende Halbmonde</li>
+                <li><code style="color:var(--color-warning)">noise=0.05</code> – geringe Streuung</li>
+                <li>200 Datenpunkte, 2 echte Cluster</li>
+                <li>Cluster sind <strong>nicht linear trennbar</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: k-means Ergebnis -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-6) 0 var(--space-2)">
+          Schritt 2 · Wie performt k-means hier?
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># k-means mit k=2 auf make_moons anwenden
+labels = KMeans(2, random_state=0).fit_predict(X)
+
+# Ergebnis plotten
+plt.scatter(X[:, 0], X[:, 1],
+            c=labels, s=50, cmap='viridis')
+plt.title("k-means – k=2 auf make_moons")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Beobachtung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li>
+                  ❌ k-means teilt die Daten
+                  <strong>horizontal</strong> –
+                  nicht entlang der Halbmonde
+                </li>
+                <li>
+                  Jeder Halbmond wird in
+                  <strong>zwei Hälften gerissen</strong>
+                </li>
+                <li>
+                  Die Cluster-Grenze ist eine
+                  <strong>gerade Linie</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Erklärung warum -->
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Warum versagt k-means?</span></h3>
+            <ul>
+              <li>
+                K-means ist nur für
+                <strong>linear-separierbare</strong> Probleme geeignet
+              </li>
+              <li>
+                Die Heuristik
+                <em>„Datenpunkte sind näher am eigenen Centroid"</em>
+                führt bei <strong>komplexen Geometrien</strong> zu falschen Zuordnungen
+              </li>
+              <li>
+                Die Cluster-Grenze ist <strong>immer eine lineare Funktion</strong>
+                der Features – das ist strukturell bedingt
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Lösung: Kernel-Trick</span></h3>
+            <ul>
+              <li>
+                Aus SVMs bekannt:
+                Daten in einen <strong>höherdimensionalen Raum</strong> projizieren
+              </li>
+              <li>
+                Im höherdimensionalen Raum werden die Daten
+                <strong>linear separierbar</strong>
+              </li>
+              <li>
+                Dort kann k-means mit linearen Grenzen
+                <strong>korrekte Cluster</strong> finden
+              </li>
+              <li>
+                Konkrete Umsetzung →
+                <span class="key" style="--key-color:var(--color-primary)">Spectral Clustering</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. SPECTRAL CLUSTERING
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="spectral-clustering">
+        <div class="section-head">
+          <h2>5.2 Spectral Clustering</h2>
+          <p>
+            Der Kernel-Trick für k-means –
+            via Graphentheorie in den höherdimensionalen Raum.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Funktionsweise</span></h3>
+            <ul>
+              <li>
+                Mittels <strong>graphentheoretischer Maße</strong>
+                werden die Daten in einen <strong>höherdimensionalen Raum</strong>
+                projiziert
+              </li>
+              <li>
+                Dazu wird ein <strong>Ähnlichkeitsgraph</strong>
+                (z. B. k-nearest-neighbors) über die Datenpunkte aufgebaut
+              </li>
+              <li>
+                Die <strong>Spektralzerlegung</strong>
+                (Eigenvektoren der Laplace-Matrix) liefert die neue Repräsentation
+              </li>
+              <li>
+                In diesem neuen Raum wird
+                <strong>normales k-means</strong> ausgeführt –
+                mit linearen Grenzen, die im Original nicht-lineare Cluster trennen
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Vergleich zu k-means</span></h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">K-means:</span>
+                Arbeitet direkt im Feature-Raum → nur lineare Grenzen möglich
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">Spectral:</span>
+                Transformiert erst, dann k-means → beliebige Formen möglich
+              </li>
+              <li>
+                <code style="color:var(--color-primary)">affinity='nearest_neighbors'</code>
+                – definiert den Ähnlichkeitsgraph
+              </li>
+              <li>
+                <code style="color:var(--color-warning)">assign_labels='kmeans'</code>
+                – k-means im transformierten Raum
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Spectral Code -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-6) 0 var(--space-2)">
+          Spectral Clustering auf make_moons
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.cluster import SpectralClustering
+
+# Spectral Clustering Modell
+model = SpectralClustering(
+    n_clusters=2,
+    affinity='nearest_neighbors',  # Ähnlichkeitsgraph
+    assign_labels='kmeans'         # k-means im neuen Raum
+)
+
+# Fitten und Labels bestimmen
+labels = model.fit_predict(X)
+
+# Ergebnis plotten
+plt.scatter(X[:, 0], X[:, 1],
+            c=labels, s=50, cmap='viridis')
+plt.title("Spectral Clustering – k=2 auf make_moons")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ergebnis
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li>
+                  ✅ Jeder Halbmond ist
+                  <strong>eine Farbe</strong>
+                </li>
+                <li>
+                  Die Cluster folgen der
+                  <strong>natürlichen Struktur</strong> der Daten
+                </li>
+                <li>
+                  Spectral Clustering erkennt,
+                  was k-means nicht kann
+                </li>
+                <li>
+                  <strong>Kein</strong> <code>.predict()</code>
+                  für neue Punkte verfügbar
+                  <small style="color:var(--color-text-faint)">
+                    (→ siehe Page08_2 mit kNN)
+                  </small>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Direktvergleich -->
+        <div style="margin-top:var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>Eigenschaft</th>
+                <th>K-means</th>
+                <th>Spectral Clustering</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Clusterform</td>
+                <td>Nur konvex / linear</td>
+                <td>✅ Beliebig</td>
+              </tr>
+              <tr>
+                <td>Grundlage</td>
+                <td>Euklidische Distanz</td>
+                <td>Graphentheorie + Eigenwerte</td>
+              </tr>
+              <tr>
+                <td><code>.predict()</code></td>
+                <td>✅ Ja</td>
+                <td>❌ Nein (nur <code>.fit_predict()</code>)</td>
+              </tr>
+              <tr>
+                <td>Laufzeit</td>
+                <td>✅ Schnell</td>
+                <td>⚠️ Langsamer bei großen Daten</td>
+              </tr>
+              <tr>
+                <td>Hyperparameter</td>
+                <td><code>n_clusters</code></td>
+                <td><code>n_clusters</code>, <code>affinity</code>, <code>assign_labels</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. K-MEANS++
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="kmeans-plus">
+        <div class="section-head">
+          <h2>5.3 K-means++</h2>
+          <p>
+            Gleiche Ergebnisse wie k-means –
+            aber schnellere Konvergenz durch intelligentere Initialisierung.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Das Problem mit zufälliger Initialisierung</span></h3>
+            <ul>
+              <li>
+                Standard k-means wählt Centroids
+                <strong>vollständig zufällig</strong>
+              </li>
+              <li>
+                Schlechte Startwerte → viele Iterationen
+                oder <strong>schlechtes lokales Optimum</strong>
+              </li>
+              <li>
+                Mehrfache Initialisierungen nötig
+                (<code>n_init</code>) – zeitaufwändig
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">K-means++ Lösung</span></h3>
+            <ul>
+              <li>
+                Centroids werden nach einer
+                <strong>gezielten Heuristik</strong> initialisiert
+              </li>
+              <li>
+                Die <strong>Wahrscheinlichkeit</strong>,
+                als Centroid gewählt zu werden, ist proportional zur
+                <strong>Distanz</strong> zum nächsten bereits gewählten Centroid
+              </li>
+              <li>
+                → Centroids starten <strong>verteilt</strong>,
+                nicht geclustert
+              </li>
+              <li>
+                <strong>Konvergiert schneller</strong>
+                bei gleicher Ergebnisqualität
+              </li>
+              <li>
+                In sklearn:
+                <code style="color:var(--color-primary)">init='k-means++'</code>
+                (ist der <strong>Default!</strong>)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="code-cell-split" style="margin-top:var(--space-5)">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.cluster import KMeans
+
+# k-means++ ist der Default in sklearn
+kmeans_pp = KMeans(
+    n_clusters=4,
+    init='k-means++',   # Default – hier explizit gesetzt
+    n_init=10,          # 10 Initialisierungen
+    random_state=0
+)
+kmeans_pp.fit(X)
+
+# Zum Vergleich: zufällige Initialisierung
+kmeans_rand = KMeans(
+    n_clusters=4,
+    init='random',      # Vollständig zufällig
+    n_init=10,
+    random_state=0
+)
+kmeans_rand.fit(X)
+
+print("k-means++ Inertia:", kmeans_pp.inertia_)
+print("k-means rand Inertia:", kmeans_rand.inertia_)
+print("k-means++ Iterationen:", kmeans_pp.n_iter_)
+print("k-means rand Iterationen:", kmeans_rand.n_iter_)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ergebnis
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li>
+                  Beide liefern <strong>ähnliche Inertia</strong>
+                </li>
+                <li>
+                  k-means++ braucht
+                  <strong>deutlich weniger Iterationen</strong>
+                  bis zur Konvergenz
+                </li>
+                <li>
+                  <code style="color:var(--color-primary)">init='k-means++'</code>
+                  ist deshalb der sklearn-<strong>Default</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. K-MEDIAN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="k-median">
+        <div class="section-head">
+          <h2>5.4 K-Median</h2>
+          <p>
+            Eine robustere Variante von k-means –
+            tauscht Mittelwert gegen Median und euklidische gegen Manhattan-Distanz.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Unterschiede zu K-means</span></h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">Distanzmaß:</span>
+                <strong>Manhattan-Distanz</strong>
+                statt euklidischer Distanz
+                <br>
+                <small style="color:var(--color-text-muted)">
+                  \(d(a, b) = \sum_i |a_i - b_i|\)
+                  statt \(\sqrt{\sum_i (a_i - b_i)^2}\)
+                </small>
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">M-Schritt:</span>
+                <strong>Median</strong> statt arithmetisches Mittel
+              </li>
+              <li>
+                Der Centroid ist daher
+                <strong>immer ein echter Datenpunkt</strong>
+                aus dem Datensatz
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Wann k-Median nutzen?</span></h3>
+            <ul>
+              <li>
+                <strong>Robustheit gegenüber Ausreißern</strong> –
+                der Median ist stabiler als der Mittelwert
+              </li>
+              <li>
+                Bei Daten mit
+                <strong>starken Ausreißern</strong>
+                oder <strong>schiefen Verteilungen</strong>
+              </li>
+              <li>
+                Wenn der Centroid ein
+                <strong>interpretierbares Objekt</strong>
+                sein soll (z. B. repräsentativer Kunde)
+              </li>
+              <li>
+                Höhere <strong>Rechenkosten</strong>
+                als k-means (Median-Berechnung)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Vergleichstabelle alle Variationen -->
+        <div style="margin-top:var(--space-8)">
+          <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+             text-transform:uppercase;color:var(--color-text-faint);
+             margin-bottom:var(--space-3)">
+            Übersicht · Alle K-means Variationen
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Variante</th>
+                <th>Kernidee</th>
+                <th>Distanz</th>
+                <th>M-Schritt</th>
+                <th>Besonderheit</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>K-means</strong></td>
+                <td>Standard-Algorithmus</td>
+                <td>Euklidisch</td>
+                <td>Arithmet. Mittel</td>
+                <td>Nur linear separierbar</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="key" style="--key-color:var(--color-primary)">K-means++</span>
+                </td>
+                <td>Bessere Initialisierung</td>
+                <td>Euklidisch</td>
+                <td>Arithmet. Mittel</td>
+                <td>Default in sklearn, schneller</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="key" style="--key-color:var(--color-warning)">K-Median</span>
+                </td>
+                <td>Robustheit gegen Ausreißer</td>
+                <td>Manhattan</td>
+                <td>Median</td>
+                <td>Centroid = echter Datenpunkt</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="key" style="--key-color:var(--color-success)">Spectral</span>
+                </td>
+                <td>Nicht-lineare Cluster</td>
+                <td>Graphenbasiert</td>
+                <td>K-means im neuen Raum</td>
+                <td>Kein <code>.predict()</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Und viele weitere…</strong>
+          MiniBatchKMeans, k-Medoids, Fuzzy C-Means –
+          einen vollständigen Vergleich aller Algorithmen auf
+          verschiedenen Datensätzen findest du auf
+          <a href="Page07.html">Seite 7 → Vergleich Clustering-Verfahren</a>.
+          <br><br>
+          <strong>Nächste Seite:</strong>
+          Wann sollte man skalieren – und DBSCAN im Detail.
+          <br>
+          <a href="Page06.html">→ Seite 6: Skalierung &amp; DBSCAN</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Seite 5 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

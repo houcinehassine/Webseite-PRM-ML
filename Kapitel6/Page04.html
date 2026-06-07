@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K6 · Dichteschätzung &amp; BIC/AIC</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    /* Falls formula-block noch nicht in components.css ist (aus Seite 03) */
+    .formula-block {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 18%, var(--color-border));
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-6);
+      margin: var(--space-4) 0;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .formula-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-2);
+    }
+    /* Vergleichs-Badge für Generativ vs. Diskriminativ */
+    .vs-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-4);
+      align-items: start;
+      margin: var(--space-5) 0;
+    }
+    .vs-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-top: var(--space-8);
+      font-size: var(--text-lg);
+      font-weight: 900;
+      color: var(--color-text-faint);
+    }
+    @media (max-width: 700px) {
+      .vs-grid { grid-template-columns: 1fr; }
+      .vs-divider { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <site-header active="page6" title="Kapitel 6 · Gaussian Mixture Models"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page4"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ══════════════════════════════════════════════════════ -->
+      <section class="hero" id="dichteschaetzung">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 6 · Seite 04</span>
+            <h1>Dichteschätzung &amp;
+              <span class="key" style="--key-color:var(--color-primary)">BIC / AIC</span>
+            </h1>
+            <p>
+              GMM ist primär ein
+              <span class="key" style="--key-color:var(--color-primary)">generatives Dichteschätzungs-Modell</span>,
+              kein Clustering-Algorithmus.
+              Das „Zwei Monde"-Problem zeigt warum – und
+              <span class="key" style="--key-color:var(--color-primary)">BIC &amp; AIC</span>
+              helfen, die richtige Komponentenanzahl zu finden.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Generatives Modell</span>
+              <span class="pill">Dichteschätzung</span>
+              <span class="pill">Zwei Monde</span>
+              <span class="pill">plot_gmm</span>
+              <span class="pill">.sample()</span>
+              <span class="pill">BIC</span>
+              <span class="pill">AIC</span>
+              <span class="pill">Informationskriterien</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>
+                Unterschied zwischen
+                <span class="key" style="--key-color:var(--color-primary)">generativen</span>
+                und
+                <span class="key" style="--key-color:var(--color-warning)">diskriminativen</span>
+                Modellen verstehen
+              </li>
+              <li>
+                Warum GMM als
+                <strong>Dichteschätzer</strong> und nicht als
+                Clustering-Algorithmus zu betrachten ist
+              </li>
+              <li>
+                Das <code>.sample()</code>-Konzept beherrschen –
+                <strong>neue Daten generieren</strong>
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">BIC und AIC</span>
+                formal kennen und zur Modellwahl anwenden können
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. GMM ALS GENERATIVES MODELL
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="dichteschaetzung">
+        <div class="section-head">
+          <h2>GMM als generatives Modell</h2>
+          <p>
+            GMMs werden häufig als Clustering-Algorithmen beschrieben –
+            genauer gesagt handelt es sich jedoch um
+            <span class="key" style="--key-color:var(--color-primary)">Dichteschätzung</span>.
+            Das Ergebnis eines GMMs ist kein Clustering-Modell,
+            sondern ein
+            <span class="key" style="--key-color:var(--color-primary)">Generative Probabilistic Model</span>.
+          </p>
+        </div>
+
+        <!-- Generativ vs. Diskriminativ Vergleich -->
+        <div class="vs-grid">
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Generative Modelle
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Modellieren die
+                <strong>vollständige Datenverteilung</strong>
+                \(p(\mathbf{x})\) oder \(p(\mathbf{x}, y)\)
+              </li>
+              <li>Können <strong>neue Daten generieren</strong> via
+                <code>.sample()</code>
+              </li>
+              <li>
+                → Antwort auf: „Wie sehen typische Datenpunkte aus?"
+              </li>
+              <li>
+                Beispiele:
+                <span class="key" style="--key-color:var(--color-primary)">GMM</span>,
+                Naive Bayes, VAE, GAN
+              </li>
+              <li>
+                Dichteschätzung ist das
+                <strong>primäre Ziel</strong>
+              </li>
+            </ul>
+          </article>
+
+          <div class="vs-divider">vs</div>
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">
+                Diskriminative Modelle
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Modellieren nur die
+                <strong>Entscheidungsgrenze</strong>
+                \(p(y \mid \mathbf{x})\)
+              </li>
+              <li>
+                Können <strong>keine neuen Daten generieren</strong>
+              </li>
+              <li>
+                → Antwort auf: „Zu welcher Klasse gehört dieser Punkt?"
+              </li>
+              <li>
+                Beispiele:
+                <span class="key" style="--key-color:var(--color-warning)">SVM</span>,
+                <span class="key" style="--key-color:var(--color-warning)">k-means</span>,
+                Logistic Regression
+              </li>
+              <li>
+                Klassifikation / Clustering ist das
+                <strong>primäre Ziel</strong>
+              </li>
+            </ul>
+          </article>
+
+        </div>
+
+        <div class="note note-primary">
+          <p>
+            <strong>💡 Kernbotschaft:</strong>
+            Wir befinden uns mit GMM bei
+            <span class="key" style="--key-color:var(--color-primary)">generativen Modellen</span>.
+            Das Clustering, das wir mit <code>.predict()</code> oder
+            <code>.predict_proba()</code> erhalten,
+            ist nur ein Nebenprodukt der Dichteschätzung –
+            <strong>nicht das primäre Ziel</strong>.
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. PROBLEM: ZWEI MONDE
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="zwei-monde">
+        <div class="section-head">
+          <h2>Problem – Zwei Monde: ein Beispiel</h2>
+          <p>
+            Der „Zwei Monde"-Datensatz zeigt anschaulich, wo
+            <span class="key" style="--key-color:var(--color-warning)">GMM mit zu wenigen Komponenten versagt</span>
+            – und wie
+            <span class="key" style="--key-color:var(--color-primary)">mehr Komponenten die Lösung</span>
+            liefern.
+          </p>
+        </div>
+
+        <!-- Schritt 1 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2)">
+          Schritt 1 · Zwei-Monde-Datensatz erzeugen &amp; visualisieren
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>make_moons</code> erzeugt zwei halbmondförmige Cluster –
+          eine <span class="key" style="--key-color:var(--color-warning)">nicht-elliptische Struktur</span>,
+          die für GMM mit wenigen Komponenten eine Herausforderung darstellt.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>from sklearn.datasets import make_moons
+import matplotlib.pyplot as plt
+
+Xmoon, ymoon = make_moons(200, noise=.05, random_state=0)
+
+plt.scatter(Xmoon[:, 0], Xmoon[:, 1], edgecolors='blue')
+plt.title("Zwei-Monde-Datensatz")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                🌙 200 Punkte in zwei Halbmond-Formen.
+                <code>Xmoon.shape = (200, 2)</code>
+                <br><br>
+                Die Struktur ist
+                <strong>nicht-elliptisch</strong> –
+                klassisches Beispiel für die
+                <span style="color:var(--color-warning); font-weight:600">
+                  Grenzen von GMM mit wenigen Komponenten
+                </span>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: plot_gmm Hilfsfunktion -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 2 · Hilfsfunktion <code>plot_gmm</code> definieren
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>plot_gmm</code> visualisiert die
+          <span class="key" style="--key-color:var(--color-primary)">Gauß-Ellipsen</span>
+          aller Komponenten als Konfidenzringe (1σ, 2σ, 3σ).
+          Der Parameter <code>label=False</code> unterdrückt die Cluster-Farben
+          und zeigt nur die Dichteschätzung.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>import numpy as np
+from matplotlib.patches import Ellipse
+
+def draw_ellipse(pos, covar, ax=None, **kwargs):
+    ax = ax or plt.gca()
+    U, s, Vt = np.linalg.svd(covar)
+    angle = np.degrees(np.arctan2(U[1, 0], U[0, 0]))
+    w, h = 2 * np.sqrt(s)
+    for nsig in range(1, 4):
+        ax.add_patch(Ellipse(pos, nsig*w, nsig*h,
+                             angle=angle, **kwargs))
+
+def plot_gmm(gmm, X, label=True, ax=None):
+    ax = ax or plt.gca()
+    labels = gmm.fit(X).predict(X)
+    if label:
+        ax.scatter(X[:, 0], X[:, 1], c=labels,
+                   s=40, cmap='viridis', zorder=2)
+    else:
+        ax.scatter(X[:, 0], X[:, 1], s=40,
+                   color='gray', zorder=2)
+    w_factor = 0.2 / gmm.weights_.max()
+    for pos, cov, w in zip(gmm.means_,
+                           gmm.covariances_,
+                           gmm.weights_):
+        draw_ellipse(pos, cov, alpha=w * w_factor, ax=ax)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                ✅ Zwei Funktionen definiert:
+                <br><br>
+                <strong><code>draw_ellipse</code></strong> –
+                zeichnet Konfidenzellipsen (1σ–3σ) per SVD-Zerlegung
+                <br><br>
+                <strong><code>plot_gmm</code></strong> –
+                fittet das GMM, plottet Punkte + Ellipsen;
+                <code>label=False</code> → grau, nur Dichte sichtbar
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 3: 2 Komponenten – Fail -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 3 · 2 Komponenten – intuitiver Versuch
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Intuitiv würde man für den „Zwei Monde"-Datensatz
+          <strong>zwei Komponenten</strong> versuchen –
+          schließlich gibt es zwei Monde.
+          Das Ergebnis zeigt jedoch das fundamentale Problem:
+          Gauß-Komponenten können nur
+          <span class="key" style="--key-color:var(--color-warning)">elliptische</span>
+          Formen abbilden.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>from sklearn.mixture import GaussianMixture
+
+gmm2 = GaussianMixture(n_components=2,
+                       covariance_type='full',
+                       random_state=0)
+plot_gmm(gmm2, Xmoon)
+plt.title("GMM mit 2 Komponenten – Fail")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                ❌
+                <span style="color:var(--color-warning); font-weight:600">Fail</span>
+                – zwei große Ellipsen die sich überlappen und
+                die Mondform <em>nicht</em> erfassen können.
+                <br><br>
+                Gauß-Komponenten erzeugen immer
+                <strong>elliptische Formen</strong> –
+                die gebogene Halbmondstruktur ist damit
+                prinzipiell nicht darstellbar.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="note note-warning" style="margin-top:var(--space-4)">
+          <p>
+            <strong>⚠️ Warum scheitert GMM mit 2 Komponenten?</strong>
+          </p>
+          <ul>
+            <li>
+              Jede Gauß-Komponente beschreibt eine
+              <span class="key" style="--key-color:var(--color-warning)">elliptische Region</span>
+              im Datenraum
+            </li>
+            <li>
+              Eine Halbmondform ist
+              <span class="key" style="--key-color:var(--color-warning)">nicht-elliptisch</span>
+              und kann mit 2 Gauß-Kurven
+              <strong>nicht korrekt</strong> abgebildet werden
+            </li>
+            <li>
+              Das GMM versucht es trotzdem –
+              Ergebnis: <em>falsche</em> Cluster-Grenzen, falsche Ellipsen
+            </li>
+          </ul>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. GMM ALS SAMPLER (Lösung mit 16 Komponenten)
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="gmm-sampler">
+        <div class="section-head">
+          <h2>Lösung: GMM als generativer Sampler</h2>
+          <p>
+            Statt 2 Komponenten: wir nutzen
+            <span class="key" style="--key-color:var(--color-primary)">viele Komponenten</span>
+            (z. B. 16) und ignorieren die Cluster-Labels.
+            Das GMM modelliert dann die
+            <strong>gesamte Verteilung</strong> der Daten –
+            und kann daraus neue Daten
+            <span class="key" style="--key-color:var(--color-primary)">generieren</span>.
+          </p>
+        </div>
+
+        <!-- Schritt 4: 16 Komponenten -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2)">
+          Schritt 4 · 16 Komponenten – Dichteschätzung der Mondstruktur
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Mit <code>label=False</code> ignorieren wir die Cluster-Zuweisung vollständig.
+          Die 16 kleinen Ellipsen legen sich wie
+          <span class="key" style="--key-color:var(--color-primary)">Pflastersteine</span>
+          entlang der Mondkurven – das Ergebnis ist eine
+          präzise Dichteschätzung, kein echtes Clustering.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>gmm16 = GaussianMixture(n_components=16,
+                        covariance_type='full',
+                        random_state=0)
+# label=False → nur Dichte, keine Cluster-Farben
+plot_gmm(gmm16, Xmoon, label=False)
+plt.title("GMM mit 16 Komponenten – Dichteschätzung")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                ✅
+                <span style="color:var(--color-success); font-weight:600">Erfolg!</span>
+                16 kleine Gauß-Ellipsen legen sich präzise entlang
+                der Mondkurven.
+                <br><br>
+                Die <strong>Dichte</strong> der Mondstruktur wird
+                korrekt geschätzt – obwohl jede Einzelkomponente
+                elliptisch ist.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 5: .sample() -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 5 · Neue Daten generieren via <code>.sample()</code>
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Da das GMM die vollständige Datenverteilung modelliert hat,
+          liegt ein echtes
+          <span class="key" style="--key-color:var(--color-primary)">generatives Modell</span>
+          vor.
+          Mit <code>.sample(n)</code> lassen sich beliebig viele
+          neue Datenpunkte aus der gelernten Verteilung ziehen –
+          Punkte, die <strong>nie zuvor gesehen wurden</strong>,
+          aber der Mondstruktur entsprechen.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code># 400 neue Datenpunkte aus dem gelernten Modell sampeln
+Xnew, _ = gmm16.sample(400)
+
+plt.scatter(Xnew[:, 0], Xnew[:, 1], edgecolors='blue')
+plt.title("400 generierte Punkte aus GMM (16 Komp.)")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                🎲 400 neue Punkte – erkennbar die Mondstruktur,
+                obwohl keiner davon im Trainingsdatensatz war.
+                <br><br>
+                <strong><code>Xnew.shape = (400, 2)</code></strong>
+                <br>
+                <code>_</code> enthält die Komponentenzugehörigkeit
+                (wird ignoriert)
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Karten: was .sample() bedeutet -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Was macht <code>.sample()</code>?
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Wählt zuerst <strong>zufällig eine Komponente</strong>
+                \(k\) gemäß den Gewichten \(w_k\)
+              </li>
+              <li>
+                Sampelt dann einen Punkt aus
+                \(\mathcal{N}(\boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)\)
+              </li>
+              <li>
+                Rückgabe: <code>(Xnew, labels)</code> –
+                neue Datenpunkte + Komponenten-Index
+              </li>
+              <li>
+                → <code>Xnew</code> hat dieselbe Dimension
+                wie die Trainingsdaten
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Dichteschätzung vs. Clustering
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Mit <strong>2 Komponenten</strong>: GMM versucht
+                zu clustern – versagt bei nicht-elliptischen Daten
+              </li>
+              <li>
+                Mit <strong>16 Komponenten</strong>: GMM schätzt
+                die Dichte – funktioniert auch für Mondformen
+              </li>
+              <li>
+                → Die Frage ist nicht mehr „zu welchem Cluster gehört X?",
+                sondern „wie hoch ist \(p(\mathbf{x})\)?"
+              </li>
+              <li>
+                → Anzahl der Komponenten = Güte des
+                <span class="key" style="--key-color:var(--color-primary)">Dichteschätzers</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-4)">
+          <p>
+            <strong>🚀 So what?</strong>
+            Wir haben eine Möglichkeit, beliebig verteilte multidimensionale Daten
+            zu modellieren –
+            <span class="key" style="--key-color:var(--color-primary)">und aus dem Modell neue Daten zu generieren</span>!
+          </p>
+          <p style="margin-top:var(--space-2)">
+            Die Frage nach der richtigen
+            <span class="key" style="--key-color:var(--color-primary)">Anzahl der Komponenten</span>
+            erinnert an die Wahl von \(K\) bei k-means
+            → Lösung:
+            <strong>Informationskriterien</strong> (nächster Abschnitt).
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. BIC & AIC
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="bic-aic">
+        <div class="section-head">
+          <h2>Informationskriterien: BIC &amp; AIC</h2>
+          <p>
+            Wie bei k-means benötigt man ein Maß, um die besten
+            <span class="key" style="--key-color:var(--color-primary)">Hyperparameter bzw. Modelle</span>
+            auszuwählen.
+            Bei generativen/probabilistischen Modellen wie GMM
+            geschieht dies über sog.
+            <span class="key" style="--key-color:var(--color-primary)">Informationskriterien</span>.
+          </p>
+        </div>
+
+        <!-- BIC und AIC Formeln nebeneinander -->
+        <div class="overview-3" style="align-items:start; margin-bottom:var(--space-5)">
+
+          <div>
+            <p class="formula-label">BIC – Bayesian Information Criterion</p>
+            <div class="formula-block">
+              \[
+                \text{BIC} = m \ln(n) - 2\ln(\hat{L})
+              \]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-2)">
+              Strafterm:
+              <span class="key" style="--key-color:var(--color-primary)">\(m \ln(n)\)</span>
+              – wächst mit der Datenmenge → BIC wird
+              <strong>konservativer</strong> bei mehr Daten
+            </p>
+          </div>
+
+          <div style="display:flex; align-items:center; justify-content:center; padding-top:2.5rem">
+            <span style="font-size:var(--text-lg); font-weight:900; color:var(--color-text-faint)">≠</span>
+          </div>
+
+          <div>
+            <p class="formula-label">AIC – Akaike Information Criterion</p>
+            <div class="formula-block">
+              \[
+                \text{AIC} = 2m - 2\ln(\hat{L})
+              \]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-2)">
+              Strafterm:
+              <span class="key" style="--key-color:var(--color-primary)">\(2m\)</span>
+              – konstanter Faktor unabhängig von der Datenmenge →
+              AIC ist <strong>liberaler</strong>
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Parameter-Tabelle -->
+        <table style="margin-bottom:var(--space-5)">
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Bedeutung</th>
+              <th>Hinweis</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>\(m\)</td>
+              <td>
+                Anzahl der
+                <span class="key" style="--key-color:var(--color-primary)">geschätzten Parameter</span>
+                des Modells
+              </td>
+              <td>
+                Steigt mit \(K\) (Komponentenanzahl) und
+                <code>covariance_type</code>
+              </td>
+            </tr>
+            <tr>
+              <td>\(\hat{L}\)</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">Maximum der Likelihood-Funktion</span>
+              </td>
+              <td>
+                Je besser das Modell die Daten erklärt,
+                desto größer \(\hat{L}\)
+              </td>
+            </tr>
+            <tr>
+              <td>\(n\)</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">Anzahl der Datenpunkte</span>
+              </td>
+              <td>
+                Nur relevant für BIC –
+                macht BIC bei großen Datensätzen strenger
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Schritt 6: BIC/AIC Loop -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2)">
+          Schritt 6 · Modelle für verschiedene Komponentenanzahlen trainieren
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Für \(K = 1, 2, \ldots, 20\) trainieren wir je ein GMM
+          und berechnen dann BIC und AIC.
+          Das Minimum beider Kurven zeigt die
+          <span class="key" style="--key-color:var(--color-primary)">optimale Komponentenanzahl</span>.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>n_components = np.arange(1, 21)
+
+# Für jedes K: GMM trainieren
+models = [
+    GaussianMixture(n, covariance_type='full', random_state=0).fit(Xmoon)
+    for n in n_components
+]</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                ✅ 20 trainierte GMM-Modelle in einer Liste –
+                <code>K</code> von 1 bis 20.
+                <br><br>
+                Jedes Modell hat unterschiedlich viele Parameter
+                und unterschiedliche Likelihood.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 7: BIC/AIC Plot -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 7 · BIC und AIC über Komponentenanzahl plotten
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Beide Kurven werden in einem Plot überlagert.
+          Das
+          <span class="key" style="--key-color:var(--color-primary)">Minimum</span>
+          der Kurven zeigt die optimale Komponentenanzahl an –
+          der Punkt, an dem der Gewinn an Modellgüte die
+          <span class="key" style="--key-color:var(--color-warning)">Strafe für mehr Parameter</span>
+          nicht mehr überwiegt.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code># BIC und AIC berechnen und plotten
+plt.plot(n_components,
+         [m.bic(Xmoon) for m in models], label='BIC')
+plt.plot(n_components,
+         [m.aic(Xmoon) for m in models], label='AIC')
+plt.legend(loc='best')
+plt.xlabel('n_components')
+plt.ylabel('Informationskriterium')
+plt.title("BIC vs. AIC – Optimum beim Minimum")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                📊 Zwei Kurven (BIC &amp; AIC) über
+                <code>n_components = 1..20</code>.
+                <br><br>
+                Beide fallen zunächst stark ab,
+                dann flacht die Kurve ab –
+                das
+                <span style="color:var(--color-primary); font-weight:600">
+                  Minimum markiert die optimale K
+                </span>.
+                BIC-Minimum liegt oft etwas <em>links</em>
+                von AIC (konservativer).
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5. INTERPRETATION
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="interpretation">
+        <div class="section-head">
+          <h2>Interpretation &amp; So What?</h2>
+          <p>
+            Was sagen uns BIC und AIC genau –
+            und warum muss man Penalty-Terme überhaupt einführen?
+          </p>
+        </div>
+
+        <!-- 3 Kern-Interpretationspunkte als Karten -->
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Penalty für Parameterzahl
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Beide Kriterien führen eine
+                <span class="key" style="--key-color:var(--color-primary)">Penalty für die Parameterzahl</span>
+                \(m\) ein
+              </li>
+              <li>
+                Ziel: <strong>Regularisierung</strong> –
+                Overfitting vermeiden
+              </li>
+              <li>
+                Mehr Parameter → höhere Penalty →
+                schlechterer Score (ceteris paribus)
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">
+                BIC konservativer als AIC
+              </span>
+            </h3>
+            <ul>
+              <li>
+                BIC-Strafterm:
+                <span class="key" style="--key-color:var(--color-warning)">\(m \ln(n)\)</span>
+                – wächst logarithmisch mit der Datenmenge
+              </li>
+              <li>
+                AIC-Strafterm: \(2m\) – konstant, unabhängig von \(n\)
+              </li>
+              <li>
+                → Bei großen \(n\) bevorzugt BIC
+                <strong>einfachere Modelle</strong>
+                als AIC
+              </li>
+              <li>
+                → BIC-Minimum liegt oft links vom AIC-Minimum
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Optimum beim Minimum
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Bei
+                <span class="key" style="--key-color:var(--color-primary)">beiden Kriterien
+                liegt das Optimum beim Minimum</span>
+              </li>
+              <li>
+                Kleiner Wert = gutes Gleichgewicht zwischen
+                Modellanpassung und Einfachheit
+              </li>
+              <li>
+                → <code>np.argmin([m.bic(X) for m in models])</code>
+                gibt den Index des besten Modells
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Zwei Arten lernbarer Größen Note -->
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <p>
+            <strong>🎯 So what? – Zwei Arten lernbarer Größen:</strong>
+          </p>
+          <ul style="margin-top:var(--space-2)">
+            <li>
+              Die
+              <span class="key" style="--key-color:var(--color-primary)">Parameter</span>
+              (\(w_k\), \(\boldsymbol{\mu}_k\), \(\boldsymbol{\Sigma}_k\)) –
+              gefunden durch <strong>MLE</strong>
+            </li>
+            <li>
+              Die
+              <span class="key" style="--key-color:var(--color-primary)">Hyperparameter</span>
+              (z. B. Anzahl der Komponenten \(K\)) –
+              bestimmt durch <strong>Informationskriterien</strong>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Zitat Jake VanderPlas -->
+        <div class="note" style="margin-top:var(--space-4); border-left:4px solid var(--color-primary)">
+          <p style="font-style:italic; color:var(--color-text-muted)">
+            „Notice the important point: this choice of number of components measures how well GMM
+            works as a <strong>density estimator</strong>, not how well it works as a
+            <strong>clustering algorithm</strong>. I'd encourage you to think of GMM primarily
+            as a density estimator, and use it for clustering only when warranted within
+            simple datasets."
+          </p>
+          <p style="font-size:var(--text-xs); color:var(--color-text-faint);
+                    margin-top:var(--space-2)">
+            – Jake VanderPlas, Python Data Science Handbook
+          </p>
+        </div>
+
+        <!-- Warum Penalty? -->
+        <div class="note note-warning" style="margin-top:var(--space-4)">
+          <p>
+            <strong>⚠️ Warum die zusätzlichen Summanden zur Maximum Likelihood?</strong>
+          </p>
+          <ul style="margin-top:var(--space-2)">
+            <li>
+              Ohne Penalty würde man immer mehr Komponenten wählen –
+              das Modell würde
+              <span class="key" style="--key-color:var(--color-warning)">overfittten</span>
+            </li>
+            <li>
+              Extremfall: \(K = N\) → jeder Datenpunkt bekommt eine eigene
+              Gauß-Komponente → perfekte Likelihood, aber
+              <strong>keinerlei Generalisierung</strong>
+            </li>
+            <li>
+              BIC/AIC
+              <span class="key" style="--key-color:var(--color-primary)">bestrafen unnötige Komplexität</span>,
+              sodass das Minimum ein gutes
+              <span class="key" style="--key-color:var(--color-primary)">Gleichgewicht</span>
+              zwischen Modellanpassung und Einfachheit darstellt
+            </li>
+          </ul>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 6 – Gaussian Mixture Models · Seite 04</small>
+    </div>
+  </footer>
+
+</body>
+</html>

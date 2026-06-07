@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Anwendungsbeispiele</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · Anwendungsbeispiele"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page8"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Seite 8 · Übersicht</span>
+            <h1>Anwendungs-<span class="key" style="--key-color:var(--color-primary)">beispiele</span></h1>
+            <p>
+              Theorie trifft Praxis – zwei vollständige Fallstudien
+              zeigen, wie Clustering in realen industriellen
+              und datenwissenschaftlichen Szenarien eingesetzt wird.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Brownfield</span>
+              <span class="pill">Maschinenzustände</span>
+              <span class="pill">DBSCAN</span>
+              <span class="pill">kNN</span>
+              <span class="pill">Neue Punkte zuordnen</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Was erwartet dich?</h2>
+            <p>
+              Zwei eigenständige Beispiele – jedes mit einer
+              klaren Problemstellung, vollständigem Code und
+              Erkenntnissen, die über die Theorie hinausgehen.
+              Wähle direkt oder lies sequenziell.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           BEISPIEL-KARTEN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="beispiele-overview">
+        <div class="section-head">
+          <h2>Die zwei Fallstudien</h2>
+          <p>
+            Beide Beispiele bauen auf den Konzepten aus
+            Seiten 1–7 auf und zeigen unterschiedliche
+            Herausforderungen der Praxis.
+          </p>
+        </div>
+
+        <div class="examples-grid">
+
+          <!-- Karte 8.1 -->
+          <a href="Page08_1.html" class="example-card">
+            <div class="example-card-header" style="background: linear-gradient(135deg,
+              color-mix(in oklab, var(--color-primary) 15%, var(--color-surface-2)) 0%,
+              color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2)) 100%);">
+              <div class="example-number">8.1</div>
+              <div class="example-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+                     stroke="var(--color-primary)" stroke-width="1.5">
+                  <rect x="2" y="3" width="20" height="14" rx="2"/>
+                  <path d="M8 21h8M12 17v4"/>
+                  <path d="M7 8h.01M12 8h.01M17 8h.01M7 12h.01M12 12h.01M17 12h.01"/>
+                </svg>
+              </div>
+            </div>
+            <div class="example-card-body">
+              <h3>Brownfield Maschinenzustände</h3>
+              <p>
+                Alte Industriemaschinen ohne digitale Schnittstelle –
+                mit k-means Betriebszustände datengetrieben bestimmen.
+              </p>
+              <div class="example-tags">
+                <span class="pill" style="font-size:var(--text-xs)">k-means</span>
+                <span class="pill" style="font-size:var(--text-xs)">Elbow Plot</span>
+                <span class="pill" style="font-size:var(--text-xs)">Silhouette</span>
+                <span class="pill" style="font-size:var(--text-xs)">StandardScaler</span>
+              </div>
+              <ul class="example-highlights">
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-primary)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Weihenstephaner Standard: 6 Betriebszustände
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-primary)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Vibrations- &amp; Temperatursensor als Features
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-primary)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Scaling-Entscheidung kritisch diskutiert
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-primary)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Sweep k = 2–13 mit Subplot-Grid
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-primary)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  yellowbrick SilhouetteVisualizer
+                </li>
+              </ul>
+              <div class="example-cta">
+                Zum Beispiel
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+          </a>
+
+          <!-- Karte 8.2 -->
+          <a href="Page08_2.html" class="example-card">
+            <div class="example-card-header" style="background: linear-gradient(135deg,
+              color-mix(in oklab, var(--color-success) 15%, var(--color-surface-2)) 0%,
+              color-mix(in oklab, var(--color-success) 5%, var(--color-surface-2)) 100%);">
+              <div class="example-number" style="color:var(--color-success)">8.2</div>
+              <div class="example-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
+                     stroke="var(--color-success)" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="3"/>
+                  <circle cx="4" cy="6" r="2"/>
+                  <circle cx="20" cy="6" r="2"/>
+                  <circle cx="4" cy="18" r="2"/>
+                  <circle cx="20" cy="18" r="2"/>
+                  <path d="M6 6l4.5 4.5M17.5 6.5 13 11M6 18l4.5-4.5M13 13l4.5 4.5"/>
+                </svg>
+              </div>
+            </div>
+            <div class="example-card-body">
+              <h3>DBSCAN + kNN – Neue Punkte zuordnen</h3>
+              <p>
+                DBSCAN hat kein <code>.predict()</code> –
+                wie ordnet man trotzdem neue, unbekannte
+                Datenpunkte einem Cluster zu?
+              </p>
+              <div class="example-tags">
+                <span class="pill" style="font-size:var(--text-xs)">DBSCAN</span>
+                <span class="pill" style="font-size:var(--text-xs)">KNeighborsClassifier</span>
+                <span class="pill" style="font-size:var(--text-xs)">components_</span>
+                <span class="pill" style="font-size:var(--text-xs)">Majoritätsvotum</span>
+              </div>
+              <ul class="example-highlights">
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-success)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Warum DBSCAN bewusst kein .predict() hat
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-success)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  <code>components_</code> und <code>core_sample_indices_</code> erklärt
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-success)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  kNN als lazy learner – Training = Speichern
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-success)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Vollständige 4-Schritt Pipeline
+                </li>
+                <li>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="var(--color-success)" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Übungsaufgabe: Core only vs. alle Punkte
+                </li>
+              </ul>
+              <div class="example-cta" style="color:var(--color-success)">
+                Zum Beispiel
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           KONZEPT-QUERVERWEISE
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="konzepte">
+        <div class="section-head">
+          <h2>Verwendete Konzepte</h2>
+          <p>
+            Diese Seiten setzen Inhalte aus den vorherigen Seiten voraus –
+            hier eine schnelle Übersicht, wo was erklärt wurde.
+          </p>
+        </div>
+
+        <div class="overview">
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">8.1</div>
+            <div>
+              <h3>Vorausgesetzte Konzepte für Beispiel 8.1</h3>
+              <ul>
+                <li>
+                  <a href="Page01.html">Seite 1</a> –
+                  k-means Algorithmus (E- und M-Schritt)
+                </li>
+                <li>
+                  <a href="Page04.html">Seite 4</a> –
+                  Elbow Plot, Silhouette Score, SSE / Inertia
+                </li>
+                <li>
+                  <a href="Page06.html">Seite 6</a> –
+                  Scaling-Entscheidung und Distanzmaße
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">8.2</div>
+            <div>
+              <h3>Vorausgesetzte Konzepte für Beispiel 8.2</h3>
+              <ul>
+                <li>
+                  <a href="Page06.html">Seite 6</a> –
+                  DBSCAN Algorithmus, eps, min_samples, Noise
+                </li>
+                <li>
+                  <a href="Page05.html">Seite 5</a> –
+                  Nicht-lineare Probleme, make_moons
+                </li>
+                <li>
+                  <a href="Page07.html">Seite 7</a> –
+                  Warum DBSCAN kein .predict() hat
+                </li>
+              </ul>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           VERGLEICH DER BEIDEN BEISPIELE
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="vergleich">
+        <div class="section-head">
+          <h2>Gegenüberstellung der Beispiele</h2>
+          <p>
+            Beide Beispiele lösen ein Clustering-Problem –
+            aber mit unterschiedlichen Algorithmen,
+            Zielen und Herausforderungen.
+          </p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th>
+                <span class="key" style="--key-color:var(--color-primary)">8.1 Maschinenzustände</span>
+              </th>
+              <th>
+                <span class="key" style="--key-color:var(--color-success)">8.2 DBSCAN + kNN</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Algorithmus</td>
+              <td>k-means</td>
+              <td>DBSCAN + KNeighborsClassifier</td>
+            </tr>
+            <tr>
+              <td>Datensatz</td>
+              <td><code>make_blobs</code> (Vibration × Temperatur)</td>
+              <td><code>make_moons</code> (nicht-linear)</td>
+            </tr>
+            <tr>
+              <td>Cluster-Form</td>
+              <td>Konvex, kompakt</td>
+              <td>Nicht-linear (Halbmonde)</td>
+            </tr>
+            <tr>
+              <td>k vorab bekannt?</td>
+              <td>Hinweis: 6 Weihenstephaner Zustände</td>
+              <td>Nein – von DBSCAN bestimmt</td>
+            </tr>
+            <tr>
+              <td>Haupt-Herausforderung</td>
+              <td>Optimale k-Wahl, Scaling-Entscheidung</td>
+              <td>Neue Punkte zuordnen ohne .predict()</td>
+            </tr>
+            <tr>
+              <td>Validierung</td>
+              <td>Elbow Plot + Silhouette (yellowbrick)</td>
+              <td>Visuell + Cluster-Label-Ausgabe</td>
+            </tr>
+            <tr>
+              <td>Kernlernziel</td>
+              <td>Vollständige Analyse-Pipeline</td>
+              <td>DBSCAN + kNN als Vorhersage-Pipeline</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- NAVIGATION -->
+      <section class="section" id="navigation">
+        <div class="card-grid">
+          <a href="Page07.html" class="card" style="text-decoration:none;cursor:pointer">
+            <h3>← Seite 7</h3>
+            <p style="color:var(--color-text-muted);font-size:var(--text-sm)">
+              Vergleich aller Clustering-Verfahren –
+              11 Algorithmen auf 6 Datensätzen
+            </p>
+          </a>
+          <a href="Page08_1.html" class="card"
+             style="text-decoration:none;cursor:pointer;
+             border-color:var(--color-primary);
+             background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))">
+            <h3 style="color:var(--color-primary)">→ Beispiel 8.1 starten</h3>
+            <p style="color:var(--color-text-muted);font-size:var(--text-sm)">
+              Brownfield Maschinenzustände mit k-means,
+              Elbow Plot und Silhouette-Analyse
+            </p>
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Seite 8 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+  <style>
+    /* ── Beispiel-Karten Layout ────────────────── */
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: var(--space-6);
+      margin-top: var(--space-4);
+    }
+
+    .example-card {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      transition: transform .18s ease, box-shadow .18s ease,
+                  border-color .18s ease;
+      background: var(--color-surface-2);
+    }
+    .example-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.12);
+      border-color: var(--color-primary);
+    }
+
+    .example-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-5) var(--space-6);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .example-number {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      line-height: 1;
+      letter-spacing: -.04em;
+    }
+
+    .example-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+      padding: var(--space-5) var(--space-6);
+      flex: 1;
+    }
+
+    .example-card-body h3 {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      margin: 0;
+      color: var(--color-text);
+    }
+
+    .example-card-body p {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .example-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+    }
+
+    .example-highlights {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .example-highlights li {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+
+    .example-highlights li svg {
+      flex-shrink: 0;
+    }
+
+    .example-cta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--color-primary);
+      margin-top: auto;
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--color-border);
+    }
+  </style>
+
+</body>
+</html>

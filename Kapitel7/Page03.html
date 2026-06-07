@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – ROC Curves in sklearn</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page7" title="Kapitel 7 · ROC Curves in sklearn"></site-header>
+  <div class="layout">
+    <site-sidebar active="page3"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 7 · Seite 3</span>
+            <h1>ROC Curves <span class="key" style="--key-color:var(--color-primary)">in sklearn</span></h1>
+            <p>
+              Von der Theorie zur Implementierung:
+              <code>roc_curve()</code>, <code>RocCurveDisplay</code>,
+              das mathematische Fundament des Decision Thresholds –
+              und ein Gefühl für ROC-Kurven durch Variation der Streuung.
+            </p>
+            <div class="pill-row">
+              <span class="pill">roc_curve</span>
+              <span class="pill">RocCurveDisplay</span>
+              <span class="pill">SVC.decision_function</span>
+              <span class="pill">Threshold-Integral</span>
+              <span class="pill">cluster_std variieren</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kannst eine ROC-Kurve mit sklearn berechnen und plotten,
+              verstehst was <code>y_score</code> ist, und weißt,
+              warum Gaußsche Dichten und Integrale hinter dem Threshold stecken.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. SKLEARN API – ÜBERSICHT
+           ════════════════════════════════════════════ -->
+      <section class="section" id="api-uebersicht">
+        <div class="section-head">
+          <h2>3.1 sklearn ROC-API – Überblick</h2>
+          <p>
+            sklearn stellt zwei Wege bereit, um ROC-Kurven zu erzeugen.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><code style="color:var(--color-primary)">roc_curve(y_true, y_score)</code></h3>
+            <ul>
+              <li>Gibt <code>fpr</code>, <code>tpr</code> und <code>thresholds</code> zurück</li>
+              <li>
+                <code>y_score</code>: Ausgabe der <code>.decision_function()</code>
+                oder <code>.predict_proba()</code> – <strong>kein binäres Label!</strong>
+              </li>
+              <li>Nur für <strong>binäre Klassifikation</strong> direkt verwendbar</li>
+              <li><code>from sklearn.metrics import roc_curve</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><code style="color:var(--color-success)">RocCurveDisplay.from_estimator(model, X, y)</code></h3>
+            <ul>
+              <li>Convenience-Funktion: berechnet ROC <strong>und plottet</strong> direkt</li>
+              <li>Zeigt die AUC im Plot an</li>
+              <li>Braucht das trainierte Modell, X-Testdaten und y-Testlabels</li>
+              <li><code>from sklearn.metrics import RocCurveDisplay</code></li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-warning" style="margin-top:var(--space-5)">
+          <strong>Wichtig:</strong>
+          <code>y_score</code> ist <strong>kein Vorhersage-Label</strong> (0 oder 1), sondern ein
+          kontinuierlicher Wert – z.B. der Abstand zur Entscheidungsgrenze oder eine Wahrscheinlichkeit.
+          Erst durch Anlegen eines Thresholds auf diesen Wert entsteht die binäre Vorhersage.
+          Das ist der Schlüssel zur ROC-Kurve.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. ERSTES CODE-BEISPIEL
+           ════════════════════════════════════════════ -->
+      <section class="section" id="erstes-beispiel">
+        <div class="section-head">
+          <h2>3.2 Erstes Beispiel – SVC mit roc_curve</h2>
+          <p>
+            Synthetischen Datensatz erzeugen, SVC trainieren, ROC-Kurve berechnen und plotten.
+          </p>
+        </div>
+
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+          text-transform:uppercase; color:var(--color-text-faint); margin-bottom:var(--space-2)">
+          Schritt 1 · Daten erzeugen und Modell trainieren
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.datasets import make_blobs
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import roc_curve, RocCurveDisplay
+import matplotlib.pyplot as plt
+
+# Synthetischen Datensatz mit 2 Klassen erzeugen
+X, y = make_blobs(n_samples=400, centers=2,
+                  cluster_std=.90, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+# SVM trainieren (linear)
+model = SVC(kernel='linear').fit(X_train, y_train)
+
+# Score-Werte berechnen (kein Label, sondern Abstand)
+y_score = model.decision_function(X_test)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Info
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li><code>make_blobs</code>: 400 Punkte, 2 Cluster, <code>cluster_std=0.90</code></li>
+                <li><code>decision_function()</code>: liefert den <strong>vorzeichenbehafteten Abstand</strong> zur Entscheidungsgrenze</li>
+                <li>Positive Werte → Modell tendiert zu Klasse 1</li>
+                <li>Negative Werte → Modell tendiert zu Klasse 0</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+          text-transform:uppercase; color:var(--color-text-faint); margin: var(--space-6) 0 var(--space-2)">
+          Schritt 2 · ROC-Kurve berechnen und plotten
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># Methode 1: Manuell berechnen
+fpr, tpr, thresholds = roc_curve(y_test, y_score)
+
+print("FPR:", fpr[:5])
+print("TPR:", tpr[:5])
+print("Thresholds:", thresholds[:5])
+
+# Methode 2: Convenience-Funktion (plottet direkt + zeigt AUC)
+RocCurveDisplay.from_estimator(model, X_test, y_test)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output (vereinfacht)
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>FPR: [0.   0.   0.   0.   0.01 ...]
+TPR: [0.   0.02 0.04 0.06 0.08 ...]
+Thresholds: [3.12 2.87 2.54 2.21 1.97 ...]</pre>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-3) 0 0; padding-left:1rem; line-height:1.9">
+                <li>Jeder Eintrag = ein Threshold-Wert</li>
+                <li>Je niedriger der Threshold, desto liberaler → TPR und FPR steigen</li>
+                <li><code>RocCurveDisplay</code> plottet Kurve inkl. AUC-Wert</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. GEFÜHL ENTWICKELN – STD VARIIEREN
+           ════════════════════════════════════════════ -->
+      <section class="section" id="std-variieren">
+        <div class="section-head">
+          <h2>3.3 Ein Gefühl entwickeln – Streuung variieren</h2>
+          <p>
+            Was passiert mit der ROC-Kurve, wenn die Klassen zunehmend überlappen?
+          </p>
+        </div>
+
+        <div class="note" style="margin-bottom:var(--space-5)">
+          <strong>Idee:</strong> Wir erzeugen denselben Datensatz mehrfach mit steigender
+          <code>cluster_std</code>. Dadurch überlappen die Klassen mehr und mehr –
+          der Klassifikator hat es schwerer, und das sieht man an der ROC-Kurve.
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+
+for std in np.linspace(0.2, 2, 5):
+    X, y = make_blobs(n_samples=400, centers=2,
+                      cluster_std=std, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+    model = SVC(kernel='linear').fit(X_train, y_train)
+    y_score = model.decision_function(X_test)
+
+    # Datenpunkte plotten
+    plt.figure()
+    plt.scatter(X_train[:, 0], X_train[:, 1],
+                c=y_train, s=40, cmap='viridis', edgecolors='gray')
+    plt.title(f"Daten – std={std:.2f}")
+
+    # ROC-Kurve plotten
+    plt.figure()
+    RocCurveDisplay.from_estimator(model, X_test, y_test)
+    plt.title(f"ROC – std={std:.2f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Beobachtung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li><strong>std = 0.2:</strong> Klar getrennte Cluster → ROC-Kurve nahe am Ideal, AUC ≈ 1.0</li>
+                <li><strong>std = 1.1:</strong> Leichte Überlappung → ROC-Kurve bewegt sich Richtung Diagonale</li>
+                <li><strong>std = 2.0:</strong> Starke Überlappung → ROC-Kurve fast auf der Diagonalen, AUC ≈ 0.5</li>
+                <li>Die AUC sinkt mit zunehmender Überlappung</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Kernaussage:</strong>
+          Die ROC-Kurve und die AUC sind ein Maß dafür,
+          wie gut ein Klassifikator die beiden Klassen <em>grundlegend</em> voneinander trennen kann –
+          unabhängig vom gewählten Threshold.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. MATHEMATISCHES FUNDAMENT: INTEGRALE
+           ════════════════════════════════════════════ -->
+      <section class="section" id="integrale">
+        <div class="section-head">
+          <h2>3.4 Mathematisches Fundament: Decision Threshold als Integral</h2>
+          <p>
+            Warum entstehen ROC-Kurven, wenn der Threshold variiert?
+            Die formale Herleitung über Wahrscheinlichkeitsdichten.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Das Modell als Zufallsvariable</span></h3>
+            <p>
+              Betrachte den Klassifikator als etwas, das für jeden Datenpunkt
+              einen Score \(x\) ausgibt. Datenpunkte der Klasse „positiv" folgen einer
+              Wahrscheinlichkeitsdichte \(f_1(x)\), Punkte der Klasse „negativ" folgen \(f_0(x)\).
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Der Threshold T</span></h3>
+            <p>
+              Ein Datenpunkt wird als „positiv" klassifiziert, wenn \(x \geq T\).
+              Je nach Lage von \(T\) werden unterschiedlich viele Positive und Negative
+              auf der richtigen oder falschen Seite eingeordnet.
+            </p>
+          </article>
+        </div>
+
+        <div style="margin-top: var(--space-6)">
+          <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+            text-transform:uppercase; color:var(--color-text-faint); margin-bottom:var(--space-3)">
+            Formale Definition von TPR und FPR über Integrale
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Rate</th>
+                <th>Integralformel</th>
+                <th>Bedeutung</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>TPR</strong></td>
+                <td>
+                  \[\text{TPR}(T) = \int_T^{\infty} f_1(x)\, dx\]
+                </td>
+                <td>Anteil der Positiven, die über dem Threshold liegen</td>
+              </tr>
+              <tr>
+                <td><strong>FPR</strong></td>
+                <td>
+                  \[\text{FPR}(T) = \int_T^{\infty} f_0(x)\, dx\]
+                </td>
+                <td>Anteil der Negativen, die fälschlicherweise über dem Threshold liegen</td>
+              </tr>
+              <tr>
+                <td><strong>TNR</strong></td>
+                <td>\[\text{TNR}(T) = 1 - \text{FPR}(T)\]</td>
+                <td>Anteil der Negativen unter dem Threshold</td>
+              </tr>
+              <tr>
+                <td><strong>FNR</strong></td>
+                <td>\[\text{FNR}(T) = 1 - \text{TPR}(T)\]</td>
+                <td>Anteil der Positiven unter dem Threshold</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Wie entsteht die ROC-Kurve?</span></h3>
+            <p>
+              Indem der Threshold \(T\) von \(-\infty\) bis \(+\infty\) variiert wird,
+              entstehen für jeden \(T\)-Wert ein (FPR, TPR)-Wertepaar.
+              Die Menge aller dieser Wertepaare ergibt die ROC-Kurve.
+            </p>
+            <ul>
+              <li>\(T \to +\infty\): Alles unter dem Threshold → TPR = 0, FPR = 0 (Punkt links unten)</li>
+              <li>\(T \to -\infty\): Alles über dem Threshold → TPR = 1, FPR = 1 (Punkt rechts oben)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Gaußsche Spezialfälle</span></h3>
+            <p>
+              Wenn man annimmt, dass \(f_1(x)\) und \(f_0(x)\)
+              <strong>Gaußsche Verteilungen</strong> sind,
+              kann man ROC-Kurven <em>analytisch</em> herleiten –
+              aus dem Abstand der Mittelwerte und der gemeinsamen Standardabweichung.
+              In der Praxis werden die Kurven numerisch berechnet.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <section class="section" id="navigation">
+        <div class="card-grid">
+          <a href="Page02.html" class="card" style="text-decoration:none">
+            <h3>← Seite 2</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              ROC Curves Theorie – Koordinatensystem, Trade-off
+            </p>
+          </a>
+          <a href="Page04.html" class="card"
+            style="text-decoration:none; border-color:var(--color-primary);
+              background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))">
+            <h3 style="color:var(--color-primary)">→ Seite 4: Decision Threshold Use Cases</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              Wann FPR senken, wann TPR erhöhen? adjusted_predict() implementieren
+            </p>
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 7 · Seite 3 · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

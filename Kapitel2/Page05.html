@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · ML in Python: scikit-learn</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ── SKLEARN 6-KACHEL GRID ──────────────────────── */
+    .sklearn-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 860px) { .sklearn-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 540px) { .sklearn-grid { grid-template-columns: 1fr; } }
+
+    .sklearn-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-top: 3px solid var(--sk-color, var(--color-primary));
+      border-radius: var(--radius-xl);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .sklearn-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .sklearn-card-title {
+      font-size: var(--text-sm); font-weight: 700;
+      color: var(--sk-color, var(--color-primary));
+    }
+    .sklearn-card-desc {
+      font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.6; font-style: italic;
+    }
+    .sklearn-card-group {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--color-text-faint);
+      margin-bottom: var(--space-1);
+    }
+    .sklearn-card ul {
+      margin: 0; padding-left: 1rem; font-size: var(--text-xs);
+      color: var(--color-text-muted); line-height: 1.8;
+    }
+    .sklearn-card-link {
+      margin-top: auto;
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      font-size: 0.65rem; font-weight: 700; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--sk-color, var(--color-primary));
+      text-decoration: none; opacity: .7;
+    }
+    .sklearn-card-link:hover { opacity: 1; }
+
+    /* ── 4-SCHRITTE PROZESS ─────────────────────────── */
+    .step-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: var(--space-5);
+    }
+    .step-item {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: var(--space-4);
+      position: relative;
+    }
+    .step-item:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 23px; top: 48px;
+      width: 2px; height: calc(100% - 24px);
+      background: var(--color-border);
+    }
+    .step-num {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: var(--text-base); font-weight: 800;
+      background: var(--step-bg, var(--color-primary-highlight));
+      color: var(--step-color, var(--color-primary));
+      border: 2px solid var(--step-color, var(--color-primary));
+      flex-shrink: 0; z-index: 1;
+    }
+    .step-content {
+      padding: var(--space-3) 0 var(--space-5) 0;
+    }
+    .step-title {
+      font-size: var(--text-sm); font-weight: 700; margin-bottom: var(--space-2);
+    }
+    .step-body {
+      font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.65;
+    }
+
+    /* ── DATENFORMAT VISUAL ─────────────────────────── */
+    .datenformat-visual {
+      display: flex;
+      gap: var(--space-4);
+      align-items: flex-start;
+      margin-top: var(--space-5);
+      overflow-x: auto;
+    }
+    .df-matrix {
+      flex: 1; min-width: 0;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+    .df-title {
+      padding: var(--space-3) var(--space-4); font-size: var(--text-xs); font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase; background: var(--color-surface-offset);
+      border-bottom: 1px solid var(--color-border); text-align: center; color: var(--color-text-muted);
+    }
+    .df-head {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      padding: var(--space-2) var(--space-4);
+      background: var(--color-surface-offset); border-bottom: 1px solid var(--color-border);
+    }
+    .df-head span {
+      font-size: .65rem; font-weight: 700; text-transform: uppercase;
+      color: var(--color-text-faint); text-align: center;
+    }
+    .df-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      padding: var(--space-2) var(--space-4);
+      border-bottom: 1px solid var(--color-divider);
+    }
+    .df-row:last-child { border-bottom: none; }
+    .df-row span {
+      font-size: var(--text-xs); font-family: var(--font-mono);
+      text-align: center; color: var(--color-text-muted);
+    }
+    .df-note {
+      padding: var(--space-2) var(--space-4); font-size: .65rem;
+      color: var(--color-text-faint); border-top: 1px solid var(--color-border);
+      background: var(--color-surface-offset);
+    }
+    .df-arrow {
+      font-size: 1.3rem; color: var(--color-text-faint);
+      padding-top: 55px; flex-shrink: 0;
+    }
+    .df-y { min-width: 80px; }
+    .df-y-cell {
+      padding: var(--space-2) var(--space-3); font-size: var(--text-xs); font-weight: 700;
+      font-family: var(--font-mono); text-align: center;
+      border-bottom: 1px solid var(--color-divider);
+    }
+    .df-y-cell:last-child { border-bottom: none; }
+
+    /* ── SO WHAT + FRAGE BOX ────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── QUOTE BLOCK ────────────────────────────────── */
+    .quote-block { margin:var(--space-6) 0; padding:var(--space-6);
+      background:var(--color-surface-2); border:1px solid var(--color-border);
+      border-radius:var(--radius-xl); text-align:center; }
+    .quote-block blockquote { font-family:var(--font-display); font-size:var(--text-xl);
+      font-style:italic; color:var(--color-text); margin:0 0 var(--space-3) 0; line-height:1.4; }
+    .quote-block cite { font-size:var(--text-xs); color:var(--color-text-muted);
+      font-style:normal; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · sklearn"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page5"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Seite 5 · Folien 18–22</span>
+            <h1>ML in Python:
+              <span class="key" style="--key-color:var(--color-primary)">scikit-learn</span>
+            </h1>
+            <p>
+              Alle ML-Algorithmen in sklearn folgen demselben Muster – einem
+              generischen 4-Schritte-Prozess. Diese Seite zeigt den
+              vollständigen Überblick über die 6 sklearn-Bereiche,
+              erklärt das Datenformat und führt das erste vollständige
+              ML-Beispiel mit Code durch.
+            </p>
+            <div class="pill-row">
+              <span class="pill">sklearn API</span>
+              <span class="pill">6 Bereiche</span>
+              <span class="pill">.fit()</span>
+              <span class="pill">.predict()</span>
+              <span class="pill">.transform()</span>
+              <span class="pill">NumPy · DataFrame</span>
+              <span class="pill">LinearRegression</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kennst die
+              <span class="key" style="--key-color:var(--color-primary)">6 Bereiche von sklearn</span>
+              und kannst den generischen
+              <strong>4-Schritte-Prozess</strong> auf jedes ML-Modell anwenden.
+              Du weißt, wie die Daten formatiert sein müssen
+              (<strong>X</strong> als Matrix, <strong>y</strong> als Vektor)
+              und hast das erste vollständige Beispiel in Code gesehen.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5.1  SKLEARN ÜBERBLICK — 6 BEREICHE  (Folie 19)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="sklearn-ueberblick">
+        <div class="section-head">
+          <h2>5.1 scikit-learn – Überblick</h2>
+          <p>
+            sklearn deckt alle wichtigen ML-Aufgaben ab – in 6 Bereichen.
+            Die vollständige Dokumentation: 
+            <a href="https://scikit-learn.org/stable/index.html" target="_blank">scikit-learn.org</a>
+          </p>
+        </div>
+
+        <div class="sklearn-grid">
+
+          <!-- 1. Classification -->
+          <div class="sklearn-card" style="--sk-color: #3b82f6">
+            <div class="sklearn-card-title">📊 Classification</div>
+            <div class="sklearn-card-desc">
+              "Identifying which category an object belongs to."
+            </div>
+            <div>
+              <div class="sklearn-card-group">Anwendungen</div>
+              <ul>
+                <li>Spam detection</li>
+                <li>Image recognition</li>
+                <li>Medizinische Diagnose</li>
+              </ul>
+            </div>
+            <div>
+              <div class="sklearn-card-group">Wichtige Algorithmen</div>
+              <ul>
+                <li>SVM, k-nearest neighbors</li>
+                <li>Random Forest</li>
+                <li>Logistic Regression</li>
+              </ul>
+            </div>
+            <a href="https://scikit-learn.org/stable/supervised_learning.html"
+               class="sklearn-card-link" target="_blank">Docs →</a>
+          </div>
+
+          <!-- 2. Regression -->
+          <div class="sklearn-card" style="--sk-color: #10b981">
+            <div class="sklearn-card-title">📈 Regression</div>
+            <div class="sklearn-card-desc">
+              "Predicting a continuous-valued attribute associated with an object."
+            </div>
+            <div>
+              <div class="sklearn-card-group">Anwendungen</div>
+              <ul>
+                <li>Drug response prediction</li>
+                <li>Stock prices</li>
+                <li>Stromverbrauch</li>
+              </ul>
+            </div>
+            <div>
+              <div class="sklearn-card-group">Wichtige Algorithmen</div>
+              <ul>
+                <li>SVR, nearest neighbors</li>
+                <li>Random Forest Regressor</li>
+                <li>LinearRegression</li>
+              </ul>
+            </div>
+            <a href="https://scikit-learn.org/stable/supervised_learning.html"
+               class="sklearn-card-link" target="_blank">Docs →</a>
+          </div>
+
+          <!-- 3. Clustering -->
+          <div class="sklearn-card" style="--sk-color: #f59e0b">
+            <div class="sklearn-card-title">🔍 Clustering</div>
+            <div class="sklearn-card-desc">
+              "Automatic grouping of similar objects into sets."
+            </div>
+            <div>
+              <div class="sklearn-card-group">Anwendungen</div>
+              <ul>
+                <li>Document segmentation</li>
+                <li>Grouping experiment outcomes</li>
+                <li>Kundengruppierung</li>
+              </ul>
+            </div>
+            <div>
+              <div class="sklearn-card-group">Wichtige Algorithmen</div>
+              <ul>
+                <li>k-Means</li>
+                <li>Spectral Clustering</li>
+                <li>Mean-Shift</li>
+              </ul>
+            </div>
+            <a href="https://scikit-learn.org/stable/modules/clustering.html"
+               class="sklearn-card-link" target="_blank">Docs →</a>
+          </div>
+
+          <!-- 4. Dimensionality Reduction -->
+          <div class="sklearn-card" style="--sk-color: #8b5cf6">
+            <div class="sklearn-card-title">📉 Dimensionality Reduction</div>
+            <div class="sklearn-card-desc">
+              "Reducing the number of random variables to consider."
+            </div>
+            <div>
+              <div class="sklearn-card-group">Anwendungen</div>
+              <ul>
+                <li>Visualization</li>
+                <li>Increased efficiency</li>
+                <li>Feature Compression</li>
+              </ul>
+            </div>
+            <div>
+              <div class="sklearn-card-group">Wichtige Algorithmen</div>
+              <ul>
+                <li>PCA, NMF</li>
+                <li>Feature Selection</li>
+                <li>t-SNE (extern)</li>
+              </ul>
+            </div>
+            <a href="https://scikit-learn.org/stable/modules/decomposition.html"
+               class="sklearn-card-link" target="_blank">Docs →</a>
+          </div>
+
+          <!-- 5. Model Selection -->
+          <div class="sklearn-card" style="--sk-color: #ec4899">
+            <div class="sklearn-card-title">⚙️ Model Selection</div>
+            <div class="sklearn-card-desc">
+              "Comparing, validating and choosing parameters and models."
+            </div>
+            <div>
+              <div class="sklearn-card-group">Anwendungen</div>
+              <ul>
+                <li>Improved accuracy via parameter tuning</li>
+                <li>Hyperparameter-Optimierung</li>
+                <li>Modellvergleich</li>
+              </ul>
+            </div>
+            <div>
+              <div class="sklearn-card-group">Wichtige Algorithmen</div>
+              <ul>
+                <li>GridSearchCV</li>
+                <li>Cross Validation</li>
+                <li>Metriken</li>
+              </ul>
+            </div>
+            <a href="https://scikit-learn.org/stable/modules/model_evaluation.html"
+               class="sklearn-card-link" target="_blank">Docs →</a>
+          </div>
+
+          <!-- 6. Preprocessing -->
+          <div class="sklearn-card" style="--sk-color: #0ea5e9">
+            <div class="sklearn-card-title">🔧 Preprocessing</div>
+            <div class="sklearn-card-desc">
+              "Feature extraction and normalization."
+            </div>
+            <div>
+              <div class="sklearn-card-group">Anwendungen</div>
+              <ul>
+                <li>Text-Daten für ML vorbereiten</li>
+                <li>Feature Normalisierung</li>
+                <li>Skalierung</li>
+              </ul>
+            </div>
+            <div>
+              <div class="sklearn-card-group">Wichtige Algorithmen</div>
+              <ul>
+                <li>StandardScaler, MinMaxScaler</li>
+                <li>LabelEncoder, OneHotEncoder</li>
+                <li>PolynomialFeatures</li>
+              </ul>
+            </div>
+            <a href="https://scikit-learn.org/stable/modules/preprocessing.html"
+               class="sklearn-card-link" target="_blank">Docs →</a>
+          </div>
+
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            sklearn hat einen sehr zugänglichen und konsistenten Aufbau –
+            <strong>jeder ML-Algorithmus hat denselben API-Aufbau</strong>.
+            Das bedeutet: wenn du einen Algorithmus kennst, kennst du im Prinzip alle –
+            zumindest was die Syntax angeht.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5.2  GENERISCHER 4-SCHRITTE-PROZESS  (Folie 20)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="generischer-aufbau">
+        <div class="section-head">
+          <h2>5.2 Generischer 4-Schritte-Prozess</h2>
+          <p>
+            Jeder ML-Algorithmus in sklearn folgt demselben Ablauf.
+            Dieser Prozess ist universell – für Supervised und Unsupervised Learning gleichermaßen.
+          </p>
+        </div>
+
+        <div class="step-flow">
+
+          <!-- Schritt 1 -->
+          <div class="step-item">
+            <div class="step-num" style="--step-bg:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface)); --step-color:var(--color-primary)">1</div>
+            <div class="step-content">
+              <div class="step-title">
+                Wähle Modell &amp;
+                <span class="key" style="--key-color:var(--color-primary)">importiere</span>
+                entsprechende Klasse aus sklearn
+              </div>
+              <div class="step-body">
+                <ul style="padding-left:1.1rem; margin:0; line-height:1.9">
+                  <li>
+                    Importiere das gewünschte Modell aus dem entsprechenden sklearn-Modul:
+                    <code class="key" style="--key-color:var(--color-primary)">from sklearn.X import Y</code>
+                  </li>
+                  <li>Beispiele:
+                    <code>from sklearn.linear_model import LinearRegression</code> |
+                    <code>from sklearn.cluster import KMeans</code>
+                  </li>
+                  <li>Das Modul (sklearn.X) gibt den Bereich an: <code>linear_model</code>, <code>cluster</code>, <code>svm</code>, ...</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schritt 2 -->
+          <div class="step-item">
+            <div class="step-num" style="--step-bg:color-mix(in oklab,var(--color-success) 12%,var(--color-surface)); --step-color:var(--color-success)">2</div>
+            <div class="step-content">
+              <div class="step-title">
+                Wähle
+                <span class="key" style="--key-color:var(--color-success)">Hyperparameter</span>
+                durch entsprechende Instanziierung
+              </div>
+              <div class="step-body">
+                <ul style="padding-left:1.1rem; margin:0; line-height:1.9">
+                  <li>
+                    Erstelle eine Instanz der Modellklasse mit den gewünschten Hyperparametern:
+                    <code class="key" style="--key-color:var(--color-success)">model = Y(hyperparameter=wert)</code>
+                  </li>
+                  <li>
+                    <span class="key" style="--key-color:var(--color-success)">Hyperparameter</span>
+                    = werden <em>vor</em> dem Training festgelegt (z.B.
+                    <code>n_clusters=3</code>, <code>max_depth=5</code>)
+                  </li>
+                  <li>Im Gegensatz zu <strong>Parametern</strong> = werden <em>durch</em> das Training gelernt</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schritt 3 -->
+          <div class="step-item">
+            <div class="step-num" style="--step-bg:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface)); --step-color:color-mix(in oklab,var(--color-warning) 80%,#000)">3</div>
+            <div class="step-content">
+              <div class="step-title">
+                Trainiere/fitte das Modell via
+                <span class="key" style="--key-color:color-mix(in oklab,var(--color-warning) 80%,#000)">.fit()</span>
+              </div>
+              <div class="step-body">
+                <ul style="padding-left:1.1rem; margin:0; line-height:1.9">
+                  <li>
+                    <strong>Supervised:</strong>
+                    <code class="key" style="--key-color:color-mix(in oklab,var(--color-warning) 80%,#000)">model.fit(X, y)</code>
+                    – Modell lernt aus Feature-Matrix + Labels
+                  </li>
+                  <li>
+                    <strong>Unsupervised:</strong>
+                    <code class="key" style="--key-color:color-mix(in oklab,var(--color-warning) 80%,#000)">model.fit(X)</code>
+                    – nur Feature-Matrix, kein y
+                  </li>
+                  <li>Nach <code>.fit()</code>: Modellparameter sind gelernt (im Modell-Objekt gespeichert)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Schritt 4 -->
+          <div class="step-item">
+            <div class="step-num" style="--step-bg:color-mix(in oklab,#8b5cf6 12%,var(--color-surface)); --step-color:#7c3aed">4</div>
+            <div class="step-content">
+              <div class="step-title">
+                Wende das Modell auf neue Daten an
+              </div>
+              <div class="step-body">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); margin-top:var(--space-2)">
+                  <div style="padding:var(--space-4); background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2)); border:1px solid color-mix(in oklab,var(--color-primary) 20%,var(--color-border)); border-radius:var(--radius-lg)">
+                    <div style="font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-primary); margin-bottom:var(--space-2)">a) Supervised Learning</div>
+                    <ul style="padding-left:1rem; margin:0; font-size:var(--text-xs); color:var(--color-text-muted); line-height:1.8">
+                      <li>Labels für neue Daten vorhersagen</li>
+                      <li><code class="key" style="--key-color:var(--color-primary)">y_pred = model.predict(X_new)</code></li>
+                    </ul>
+                  </div>
+                  <div style="padding:var(--space-4); background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); border:1px solid color-mix(in oklab,var(--color-success) 20%,var(--color-border)); border-radius:var(--radius-lg)">
+                    <div style="font-size:.65rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--color-success); margin-bottom:var(--space-2)">b) Unsupervised Learning</div>
+                    <ul style="padding-left:1rem; margin:0; font-size:var(--text-xs); color:var(--color-text-muted); line-height:1.8">
+                      <li>Transformieren oder Strukturen zuweisen</li>
+                      <li><code class="key" style="--key-color:var(--color-success)">.transform(X)</code> oder <code>.predict(X)</code></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="quote-block">
+          <blockquote>„Wenn Sie ein Modell anwenden können – können Sie jedes anwenden – zumindest bzgl. der Syntax!"</blockquote>
+          <cite>Prof. · Folie 20 · Grüne So-What-Box</cite>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5.3  DATENFORMAT  (Folie 21)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="datenformat">
+        <div class="section-head">
+          <h2>5.3 Datenformat – Wie werden die Daten erwartet?</h2>
+          <p>
+            sklearn erwartet die Feature-Matrix und den Label-Vektor in einem
+            spezifischen Format – dem Format, das wir bereits aus Kapitel 1 kennen.
+          </p>
+        </div>
+
+        <!-- Datenformat Visual -->
+        <div class="datenformat-visual">
+
+          <!-- Feature Matrix X -->
+          <div class="df-matrix">
+            <div class="df-title">
+              <span class="key" style="--key-color:var(--color-primary)">X</span>
+              — Feature Matrix (n_samples × n_features)
+            </div>
+            <div class="df-head">
+              <span>Feature 1</span><span>Feature 2</span>
+              <span>Feature 3</span><span>⋯ Feature T</span>
+            </div>
+            <div class="df-row">
+              <span>x₁₁</span><span>x₁₂</span><span>x₁₃</span><span>⋯ x₁T</span>
+            </div>
+            <div class="df-row">
+              <span>x₂₁</span><span>x₂₂</span><span>x₂₃</span><span>⋯ x₂T</span>
+            </div>
+            <div class="df-row" style="opacity:.5">
+              <span>⋮</span><span>⋮</span><span>⋮</span><span>⋮</span>
+            </div>
+            <div class="df-row">
+              <span>xN₁</span><span>xN₂</span><span>xN₃</span><span>⋯ xNT</span>
+            </div>
+            <div class="df-note">N Zeilen = n_samples &nbsp;·&nbsp; T Spalten = n_features</div>
+          </div>
+
+          <div class="df-arrow">→</div>
+
+          <!-- Target Vector y -->
+          <div class="df-matrix df-y">
+            <div class="df-title">
+              <span class="key" style="--key-color:var(--color-success)">y</span>
+              — Target Vector
+            </div>
+            <div class="df-head" style="grid-template-columns:1fr">
+              <span>Label</span>
+            </div>
+            <div class="df-y-cell" style="color:#3b82f6">y₁</div>
+            <div class="df-y-cell" style="color:#f59e0b">y₂</div>
+            <div class="df-y-cell" style="opacity:.5; color:var(--color-text-faint)">⋮</div>
+            <div class="df-y-cell" style="color:#10b981">yN</div>
+            <div class="df-note">N Einträge</div>
+          </div>
+
+        </div>
+
+        <!-- Format Cards -->
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3>
+              Feature Matrix
+              <span class="key" style="--key-color:var(--color-primary)">X</span>
+            </h3>
+            <ul>
+              <li>Liegt üblicherweise als
+                <span class="key" style="--key-color:var(--color-primary)">NumPy-Array</span>
+                oder
+                <span class="key" style="--key-color:var(--color-primary)">Pandas DataFrame</span>
+                vor
+              </li>
+              <li>Shape: <code>(n_samples, n_features)</code> = <code>(N, T)</code></li>
+              <li>Jede <strong>Zeile</strong> = eine Beobachtung (Sample)</li>
+              <li>Jede <strong>Spalte</strong> = ein Feature</li>
+              <li>sklearn erwartet immer <strong>2D</strong>: auch bei nur 1 Feature → <code>reshape(-1, 1)</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              Target Vector
+              <span class="key" style="--key-color:var(--color-success)">y</span>
+            </h3>
+            <ul>
+              <li>Liegt als
+                <span class="key" style="--key-color:var(--color-success)">NumPy-Array</span>
+                oder
+                <span class="key" style="--key-color:var(--color-success)">Pandas Series</span>
+                vor
+              </li>
+              <li>Shape: <code>(n_samples,)</code> = <code>(N,)</code> – 1D-Array</li>
+              <li>Diskret (Klassen) bei Klassifikation</li>
+              <li>Kontinuierlich (Zahlen) bei Regression</li>
+              <li>Nur bei <strong>Supervised Learning</strong> nötig – UL: kein y!</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            sklearn erwartet die Feature-Matrix und den zugehörigen Target-Vektor im
+            beschriebenen Format – das Format, das wir aus Kapitel 1 schon kennen.
+            Die Feature Matrix liegt üblicherweise als
+            <code>np.ndarray</code> oder <code>pd.DataFrame</code> vor,
+            der Target-Vektor als <code>np.ndarray</code> oder <code>pd.Series</code>.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5.4  LINEAR REGRESSION BEISPIEL + CODE  (Folie 22)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="linear-regression">
+        <div class="section-head">
+          <h2>5.4 Exemplarisches Beispiel: Linear Regression in sklearn</h2>
+          <p>
+            Wir haben die einfache lineare Regression schon aus dem Data Understanding Block
+            kennengelernt. Hier gehen wir den typischen
+            <strong>sklearn-Prozess</strong> an einem vollständigen Beispiel durch.
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom:var(--space-5)">
+          <h3>Das Szenario</h3>
+          <ul>
+            <li>Wir generieren synthetische Daten: <strong>50 Samples</strong>, 1 Feature</li>
+            <li>Labels: <code>y = 2 · X + Rauschen</code> – eine lineare Beziehung mit Noise</li>
+            <li>Ziel: LinearRegression-Modell trainieren und Regressionsgerade einzeichnen</li>
+            <li>Schritte: Daten generieren → Importieren → Fit → Predict + Plot</li>
+          </ul>
+        </div>
+
+        <!-- ── SCHRITT 1: Daten generieren ──────────────────── -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Schritt 1 — Daten generieren &amp; visualisieren
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir erstellen einen reproduzierbaren Zufallszahlen-Generator (<code>RandomState(42)</code>)
+          und generieren 50 Datenpunkte mit einer linearen Beziehung plus zufälligem Rauschen.
+          Der Scatter-Plot zeigt die generierten Daten.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Daten generieren
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+
+# Reproduzierbarer Zufallszahlen-Generator
+rng = np.random.RandomState(42)
+
+# Feature-Matrix X: 50 Samples, 1 Feature
+X = 10 * rng.rand(50, 1)
+
+# Labels y = 2*X + Rauschen
+y = 2 * X + rng.rand(50, 1)
+
+# Scatter-Plot der Daten
+plt.scatter(X, y)
+plt.xlabel("X")
+plt.ylabel("y")
+plt.title("Generierte Daten: y = 2X + noise")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Beobachtung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>📊 Scatter-Plot: X-Achse 0–10, Y-Achse 0–20</li>
+                <li>Blaue Datenpunkte zeigen deutlich eine <strong>lineare Beziehung</strong></li>
+                <li>Zufälliges Rauschen via <code>rng.rand(50,1)</code></li>
+                <li><code>RandomState(42)</code> garantiert Reproduzierbarkeit</li>
+                <li><code>X</code> hat Shape <code>(50, 1)</code> – korrekt für sklearn</li>
+              </ul>
+              <div style="margin-top:var(--space-3); padding:var(--space-3); background:var(--color-surface-offset); border-radius:var(--radius-md); font-size:var(--text-xs); font-family:var(--font-mono); color:var(--color-text-muted)">
+                X.shape → (50, 1)<br>
+                y.shape → (50, 1)<br>
+                y ≈ 2*X + noise (0–1)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SCHRITT 2: Modell importieren & trainieren ──── -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Schritt 2 — Modell importieren &amp;
+          <span class="key" style="--key-color:var(--color-warning)">.fit()</span>
+          – Training
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir importieren <code>LinearRegression</code> aus <code>sklearn.linear_model</code>,
+          erstellen eine Instanz (keine Hyperparameter nötig bei einfacher LR)
+          und trainieren das Modell mit <code>.fit(X, y)</code>.
+          Nach dem Fit sind die Koeffizienten im Modell gespeichert.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Schritt 1 &amp; 2: Import &amp; Training
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code># Schritt 1: Modell importieren
+from sklearn.linear_model import LinearRegression
+
+# Schritt 2: Instanz erstellen (keine Hyperparameter)
+model = LinearRegression()
+
+# Schritt 3: Training (.fit)
+model.fit(X, y)
+
+# Gelernte Parameter ausgeben
+print("Steigung (coef_):", model.coef_)
+print("Achsenabschnitt (intercept_):", model.intercept_)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ausgabe &amp; Erklärung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <div style="background:var(--color-surface-offset); border-radius:var(--radius-md); padding:var(--space-3); font-family:var(--font-mono); font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+                Steigung (coef_): [[2.00...]}<br>
+                Achsenabschnitt (intercept_): [0.5...]
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li><code>model.coef_</code> ≈ 2.0 → <strong>gelernte Steigung</strong></li>
+                <li><code>model.intercept_</code> ≈ 0.5 → Achsenabschnitt</li>
+                <li>Diese Werte sind die <strong>gelernten Modellparameter</strong></li>
+                <li>Learning = Optimierung dieser Koeffizienten</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SCHRITT 3: Predict + Plot ────────────────────── -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Schritt 3 —
+          <span class="key" style="--key-color:var(--color-success)">.predict()</span>
+          &amp; Regressionsgerade visualisieren
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Mit <code>.predict()</code> berechnen wir die vorhergesagten Labels für neue Eingabewerte.
+          Wir erstellen dazu ein feines Gitter von X-Werten (<code>linspace</code>),
+          lassen das Modell vorhersagen und zeichnen die Regressionsgerade ein.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Schritt 4: Predict &amp; Plot
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code># Feines X-Gitter für die Regressionsgerade
+X_new = np.linspace(0, 10, 100).reshape(-1, 1)
+
+# Schritt 4: Vorhersage für neue X-Werte
+y_new = model.predict(X_new)
+
+# Scatter-Plot + Regressionsgerade
+plt.scatter(X, y, label="Daten")
+plt.plot(X_new, y_new, color='red',
+         label="Regression")
+plt.xlabel("X")
+plt.ylabel("y")
+plt.legend()
+plt.title("LinearRegression: Fit")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Beobachtung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>📊 Scatter-Plot: blaue Datenpunkte + <strong>rote Regressionsgerade</strong></li>
+                <li>Die Gerade folgt klar dem Trend der Daten</li>
+                <li><code>reshape(-1, 1)</code>: 1D → 2D-Array (sklearn erwartet 2D)</li>
+                <li>Demo: <em>„Nutzen Sie .predict() um die Regressionsgerade einzuzeichnen"</em></li>
+                <li>Frage aus der Vorlesung: <em>„Sind wir schon fertig?"</em> → Nein! → Model Validation!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Frage aus Folie 22 -->
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>
+            „Was denken Sie? Jetzt haben wir unser erstes exemplarisches Modell trainiert –
+            sind wir schon fertig?"
+          </p>
+        </div>
+
+        <!-- Zusammenfassung -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Der vollständige sklearn-Prozess</span>
+            </h3>
+            <ul>
+              <li>
+                <strong>Import:</strong>
+                <code>from sklearn.linear_model import LinearRegression</code>
+              </li>
+              <li>
+                <strong>Instanziierung:</strong>
+                <code>model = LinearRegression()</code>
+              </li>
+              <li>
+                <strong>Training:</strong>
+                <code class="key" style="--key-color:var(--color-warning)">model.fit(X, y)</code>
+              </li>
+              <li>
+                <strong>Vorhersage:</strong>
+                <code class="key" style="--key-color:var(--color-success)">y_pred = model.predict(X_new)</code>
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Gelernte Parameter nach <code>.fit()</code></h3>
+            <ul>
+              <li>
+                <code class="key" style="--key-color:var(--color-primary)">model.coef_</code>
+                → gelernte Steigung(en)
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-primary)">model.intercept_</code>
+                → gelernter Achsenabschnitt
+              </li>
+              <li>Diese <strong>Parameter</strong> wurden aus den Trainingsdaten gelernt</li>
+              <li>Bei anderen Modellen: andere Attribute, aber gleiches Muster</li>
+              <li>→ <em>Learning is finding parameters!</em></li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? – Referenzseite</div>
+          <p>
+            Wir haben nun viele generische ML-Konzepte kennengelernt und mit sklearn verknüpft.
+            <strong>Diese Seite ist eine Referenz</strong> – wir werden immer wieder auf diesen
+            Prozess zurückkommen. Als nächstes: wie gut ist das Modell wirklich?
+            → <strong>Model Validation</strong> (Seite 6).
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Seite 5 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Clustering Übersicht</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · Clustering Übersicht"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page1"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Seite 1</span>
+            <h1>Clustering <span class="key" style="--key-color:var(--color-primary)">Übersicht</span></h1>
+            <p>
+              Ein erster Überblick über alle wichtigen Clustering-Konzepte:
+              von der Definition über k-means bis hin zu dichtebasierten
+              Verfahren wie DBSCAN – inklusive Validierung und Skalierung.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Definition</span>
+              <span class="pill">Clustering-Arten</span>
+              <span class="pill">k-means</span>
+              <span class="pill">Validierung</span>
+              <span class="pill">Scaling</span>
+              <span class="pill">DBSCAN</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du bekommst einen strukturierten Überblick über alle
+              Clustering-Methoden und lernst, wann welches Verfahren
+              geeignet ist – als Grundlage für die Detailseiten.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. DEFINITION
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="clustering-definition">
+        <div class="section-head">
+          <h2>1.1 Was ist Clustering?</h2>
+          <p>
+            Clustering gehört zum <strong>unüberwachten Lernen</strong> –
+            es gibt keine vorgegebenen Labels, nur rohe Datenpunkte.
+          </p>
+        </div>
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Formale Definition</span></h3>
+            <p>
+              Clustering-Algorithmen versuchen, aus den Eigenschaften der Daten
+              eine <strong>optimale Unterteilung in Gruppen</strong> zu erreichen.
+              Das Ergebnis sind <strong>diskrete Labels</strong> – jeder Datenpunkt
+              wird einer Gruppe (einem Cluster) zugeordnet.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Ziel</span></h3>
+            <p>
+              Datenpunkte innerhalb eines Clusters sollen sich
+              <strong>möglichst ähnlich</strong> sein (<em>intra-cluster</em>),
+              während Datenpunkte aus verschiedenen Clustern
+              <strong>möglichst verschieden</strong> sein sollen (<em>inter-cluster</em>).
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. ARTEN DES CLUSTERINGS
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="clustering-arten">
+        <div class="section-head">
+          <h2>1.2 Arten des Clusterings</h2>
+          <p>
+            Es gibt mehrere grundlegende Ansätze – jeder mit einer anderen
+            Grundidee, wie Gruppen definiert und gefunden werden.
+          </p>
+        </div>
+        <div class="overview">
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">P</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-primary)">Partitionierendes Clustering</span></h3>
+              <p>
+                Teilt den Datensatz in eine <strong>vorher festgelegte Anzahl</strong>
+                von Clustern auf. Jeder Datenpunkt gehört genau einem Cluster an.
+                Vertreter: <strong>k-means</strong> und seine Varianten (k-means++, k-Median).
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">D</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-warning)">Dichtebasiertes Clustering</span></h3>
+              <p>
+                Cluster werden als <strong>dichte Regionen</strong> im Datenraum
+                identifiziert, die durch weniger dichte Bereiche voneinander getrennt sind.
+                Cluster können <strong>beliebige Formen</strong> annehmen.
+                Vertreter: <strong>DBSCAN</strong>, <strong>OPTICS</strong>.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-purple)">H</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-purple)">Hierarchisches Clustering</span></h3>
+              <p>
+                Erstellt eine <strong>Baumstruktur (Dendrogramm)</strong> von Clustern –
+                entweder von unten nach oben (<em>agglomerativ</em>) oder von oben
+                nach unten (<em>divisiv</em>). Kein k muss vorab bestimmt werden.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-text-muted)">G</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-text-muted)">Gitterbasierte Verfahren</span></h3>
+              <p>
+                Der Datenraum wird in ein <strong>Gitter aus Zellen</strong> unterteilt.
+                Clustering-Operationen werden auf diesen Zellen statt auf einzelnen
+                Datenpunkten durchgeführt – besonders effizient bei großen Datenmengen.
+              </p>
+            </div>
+          </article>
+
+        </div>
+
+        <!-- Übersichtstabelle -->
+        <div style="margin-top: var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>Verfahren</th>
+                <th>k vorab nötig?</th>
+                <th>Clusterform</th>
+                <th>Rauschen</th>
+                <th>Typische Algorithmen</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Partitionierend</strong></td>
+                <td>✅ Ja</td>
+                <td>Konvex / linear</td>
+                <td>❌ Kein Rauschen</td>
+                <td>k-means, k-means++</td>
+              </tr>
+              <tr>
+                <td><strong>Dichtebasiert</strong></td>
+                <td>❌ Nein</td>
+                <td>Beliebig</td>
+                <td>✅ Als eigene Klasse</td>
+                <td>DBSCAN, OPTICS</td>
+              </tr>
+              <tr>
+                <td><strong>Hierarchisch</strong></td>
+                <td>❌ Nein</td>
+                <td>Beliebig</td>
+                <td>❌ Kein Rauschen</td>
+                <td>Ward, Average Linkage</td>
+              </tr>
+              <tr>
+                <td><strong>Gitterbasiert</strong></td>
+                <td>Variabel</td>
+                <td>Gitterabhängig</td>
+                <td>Möglich</td>
+                <td>STING, CLIQUE</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. K-MEANS ZUSAMMENFASSUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="kmeans-zusammenfassung">
+        <div class="section-head">
+          <h2>1.3 K-means – Zusammenfassung</h2>
+          <p>
+            Der bekannteste und meistverwendete Clustering-Algorithmus
+            im Überblick.
+          </p>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="step-no">1</div>
+            <div>
+              <h3>Initialisierung</h3>
+              <p>
+                Wähle <strong>k Centroids</strong> zufällig aus dem Datensatz.
+                Der Parameter <strong>k</strong> (Anzahl der Cluster) muss
+                vorab festgelegt werden – das ist eine der größten Einschränkungen.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">2</div>
+            <div>
+              <h3>Zuweisung (E-Schritt)</h3>
+              <p>
+                Weise jeden Datenpunkt dem <strong>nächstgelegenen Centroid</strong>
+                zu – gemessen über die euklidische Distanz.
+                Jeder Datenpunkt gehört genau einem Cluster an.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">3</div>
+            <div>
+              <h3>Update (M-Schritt)</h3>
+              <p>
+                Berechne den neuen Centroid als <strong>arithmetisches Mittel</strong>
+                aller Datenpunkte im Cluster. Die Centroids verschieben sich
+                iterativ in Richtung der Clustermitte.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">4</div>
+            <div>
+              <h3>Konvergenz</h3>
+              <p>
+                Wiederhole Schritte 2 und 3 bis sich die Centroids
+                nicht mehr wesentlich verschieben (<strong>Konvergenz</strong>).
+                Das Ergebnis ist ein <em>lokales</em> – nicht unbedingt globales – Optimum.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="note note-primary" style="margin-top: var(--space-6)">
+          <strong>Kernidee:</strong> Jeder Datenpunkt liegt näher an seinem
+          eigenen Centroid als an jedem anderen Centroid.
+          Der Cluster-Mittelpunkt ist das <strong>arithmetische Mittel</strong>
+          aller Punkte im Cluster.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. VOR- & NACHTEILE K-MEANS
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="kmeans-pros-cons">
+        <div class="section-head">
+          <h2>1.4 Vor- &amp; Nachteile von K-means</h2>
+          <p>
+            Ein ehrlicher Blick auf Stärken und Grenzen des Algorithmus –
+            entscheidend für die Wahl des richtigen Verfahrens.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <!-- PROS -->
+          <article class="card">
+            <h3 style="color: var(--color-success)">✅ Vorteile</h3>
+            <ul>
+              <li>
+                <strong>Schnell und effizient</strong> –
+                lineare Laufzeit in der Anzahl der Datenpunkte;
+                skaliert gut auf große Datensätze.
+              </li>
+              <li>
+                <strong>Leicht verständlich und implementierbar</strong> –
+                die Logik ist intuitiv, die sklearn-API minimal.
+              </li>
+              <li>
+                <strong>Anwendbar auf viele Datenarten</strong> –
+                solange ein sinnvolles Distanzmaß existiert,
+                kann k-means eingesetzt werden.
+              </li>
+            </ul>
+          </article>
+
+          <!-- CONS -->
+          <article class="card">
+            <h3 style="color: var(--color-warning)">⚠️ Nachteile</h3>
+            <ul>
+              <li>
+                <strong>Abhängig von Initialisierung</strong> –
+                verschiedene Startwerte führen zu verschiedenen Ergebnissen;
+                globales Optimum nicht garantiert → mehrere Initialisierungen nötig.
+              </li>
+              <li>
+                <strong>k muss vorab angegeben werden</strong> –
+                der Algorithmus lernt die Anzahl der Cluster nicht selbst.
+              </li>
+              <li>
+                <strong>Nur linear separierbare Cluster</strong> –
+                ohne Trick (z. B. Kernel) können nicht-konvexe Strukturen
+                nicht erkannt werden.
+              </li>
+              <li>
+                <strong>Empfindlich gegenüber Ausreißern</strong> –
+                ein einzelner Extrempunkt kann den Centroid stark verschieben.
+              </li>
+              <li>
+                <strong>Probleme bei unterschiedlichen Clusterdichten/-größen</strong> –
+                gleich große, gleich dichte Cluster werden bevorzugt.
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           5. VALIDIERUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="validierung-intro">
+        <div class="section-head">
+          <h2>1.5 Validierung &amp; Bewertung</h2>
+          <p>
+            Wie bewertet man, ob ein Clustering „gut" ist –
+            ohne Ground-Truth-Labels?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Was bedeutet Validierung?</span></h3>
+            <p>
+              Validierung misst die <strong>Güte eines Clusterings</strong> –
+              also ob die gefundenen Gruppen tatsächlich sinnvolle,
+              natürliche Strukturen in den Daten widerspiegeln.
+              Da beim unüberwachten Lernen keine Labels vorliegen,
+              braucht man spezielle Kriterien.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Grundprinzip</span></h3>
+            <p>
+              Ein gutes Clustering hat eine hohe
+              <strong>intra-Cluster-Ähnlichkeit</strong>
+              (Punkte im gleichen Cluster liegen nah beieinander)
+              und eine geringe <strong>inter-Cluster-Ähnlichkeit</strong>
+              (Cluster sind gut voneinander getrennt).
+            </p>
+          </article>
+        </div>
+
+        <div class="note" style="margin-top: var(--space-5)">
+          <strong>Auf Seite 4 im Detail:</strong>
+          Dunn-Index · Davies-Bouldin-Index · Silhouette Score · SSE &amp; Elbow Plot –
+          <a href="Page04.html">→ zur Validierungsseite</a>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           6. SCALING
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="scaling-intro">
+        <div class="section-head">
+          <h2>1.6 Skalierung (Scaling)</h2>
+          <p>
+            Warum die Einheiten der Features entscheidend sein können.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Das Problem</span></h3>
+            <p>
+              Clustering-Algorithmen wie k-means basieren auf <strong>Distanzmaßen</strong>.
+              Features mit großen Wertebereichen (z. B. Temperatur in °C: 200–400)
+              dominieren automatisch gegenüber Features mit kleinen Wertebereichen
+              (z. B. Druck in bar: 1–5) – auch wenn letztere inhaltlich genauso
+              wichtig sind.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Die Lösung</span></h3>
+            <p>
+              Durch <strong>StandardScaler</strong> oder <strong>MinMaxScaler</strong>
+              werden alle Features auf den gleichen Wertebereich gebracht.
+              Ob skaliert werden soll, hängt davon ab, ob man will,
+              dass Features mit größeren Differenzen auch mehr Gewicht erhalten.
+            </p>
+          </article>
+        </div>
+
+        <div class="note note-warning" style="margin-top: var(--space-5)">
+          <strong>Merksatz:</strong> Skalieren ist nicht immer notwendig –
+          aber wenn Features sehr unterschiedliche Einheiten oder Wertebereiche haben,
+          sollte man standardisieren.
+          <a href="Page06.html">→ Detailbetrachtung auf Seite 6</a>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           7. DENSITY-BASED CLUSTERING
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="density-based-intro">
+        <div class="section-head">
+          <h2>1.7 Density-based Clustering</h2>
+          <p>
+            Ein grundlegend anderer Ansatz – Cluster als dichte Regionen,
+            nicht als Gruppen um Centroids.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Definition</span></h3>
+            <p>
+              Anstatt Cluster explizit über ein Abstandsmaß zu Centroids zu definieren,
+              werden hier <strong>dichtere Regionen</strong> von weniger dichten
+              Bereichen abgegrenzt. Ein Cluster ist eine zusammenhängende,
+              dichte Wolke von Datenpunkten – unabhängig von ihrer Form.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Hauptvertreter: DBSCAN</span></h3>
+            <p>
+              <strong>D</strong>ensity-<strong>B</strong>ased
+              <strong>S</strong>patial <strong>C</strong>lustering of
+              <strong>A</strong>pplications with <strong>N</strong>oise.
+              Zwei Hyperparameter steuern den Algorithmus:
+              <code>eps</code> (Nachbarschaftsradius) und
+              <code>min_samples</code> (Mindestpunktzahl in der Nachbarschaft).
+            </p>
+          </article>
+        </div>
+
+        <div class="overview" style="margin-top: var(--space-6)">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">A</div>
+            <div>
+              <h3>Core Point</h3>
+              <p>
+                Ein Punkt gilt als <strong>Core Point</strong>, wenn sich
+                mindestens <code>min_samples</code> Punkte innerhalb
+                seines <code>eps</code>-Radius befinden.
+                Diese Punkte bilden das Herzstück eines Clusters.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">B/C</div>
+            <div>
+              <h3>Border Point &amp; Density-Reachable</h3>
+              <p>
+                <strong>Border Points</strong> liegen im Radius eines Core Points,
+                sind selbst aber nicht dicht genug.
+                Sie gehören zum Cluster, aber ihre Zugehörigkeit ist nicht eindeutig
+                → Quelle der Nicht-Determiniertheit.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-text-muted)">N</div>
+            <div>
+              <h3>Noise</h3>
+              <p>
+                Datenpunkte, die weder Core noch Border Point sind,
+                werden als <strong>Rauschen (Noise)</strong> klassifiziert
+                und keinem Cluster zugeordnet – Label <code>-1</code> in sklearn.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           8. VOR- & NACHTEILE DBSCAN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="density-pros-cons">
+        <div class="section-head">
+          <h2>1.8 Vor- &amp; Nachteile von DBSCAN</h2>
+          <p>
+            Im direkten Vergleich zu k-means zeigt sich,
+            wo dichtebasierte Verfahren glänzen – und wo sie an Grenzen stoßen.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <!-- PROS -->
+          <article class="card">
+            <h3 style="color: var(--color-success)">✅ Vorteile</h3>
+            <ul>
+              <li>
+                <strong>k muss nicht vorab bestimmt werden</strong> –
+                die Anzahl der Cluster ergibt sich automatisch aus den Daten.
+              </li>
+              <li>
+                <strong>Cluster beliebiger Form</strong> –
+                nicht auf konvexe oder linear-separierbare Strukturen beschränkt.
+              </li>
+              <li>
+                <strong>Robustheit gegenüber Ausreißern</strong> –
+                Noise-Punkte werden explizit als eigene Klasse behandelt
+                und verfälschen die Cluster nicht.
+              </li>
+              <li>
+                <strong>Nur zwei Hyperparameter</strong> (<code>eps</code>,
+                <code>min_samples</code>) – und beide lassen sich
+                <strong>domänengetrieben</strong> sinnvoll wählen.
+              </li>
+            </ul>
+          </article>
+
+          <!-- CONS -->
+          <article class="card">
+            <h3 style="color: var(--color-warning)">⚠️ Nachteile</h3>
+            <ul>
+              <li>
+                <strong>Nicht vollständig deterministisch</strong> –
+                Border Points können je nach Reihenfolge der Datenpunkte
+                unterschiedlichen Clustern zugeordnet werden.
+              </li>
+              <li>
+                <strong>Abhängig vom Distanzmaß</strong> –
+                wie auch k-means liefert DBSCAN mit unterschiedlichen
+                Distanzmaßen verschiedene Ergebnisse.
+              </li>
+              <li>
+                <strong>Probleme bei unterschiedlichen Clusterdichten</strong> –
+                eine einzige <code>eps</code>/<code>min_samples</code>-Kombination
+                kann nicht für alle Cluster gleichzeitig optimal sein,
+                wenn diese sehr unterschiedlich dicht sind.
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Vergleichstabelle k-means vs DBSCAN -->
+        <div style="margin-top: var(--space-8)">
+          <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+             text-transform:uppercase; color:var(--color-text-faint);
+             margin-bottom:var(--space-3)">
+            Direktvergleich: K-means vs. DBSCAN
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Kriterium</th>
+                <th>K-means</th>
+                <th>DBSCAN</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>k vorab nötig?</td>
+                <td>✅ Ja</td>
+                <td>❌ Nein</td>
+              </tr>
+              <tr>
+                <td>Clusterform</td>
+                <td>Konvex / linear</td>
+                <td>Beliebig</td>
+              </tr>
+              <tr>
+                <td>Ausreißer</td>
+                <td>Werden einem Cluster zugewiesen</td>
+                <td>Als Noise (−1) klassifiziert</td>
+              </tr>
+              <tr>
+                <td>Deterministisch?</td>
+                <td>✅ (bei gleicher Initialisierung)</td>
+                <td>⚠️ Border Points nicht immer</td>
+              </tr>
+              <tr>
+                <td>Hyperparameter</td>
+                <td>k</td>
+                <td>eps, min_samples</td>
+              </tr>
+              <tr>
+                <td>Skalierbarkeit</td>
+                <td>✅ Sehr gut</td>
+                <td>⚠️ Bei großen Daten langsamer</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top: var(--space-6)">
+          <strong>Nächste Schritte:</strong>
+          Auf den folgenden Seiten werden alle hier vorgestellten Konzepte
+          Schritt für Schritt vertieft – mit Mathematik, Code und Visualisierungen.
+          <br><br>
+          <a href="Page02.html">→ Seite 2: K-means im Detail</a> &nbsp;·&nbsp;
+          <a href="Page06.html">→ Seite 6: DBSCAN im Detail</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Seite 1 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

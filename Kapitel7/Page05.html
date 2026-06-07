@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Confusion Matrix sklearn &amp; AUC</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page7" title="Kapitel 7 · Confusion Matrix sklearn &amp; AUC"></site-header>
+  <div class="layout">
+    <site-sidebar active="page5"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 7 · Seite 5</span>
+            <h1>Confusion Matrix <span class="key" style="--key-color:var(--color-primary)">sklearn &amp; AUC</span></h1>
+            <p>
+              <code>confusion_matrix()</code> in sklearn, normierte Heatmaps mit seaborn,
+              das AUC-Maß für die Güte einer ROC-Kurve, und der Youden-Index
+              für den optimal balancierten Threshold.
+            </p>
+            <div class="pill-row">
+              <span class="pill">confusion_matrix()</span>
+              <span class="pill">normalize</span>
+              <span class="pill">sns.heatmap</span>
+              <span class="pill">roc_auc_score</span>
+              <span class="pill">Youden-Index</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kannst eine Confusion Matrix berechnen, visualisieren und interpretieren –
+              und du weißt, wie AUC berechnet wird und wie der Youden-Index
+              den optimalen Threshold bestimmt.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. CONFUSION MATRIX IN SKLEARN
+           ════════════════════════════════════════════ -->
+      <section class="section" id="confusion-matrix">
+        <div class="section-head">
+          <h2>5.1 Confusion Matrix in sklearn</h2>
+          <p>
+            Die <code>confusion_matrix()</code>-Funktion und ihre Normierungsoption.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><code style="color:var(--color-primary)">confusion_matrix(y_true, y_pred)</code></h3>
+            <ul>
+              <li>Gibt eine 2D-Matrix der Form [[TN, FP], [FN, TP]] zurück</li>
+              <li>Für Multi-Class: k×k-Matrix, Zeilen = tatsächliche Klasse, Spalten = vorhergesagte Klasse</li>
+              <li>Parameter <code>normalize='true'</code>: normiert die Einträge auf [0, 1] (relativ zur tatsächlichen Klasse)</li>
+              <li><code>normalize='pred'</code>: relativ zur vorhergesagten Klasse</li>
+              <li><code>normalize='all'</code>: relativ zur Gesamtzahl</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Heatmap-Visualisierung</span></h3>
+            <p>Am einfachsten zu lesen als Heatmap mit seaborn:</p>
+            <ul>
+              <li><strong>Diagonale</strong>: Korrekte Vorhersagen (hell = gut)</li>
+              <li><strong>Außerhalb der Diagonale</strong>: Fehler</li>
+              <li>Zeilenbeschriftung = wahre Klasse (<code>yticklabels</code>)</li>
+              <li>Spaltenbeschriftung = vorhergesagte Klasse (<code>xticklabels</code>)</li>
+              <li>Empfohlen: <code>cmap='viridis'</code> oder <code>cmap='Blues'</code></li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="code-cell-split" style="margin-top:var(--space-5)">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Confusion Matrix + Heatmap
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+
+# Beispiel: Spotify-Klassifikation mit SVM
+ytest = np.load('../res/data/spotify_svm_ytest.npy',
+                allow_pickle=True)
+ypredicted = np.load('../res/data/spotify_svm_ypredicted.npy',
+                     allow_pickle=True)
+
+classes = ['baroque', 'classical', 'hip hop', 'pop',
+           'progressive bluegrass', 'r&b', 'rap',
+           'rock', 'serialism', 'tropical house']
+
+# Normierte Confusion Matrix berechnen
+cm = confusion_matrix(ytest, ypredicted, normalize='true')
+
+# Als Heatmap visualisieren
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm,
+            annot=True,           # Werte einblenden
+            xticklabels=classes,  # Vorhergesagte Klasse
+            yticklabels=classes,  # Wahre Klasse
+            cmap='viridis')
+plt.ylabel('True Class')
+plt.xlabel('Predicted Class')
+plt.title('Normierte Confusion Matrix – Spotify SVM')
+plt.tight_layout()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Wie liest man die Matrix?
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li><strong>Zeile i, Spalte j</strong>: Klasse i wurde als Klasse j vorhergesagt</li>
+                <li><strong>Diagonale = 1.0</strong>: 100 % korrekt klassifiziert</li>
+                <li>Verwechslungen erkennbar: hip hop oft als rap erkannt</li>
+                <li>baroque und serialism leicht zu verwechseln mit classical</li>
+                <li><code>normalize='true'</code>: Werte pro Zeile summieren sich zu 1</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-5)">
+          <strong>Mehrere Modelle vergleichen:</strong>
+          Dieselbe Heatmap lässt sich für verschiedene Modelle erzeugen:
+          bearing (10 Klassen), face recognition, Spotify-SVM, Spotify-RandomForest.
+          So sieht man sofort, welche Klassen welches Modell verwechselt.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. AREA UNDER THE CURVE (AUC)
+           ════════════════════════════════════════════ -->
+      <section class="section" id="auc">
+        <div class="section-head">
+          <h2>5.2 Area Under the Curve (AUC)</h2>
+          <p>
+            Die AUC fasst die Güte einer ROC-Kurve in einem einzigen Skalar zusammen.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Definition</span></h3>
+            <p>
+              Die AUC ist die <strong>Fläche unter der ROC-Kurve</strong> –
+              ein Maß für die Gesamtgüte des Klassifikators über alle Threshold-Einstellungen.
+            </p>
+            <div class="math-display">
+              \[\text{AUC} = \int_0^1 \text{TPR}(\text{FPR})\, d(\text{FPR})\]
+            </div>
+            <ul>
+              <li><strong>AUC = 1.0</strong>: Idealer Klassifikator</li>
+              <li><strong>AUC = 0.5</strong>: Zufallsklassifikator (Diagonale)</li>
+              <li><strong>AUC &lt; 0.5</strong>: Schlechter als Zufall (Modell vertauscht Klassen)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">AUC in sklearn</span></h3>
+            <div class="code-block">
+              <div class="code-block-title">Methode 1: roc_auc_score</div>
+              <pre><code>from sklearn.metrics import roc_auc_score
+
+# y_score = decision_function() oder predict_proba()
+auc = roc_auc_score(y_true, y_score)
+print(f"AUC: {auc:.3f}")</code></pre>
+            </div>
+            <div class="code-block">
+              <div class="code-block-title">Methode 2: direkt im Plot</div>
+              <pre><code># RocCurveDisplay zeigt AUC direkt im Plot
+RocCurveDisplay.from_estimator(model, X_test, y_test)</code></pre>
+            </div>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Threshold-Invarianz:</strong>
+          Die AUC ist <strong>unabhängig vom gewählten Threshold</strong>.
+          Sie bewertet das Modell über alle möglichen Threshold-Werte.
+          Das macht sie zum wichtigsten einzelnen Gütekriterium für Klassifikatoren.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. YOUDEN-INDEX
+           ════════════════════════════════════════════ -->
+      <section class="section" id="youden">
+        <div class="section-head">
+          <h2>5.3 Optimaler Threshold – Youden-Index</h2>
+          <p>
+            Wie findet man den Threshold, der TPR und FPR optimal balanciert?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Definition</span></h3>
+            <p>
+              Der <strong>Youden-Index J</strong> maximiert die Differenz zwischen
+              TPR und FPR. Er gibt den Punkt auf der ROC-Kurve an,
+              an dem die Balance zwischen Sensitivity und Specificity optimal ist.
+            </p>
+            <div class="math-display">
+              \[J = \text{TPR} - \text{FPR}\]
+            </div>
+            <p>
+              Der optimale Threshold liegt dort, wo <strong>J maximal</strong> ist.
+              Das entspricht dem Punkt auf der ROC-Kurve mit dem
+              größten vertikalen Abstand zur Diagonalen.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Geometrische Bedeutung</span></h3>
+            <p>
+              Zeichne auf der ROC-Kurve eine Parallele zur Diagonalen nach oben –
+              der Schnittpunkt mit der höchsten vertikalen Verschiebung
+              ist der Youden-Punkt.
+            </p>
+            <ul>
+              <li>Pragmatisch und schnell berechenbar</li>
+              <li>Sinnvoll bei gleichwertigen Fehlern (FP ≈ FN)</li>
+              <li>Für ungleiche Fehlerkosten: Use-Case-spezifischer Threshold (Seite 4)</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="code-cell-split" style="margin-top:var(--space-5)">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Youden-Index
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.metrics import roc_curve, RocCurveDisplay
+import numpy as np
+import matplotlib.pyplot as plt
+
+# ROC-Kurve berechnen
+fpr, tpr, thresholds = roc_curve(y_test, y_score)
+
+# ROC plotten (zeigt AUC)
+RocCurveDisplay.from_estimator(model, X_test, y_test)
+
+# Youden-Index berechnen
+J = tpr - fpr                        # J für jeden Threshold
+best_threshold_index = np.argmax(J)  # Index des maximalen J
+
+# Optimalen Punkt extrahieren
+best_tpr = tpr[best_threshold_index]
+best_fpr = fpr[best_threshold_index]
+best_threshold = thresholds[best_threshold_index]
+
+print(f"Optimaler Threshold: {best_threshold:.3f}")
+print(f"Optimale TPR: {best_tpr:.3f}")
+print(f"Optimale FPR: {best_fpr:.3f}")
+
+# Punkt in der ROC-Kurve markieren
+plt.scatter(best_fpr, best_tpr,
+            c='red', s=100, zorder=5,
+            label=f'Youden-Punkt (J={J[best_threshold_index]:.2f})')
+plt.legend()
+
+# Kann in adjusted_predict() eingespeist werden:
+# ypredicted_new = adjusted_predict(model, Xtest, best_tpr, tp=True)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Erklärung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.1">
+                <li><code>J = tpr - fpr</code>: Vektor der Youden-Werte für alle Thresholds</li>
+                <li><code>np.argmax(J)</code>: Index des optimalen Thresholds</li>
+                <li>Roter Punkt: Maximum des vertikalen Abstands zur Diagonalen</li>
+                <li>Der Threshold kann in <code>adjusted_predict()</code> eingegeben werden</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. PRAXISBEISPIELE: WHAT CONFUSES OUR MODELS?
+           ════════════════════════════════════════════ -->
+      <section class="section" id="praxis-beispiele">
+        <div class="section-head">
+          <h2>5.4 Praxisbeispiel: „What confuses our models?"</h2>
+          <p>
+            Confusion Matrices für vier verschiedene Modelle –
+            welche Klassen werden wie gut unterschieden?
+          </p>
+        </div>
+
+        <div class="overview">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">1</div>
+            <div>
+              <h3>Kugellager – 10 Klassen</h3>
+              <p>
+                Klassen: B007_3, B014_3, B021_3, IR007_3, IR014_3, IR021_3,
+                normal, OR007@6_3, OR014@6_3, OR021@6_3<br>
+                Erwartete Verwechslungen: unterschiedliche Schadensstufen derselben Fehlerart
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">2</div>
+            <div>
+              <h3>Gesichtserkennung</h3>
+              <p>
+                Klassen: Ariel Sharon, Colin Powell, Donald Rumsfeld,
+                George W Bush, Gerhard Schroeder, Hugo Chavez, Tony Blair<br>
+                Personen mit ähnlichen Merkmalen werden öfter verwechselt
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">3</div>
+            <div>
+              <h3>Spotify – SVM vs. Random Forest</h3>
+              <p>
+                10 Musikgenres: baroque, classical, hip hop, pop, progressive bluegrass,
+                r&amp;b, rap, rock, serialism, tropical house<br>
+                Hip-Hop / Rap und Baroque / Classical werden oft verwechselt
+              </p>
+            </div>
+          </article>
+        </div>
+
+        <div class="code-cell-split" style="margin-top:var(--space-5)">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Alle Modelle vergleichen
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+
+# Alle Modelle und ihre Klassen-Labels
+models_data = [
+    {
+        'name': 'Kugellager 10 Klassen',
+        'ytest_path': '../res/data/bearing_10classes_ytest.npy',
+        'ypred_path': '../res/data/bearing_10classes_ypredicted.npy',
+        'classes': ['B007_3', 'B014_3', 'B021_3',
+                    'IR007_3', 'IR014_3', 'IR021_3',
+                    'normal', 'OR007@6_3', 'OR014@6_3', 'OR021@6_3'],
+        'figsize': (10, 8)
+    },
+    {
+        'name': 'Gesichtserkennung',
+        'ytest_path': '../res/data/face_recognition_ytest.npy',
+        'ypred_path': '../res/data/face_recognition_ypredicted.npy',
+        'classes': ['Ariel Sharon', 'Colin Powell',
+                    'Donald Rumsfeld', 'George W Bush',
+                    'Gerhard Schroeder', 'Hugo Chavez', 'Tony Blair'],
+        'figsize': (9, 7)
+    },
+    {
+        'name': 'Spotify SVM',
+        'ytest_path': '../res/data/spotify_svm_ytest.npy',
+        'ypred_path': '../res/data/spotify_svm_ypredicted.npy',
+        'classes': ['baroque', 'classical', 'hip hop', 'pop',
+                    'progressive bluegrass', 'r&b', 'rap',
+                    'rock', 'serialism', 'tropical house'],
+        'figsize': (10, 8)
+    },
+    {
+        'name': 'Spotify Random Forest',
+        'ytest_path': '../res/data/spotify_rf_ytest.npy',
+        'ypred_path': '../res/data/spotify_rf_ypredicted.npy',
+        'classes': ['baroque', 'classical', 'hip hop', 'pop',
+                    'progressive bluegrass', 'r&b', 'rap',
+                    'rock', 'serialism', 'tropical house'],
+        'figsize': (10, 8)
+    }
+]
+
+for m in models_data:
+    ytest = np.load(m['ytest_path'], allow_pickle=True)
+    ypredicted = np.load(m['ypred_path'], allow_pickle=True)
+
+    cm = confusion_matrix(ytest, ypredicted, normalize='true')
+
+    plt.figure(figsize=m['figsize'])
+    sns.heatmap(cm, annot=True, fmt='.2f',
+                xticklabels=m['classes'],
+                yticklabels=m['classes'],
+                cmap='viridis')
+    plt.ylabel('True Class')
+    plt.xlabel('Predicted Class')
+    plt.title(f"Confusion Matrix – {m['name']}")
+    plt.tight_layout()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Beobachtungen
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.1">
+                <li><strong>Kugellager:</strong> Verschiedene Schadensstärken ähnlicher Fehlerart werden leicht verwechselt</li>
+                <li><strong>Gesichter:</strong> Häufiger fotografierte Personen werden besser erkannt</li>
+                <li><strong>Spotify SVM:</strong> hip hop ↔ rap, baroque ↔ classical</li>
+                <li><strong>RF vs. SVM:</strong> Random Forest differenziert oft besser</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <section class="section" id="navigation">
+        <div class="card-grid">
+          <a href="Page04.html" class="card" style="text-decoration:none">
+            <h3>← Seite 4</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              Decision Threshold – Use Cases, adjusted_predict()
+            </p>
+          </a>
+          <a href="Page06.html" class="card"
+            style="text-decoration:none; border-color:var(--color-primary);
+              background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))">
+            <h3 style="color:var(--color-primary)">→ Seite 6: Precision-Recall &amp; F1</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              Wenn True Negatives nicht verfügbar sind: Precision-Recall-Kurve, F1-Score
+            </p>
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 7 · Seite 5 · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

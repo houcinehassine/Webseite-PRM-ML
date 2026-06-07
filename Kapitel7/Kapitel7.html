@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Kapitel 7 · Evaluation</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .k7-hero {
+      padding: clamp(3rem, 10vw, 5rem) 0 clamp(2rem, 6vw, 3rem);
+      text-align: center;
+    }
+    .k7-hero .eyebrow { margin-bottom: var(--space-4); }
+    .k7-hero h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      line-height: 1.08;
+      text-transform: none;
+      margin: var(--space-4) auto var(--space-4);
+      max-width: 22ch;
+    }
+    .k7-hero p {
+      color: var(--color-text-muted);
+      font-size: var(--text-base);
+      max-width: 60ch;
+      margin-inline: auto;
+    }
+    .k7-pills {
+      display: flex; flex-wrap: wrap; gap: var(--space-2);
+      justify-content: center; margin-top: var(--space-6);
+    }
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-6);
+      max-width: 1120px;
+      margin: var(--space-8) auto;
+      padding: 0 var(--space-8) var(--space-16);
+    }
+    .page-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--color-text);
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: var(--shadow-sm);
+      display: flex; flex-direction: column;
+    }
+    .page-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .page-card .card-banner {
+      width: 100%; height: 130px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem;
+      background: var(--color-primary-highlight);
+      position: relative;
+    }
+    .page-card .card-banner .card-num {
+      position: absolute; top: var(--space-3); left: var(--space-4);
+      font-size: var(--text-xs); font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--color-primary);
+      background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));
+      padding: 0.15rem 0.6rem; border-radius: var(--radius-full);
+    }
+    .page-card .card-body {
+      padding: var(--space-5); flex: 1;
+      display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .page-card .card-titel { font-size: var(--text-base); font-weight: 700; color: var(--color-text); }
+    .page-card .card-desc { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.6; flex: 1; }
+    .page-card .card-tags { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); }
+    .page-card .card-tags .tag { font-size: 0.7rem; }
+    .page-card .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-3) var(--space-5);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--text-xs); color: var(--color-text-muted);
+    }
+    .card-arrow { font-size: 1rem; color: var(--color-primary); transition: transform 0.15s; }
+    .page-card:hover .card-arrow { transform: translateX(4px); }
+    .pages-grid.pruefung-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); margin-top: 0; }
+    .section-label {
+      font-size: var(--text-xs); font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--color-text-faint);
+      max-width: 1120px; margin: 0 auto;
+      padding: 0 var(--space-8); margin-bottom: var(--space-2);
+    }
+    .section-label-desc {
+      font-size: var(--text-xs); color: var(--color-text-muted);
+      max-width: 1120px; margin: 0 auto;
+      padding: 0 var(--space-8); margin-bottom: var(--space-5); margin-top: var(--space-1);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="page7" title="Kapitel 7 · Evaluation"></site-header>
+  <main id="main-content">
+    <div class="container">
+      <section class="k7-hero">
+        <span class="eyebrow">✦ Kapitel 7 · Supervised Learning – Evaluation</span>
+        <h1>Evaluation von Klassifikatoren</h1>
+        <p>
+          Confusion Matrix, ROC-Kurven, Decision Threshold, AUC, Precision-Recall –
+          alle Werkzeuge zur fundierten Bewertung eines ML-Modells.
+        </p>
+        <div class="k7-pills">
+          <span class="pill">Confusion Matrix</span>
+          <span class="pill">TPR / FPR</span>
+          <span class="pill">ROC Curve</span>
+          <span class="pill">Decision Threshold</span>
+          <span class="pill">AUC</span>
+          <span class="pill">Youden-Index</span>
+          <span class="pill">Precision-Recall</span>
+          <span class="pill">F1-Score</span>
+          <span class="pill">Multi-Class ROC</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- HAUPTSEITEN -->
+    <p class="section-label">Alle Seiten</p>
+    <div class="pages-grid">
+
+      <!-- Page 01 -->
+      <a class="page-card" href="Page01.html">
+        <div class="card-banner">
+          🎯
+          <span class="card-num">Seite 1</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Confusion Matrix – Grundlagen</div>
+          <div class="card-desc">
+            Warum reicht Accuracy alleine nicht? Signalentdeckungstheorie, TP/FP/TN/FN,
+            True Positive Rate (TPR), False Positive Rate (FPR) – hergeleitet am Ohrenarzt-Beispiel.
+          </div>
+          <div class="card-tags">
+            <span class="tag">TP / FP</span>
+            <span class="tag">TPR / FPR</span>
+            <span class="tag">Confusion Matrix</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 02 -->
+      <a class="page-card" href="Page02.html">
+        <div class="card-banner">
+          📈
+          <span class="card-num">Seite 2</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">ROC Curves – Theorie</div>
+          <div class="card-desc">
+            Sensitivity-Specificity-Trade-off, liberales vs. konservatives Kriterium,
+            das ROC-Koordinatensystem, idealer Klassifikator vs. Winkelhalbierende.
+          </div>
+          <div class="card-tags">
+            <span class="tag">ROC</span>
+            <span class="tag">Trade-off</span>
+            <span class="tag">Kriterium</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 03 -->
+      <a class="page-card" href="Page03.html">
+        <div class="card-banner">
+          💻
+          <span class="card-num">Seite 3</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">ROC Curves in sklearn</div>
+          <div class="card-desc">
+            <code>roc_curve()</code>, <code>RocCurveDisplay.from_estimator()</code>,
+            Decision-Threshold-Theorie mit Integralen, Variation der Streuung für Intuition.
+          </div>
+          <div class="card-tags">
+            <span class="tag">sklearn</span>
+            <span class="tag">roc_curve</span>
+            <span class="tag">SVC</span>
+            <span class="tag">Threshold-Integral</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 04 -->
+      <a class="page-card" href="Page04.html">
+        <div class="card-banner">
+          ⚙️
+          <span class="card-num">Seite 4</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Decision Threshold – Use Cases</div>
+          <div class="card-desc">
+            Wann verschiebt man den Threshold Richtung FPR, wann Richtung TPR?
+            Krankheitserkennung vs. Predictive Maintenance.
+            Funktion <code>adjusted_predict()</code> implementieren.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Use Cases</span>
+            <span class="tag">adjusted_predict</span>
+            <span class="tag">Fine-Tuning</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 05 -->
+      <a class="page-card" href="Page05.html">
+        <div class="card-banner">
+          🔲
+          <span class="card-num">Seite 5</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Confusion Matrix in sklearn &amp; AUC</div>
+          <div class="card-desc">
+            <code>confusion_matrix()</code> mit normalize, <code>sns.heatmap</code>-Visualisierung,
+            <code>roc_auc_score()</code>, optimaler Threshold via Youden-Index.
+          </div>
+          <div class="card-tags">
+            <span class="tag">confusion_matrix</span>
+            <span class="tag">AUC</span>
+            <span class="tag">Youden-Index</span>
+            <span class="tag">Heatmap</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 06 -->
+      <a class="page-card" href="Page06.html">
+        <div class="card-banner">
+          ⚖️
+          <span class="card-num">Seite 6</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Precision-Recall Curve &amp; F1-Score</div>
+          <div class="card-desc">
+            Wenn True Negatives nicht verfügbar sind – PPV/Precision, Recall,
+            <code>precision_recall_curve()</code>, F1-Score als harmonisches Mittel.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Precision</span>
+            <span class="tag">Recall</span>
+            <span class="tag">F1-Score</span>
+            <span class="tag">Object Detection</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 07 -->
+      <a class="page-card" href="Page07.html">
+        <div class="card-banner">
+          🌐
+          <span class="card-num">Seite 7</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Multi-Class ROC Curves</div>
+          <div class="card-desc">
+            One-vs-One (OvO) und One-vs-Rest (OvR), Micro- und Macro-Averaging,
+            vollständiges Code-Beispiel mit Iris-Datensatz, <code>OneVsRestClassifier</code>.
+          </div>
+          <div class="card-tags">
+            <span class="tag">OvO / OvR</span>
+            <span class="tag">Macro-Avg</span>
+            <span class="tag">Micro-Avg</span>
+            <span class="tag">Iris</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- PRAXISBEISPIEL -->
+    <p class="section-label">Praxisbeispiel</p>
+    <p class="section-label-desc">Vollständige Anwendung aller Konzepte in einer realitätsnahen Aufgabe.</p>
+    <div class="pages-grid pruefung-grid">
+      <a class="page-card" href="PageBeispiel.html">
+        <div class="card-banner"
+          style="background: color-mix(in oklab, var(--color-success) 12%, var(--color-surface-2));">
+          🔩
+          <span class="card-num"
+            style="color:var(--color-success); background:color-mix(in oklab,var(--color-success) 10%,var(--color-surface))">
+            Beispiel
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Cheap &amp; Expensive Bearings</div>
+          <div class="card-desc">
+            Kugellager-Klassifikation „gut" / „beschädigt" – <code>adjusted_predict()</code>
+            implementieren, fpr ≈ 0.023 und tpr ≈ 0.97 einhalten, ROC mit markiertem Threshold-Punkt.
+            Lösung Schritt für Schritt.
+          </div>
+          <div class="card-tags">
+            <span class="tag">adjusted_predict</span>
+            <span class="tag">fpr / tpr Target</span>
+            <span class="tag">bearing_model.pkl</span>
+            <span class="tag">Praxisaufgabe</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Vollständige Lösung</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+    </div>
+
+    <!-- PRÜFUNGSVORBEREITUNG -->
+    <p class="section-label">Prüfungsvorbereitung</p>
+    <p class="section-label-desc">Schnellreferenz und Selbsttest – ideal kurz vor der Prüfung.</p>
+    <div class="pages-grid pruefung-grid">
+      <!-- Cheatsheet -->
+      <a class="page-card" href="PageCheatsheet.html">
+        <div class="card-banner"
+          style="background: color-mix(in oklab, var(--color-warning) 12%, var(--color-surface-2));">
+          📋
+          <span class="card-num"
+            style="color: color-mix(in oklab, var(--color-warning) 80%, #000);
+                   background: color-mix(in oklab, var(--color-warning) 12%, var(--color-surface))">
+            Referenz
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Cheatsheet – Alle Formeln &amp; Befehle</div>
+          <div class="card-desc">
+            TPR/FPR/PPV-Formeln, komplette sklearn API,
+            Youden-Index, F1-Score, AUC, Multi-Class Strategien,
+            Entscheidungsregeln und typische Prüfungsfallen.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Formeln</span>
+            <span class="tag">sklearn API</span>
+            <span class="tag">Entscheidungsregeln</span>
+            <span class="tag">Merksätze</span>
+            <span class="tag">Fallen</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Schnellreferenz · 6 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Quiz -->
+      <a class="page-card" href="PageQuiz.html">
+        <div class="card-banner"
+          style="background: color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-2));">
+          🧠
+          <span class="card-num"
+            style="color:var(--color-primary); background:color-mix(in oklab,var(--color-primary) 10%,var(--color-surface))">
+            Selbsttest
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Quiz – 20 Prüfungsfragen</div>
+          <div class="card-desc">
+            20 aufklappbare Fragen in vier Kategorien:
+            Konzeptfragen, Formelfragen, Code-Fragen und typische Prüfungsfallen.
+            Klappe die Antwort auf, nachdem du selbst überlegt hast.
+          </div>
+          <div class="card-tags">
+            <span class="tag">20 Fragen</span>
+            <span class="tag">Konzept</span>
+            <span class="tag">Formeln</span>
+            <span class="tag">Code</span>
+            <span class="tag">🪤 Fallen</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Selbsttest · 4 Kategorien</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+    </div>
+
+  </main>
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 7 · Evaluation · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

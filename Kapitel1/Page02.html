@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Von Daten zu Features</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       DEFINITION QUOTE
+    ═══════════════════════════════════════════════════════ */
+    .definition-quote {
+      margin: var(--space-6) 0;
+      padding: var(--space-5) var(--space-6);
+      border-left: 3px solid var(--color-primary);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+    }
+    .definition-quote blockquote {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-style: italic;
+      line-height: 1.5;
+      color: var(--color-text);
+      margin: 0 0 var(--space-3) 0;
+    }
+    .definition-quote cite {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       EIGENSCHAFTEN-CARDS  (Icon + Titel + Text)
+    ═══════════════════════════════════════════════════════ */
+    .eigenschaft-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-6);
+      background: var(--color-surface-2);
+      border: 1px solid color-mix(in oklab, var(--color-text) 10%, transparent);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .eigenschaft-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .eigenschaft-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .eigenschaft-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .eigenschaft-title {
+      font-size: var(--text-lg);
+      font-weight: 700;
+    }
+    .eigenschaft-card p {
+      color: var(--color-text-muted);
+      font-size: var(--text-sm);
+      line-height: 1.7;
+      margin: 0;
+    }
+    .eigenschaft-card .key-phrase {
+      display: inline-block;
+      margin-top: var(--space-3);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-full);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FEATURE-MATRIX VISUAL
+    ═══════════════════════════════════════════════════════ */
+    .matrix-outer {
+      margin-top: var(--space-6);
+      overflow-x: auto;
+    }
+    .matrix-wrap {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 0;
+      min-width: 480px;
+    }
+    .matrix-label-row {
+      display: flex;
+      gap: 0;
+      margin-bottom: 0;
+    }
+    .matrix-corner { width: 120px; flex-shrink: 0; }
+    .matrix-col-labels {
+      display: flex;
+      gap: 0;
+      flex: 1;
+    }
+    .matrix-col-label {
+      flex: 1;
+      text-align: center;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-primary);
+      padding: var(--space-2);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .matrix-col-label.dots { color: var(--color-text-faint); font-weight: 400; }
+    .matrix-body { display: flex; flex-direction: column; gap: 0; }
+    .matrix-row { display: flex; gap: 0; }
+    .matrix-row-label {
+      width: 120px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 0 var(--space-3) 0 0;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-success);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .matrix-row-label.dots { color: var(--color-text-faint); font-weight: 400; }
+    .matrix-cells { display: flex; flex: 1; }
+    .matrix-cell {
+      flex: 1;
+      border: 1px solid var(--color-border);
+      padding: var(--space-3) var(--space-2);
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      background: var(--color-surface-2);
+      margin: -0.5px;
+      min-width: 60px;
+    }
+    .matrix-cell.highlight-col {
+      background: color-mix(in oklab, var(--color-primary) 6%, var(--color-surface-2));
+      color: var(--color-text);
+    }
+    .matrix-cell.dot { color: var(--color-text-faint); }
+    .matrix-caption {
+      margin-top: var(--space-4);
+      display: flex;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+    }
+    .matrix-legend {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .matrix-legend-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PIPELINE VISUAL
+    ═══════════════════════════════════════════════════════ */
+    .pipeline-flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-top: var(--space-6);
+      overflow-x: auto;
+      padding-bottom: var(--space-2);
+    }
+    .pf-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-4);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      flex-shrink: 0;
+      min-width: 100px;
+      text-align: center;
+      transition: background 0.15s;
+    }
+    .pf-node:first-child { border-radius: var(--radius-lg) 0 0 var(--radius-lg); }
+    .pf-node:last-child  { border-radius: 0 var(--radius-lg) var(--radius-lg) 0; }
+    .pf-node + .pf-node  { border-left: none; }
+    .pf-node.active {
+      background: color-mix(in oklab, var(--color-primary) 8%, var(--color-surface));
+      border-color: color-mix(in oklab, var(--color-primary) 25%, var(--color-border));
+    }
+    .pf-icon { font-size: 1.5rem; }
+    .pf-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-text-muted);
+      line-height: 1.3;
+    }
+    .pf-node.active .pf-label { color: var(--color-primary); }
+    .pf-process {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-1);
+      padding: 0 var(--space-3);
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .pf-arrow { font-size: 1.1rem; color: var(--color-text-faint); }
+    .pf-process-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--color-text-faint);
+      white-space: nowrap;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FEEDBACK-LOOP DIAGRAM
+    ═══════════════════════════════════════════════════════ */
+    .feedback-diagram {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-8);
+      margin: var(--space-6) 0;
+      flex-wrap: wrap;
+    }
+    .fb-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-6) var(--space-8);
+      border-radius: var(--radius-xl);
+      border: 2px solid;
+      min-width: 160px;
+      text-align: center;
+    }
+    .fb-box.features {
+      border-color: var(--color-primary);
+      background: color-mix(in oklab, var(--color-primary) 6%, var(--color-surface));
+    }
+    .fb-box.modell {
+      border-color: var(--color-success);
+      background: color-mix(in oklab, var(--color-success) 6%, var(--color-surface));
+    }
+    .fb-icon { font-size: 2rem; }
+    .fb-title { font-weight: 700; font-size: var(--text-base); }
+    .fb-sub { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.4; }
+    .fb-arrows {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+    }
+    .fb-arrow-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .fb-arrow-line {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .fb-arrow-icon { font-size: 1.2rem; }
+    @media (max-width: 640px) {
+      .feedback-diagram { flex-direction: column; gap: var(--space-4); }
+      .fb-arrows { flex-direction: row; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       BALANCE VISUALISIERUNG
+    ═══════════════════════════════════════════════════════ */
+    .balance-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-4);
+      align-items: center;
+      margin-top: var(--space-6);
+    }
+    @media (max-width: 760px) {
+      .balance-grid {
+        grid-template-columns: 1fr;
+      }
+      .balance-center { display: none; }
+    }
+    .balance-card {
+      padding: var(--space-6);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .balance-card.too-few {
+      border-color: color-mix(in oklab, var(--color-warning) 30%, var(--color-border));
+      background: color-mix(in oklab, var(--color-warning) 5%, var(--color-surface-2));
+    }
+    .balance-card.too-many {
+      border-color: color-mix(in oklab, var(--color-warning) 30%, var(--color-border));
+      background: color-mix(in oklab, var(--color-warning) 5%, var(--color-surface-2));
+    }
+    .balance-card h3 { margin-top: 0; margin-bottom: var(--space-3); }
+    .balance-card p { margin: 0; color: var(--color-text-muted); font-size: var(--text-sm); }
+    .balance-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: 1.5rem;
+      color: var(--color-text-faint);
+    }
+    .balance-center span {
+      font-size: var(--text-xs);
+      color: var(--color-text-faint);
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page1" title="Kapitel 1 · Von Daten zu Features"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page2"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 1 · Seite 2</span>
+            <h1>Von Daten zu
+              <span class="key" style="--key-color:var(--color-primary)">Features</span>
+            </h1>
+            <p>
+              Das Fundament des Feature Engineerings – was Features sind, welche
+              Eigenschaften sie haben müssen, wie man sie als Matrix beschreibt und
+              warum der Prozess ein iterativer Feedback-Loop ist.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Definition</span>
+              <span class="pill">Informativ</span>
+              <span class="pill">Diskriminativ</span>
+              <span class="pill">Unabhängig</span>
+              <span class="pill">Feature-Matrix N×K</span>
+              <span class="pill">Pipeline</span>
+              <span class="pill">Feedback-Loop</span>
+              <span class="pill">Domänenwissen</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kennst die präzise Definition eines Features, weißt welche
+              3&nbsp;Eigenschaften gute Features ausmachen, verstehst die
+              N×K-Feature-Matrix und erkennst, warum Feature Engineering und
+              Modellierung ein untrennbarer <strong>iterativer Prozess</strong> sind.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           2.1  DEFINITION
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="definition">
+        <div class="section-head">
+          <h2>2.1 Was ist ein Feature?</h2>
+          <p>Von der intuitiven Idee zur formalen Definition.</p>
+        </div>
+
+        <!-- Englisches Zitat -->
+        <div class="definition-quote">
+          <blockquote>
+            "In machine learning and pattern recognition, a feature is an individual
+            measurable property or characteristic of a phenomenon being observed."
+          </blockquote>
+          <cite>Wikipedia – Feature (machine learning)</cite>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Operationalisierung</span>
+            </h3>
+            <p>
+              Features sind <strong>Merkmale</strong> – etwas, das zusammenfassend und
+              charakterisierend bezüglich der zugrundeliegenden Daten ist.
+              Feature Engineering bildet eine messbare Eigenschaft auf einen
+              <strong>Skalar</strong> ab.
+            </p>
+            <p>
+              Features können sowohl die Daten an sich sein,
+              als auch <strong>davon abgeleitete Größen</strong>.
+              Meist spricht man von Features, wenn die Daten auf eine
+              bestimmte Weise aggregiert wurden.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Warum Features?</span>
+            </h3>
+            <p>
+              Ein Machine Learning Modell nutzt Features, um die sogenannten
+              <strong>Labels vorherzusagen</strong>. Features sind im Grunde
+              nichts anderes als Arrays bzw. DataFrames.
+            </p>
+            <p>
+              Strikt formuliert: Feature Engineering bildet eine messbare
+              Eigenschaft auf einen Skalar ab.
+              Durch diesen Prozess verringert man <strong>in der Regel bereits
+              die Dimensionalität</strong> des Problems.
+            </p>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>So what?</strong> &nbsp;
+          Der Begriff Feature ist oft nicht scharf abzugrenzen – aus den Rohdaten erzeugt man
+          im Prozess des Feature Engineerings eine <strong>Feature-Matrix</strong> mit
+          sauberem Input für das Modell.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           2.2  EIGENSCHAFTEN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="eigenschaften">
+        <div class="section-head">
+          <h2>2.2 Welche Eigenschaften müssen Features haben?</h2>
+          <p>Drei notwendige Bedingungen für gute Features.</p>
+        </div>
+
+        <div class="overview-3">
+
+          <!-- 1. Informativ -->
+          <div class="eigenschaft-card">
+            <div class="eigenschaft-header">
+              <div class="eigenschaft-icon"
+                   style="background:color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-2));">
+                📡
+              </div>
+              <span class="eigenschaft-title"
+                    style="color:var(--color-primary)">1. Informativ</span>
+            </div>
+            <p>
+              Features müssen <strong>informativ</strong> sein und Informationen
+              über das zugrundeliegende Phänomen tragen. Ein Feature, das
+              keine Auskunft über das gibt, was wir vorhersagen wollen,
+              nützt dem Modell nichts.
+            </p>
+            <span class="key key-phrase"
+                  style="--key-color:var(--color-primary)">
+              Trägt Information über das Phänomen
+            </span>
+          </div>
+
+          <!-- 2. Diskriminativ -->
+          <div class="eigenschaft-card">
+            <div class="eigenschaft-header">
+              <div class="eigenschaft-icon"
+                   style="background:color-mix(in oklab, var(--color-success) 12%, var(--color-surface-2));">
+                🔬
+              </div>
+              <span class="eigenschaft-title"
+                    style="color:var(--color-success)">2. Diskriminativ</span>
+            </div>
+            <p>
+              Features müssen <strong>diskriminativ</strong> sein und somit
+              Unterschiede bzw. Strukturen in den Daten erklären können.
+              Ein Feature, das für alle Klassen denselben Wert liefert,
+              kann das Modell bei der Unterscheidung nicht unterstützen.
+            </p>
+            <span class="key key-phrase"
+                  style="--key-color:var(--color-success)">
+              Erklärt Unterschiede in den Daten
+            </span>
+          </div>
+
+          <!-- 3. Unabhängig -->
+          <div class="eigenschaft-card">
+            <div class="eigenschaft-header">
+              <div class="eigenschaft-icon"
+                   style="background:color-mix(in oklab, var(--color-purple) 12%, var(--color-surface-2));">
+                🔗
+              </div>
+              <span class="eigenschaft-title"
+                    style="color:var(--color-purple)">3. Unabhängig</span>
+            </div>
+            <p>
+              Features dürfen <strong>nicht zu stark miteinander korrelieren</strong>,
+              um Redundanz zu vermeiden. Stark korrelierte Features liefern
+              dieselbe Information doppelt – das erhöht die Dimensionalität
+              ohne Mehrwert.
+            </p>
+            <span class="key key-phrase"
+                  style="--key-color:var(--color-purple)">
+              Geringe Korrelation untereinander
+            </span>
+          </div>
+
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Merksatz:</strong> &nbsp;
+          Gute Features sind informativ, diskriminativ und (weitgehend) unabhängig voneinander.
+          Fehlt eine dieser Eigenschaften, leidet die Modellgüte.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           2.3  FEATURE-MATRIX N×K
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="feature-matrix">
+        <div class="section-head">
+          <h2>2.3 Die Feature-Matrix <span class="key" style="--key-color:var(--color-primary)">N × K</span></h2>
+          <p>Wie Features formal als Matrix repräsentiert werden.</p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">N – Samples</span>
+            </h3>
+            <p>
+              <strong>N</strong> ist die <strong>Anzahl der Samples</strong> (Beobachtungen).
+              Jede Zeile der Feature-Matrix entspricht einem einzelnen
+              Datenpunkt – z.&nbsp;B. einer Messung, einem Bild oder einem Dokument.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">K – Features</span>
+            </h3>
+            <p>
+              <strong>K</strong> ist die <strong>Anzahl der Features</strong>.
+              Jede Spalte der Feature-Matrix entspricht einem Feature –
+              z.&nbsp;B. Temperatur, Frequenz, Pixel-Intensität oder Worthäufigkeit.
+            </p>
+          </article>
+        </div>
+
+        <!-- Matrix-Visualisierung -->
+        <div class="matrix-outer">
+          <div class="matrix-wrap">
+            <!-- Spalten-Labels -->
+            <div class="matrix-label-row">
+              <div class="matrix-corner"></div>
+              <div class="matrix-col-labels">
+                <div class="matrix-col-label">Feature 1</div>
+                <div class="matrix-col-label">Feature 2</div>
+                <div class="matrix-col-label dots">…</div>
+                <div class="matrix-col-label">Feature K</div>
+              </div>
+            </div>
+            <!-- Zeilen -->
+            <div class="matrix-body">
+              <div class="matrix-row">
+                <div class="matrix-row-label">Sample 1</div>
+                <div class="matrix-cells">
+                  <div class="matrix-cell highlight-col">x₁₁</div>
+                  <div class="matrix-cell">x₁₂</div>
+                  <div class="matrix-cell dot">…</div>
+                  <div class="matrix-cell">x₁ₖ</div>
+                </div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-row-label">Sample 2</div>
+                <div class="matrix-cells">
+                  <div class="matrix-cell highlight-col">x₂₁</div>
+                  <div class="matrix-cell">x₂₂</div>
+                  <div class="matrix-cell dot">…</div>
+                  <div class="matrix-cell">x₂ₖ</div>
+                </div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-row-label dots">⋮</div>
+                <div class="matrix-cells">
+                  <div class="matrix-cell dot">⋮</div>
+                  <div class="matrix-cell dot">⋮</div>
+                  <div class="matrix-cell dot">⋱</div>
+                  <div class="matrix-cell dot">⋮</div>
+                </div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-row-label">Sample N</div>
+                <div class="matrix-cells">
+                  <div class="matrix-cell highlight-col">xₙ₁</div>
+                  <div class="matrix-cell">xₙ₂</div>
+                  <div class="matrix-cell dot">…</div>
+                  <div class="matrix-cell">xₙₖ</div>
+                </div>
+              </div>
+            </div>
+            <!-- Legende -->
+            <div class="matrix-caption">
+              <div class="matrix-legend">
+                <div class="matrix-legend-dot"
+                     style="background:var(--color-success)"></div>
+                <span>Zeile = ein Sample / Beobachtungspunkt</span>
+              </div>
+              <div class="matrix-legend">
+                <div class="matrix-legend-dot"
+                     style="background:var(--color-primary)"></div>
+                <span>Spalte = ein Feature (hier: Feature 1 hervorgehoben)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-6)">
+          <strong>Vorsicht Verwechslungsgefahr:</strong> &nbsp;
+          Aus einer Datenmatrix wird eine Feature-Matrix – für beides verwendet man
+          in der Notation oft ein großes, fettgedrucktes <strong>X</strong>.
+          Die geometrische Interpretation: jeder Datenpunkt ist ein Punkt
+          im K-dimensionalen Feature-Raum.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           2.4  PIPELINE
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="pipeline">
+        <div class="section-head">
+          <h2>2.4 Feature Engineering als Bindeglied</h2>
+          <p>
+            Feature Engineering transformiert Raw-Daten in Features –
+            das Bindeglied zwischen rohen Daten und dem ML-Modell.
+          </p>
+        </div>
+
+        <!-- Pipeline-Fluss -->
+        <div class="pipeline-flow">
+
+          <div class="pf-node">
+            <span class="pf-icon">🗄️</span>
+            <span class="pf-label">Quellen<br>1…N</span>
+          </div>
+
+          <div class="pf-process">
+            <span class="pf-arrow">→</span>
+            <span class="pf-process-label">Auswählen &amp;<br>zusammenführen</span>
+          </div>
+
+          <div class="pf-node">
+            <span class="pf-icon">📊</span>
+            <span class="pf-label">Rohdaten</span>
+          </div>
+
+          <div class="pf-process">
+            <span class="pf-arrow">→</span>
+            <span class="pf-process-label">Bereinigen &amp;<br>Transformieren</span>
+          </div>
+
+          <div class="pf-node active">
+            <span class="pf-icon">✨</span>
+            <span class="pf-label">Features</span>
+          </div>
+
+          <div class="pf-process">
+            <span class="pf-arrow">→</span>
+          </div>
+
+          <div class="pf-node">
+            <span class="pf-icon">🤖</span>
+            <span class="pf-label">Modelle</span>
+          </div>
+
+          <div class="pf-process">
+            <span class="pf-arrow">→</span>
+          </div>
+
+          <div class="pf-node">
+            <span class="pf-icon">💡</span>
+            <span class="pf-label">Erkenntnisse</span>
+          </div>
+
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Kreativität im Prozess</span>
+            </h3>
+            <p>
+              In der Data Science kann man an vielen Stellen kreativ werden –
+              ein zentraler Aspekt ist das <strong>Finden und Erzeugen geeigneter Features</strong>.
+              Im Erzeugen von Features steckt <strong>Domänenwissen</strong>.
+              Wir unterstützen das Modell durch unser Wissen.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">Der Aufwand</span>
+            </h3>
+            <p>
+              Den meisten Aufwand im Data Science Prozess hat man mit
+              Datenbereinigung und Feature Engineering –
+              <strong>Modellierung macht gefühlte&nbsp;20&nbsp;%</strong> aus.
+              Feature Engineering ist kein Vorschritt, sondern der Kern der Arbeit.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           2.5  FEEDBACK-LOOP
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="feedback-loop">
+        <div class="section-head">
+          <h2>2.5 Iterativer Prozess: Modell vs. Features</h2>
+          <p>
+            Features und Modell beeinflussen sich gegenseitig –
+            man optimiert nie nur das eine, ohne das andere zu berücksichtigen.
+          </p>
+        </div>
+
+        <!-- Feedback-Loop Diagramm -->
+        <div class="feedback-diagram">
+
+          <div class="fb-box features">
+            <span class="fb-icon">✨</span>
+            <span class="fb-title" style="color:var(--color-primary)">Features</span>
+            <span class="fb-sub">
+              Geeignete Features hängen<br>
+              vom Phänomen <em>und</em> vom<br>
+              gewählten Modell ab
+            </span>
+          </div>
+
+          <div class="fb-arrows">
+            <div class="fb-arrow-item">
+              <div class="fb-arrow-line">
+                <span style="color:var(--color-primary)">Features fließen ins Modell</span>
+                <span class="fb-arrow-icon" style="color:var(--color-primary)">→</span>
+              </div>
+            </div>
+            <div class="fb-arrow-item">
+              <div class="fb-arrow-line">
+                <span class="fb-arrow-icon" style="color:var(--color-success)">←</span>
+                <span style="color:var(--color-success)">Modell zeigt, welche Features gut sind</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="fb-box modell">
+            <span class="fb-icon">🤖</span>
+            <span class="fb-title" style="color:var(--color-success)">Modell</span>
+            <span class="fb-sub">
+              Die Güte des Modells hängt<br>
+              maßgeblich von den Features<br>
+              und deren Anzahl ab
+            </span>
+          </div>
+
+        </div>
+
+        <!-- Prozessbeschreibung als Timeline -->
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="step-no">1</div>
+            <div>
+              <h3>Features engineeren</h3>
+              <p>
+                Basierend auf Domänenwissen und den Rohdaten werden erste
+                Features erzeugt. Die Wahl ist zunächst eine informierte Hypothese.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">2</div>
+            <div>
+              <h3>Modell trainieren</h3>
+              <p>
+                Das Modell wird auf den erzeugten Features trainiert.
+                Feature-Qualität und Modellgüte sind direkt verknüpft.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">3</div>
+            <div>
+              <h3>Erkenntnisse ziehen</h3>
+              <p>
+                Das Modell kann zeigen, welche Features gut funktionieren
+                und welche nicht – z.&nbsp;B. über Feature Importance.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">4</div>
+            <div>
+              <h3>Features neu engineeren → Loop</h3>
+              <p>
+                Basierend auf diesen Informationen werden neue Features
+                engineered, die wieder ins Modell fließen.
+                <strong>Der Kreis schließt sich.</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-6)">
+          <strong>Kernaussage:</strong> &nbsp;
+          Man optimiert nicht nur das Modell, sondern auch die Features.
+          Es ist ein <strong>Feedback-Loop</strong> zwischen beiden –
+          Modell und Features beeinflussen sich gegenseitig.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           2.6  BALANCE-PROBLEM
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="balance">
+        <div class="section-head">
+          <h2>2.6 Das Balance-Problem: Zu wenig vs. zu viele Features</h2>
+          <p>
+            Auch die <strong>Anzahl</strong> der verwendeten Features ist entscheidend –
+            zu wenige und zu viele haben beide negative Auswirkungen.
+          </p>
+        </div>
+
+        <div class="balance-grid">
+
+          <!-- Zu wenig -->
+          <div class="balance-card too-few">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">⬇️ Zu wenig Features</span>
+            </h3>
+            <p>
+              Das Modell kann das Phänomen <strong>nicht ausreichend beschreiben</strong>.
+              Wichtige Strukturen in den Daten bleiben unerkannt.
+              Das Modell <em>underfittet</em> – es lernt nicht genug.
+            </p>
+          </div>
+
+          <!-- Mitte: Pfeil/VS -->
+          <div class="balance-center">
+            <span style="font-size:1.5rem">⚖️</span>
+            <span>vs.</span>
+          </div>
+
+          <!-- Zu viele -->
+          <div class="balance-card too-many">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">⬆️ Zu viele Features</span>
+            </h3>
+            <p>
+              Das Modell ist <strong>schwierig anzulernen</strong>.
+              Irrelevante oder redundante Features rauschen das Signal aus.
+              → Curse of Dimensionality (mehr auf Seite&nbsp;7).
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Das Optimum -->
+        <div class="note note-success"
+             style="margin-top:var(--space-5);
+                    background:color-mix(in oklab, var(--color-success) 8%, var(--color-surface-2));
+                    border-color:color-mix(in oklab, var(--color-success) 25%, transparent);">
+          <strong>Das Ziel:</strong> &nbsp;
+          Die <strong>minimale Menge an informativen, diskriminativen und unabhängigen Features</strong>,
+          die das Phänomen vollständig beschreiben –
+          nicht mehr und nicht weniger. Der Feedback-Loop hilft dabei.
+        </div>
+
+        <!-- Weiter-Link -->
+        <div class="note" style="margin-top:var(--space-5)">
+          <strong>Nächste Seite:</strong> &nbsp;
+          Die Feature-Matrix als geometrischer Raum – und wie man
+          hochdimensionale Feature-Räume visualisiert.
+          <br><br>
+          <a href="Page03.html">→ Seite 3: Feature-Raum &amp; Visualisierung</a>
+          &nbsp;·&nbsp;
+          <a href="Page07.html">→ Seite 7: Feature Selection (Curse of Dimensionality)</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 1 · Seite 2 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

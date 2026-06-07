@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Bias-Variance Trade-off</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ── SCATTER PAIR (2 Plots nebeneinander) ───────── */
+    .scatter-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 640px) { .scatter-pair { grid-template-columns: 1fr; } }
+    .scatter-card { background:var(--color-surface-2); border:1px solid var(--color-border);
+      border-radius:var(--radius-xl); overflow:hidden; }
+    .scatter-card-title { padding:var(--space-3) var(--space-4); font-size:var(--text-xs);
+      font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+      background:var(--color-surface-offset); border-bottom:1px solid var(--color-border);
+      text-align:center; }
+    .scatter-card svg { width:100%; height:auto; display:block; padding:var(--space-2); }
+
+    /* ── DARTSCHEIBEN 2×2 GRID ──────────────────────── */
+    .dart-2x2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 640px) { .dart-2x2 { grid-template-columns: 1fr; } }
+
+    .dart-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      border-top: 3px solid var(--dart-color, var(--color-border));
+    }
+    .dart-label {
+      font-size: var(--text-xs); font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--dart-color, var(--color-text-faint));
+    }
+    .dart-desc {
+      font-size: var(--text-xs); color: var(--color-text-muted);
+      line-height: 1.55; text-align: center;
+    }
+
+    /* ── VALIDIERUNGSKURVEN SVG WRAPPER ─────────────── */
+    .val-curve-wrap {
+      margin-top: var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      padding: var(--space-4);
+    }
+    .val-curve-title {
+      font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--color-text-faint); margin-bottom: var(--space-3);
+      text-align: center;
+    }
+    .val-curve-wrap svg { width:100%; height:auto; display:block; }
+
+    /* ── SO WHAT + FRAGE BOX ────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── QUOTE BLOCK ────────────────────────────────── */
+    .quote-block { margin:var(--space-6) 0; padding:var(--space-6);
+      background:var(--color-surface-2); border:1px solid var(--color-border);
+      border-radius:var(--radius-xl); text-align:center; }
+    .quote-block blockquote { font-family:var(--font-display); font-size:var(--text-xl);
+      font-style:italic; color:var(--color-text); margin:0 0 var(--space-3) 0; line-height:1.4; }
+    .quote-block cite { font-size:var(--text-xs); color:var(--color-text-muted);
+      font-style:normal; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+
+    /* ── NOTATION GRID (für Hyperparameter-Karten) ──── */
+    .notation-grid { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); margin-top:var(--space-5); }
+    @media (max-width:640px) { .notation-grid { grid-template-columns:1fr; } }
+    .notation-item { padding:var(--space-5); background:var(--color-surface-2);
+      border:1px solid var(--color-border); border-radius:var(--radius-xl); }
+    .notation-symbol { font-family:var(--font-mono); font-size:var(--text-lg); font-weight:700; margin-bottom:var(--space-2); }
+    .notation-name { font-size:var(--text-sm); font-weight:700; margin-bottom:var(--space-2); }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Bias-Variance"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page8"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Seite 8 · Folien 33–37</span>
+            <h1>
+              <span class="key" style="--key-color:#3b82f6">Bias</span>-<span class="key" style="--key-color:#ef4444">Variance</span>
+              Trade-off
+            </h1>
+            <p>
+              Das zentrale Dilemma des Machine Learnings: zu simple Modelle
+              <em>underfiten</em>, zu komplexe <em>overfiten</em>.
+              Diese Seite erklärt Hyperparameter vs. Parameter,
+              High-Bias und High-Variance, die Dartscheiben-Metapher
+              und das Schema der Validierungskurven.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Hyperparameter</span>
+              <span class="pill">Parameter</span>
+              <span class="pill">Underfitting</span>
+              <span class="pill">Overfitting</span>
+              <span class="pill">Dartscheibe</span>
+              <span class="pill">Validierungskurven</span>
+              <span class="pill">Best Model</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kannst
+              <span class="key" style="--key-color:#3b82f6">High-Bias</span>
+              (Underfitting) von
+              <span class="key" style="--key-color:#ef4444">High-Variance</span>
+              (Overfitting) unterscheiden und weißt, wie sich das in
+              Trainings- und Validierungs-Scores zeigt.
+              Du verstehst das Dartscheiben-Bild und kannst aus dem
+              <strong>Schema der Validierungskurven</strong> das optimale Modell ablesen.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           8.1  HYPERPARAMETER VS. PARAMETER  (Folie 33)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="hyperparameter-vs-parameter">
+        <div class="section-head">
+          <h2>8.1 Hyperparameter vs. Parameter</h2>
+          <p>
+            Wir kennen Cross-Validation als Methode, um
+            <span class="key" style="--key-color:var(--color-warning)">Hyperparameter</span>
+            zu bewerten. Aber was unterscheidet Hyperparameter von Parametern?
+          </p>
+        </div>
+
+        <!-- Definition -->
+        <div class="card" style="margin-bottom:var(--space-5)">
+          <h3>
+            <span class="key" style="--key-color:var(--color-warning)">Definition</span>
+          </h3>
+          <p>
+            „Wir nehmen uns schon mal mit: der Wert eines
+            <span class="key" style="--key-color:var(--color-warning)">Hyperparameters</span>,
+            im Gegensatz zu dem eines
+            <span class="key" style="--key-color:var(--color-primary)">Parameters</span>,
+            eines Modells wird <strong>nicht durch das Training bestimmt</strong>,
+            sondern <strong>vorab festgelegt</strong>."
+          </p>
+        </div>
+
+        <div class="notation-grid">
+          <div class="notation-item">
+            <div class="notation-symbol" style="color:var(--color-warning)">Hyperparameter</div>
+            <div class="notation-name">Vor dem Training festgelegt</div>
+            <ul style="font-size:var(--text-xs); color:var(--color-text-muted); padding-left:1rem; margin:0; line-height:1.9">
+              <li>Werden vom Entwickler/Modellbauer gesetzt</li>
+              <li>Beeinflussen die Modellstruktur oder den Trainingsprozess</li>
+              <li>Beispiele: <code>n_neighbors=1</code>, <code>max_depth=5</code>, <code>degree=3</code></li>
+              <li>Optimierung durch Cross-Validation / Grid Search</li>
+              <li>→ <span class="key" style="--key-color:var(--color-warning)">Hyperparameter-Tuning</span></li>
+            </ul>
+          </div>
+          <div class="notation-item">
+            <div class="notation-symbol" style="color:var(--color-primary)">Parameter</div>
+            <div class="notation-name">Durch das Training gelernt</div>
+            <ul style="font-size:var(--text-xs); color:var(--color-text-muted); padding-left:1rem; margin:0; line-height:1.9">
+              <li>Werden automatisch beim Training bestimmt</li>
+              <li>Speichern das gelernte Wissen des Modells</li>
+              <li>Beispiele: Koeffizienten einer Geraden (w₀, w₁, ...)</li>
+              <li>Werden durch <code>.fit(X, y)</code> optimiert</li>
+              <li>→ <span class="key" style="--key-color:var(--color-primary)">Learning is finding parameters!</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Optionen bei schlechter Genauigkeit -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Best Model</span>
+              – Was tun bei schlechter Genauigkeit?
+            </h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">Modellkomplexität erhöhen</span>
+                → Hyperparameter-Tuning
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">Modellkomplexität verringern</span>
+                → Überanpassung vermeiden
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">Mehr Trainingsdaten</span>
+                → Modell generalisiert besser
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">Andere / mehr Features</span>
+                → informativere Repräsentation
+              </li>
+              <li>
+                Leitfrage: Was scheint kontraintuitiv, aber funktioniert dennoch?
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">Die Wahl des besten Modells</span>
+            </h3>
+            <ul>
+              <li>Ist einer der <strong>wichtigsten Aspekte</strong> des Machine Learnings</li>
+              <li>Cross-Validation bewertet verschiedene Hyperparameter-Kombinationen</li>
+              <li>Das Modell mit dem <strong>höchsten Validation Score</strong> = Best Model</li>
+              <li>Visualisiert durch die Validierungskurve (→ Abschnitt 8.4)</li>
+              <li>Anschließend: Neutraining auf allen Daten mit Best Hyperparameters</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>„Was denken Sie? Wie würden Sie weitermachen, falls Ihr Modell eine zu niedrige Genauigkeit aufweist?"</p>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            „Die Wahl des besten bzw. optimalen Modells anhand des sog.
+            <span class="key" style="--key-color:var(--color-warning)">Hyperparameter-Tunings</span>
+            ist einer der wichtigsten Aspekte des Machine Learnings."
+            Das, was wir in den kommenden Abschnitten erfahren, scheint – zumindest teilweise – kontraintuitiv zu sein.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           8.2  HIGH-BIAS / HIGH-VARIANCE  (Folien 34 + 36)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="high-bias">
+        <div class="section-head">
+          <h2>8.2 High-Bias &amp; High-Variance</h2>
+          <p>
+            Das optimale Modell zu finden bedeutet, die Balance zwischen
+            <span class="key" style="--key-color:#3b82f6">Bias</span>
+            und
+            <span class="key" style="--key-color:#ef4444">Varianz</span>
+            zu finden. Die beiden Extreme:
+            <span class="key" style="--key-color:#3b82f6">Underfitting</span>
+            und
+            <span class="key" style="--key-color:#ef4444">Overfitting</span>.
+          </p>
+        </div>
+
+        <!-- Scatter Pair: High-Bias | High-Variance (Folie 34) -->
+        <div class="scatter-pair">
+
+          <!-- High-Bias (Underfitting) -->
+          <div class="scatter-card">
+            <div class="scatter-card-title" style="color:#3b82f6">High-Bias Model: Underfits the Data</div>
+            <svg viewBox="0 0 310 200" xmlns="http://www.w3.org/2000/svg">
+              <!-- Axis -->
+              <line x1="35" y1="175" x2="295" y2="175" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="175" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="165" y="192" text-anchor="middle" font-size="9" fill="var(--color-text-faint)" font-family="sans-serif">x</text>
+              <!-- Blue training data (roughly following a parabola) -->
+              <circle cx="50"  cy="95"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="65"  cy="82"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="80"  cy="70"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="95"  cy="65"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="110" cy="63"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="125" cy="65"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="140" cy="70"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="155" cy="78"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="170" cy="90"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="185" cy="105" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="200" cy="118" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="215" cy="130" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="230" cy="140" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="245" cy="148" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="260" cy="155" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <!-- High-Bias fit: straight line (does NOT follow the curve) -->
+              <line x1="45" y1="75" x2="275" y2="155" stroke="#374151" stroke-width="2.5"/>
+              <!-- Label -->
+              <rect x="55" y="20" width="175" height="18" rx="4" fill="color-mix(in oklab,#3b82f6 10%,var(--color-surface-offset))" stroke="#3b82f6" stroke-width="1"/>
+              <text x="142" y="32" text-anchor="middle" font-size="9" fill="#3b82f6" font-family="sans-serif" font-weight="bold">Zu simpel → passt nicht zur Kurve</text>
+            </svg>
+          </div>
+
+          <!-- High-Variance (Overfitting) -->
+          <div class="scatter-card">
+            <div class="scatter-card-title" style="color:#ef4444">High-Variance Model: Overfits the Data</div>
+            <svg viewBox="0 0 310 200" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="175" x2="295" y2="175" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="175" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="165" y="192" text-anchor="middle" font-size="9" fill="var(--color-text-faint)" font-family="sans-serif">x</text>
+              <!-- Blue training data (same positions) -->
+              <circle cx="50"  cy="95"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="65"  cy="82"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="80"  cy="70"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="95"  cy="65"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="110" cy="63"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="125" cy="65"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="140" cy="70"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="155" cy="78"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="170" cy="90"  r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="185" cy="105" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="200" cy="118" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="215" cy="130" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="230" cy="140" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="245" cy="148" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <circle cx="260" cy="155" r="4.5" fill="#3b82f6" opacity=".8"/>
+              <!-- High-Variance fit: wiggly polynomial that passes through all points -->
+              <path d="M45,100 C55,40 65,130 80,68 S110,45 125,63 S150,120 170,88 S200,145 215,128 S240,100 265,155"
+                    fill="none" stroke="#ef4444" stroke-width="2.5"/>
+              <!-- Label -->
+              <rect x="55" y="20" width="185" height="18" rx="4" fill="color-mix(in oklab,#ef4444 10%,var(--color-surface-offset))" stroke="#ef4444" stroke-width="1"/>
+              <text x="147" y="32" text-anchor="middle" font-size="9" fill="#ef4444" font-family="sans-serif" font-weight="bold">Zu komplex → folgt Rauschen</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Erklärung Cards -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:#3b82f6">High-Bias</span>
+              – Underfitting
+            </h3>
+            <ul>
+              <li>Daten werden zu <strong>simpel</strong> gefittet</li>
+              <li>Modell zu einfach, um die zugrundeliegende Struktur zu erfassen</li>
+              <li>
+                <span class="key" style="--key-color:#3b82f6">Training-Score</span>:
+                schlecht (Modell passt nicht auf Trainingsdaten)
+              </li>
+              <li>
+                <span class="key" style="--key-color:#3b82f6">Validation-Score</span>:
+                ebenfalls schlecht – im <strong>vergleichbaren (schlechten) Wertebereich</strong>
+              </li>
+              <li>→ Beide Scores sind ähnlich niedrig</li>
+              <li>Lösung: <strong>Modellkomplexität erhöhen</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:#ef4444">High-Variance</span>
+              – Overfitting
+            </h3>
+            <ul>
+              <li>Trainingsdaten werden <strong>perfekt</strong> gefittet (inkl. Rauschen)</li>
+              <li>Modell hat die Trainingsdaten „auswendig gelernt"</li>
+              <li>
+                <span class="key" style="--key-color:#ef4444">Training-Score</span>:
+                sehr hoch (fast 1.0)
+              </li>
+              <li>
+                <span class="key" style="--key-color:#ef4444">Validation-Score</span>:
+                deutlich <strong>schlechter</strong> – großer Abstand zum Training-Score
+              </li>
+              <li>→ Gap zwischen Training und Validation ist das Signal</li>
+              <li>Lösung: <strong>Modellkomplexität verringern</strong> oder mehr Daten</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Mit Validierungsdaten (Folie 36) -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Mit Validierungsdaten – Was passiert beim Scoring? (Folie 36)
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Erinnern wir uns an Cross-Validation: was passiert, wenn wir das Modell an
+          <span class="key" style="--key-color:#ef4444">roten Validierungsdaten</span>
+          testen? Das ist ein generelles Muster!
+        </p>
+
+        <div class="scatter-pair">
+          <!-- High-Bias mit Validation Data -->
+          <div class="scatter-card">
+            <div class="scatter-card-title" style="color:#3b82f6">High-Bias + Validierungsdaten</div>
+            <svg viewBox="0 0 310 200" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="175" x2="295" y2="175" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="175" stroke="var(--color-border)" stroke-width="1.5"/>
+              <!-- Blue training data -->
+              <circle cx="50"  cy="95"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="80"  cy="70"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="110" cy="63"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="140" cy="70"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="170" cy="90"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="200" cy="118" r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="230" cy="140" r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="260" cy="155" r="4" fill="#3b82f6" opacity=".8"/>
+              <!-- Red validation data (similar pattern) -->
+              <circle cx="60"  cy="88"  r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="90"  cy="74"  r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="120" cy="67"  r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="150" cy="73"  r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="180" cy="96"  r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="210" cy="122" r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="240" cy="145" r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="270" cy="159" r="4" fill="#ef4444" opacity=".8"/>
+              <!-- Straight line fit -->
+              <line x1="45" y1="75" x2="275" y2="155" stroke="#374151" stroke-width="2.5"/>
+              <!-- Annotations -->
+              <text x="160" y="28" text-anchor="middle" font-size="8" fill="#3b82f6" font-family="sans-serif">🔵 Training</text>
+              <text x="230" y="28" text-anchor="middle" font-size="8" fill="#ef4444" font-family="sans-serif">🔴 Validation</text>
+              <!-- Label: BOTH bad -->
+              <rect x="50" y="35" width="195" height="17" rx="3" fill="color-mix(in oklab,#3b82f6 8%,var(--color-surface-offset))" stroke="#3b82f6" stroke-width="1"/>
+              <text x="147" y="46" text-anchor="middle" font-size="8.5" fill="#3b82f6" font-family="sans-serif" font-weight="bold">Training-Score ≈ Validation-Score (beide schlecht)</text>
+            </svg>
+          </div>
+
+          <!-- High-Variance mit Validation Data -->
+          <div class="scatter-card">
+            <div class="scatter-card-title" style="color:#ef4444">High-Variance + Validierungsdaten</div>
+            <svg viewBox="0 0 310 200" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="175" x2="295" y2="175" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="175" stroke="var(--color-border)" stroke-width="1.5"/>
+              <!-- Blue training data -->
+              <circle cx="50"  cy="95"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="80"  cy="70"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="110" cy="63"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="140" cy="70"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="170" cy="90"  r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="200" cy="118" r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="230" cy="140" r="4" fill="#3b82f6" opacity=".8"/>
+              <circle cx="260" cy="155" r="4" fill="#3b82f6" opacity=".8"/>
+              <!-- Red validation data (similar positions, but model fails there) -->
+              <circle cx="60"  cy="88"  r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="90"  cy="130" r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="120" cy="50"  r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="150" cy="105" r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="180" cy="60"  r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="210" cy="148" r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="240" cy="100" r="4" fill="#ef4444" opacity=".8"/>
+              <circle cx="270" cy="135" r="4" fill="#ef4444" opacity=".8"/>
+              <!-- Wiggly fit -->
+              <path d="M45,100 C55,40 65,130 80,68 S110,45 125,63 S150,120 170,88 S200,145 215,128 S240,100 265,155"
+                    fill="none" stroke="#ef4444" stroke-width="2.5"/>
+              <!-- Annotations -->
+              <text x="160" y="28" text-anchor="middle" font-size="8" fill="#3b82f6" font-family="sans-serif">🔵 Training (gut)</text>
+              <text x="240" y="28" text-anchor="middle" font-size="8" fill="#ef4444" font-family="sans-serif">🔴 Val (schlecht)</text>
+              <!-- Abstand-Marker -->
+              <line x1="180" y1="60" x2="178" y2="88" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,2"/>
+              <text x="195" y="72" font-size="8" fill="#ef4444" font-family="sans-serif" font-weight="bold">+0.9</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? – Das generelle Muster</div>
+          <p>
+            Bei <span class="key" style="--key-color:#3b82f6">Underfitting</span>:
+            Validation-Score ≈ Training-Score (beide schlecht).
+            Bei <span class="key" style="--key-color:#ef4444">Overfitting</span>:
+            Training-Score deutlich größer als Validation-Score.
+            <strong>→ Das ist ein generelles Muster!</strong>
+            Für jeden Fit gibt es also auch ein Gütemaß – sowohl für Trainings- als auch Testdatensatz.
+            → Daraus ergeben sich die Validierungskurven.
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfragen aus der Vorlesung</div>
+          <p>„Was denken Sie? Wie können wir den Fit – sogar in einer Grafik – festhalten?" &nbsp;·&nbsp; „Wie überprüfen wir den Fit? Da fehlt doch was, oder?"</p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           8.3  DARTSCHEIBEN-METAPHER  (Folie 35)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="dartscheibe">
+        <div class="section-head">
+          <h2>8.3 Die Dartscheiben-Metapher</h2>
+          <p>
+            Eine intuitive Visualisierung:
+            <span class="key" style="--key-color:#3b82f6">Bias</span>
+            = Abstand vom Mittelpunkt (Validität / Genauigkeit),
+            <span class="key" style="--key-color:#ef4444">Varianz</span>
+            = Streuung der Vorhersagen (Reliabilität).
+          </p>
+        </div>
+
+        <!-- 2×2 Dartboard Grid -->
+        <div class="dart-2x2">
+
+          <!-- ① Low Bias, Low Variance (IDEAL) -->
+          <div class="dart-card" style="--dart-color: var(--color-success)">
+            <div class="dart-label">✅ Low Bias · Low Variance</div>
+            <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+              <!-- Dartboard rings -->
+              <circle cx="70" cy="70" r="65" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="50" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="35" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="20" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+              <!-- Bullseye -->
+              <circle cx="70" cy="70" r="6"  fill="#dc2626"/>
+              <!-- Dots: tight cluster at center -->
+              <circle cx="66" cy="66" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="74" cy="68" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="70" cy="75" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="64" cy="73" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="76" cy="63" r="4" fill="#1e40af" opacity=".9"/>
+            </svg>
+            <div class="dart-desc">
+              Vorhersagen <strong>eng beieinander</strong> &amp; <strong>nah am Zentrum</strong>.
+              Ideal: präzise und akkurat.
+            </div>
+          </div>
+
+          <!-- ② Low Bias, High Variance -->
+          <div class="dart-card" style="--dart-color: #3b82f6">
+            <div class="dart-label">⚠️ Low Bias · High Variance</div>
+            <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="70" cy="70" r="65" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="50" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="35" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="20" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="6"  fill="#dc2626"/>
+              <!-- Dots: spread out, but centered around bullseye -->
+              <circle cx="50" cy="45" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="95" cy="55" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="40" cy="85" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="90" cy="100" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="65" cy="30" r="4" fill="#1e40af" opacity=".9"/>
+            </svg>
+            <div class="dart-desc">
+              Vorhersagen <strong>weit verteilt</strong>, aber <em>im Mittel</em> nah am Zentrum.
+              Hohe Streuung der Vorhersagen.
+            </div>
+          </div>
+
+          <!-- ③ High Bias, Low Variance -->
+          <div class="dart-card" style="--dart-color: #f97316">
+            <div class="dart-label">⚠️ High Bias · Low Variance</div>
+            <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="70" cy="70" r="65" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="50" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="35" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="20" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="6"  fill="#dc2626"/>
+              <!-- Dots: tight cluster but far from center (displaced upper-right) -->
+              <circle cx="101" cy="38" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="109" cy="46" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="98"  cy="50" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="106" cy="54" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="114" cy="41" r="4" fill="#1e40af" opacity=".9"/>
+              <!-- Arrow showing distance from center -->
+              <line x1="70" y1="70" x2="105" y2="46" stroke="#f97316" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <text x="78" y="52" font-size="8.5" fill="#f97316" font-family="sans-serif" font-weight="bold">Abstand!</text>
+            </svg>
+            <div class="dart-desc">
+              Vorhersagen <strong>eng beieinander</strong>, aber <em>weit weg</em> vom wahren Wert.
+              Systematischer Fehler.
+            </div>
+          </div>
+
+          <!-- ④ High Bias, High Variance (WORST) -->
+          <div class="dart-card" style="--dart-color: #ef4444">
+            <div class="dart-label">❌ High Bias · High Variance</div>
+            <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="70" cy="70" r="65" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="50" fill="#d1fae5" stroke="#10b981" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="35" fill="#fef3c7" stroke="#f59e0b" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="20" fill="#fee2e2" stroke="#ef4444" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="6"  fill="#dc2626"/>
+              <!-- Dots: spread out AND displaced from center -->
+              <circle cx="30"  cy="40"  r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="110" cy="30"  r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="125" cy="95"  r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="20"  cy="110" r="4" fill="#1e40af" opacity=".9"/>
+              <circle cx="55"  cy="25"  r="4" fill="#1e40af" opacity=".9"/>
+            </svg>
+            <div class="dart-desc">
+              Vorhersagen <strong>weit verteilt</strong> &amp; <em>weit weg</em> vom wahren Wert.
+              Worst Case.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bias/Variance Definitions -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:#3b82f6">Bias</span> – Abstand vom Mittelpunkt</h3>
+            <ul>
+              <li><strong>Messung:</strong> wie weit sind die Vorhersagen im Mittel vom wahren Wert entfernt?</li>
+              <li>Bezug zu <span class="key" style="--key-color:#3b82f6">Validität</span> / Genauigkeit</li>
+              <li>Hoher Bias → systematischer Fehler → Modell zu simpel</li>
+              <li>Niedriger Bias → Modell trifft den wahren Wert im Durchschnitt</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:#ef4444">Varianz</span> – Streuung der Vorhersagen</h3>
+            <ul>
+              <li><strong>Messung:</strong> wie stark variieren die Vorhersagen um den Mittelwert?</li>
+              <li>Bezug zu <span class="key" style="--key-color:#ef4444">Reliabilität</span> / Zuverlässigkeit</li>
+              <li>Hohe Varianz → Vorhersagen instabil, hängen stark von Trainingsdaten ab</li>
+              <li>Niedrige Varianz → Vorhersagen konsistent / stabil</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="quote-block">
+          <blockquote>„Bias und Varianz haben einen Bezug zu Validität und Reliabilität!"</blockquote>
+          <cite>Prof. · Folie 35 · So-What-Box · Quantitative Methoden</cite>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           8.4  VALIDIERUNGSKURVEN SCHEMA  (Folie 37)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="validierungskurven-schema">
+        <div class="section-head">
+          <h2>8.4 Validierungskurven Schema</h2>
+          <p>
+            Sweept man die Modellkomplexität und berechnet für jede Komplexität
+            Training- und Validation-Score, entsteht die
+            <span class="key" style="--key-color:var(--color-primary)">Validierungskurve</span>.
+            Das Optimum = Maximum des Validation-Scores.
+          </p>
+        </div>
+
+        <!-- Validation Curve SVG -->
+        <div class="val-curve-wrap">
+          <div class="val-curve-title">
+            Validation Curve – Schema (Folie 37)
+          </div>
+          <svg viewBox="0 0 520 260" xmlns="http://www.w3.org/2000/svg">
+
+            <!-- Background zones -->
+            <!-- High Bias zone (left) -->
+            <rect x="45" y="20" width="150" height="205" fill="color-mix(in oklab,#3b82f6 5%,transparent)" rx="4"/>
+            <!-- High Variance zone (right) -->
+            <rect x="315" y="20" width="160" height="205" fill="color-mix(in oklab,#ef4444 5%,transparent)" rx="4"/>
+            <!-- Best Model zone (center) -->
+            <rect x="195" y="20" width="120" height="205" fill="color-mix(in oklab,var(--color-success) 8%,transparent)" rx="4"/>
+
+            <!-- Axes -->
+            <line x1="45" y1="225" x2="490" y2="225" stroke="var(--color-text-muted)" stroke-width="2"/>
+            <line x1="45" y1="225" x2="45"  y2="20"  stroke="var(--color-text-muted)" stroke-width="2"/>
+
+            <!-- Axis arrows -->
+            <polygon points="490,225 480,220 480,230" fill="var(--color-text-muted)"/>
+            <polygon points="45,20 40,30 50,30" fill="var(--color-text-muted)"/>
+
+            <!-- Axis labels -->
+            <text x="490" y="240" text-anchor="middle" font-size="11" fill="var(--color-text-muted)" font-family="sans-serif">model complexity →</text>
+            <text x="25" y="125" text-anchor="middle" font-size="11" fill="var(--color-text-muted)" font-family="sans-serif" transform="rotate(-90 25 125)">model score</text>
+
+            <!-- Y-axis ticks -->
+            <text x="38" y="230" text-anchor="end" font-size="9" fill="var(--color-text-faint)" font-family="sans-serif">0</text>
+            <text x="38" y="130" text-anchor="end" font-size="9" fill="var(--color-text-faint)" font-family="sans-serif">0.5</text>
+            <text x="38" y="35"  text-anchor="end" font-size="9" fill="var(--color-text-faint)" font-family="sans-serif">1.0</text>
+            <line x1="43" y1="225" x2="47" y2="225" stroke="var(--color-text-faint)" stroke-width="1.5"/>
+            <line x1="43" y1="130" x2="47" y2="130" stroke="var(--color-text-faint)" stroke-width="1.5"/>
+            <line x1="43" y1="35"  x2="47" y2="35"  stroke="var(--color-text-faint)" stroke-width="1.5"/>
+
+            <!-- Training Score curve (blue) – monotonically rising -->
+            <path d="M55,195 C80,175 120,150 160,130 S220,105 270,90 S340,75 400,65 S450,60 475,58"
+                  fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+
+            <!-- Validation Score curve (red) – rises then falls -->
+            <path d="M55,215 C80,185 120,145 155,115 S200,80 255,72 S295,72 315,80 S360,110 395,140 S440,165 475,185"
+                  fill="none" stroke="#ef4444" stroke-width="2.5"/>
+
+            <!-- Best Model marker at peak of validation -->
+            <circle cx="255" cy="72" r="7" fill="var(--color-success)" stroke="#fff" stroke-width="2"/>
+            <line x1="255" y1="72" x2="255" y2="25" stroke="var(--color-success)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="255" y="20" text-anchor="middle" font-size="10" fill="var(--color-success)" font-family="sans-serif" font-weight="800">Best Model</text>
+
+            <!-- Zone labels -->
+            <text x="120" y="42" text-anchor="middle" font-size="10" fill="#3b82f6" font-family="sans-serif" font-weight="700">High Bias</text>
+            <text x="120" y="55" text-anchor="middle" font-size="9"  fill="#3b82f6" font-family="sans-serif">(Underfitting)</text>
+            <text x="395" y="42" text-anchor="middle" font-size="10" fill="#ef4444" font-family="sans-serif" font-weight="700">High Variance</text>
+            <text x="395" y="55" text-anchor="middle" font-size="9"  fill="#ef4444" font-family="sans-serif">(Overfitting)</text>
+
+            <!-- Legend -->
+            <line x1="340" y1="200" x2="365" y2="200" stroke="#3b82f6" stroke-width="2.5"/>
+            <text x="370" y="204" font-size="9" fill="#3b82f6" font-family="sans-serif">training_score</text>
+            <line x1="340" y1="215" x2="365" y2="215" stroke="#ef4444" stroke-width="2.5"/>
+            <text x="370" y="219" font-size="9" fill="#ef4444" font-family="sans-serif">validation_score</text>
+
+          </svg>
+        </div>
+
+        <!-- Charakteristiken -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>Charakteristiken der Validierungskurve</h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:#3b82f6">training_score</span>
+                ist <strong>immer</strong> ≥
+                <span class="key" style="--key-color:#ef4444">validation_score</span>
+              </li>
+              <li>
+                Niedrige Komplexität (<span class="key" style="--key-color:#3b82f6">High-Bias</span>):
+                Underfitting der Trainingsdaten <em>und</em> schlechte Schätzung ungesehener Daten
+              </li>
+              <li>
+                Hohe Komplexität (<span class="key" style="--key-color:#ef4444">High-Variance</span>):
+                Overfitting der Trainingsdaten; Validation-Score divergiert
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">Optimum</span>
+                = Maximum des Validation-Scores = <strong>Best Model</strong>
+              </li>
+              <li>Für jede erzeugte Modellkomplexität → je einen Trainings- und Validierungs-Score</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Wie liest man die Kurve?</h3>
+            <ul>
+              <li>X-Achse = Modellkomplexität (z.B. Polynomgrad)</li>
+              <li>Y-Achse = Score (0 bis 1)</li>
+              <li>Blau = Training-Score, Rot = Validation-Score</li>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">Best Model</span>
+                = Peak der roten Kurve (Maximum Validation-Score)
+              </li>
+              <li>Gap zwischen Kurven bei hoher Komplexität → Overfitting-Signal</li>
+              <li>Konvergenz beider Kurven bei niedriger Komplexität → Underfitting-Signal</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>„Was denken Sie? Welche Charakteristiken sehen Sie? Und warum?"</p>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? – Zusammenfassung Seite 8</div>
+          <p>
+            Das <span class="key" style="--key-color:var(--color-primary)">Hyperparameter-Tuning</span>
+            zielt darauf ab, die Modellkomplexität zu finden, bei der der
+            <strong>Validation-Score maximal</strong> ist – das ist der Best-Model-Punkt.
+            Links davon: Underfitting. Rechts davon: Overfitting.
+            In der Praxis macht man das mit
+            <code>validation_curve()</code> oder <code>GridSearchCV()</code>
+            (→ Seite 9 &amp; 10).
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Seite 8 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

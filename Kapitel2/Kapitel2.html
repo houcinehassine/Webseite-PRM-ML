@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Kapitel 2 · Einführung in Machine Learning</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Einführung in Machine Learning"></site-header>
+
+  <!-- ══ MAIN ══════════════════════════════════════════════ -->
+  <main id="main-content">
+    <div class="container">
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- HERO                                              -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <section class="k5-hero">
+        <span class="eyebrow">🤖 Kapitel 2 · Woche 3</span>
+        <h1>Einführung in Machine Learning</h1>
+        <p>
+          Von der Feature-Matrix zum trainierten Modell – Supervised &amp; Unsupervised
+          Learning, scikit-learn API, Model Validation, Bias-Variance Trade-off
+          und Grid Search auf 10 Seiten.
+        </p>
+
+        <!-- Themen-Überblick als Pills -->
+        <div class="overview-strip">
+          <span class="overview-pill">🧠 Was ist ML?</span>
+          <span class="overview-pill">📊 Supervised Learning</span>
+          <span class="overview-pill">🔍 Unsupervised Learning</span>
+          <span class="overview-pill">🐍 scikit-learn</span>
+          <span class="overview-pill">✅ Model Validation</span>
+          <span class="overview-pill">🔀 Cross-Validation</span>
+          <span class="overview-pill">⚖️ Bias-Variance</span>
+          <span class="overview-pill">📉 Learning Curves</span>
+          <span class="overview-pill">🔧 Grid Search</span>
+        </div>
+
+        <!-- Status Pills -->
+        <div class="status-bar">
+          <span class="status-pill active"><span class="dot"></span>10 Seiten verfügbar</span>
+          <span class="status-pill"><span class="dot"></span>49 Vorlesungsfolien</span>
+          <span class="status-pill">sklearn · numpy · matplotlib</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SEKTION 1 · Grundlagen & Konzepte                 -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div class="section-label">
+        <span class="section-label-icon">🧩</span>
+        <span class="section-label-text">Grundlagen &amp; Konzepte</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="pages-grid">
+
+        <!-- Page 01 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page01.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-2)),
+                 color-mix(in oklab, var(--color-primary)  4%, var(--color-surface-offset)));">
+            🗺️
+            <span class="card-num">Seite 01</span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Einstieg</div>
+            <div class="card-titel">Einführung: Was dich erwartet</div>
+            <div class="card-desc">
+              Wochenplan &amp; zeitliche Einordnung im Semester.
+              Die 6 Agenda-Punkte als visuelle Roadmap. Ausgangssituation
+              (Feature-Raum, Feature-Matrix) und Kerndefinition:
+              Machine Learning == „Building Models of Data".
+            </div>
+            <div class="card-tags">
+              <span class="tag">Wochenplan</span>
+              <span class="tag">Agenda</span>
+              <span class="tag">Was ist ML?</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Einstieg · 5 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 02 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page02.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #10b981 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #10b981  4%, var(--color-surface-offset)));">
+            🗂️
+            <span class="card-num"
+                  style="color:#059669; background:color-mix(in oklab,#10b981 12%,var(--color-surface))">
+              Seite 02
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Überblick</div>
+            <div class="card-titel">Kategorien des ML: Überblick</div>
+            <div class="card-desc">
+              Das Drei-Kategorien-Diagramm: Supervised Learning (Classification,
+              Regression), Unsupervised Learning (Clustering, Density Estimation,
+              Dimension Reduction) und Reinforcement Learning.
+              Feature-Matrix X (N×T) + Label-Vektor y.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Supervised</span>
+              <span class="tag">Unsupervised</span>
+              <span class="tag">Feature-Matrix</span>
+              <span class="tag">Label-Vektor</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Konzept · 6 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 03 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page03.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #10b981 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #10b981  4%, var(--color-surface-offset)));">
+            📐
+            <span class="card-num"
+                  style="color:#059669; background:color-mix(in oklab,#10b981 12%,var(--color-surface))">
+              Seite 03
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Supervised Learning</div>
+            <div class="card-titel">Klassifikation &amp; Regression</div>
+            <div class="card-desc">
+              Trennlinie finden → neue Punkte klassifizieren → diskrete Labels.
+              Scoring &amp; Prediction Konzept. Regression: kontinuierliche Labels
+              als 3. Dimension, Ebene auf Daten fitten.
+              <em>„Learning is finding parameters."</em>
+            </div>
+            <div class="card-tags">
+              <span class="tag">Klassifikation</span>
+              <span class="tag">Regression</span>
+              <span class="tag">Scoring</span>
+              <span class="tag">Prediction</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie · 5 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 04 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page04.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #10b981 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #10b981  4%, var(--color-surface-offset)));">
+            🔍
+            <span class="card-num"
+                  style="color:#059669; background:color-mix(in oklab,#10b981 12%,var(--color-surface))">
+              Seite 04
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Unsupervised Learning</div>
+            <div class="card-titel">Clustering &amp; Dimensionsreduktion</div>
+            <div class="card-desc">
+              Ungelabelte Daten → diskrete Gruppen via Abstandsbetrachtungen
+              (Clustering). Dimensionsreduktion: niedrigdimensionale Repräsentation,
+              latente Variablen. Die Spirale als intrinsisch eindimensionales Beispiel.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Clustering</span>
+              <span class="tag">Dimensionsreduktion</span>
+              <span class="tag">Latente Variable</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie · 2 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Grundlagen -->
+
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SEKTION 2 · Python & scikit-learn                 -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div class="section-label">
+        <span class="section-label-icon">🐍</span>
+        <span class="section-label-text">Python &amp; scikit-learn</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="pages-grid">
+
+        <!-- Page 05 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page05.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #f59e0b 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #f59e0b  4%, var(--color-surface-offset)));">
+            ⚙️
+            <span class="card-num"
+                  style="color:#d97706; background:color-mix(in oklab,#f59e0b 12%,var(--color-surface))">
+              Seite 05
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">sklearn API</div>
+            <div class="card-titel">ML in Python: scikit-learn</div>
+            <div class="card-desc">
+              Die 6 Bereiche von sklearn (Classification, Regression, Clustering,
+              Dimensionality Reduction, Model Selection, Preprocessing).
+              Generischer 4-Schritte-Prozess: Importieren → Hyperparameter →
+              <code>.fit()</code> → <code>.predict()</code>.
+              Linear Regression als vollständiges Beispiel.
+            </div>
+            <div class="card-tags">
+              <span class="tag">sklearn API</span>
+              <span class="tag">.fit()</span>
+              <span class="tag">.predict()</span>
+              <span class="tag">LinearRegression</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie &amp; Code · 4 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 06 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page06.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #f59e0b 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #f59e0b  4%, var(--color-surface-offset)));">
+            ✅
+            <span class="card-num"
+                  style="color:#d97706; background:color-mix(in oklab,#f59e0b 12%,var(--color-surface))">
+              Seite 06
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Validierung</div>
+            <div class="card-titel">Model Validation: Grundlagen</div>
+            <div class="card-desc">
+              Warum validieren? The Not-So-Right Way: Training &amp; Test auf
+              denselben Daten → 100 % Accuracy → FAIL.
+              <code>accuracy_score()</code> und <code>model.score()</code>.
+              Holdout Sets mit <code>train_test_split()</code>.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Holdout Sets</span>
+              <span class="tag">accuracy_score</span>
+              <span class="tag">train_test_split</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie &amp; Code · 4 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid sklearn -->
+
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SEKTION 3 · Modellvalidierung & Optimierung       -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div class="section-label">
+        <span class="section-label-icon">📈</span>
+        <span class="section-label-text">Modellvalidierung &amp; Optimierung</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="pages-grid">
+
+        <!-- Page 07 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page07.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #8b5cf6 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #8b5cf6  4%, var(--color-surface-offset)));">
+            🔀
+            <span class="card-num"
+                  style="color:#7c3aed; background:color-mix(in oklab,#8b5cf6 12%,var(--color-surface))">
+              Seite 07
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Cross-Validation</div>
+            <div class="card-titel">Cross-Validation &amp; Splits</div>
+            <div class="card-desc">
+              Two-Fold CV. K-Fold mit <code>cross_val_score(model, X, y, cv=5)</code>.
+              Leave-One-Out als Extremform. State-of-the-Art: Train / Test / Validation
+              3-Way Split. Model Training Workflow als Flowchart. Repeated K-Fold.
+            </div>
+            <div class="card-tags">
+              <span class="tag">K-Fold</span>
+              <span class="tag">cross_val_score</span>
+              <span class="tag">LeaveOneOut</span>
+              <span class="tag">3-Way Split</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie &amp; Code · 5 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 08 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page08.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #8b5cf6 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #8b5cf6  4%, var(--color-surface-offset)));">
+            ⚖️
+            <span class="card-num"
+                  style="color:#7c3aed; background:color-mix(in oklab,#8b5cf6 12%,var(--color-surface))">
+              Seite 08
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Komplexität</div>
+            <div class="card-titel">Bias-Variance Trade-off</div>
+            <div class="card-desc">
+              Hyperparameter vs. Parameter. High-Bias (Underfitting) vs.
+              High-Variance (Overfitting). Die Dartscheiben-Metapher:
+              Bias = Abstand vom Mittelpunkt (Validität), Varianz = Streuung
+              (Reliabilität). Validierungskurven Schema.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Underfitting</span>
+              <span class="tag">Overfitting</span>
+              <span class="tag">Dartscheibe</span>
+              <span class="tag">Validierungskurven</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie · 5 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 09 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page09.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #8b5cf6 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #8b5cf6  4%, var(--color-surface-offset)));">
+            📉
+            <span class="card-num"
+                  style="color:#7c3aed; background:color-mix(in oklab,#8b5cf6 12%,var(--color-surface))">
+              Seite 09
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Kurvenanalyse</div>
+            <div class="card-titel">Validierungskurven &amp; Learning Curves</div>
+            <div class="card-desc">
+              Polynomiale Regression als Modell-Vertreter. <code>validation_curve()</code>:
+              Optimum bei degree=3. Learning Curves: Einfluss der Datensatzgröße
+              auf die Performance. Konvergenzverhalten degree=2 vs. degree=9.
+            </div>
+            <div class="card-tags">
+              <span class="tag">PolynomialFeatures</span>
+              <span class="tag">validation_curve</span>
+              <span class="tag">learning_curve</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie &amp; Code · 5 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 10 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page10.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #8b5cf6 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #8b5cf6  4%, var(--color-surface-offset)));">
+            🔧
+            <span class="card-num"
+                  style="color:#7c3aed; background:color-mix(in oklab,#8b5cf6 12%,var(--color-surface))">
+              Seite 10
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Hyperparameter-Tuning</div>
+            <div class="card-titel">Grid Search &amp; Hyperparameter-Tuning</div>
+            <div class="card-desc">
+              Mehrdimensionale Fehlerfläche als 3D-Surface.
+              <code>GridSearchCV(model, param_grid, cv=7)</code>: alle
+              Parameterkombinationen sweepen → <code>.best_params_</code>
+              → <code>.best_estimator_</code> → Fit &amp; Plot.
+            </div>
+            <div class="card-tags">
+              <span class="tag">GridSearchCV</span>
+              <span class="tag">param_grid</span>
+              <span class="tag">best_params_</span>
+              <span class="tag">Pipeline</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie &amp; Code · 4 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Optimierung -->
+
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SEKTION 4 · Prüfungsvorbereitung                  -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div class="section-label">
+        <span class="section-label-icon">📋</span>
+        <span class="section-label-text">Prüfungsvorbereitung</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="pages-grid two-col">
+
+        <!-- Cheatsheet ──────────────────────────────────── -->
+        <a class="page-card" href="PageCheatsheet.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #0ea5e9 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #0ea5e9  4%, var(--color-surface-offset)));">
+            📋
+            <span class="card-num"
+                  style="color:#0284c7; background:color-mix(in oklab,#0ea5e9 12%,var(--color-surface))">
+              Cheatsheet
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Schnellreferenz</div>
+            <div class="card-titel">Cheatsheet ML Einführung</div>
+            <div class="card-desc">
+              Alle Konzepte kompakt: ML-Kategorien, generischer sklearn-Workflow,
+              Validation-Methoden (Holdout, K-Fold, LOO, 3-Way Split),
+              Bias-Variance Trade-off, Grid Search.
+              Typische Fallen &amp; Merksätze für die Prüfung.
+            </div>
+            <div class="card-tags">
+              <span class="tag">ML-Kategorien</span>
+              <span class="tag">sklearn API</span>
+              <span class="tag">Prüfungsfragen</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Schnellreferenz · 8 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Quiz ────────────────────────────────────────── -->
+        <a class="page-card" href="PageQuiz.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #f43f5e 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #f43f5e  4%, var(--color-surface-offset)));">
+            🧠
+            <span class="card-num"
+                  style="color:#e11d48; background:color-mix(in oklab,#f43f5e 12%,var(--color-surface))">
+              Quiz
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Selbsttest</div>
+            <div class="card-titel">Quiz – Einführung in ML</div>
+            <div class="card-desc">
+              Konzeptfragen (Was ist Supervised / Unsupervised Learning?),
+              Formelfragen (Bias-Variance), Code-Fragen (sklearn Workflow,
+              cross_val_score) und typische Fallen
+              (Training = Test → FAIL?).
+            </div>
+            <div class="card-tags">
+              <span class="tag">Konzeptfragen</span>
+              <span class="tag">Code-Fragen</span>
+              <span class="tag">🪤 Fallen</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Selbsttest · 4 Kategorien</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Prüfung -->
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Einführung in Machine Learning · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

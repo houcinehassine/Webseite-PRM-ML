@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Unsupervised Learning: Clustering &amp; Dimensionsreduktion</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ── SCATTER PAIR (aus kapitel2.css wenn vorhanden) ── */
+    .scatter-pair { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); margin-top:var(--space-5); }
+    @media (max-width:640px) { .scatter-pair { grid-template-columns:1fr; } }
+    .scatter-card { background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:var(--radius-xl); overflow:hidden; }
+    .scatter-card-title { padding:var(--space-3) var(--space-4); font-size:var(--text-xs); font-weight:700;
+      letter-spacing:.07em; text-transform:uppercase; background:var(--color-surface-offset);
+      border-bottom:1px solid var(--color-border); text-align:center; color:var(--color-text-muted); }
+    .scatter-card svg { width:100%; height:auto; display:block; padding:var(--space-2); }
+
+    /* ── LATENT SCALE (vertikale Farbskala Folie 17) ──── */
+    .spiral-wrap {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+    }
+    .spiral-wrap svg { flex: 1; min-width: 0; }
+    .latent-scale {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      flex-shrink: 0;
+      padding: var(--space-2) 0;
+    }
+    .latent-scale-bar {
+      width: 18px;
+      flex: 1;
+      min-height: 120px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(to bottom, #fbbf24, #f59e0b, #3b82f6, #6366f1, #4c1d95);
+      border: 1px solid var(--color-border);
+    }
+    .latent-scale-label {
+      font-size: 0.6rem;
+      color: var(--color-text-faint);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      letter-spacing: .05em;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    /* ── PREVIEW BADGE (→ später in Kapitel X) ──────── */
+    .preview-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--color-surface-offset);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--color-text-faint);
+      text-decoration: none;
+    }
+    .preview-badge:hover { border-color: var(--color-primary); color: var(--color-primary); }
+
+    /* ── SO WHAT + FRAGE BOX ─────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── HORIZON HINT (Ausblick auf spätere Kapitel) ─── */
+    .horizon-box {
+      margin-top: var(--space-6);
+      padding: var(--space-5);
+      background: color-mix(in oklab, var(--color-primary) 4%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+      border-radius: var(--radius-xl);
+      display: flex;
+      gap: var(--space-5);
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    .horizon-box-title {
+      font-size: var(--text-xs); font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--color-primary);
+      margin-bottom: var(--space-2); white-space: nowrap;
+    }
+    .horizon-item {
+      flex: 1; min-width: 160px;
+      padding: var(--space-4);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+    }
+    .horizon-item-title { font-size: var(--text-sm); font-weight: 700; margin-bottom: var(--space-2); }
+    .horizon-item-sub { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.5; }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Unsupervised Learning"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page4"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Seite 4 · Folien 16–17</span>
+            <h1>Unsupervised Learning:
+              <span class="key" style="--key-color:var(--color-success)">Clustering</span>
+              &amp;
+              <span class="key" style="--key-color:var(--color-primary)">Dimensionsreduktion</span>
+            </h1>
+            <p>
+              Keine Labels – trotzdem Struktur entdecken. Diese Seite legt das
+              konzeptuelle Fundament für zwei wichtige Unsupervised-Learning-Ansätze.
+              Clustering ordnet Datenpunkte diskreten Gruppen zu,
+              Dimensionsreduktion findet niedrigdimensionale Repräsentationen.
+              Beide Themen werden in späteren Wochen vertieft.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Unlabelled Data</span>
+              <span class="pill">Diskrete Gruppen</span>
+              <span class="pill">Dichteschätzung</span>
+              <span class="pill">Abstandsmaß</span>
+              <span class="pill">Dimensionsreduktion</span>
+              <span class="pill">Latente Variable</span>
+              <span class="pill">Spirale</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kennst den Unterschied zwischen
+              <strong>Clustering</strong> (Gruppen finden) und
+              <strong>Dimensionsreduktion</strong> (niedrigdimensionale Struktur entdecken).
+              Du verstehst das Prinzip der
+              <span class="key" style="--key-color:var(--color-primary)">latenten Variable</span>
+              und weißt, warum das Spiralen-Beispiel zeigt, dass 2D-Daten
+              <em>intrinsisch eindimensional</em> sein können.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4.1  CLUSTERING  (Folie 16)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="clustering">
+        <div class="section-head">
+          <h2>4.1 Clustering</h2>
+          <p>
+            Ein typisches Unsupervised-Learning-Problem: ungelabelte Daten werden
+            <span class="key" style="--key-color:var(--color-success)">diskreten Gruppen</span>
+            zugeordnet. Das Modell entdeckt die Struktur selbst –
+            eng verwandt mit der
+            <span class="key" style="--key-color:var(--color-success)">Dichteschätzung</span>
+            der zugrundeliegenden Daten.
+          </p>
+        </div>
+
+        <!-- Scatter Pair: Unlabelled → Labelled (discrete) -->
+        <div class="scatter-pair">
+
+          <!-- Unlabelled Data -->
+          <div class="scatter-card">
+            <div class="scatter-card-title">Unlabelled Data — Sichtbar in Gruppen, aber ungefärbt</div>
+            <svg viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="215" x2="285" y2="215" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="215" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="160" y="232" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+              <text x="13"  y="115" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 13 115)">Feature 2</text>
+              <!-- Cluster 1 – upper left (gray) -->
+              <circle cx="75"  cy="60"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="90"  cy="50"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="60"  cy="75"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="100" cy="65"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="80"  cy="85"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="55"  cy="90"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="110" cy="80"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <!-- Cluster 2 – upper right (gray) -->
+              <circle cx="195" cy="55"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="215" cy="65"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="200" cy="75"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="230" cy="55"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="210" cy="90"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="240" cy="75"  r="7" fill="#9ca3af" opacity="0.7"/>
+              <!-- Cluster 3 – lower center (gray) -->
+              <circle cx="140" cy="165" r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="160" cy="175" r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="150" cy="190" r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="130" cy="180" r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="170" cy="160" r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="120" cy="160" r="7" fill="#9ca3af" opacity="0.7"/>
+              <circle cx="180" cy="185" r="7" fill="#9ca3af" opacity="0.7"/>
+              <!-- Isolated dots (possible 4th cluster) -->
+              <circle cx="250" cy="155" r="6" fill="#9ca3af" opacity="0.6"/>
+              <circle cx="265" cy="165" r="6" fill="#9ca3af" opacity="0.6"/>
+              <circle cx="255" cy="175" r="6" fill="#9ca3af" opacity="0.6"/>
+              <!-- Title -->
+              <rect x="75" y="18" width="130" height="18" rx="4" fill="var(--color-surface-offset)" stroke="var(--color-border)" stroke-width="1"/>
+              <text x="140" y="30" text-anchor="middle" font-size="10" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="bold">Unlabelled Data</text>
+            </svg>
+          </div>
+
+          <!-- Labelled Data (discrete) -->
+          <div class="scatter-card">
+            <div class="scatter-card-title">Labelled Data (discrete) — Cluster vom Modell entdeckt</div>
+            <svg viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="215" x2="285" y2="215" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="215" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="160" y="232" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+              <text x="13"  y="115" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 13 115)">Feature 2</text>
+              <!-- Cluster 1 – grün (oben-links) -->
+              <circle cx="75"  cy="60"  r="7" fill="#10b981" opacity="0.85"/>
+              <circle cx="90"  cy="50"  r="7" fill="#10b981" opacity="0.85"/>
+              <circle cx="60"  cy="75"  r="7" fill="#10b981" opacity="0.85"/>
+              <circle cx="100" cy="65"  r="7" fill="#10b981" opacity="0.85"/>
+              <circle cx="80"  cy="85"  r="7" fill="#10b981" opacity="0.85"/>
+              <circle cx="55"  cy="90"  r="7" fill="#10b981" opacity="0.85"/>
+              <circle cx="110" cy="80"  r="7" fill="#10b981" opacity="0.85"/>
+              <!-- Cluster 2 – gelb (oben-rechts) -->
+              <circle cx="195" cy="55"  r="7" fill="#fbbf24" opacity="0.85"/>
+              <circle cx="215" cy="65"  r="7" fill="#fbbf24" opacity="0.85"/>
+              <circle cx="200" cy="75"  r="7" fill="#fbbf24" opacity="0.85"/>
+              <circle cx="230" cy="55"  r="7" fill="#fbbf24" opacity="0.85"/>
+              <circle cx="210" cy="90"  r="7" fill="#fbbf24" opacity="0.85"/>
+              <circle cx="240" cy="75"  r="7" fill="#fbbf24" opacity="0.85"/>
+              <!-- Cluster 3 – dunkelblau/violett (unten) -->
+              <circle cx="140" cy="165" r="7" fill="#4338ca" opacity="0.85"/>
+              <circle cx="160" cy="175" r="7" fill="#4338ca" opacity="0.85"/>
+              <circle cx="150" cy="190" r="7" fill="#4338ca" opacity="0.85"/>
+              <circle cx="130" cy="180" r="7" fill="#4338ca" opacity="0.85"/>
+              <circle cx="170" cy="160" r="7" fill="#4338ca" opacity="0.85"/>
+              <circle cx="120" cy="160" r="7" fill="#4338ca" opacity="0.85"/>
+              <circle cx="180" cy="185" r="7" fill="#4338ca" opacity="0.85"/>
+              <!-- Cluster 4 – isoliert, dunkelviolett -->
+              <circle cx="250" cy="155" r="6" fill="#7c3aed" opacity="0.85"/>
+              <circle cx="265" cy="165" r="6" fill="#7c3aed" opacity="0.85"/>
+              <circle cx="255" cy="175" r="6" fill="#7c3aed" opacity="0.85"/>
+              <!-- Cluster legend -->
+              <circle cx="50"  cy="22" r="5" fill="#10b981"/><text x="59" cy="26" y="26" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif">C1</text>
+              <circle cx="80"  cy="22" r="5" fill="#fbbf24"/><text x="89" cy="26" y="26" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif">C2</text>
+              <circle cx="110" cy="22" r="5" fill="#4338ca"/><text x="119" cy="26" y="26" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif">C3</text>
+              <circle cx="140" cy="22" r="5" fill="#7c3aed"/><text x="149" cy="26" y="26" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif">C4?</text>
+            </svg>
+          </div>
+
+        </div>
+
+        <!-- Prof Fragen aus Folie 16 -->
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage 1 – aus der Vorlesung</div>
+          <p>„Was denken Sie? Wie würden Sie abschätzen, ob ein Datenpunkt zu einem bestimmten Cluster gehört? Welches Maß würden Sie verwenden?"</p>
+        </div>
+
+        <div class="frage-box" style="margin-top:var(--space-3)">
+          <div class="frage-label">💬 Denkfrage 2 – aus der Vorlesung</div>
+          <p>„Was denken Sie? Welches Problem sehen Sie hier?" (Hinweis: Wie viele Cluster gibt es wirklich?)</p>
+        </div>
+
+        <!-- Konzept Cards -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Clustering</span>
+              – Das Konzept
+            </h3>
+            <ul>
+              <li>Ein typisches
+                <span class="key" style="--key-color:var(--color-success)">Unsupervised Learning</span>
+                Problem</li>
+              <li>Ungelabelte Daten werden
+                <strong>diskreten Gruppen bzw. Labels</strong> zugeordnet</li>
+              <li>Eng verwandt mit der
+                <span class="key" style="--key-color:var(--color-success)">Dichteschätzung</span>
+                der zugrundeliegenden Daten</li>
+              <li>Neue Datenpunkte können durch
+                <span class="key" style="--key-color:var(--color-warning)">Abstandsbetrachtungen</span>
+                einem bestimmten Cluster zugewiesen werden</li>
+              <li>Ergebnis: diskrete Cluster-IDs (0, 1, 2, ...) statt kontinuierlicher Labels</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              Das offene Problem:
+              <span class="key" style="--key-color:var(--color-warning)">Wie viele Cluster?</span>
+            </h3>
+            <ul>
+              <li>Im Beispiel: 3 oder 4 Cluster? → <strong>nicht eindeutig</strong> erkennbar</li>
+              <li>Die Wahl von
+                <span class="key" style="--key-color:var(--color-warning)">k</span>
+                (Anzahl Cluster) ist ein zentrales Problem</li>
+              <li>Das Abstandsmaß bestimmt, welche Cluster das Modell „sieht"</li>
+              <li>Typische Maße: Euklidischer Abstand, Manhattan, Kosinus-Ähnlichkeit</li>
+              <li>Lösungsansätze: Elbow Plot, Silhouette Score →
+                <em>ausführlich in Kapitel 4 (Woche 5)</em></li>
+            </ul>
+          </article>
+
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Beim Clustering gibt es keine „richtige Antwort" im Sinne eines bekannten Labels –
+            das Modell entscheidet selbst, welche Gruppen sinnvoll sind.
+            Das Abstandsmaß und die Anzahl der Cluster
+            <span class="key" style="--key-color:var(--color-success)">k</span>
+            sind entscheidende <strong>Hyperparameter</strong>, die man als Mensch festlegt.
+          </p>
+        </div>
+
+        <!-- Ausblick -->
+        <div class="horizon-box">
+          <div>
+            <div class="horizon-box-title">📅 Kommt später ausführlich</div>
+          </div>
+          <div class="horizon-item">
+            <div class="horizon-item-title">🟢 Woche 5 · Kapitel 4</div>
+            <div class="horizon-item-sub">
+              k-means, DBSCAN, Silhouette Score, Elbow Plot,
+              Validierungsmaße – vollständiges Clustering-Kapitel
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4.2  DIMENSIONSREDUKTION  (Folie 17)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="dimensionsreduktion">
+        <div class="section-head">
+          <h2>4.2 Dimensionsreduktion</h2>
+          <p>
+            Ziel: eine
+            <span class="key" style="--key-color:var(--color-primary)">niedrigdimensionale Repräsentation</span>
+            der Daten finden, die die wichtigsten Eigenschaften erhält.
+            Das Spiralen-Beispiel zeigt: 2D-Daten können
+            <span class="key" style="--key-color:var(--color-primary)">intrinsisch eindimensional</span>
+            sein.
+          </p>
+        </div>
+
+        <!-- Spiral SVG Pair -->
+        <div class="scatter-pair">
+
+          <!-- Input Data (spiral, gray) -->
+          <div class="scatter-card">
+            <div class="scatter-card-title">Input Data — Daten liegen auf einer Spirale (2D)</div>
+            <svg viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="215" x2="285" y2="215" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="215" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="160" y="232" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+              <text x="13"  y="115" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 13 115)">Feature 2</text>
+              <!-- Spirale (grau) – approximierte Punkte einer Archimedischen Spirale -->
+              <!-- Innerer Bereich, 1. Umdrehung -->
+              <circle cx="158" cy="113" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="162" cy="107" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="153" cy="103" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="143" cy="108" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="140" cy="118" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="147" cy="127" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="160" cy="130" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="172" cy="124" r="5" fill="#9ca3af" opacity="0.8"/>
+              <!-- 2. Umdrehung (weiter außen) -->
+              <circle cx="178" cy="112" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="174" cy="97"  r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="162" cy="88"  r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="147" cy="86"  r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="132" cy="92"  r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="122" cy="105" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="120" cy="120" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="127" cy="136" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="140" cy="147" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="158" cy="151" r="5" fill="#9ca3af" opacity="0.8"/>
+              <!-- 3. Umdrehung (außen) -->
+              <circle cx="178" cy="148" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="192" cy="136" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="197" cy="120" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="194" cy="103" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="183" cy="88"  r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="166" cy="76"  r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="146" cy="71"  r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="125" cy="74"  r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="108" cy="85"  r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="97"  cy="100" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="93"  cy="118" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="98"  cy="136" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="110" cy="152" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="127" cy="163" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="148" cy="168" r="5" fill="#9ca3af" opacity="0.8"/>
+              <circle cx="168" cy="166" r="5" fill="#9ca3af" opacity="0.8"/>
+              <!-- Title -->
+              <rect x="75" y="18" width="110" height="18" rx="4" fill="var(--color-surface-offset)" stroke="var(--color-border)" stroke-width="1"/>
+              <text x="130" y="30" text-anchor="middle" font-size="10" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="bold">Input Data</text>
+            </svg>
+          </div>
+
+          <!-- Learned Latent Parameter (spiral, colored) -->
+          <div class="scatter-card">
+            <div class="scatter-card-title">Learned Latent Parameter — Latente Variable entdeckt</div>
+            <div class="spiral-wrap" style="padding:var(--space-2)">
+              <svg viewBox="0 0 270 240" xmlns="http://www.w3.org/2000/svg">
+                <line x1="35" y1="215" x2="255" y2="215" stroke="var(--color-border)" stroke-width="1.5"/>
+                <line x1="35" y1="15"  x2="35"  y2="215" stroke="var(--color-border)" stroke-width="1.5"/>
+                <text x="145" y="232" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+                <!-- Spirale mit Farbverlauf: Start=gelb, Ende=dunkelviolett -->
+                <!-- Innerer Bereich, 1. Umdrehung – gelb/orange -->
+                <circle cx="158" cy="113" r="5" fill="#fbbf24" opacity="0.9"/>
+                <circle cx="162" cy="107" r="5" fill="#fbbf24" opacity="0.9"/>
+                <circle cx="153" cy="103" r="5" fill="#f59e0b" opacity="0.9"/>
+                <circle cx="143" cy="108" r="5" fill="#f59e0b" opacity="0.9"/>
+                <circle cx="140" cy="118" r="5" fill="#fb923c" opacity="0.9"/>
+                <circle cx="147" cy="127" r="5" fill="#f97316" opacity="0.9"/>
+                <circle cx="160" cy="130" r="5" fill="#ea580c" opacity="0.9"/>
+                <circle cx="172" cy="124" r="5" fill="#dc2626" opacity="0.9"/>
+                <!-- 2. Umdrehung – orange/rot zu türkis -->
+                <circle cx="178" cy="112" r="5" fill="#b45309" opacity="0.9"/>
+                <circle cx="174" cy="97"  r="5" fill="#10b981" opacity="0.9"/>
+                <circle cx="162" cy="88"  r="5" fill="#0d9488" opacity="0.9"/>
+                <circle cx="147" cy="86"  r="5" fill="#0891b2" opacity="0.9"/>
+                <circle cx="132" cy="92"  r="5" fill="#0284c7" opacity="0.9"/>
+                <circle cx="122" cy="105" r="5" fill="#2563eb" opacity="0.9"/>
+                <circle cx="120" cy="120" r="5" fill="#3b82f6" opacity="0.9"/>
+                <circle cx="127" cy="136" r="5" fill="#4f46e5" opacity="0.9"/>
+                <circle cx="140" cy="147" r="5" fill="#6366f1" opacity="0.9"/>
+                <circle cx="158" cy="151" r="5" fill="#7c3aed" opacity="0.9"/>
+                <!-- 3. Umdrehung – blau zu dunkelviolett -->
+                <circle cx="178" cy="148" r="5" fill="#8b5cf6" opacity="0.9"/>
+                <circle cx="192" cy="136" r="5" fill="#7c3aed" opacity="0.9"/>
+                <circle cx="197" cy="120" r="5" fill="#6d28d9" opacity="0.9"/>
+                <circle cx="194" cy="103" r="5" fill="#5b21b6" opacity="0.9"/>
+                <circle cx="183" cy="88"  r="5" fill="#4c1d95" opacity="0.9"/>
+                <circle cx="166" cy="76"  r="5" fill="#4c1d95" opacity="0.9"/>
+                <circle cx="146" cy="71"  r="5" fill="#4338ca" opacity="0.9"/>
+                <circle cx="125" cy="74"  r="5" fill="#3730a3" opacity="0.9"/>
+                <circle cx="108" cy="85"  r="5" fill="#312e81" opacity="0.9"/>
+                <circle cx="97"  cy="100" r="5" fill="#312e81" opacity="0.9"/>
+                <circle cx="93"  cy="118" r="5" fill="#1e1b4b" opacity="0.9"/>
+                <circle cx="98"  cy="136" r="5" fill="#1e1b4b" opacity="0.9"/>
+                <circle cx="110" cy="152" r="5" fill="#1e1b4b" opacity="0.9"/>
+                <circle cx="127" cy="163" r="5" fill="#1e1b4b" opacity="0.9"/>
+                <circle cx="148" cy="168" r="5" fill="#1e1b4b" opacity="0.9"/>
+                <circle cx="168" cy="166" r="5" fill="#1e1b4b" opacity="0.9"/>
+                <!-- Title -->
+                <rect x="60" y="18" width="135" height="18" rx="4" fill="var(--color-surface-offset)" stroke="var(--color-border)" stroke-width="1"/>
+                <text x="127" y="30" text-anchor="middle" font-size="10" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="bold">Learned Latent Parameter</text>
+              </svg>
+              <!-- Vertikale Farbskala -->
+              <div class="latent-scale">
+                <span class="latent-scale-label">hoch</span>
+                <div class="latent-scale-bar"></div>
+                <span class="latent-scale-label">niedrig</span>
+                <div style="font-size:0.55rem; color:var(--color-text-faint); text-align:center; margin-top:2px; line-height:1.3; max-width:40px">learned<br>latent<br>variable</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Konzept Cards -->
+        <div class="card-grid" style="margin-top:var(--space-6)">
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Dimensionsreduktion</span>
+              – Das Ziel
+            </h3>
+            <ul>
+              <li>Ein weiteres Problem des Unsupervised Learnings</li>
+              <li>Ziel: eine
+                <span class="key" style="--key-color:var(--color-primary)">niedrigdimensionale Repräsentation</span>
+                der Daten, die die meisten/wichtigsten Eigenschaften <strong>erhält</strong>
+              </li>
+              <li>Im Beispiel: 2D-Daten auf einer Spirale → eigentlich nur <strong>1 Parameter</strong> nötig</li>
+              <li>Das Modell entdeckt diese <strong>innere Struktur</strong> selbst</li>
+              <li>Anwendungen: Visualisierung, Datenkompression, Feature-Engineering</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              Das Spiralen-Beispiel:
+              <span class="key" style="--key-color:var(--color-primary)">Intrinsisch eindimensional</span>
+            </h3>
+            <ul>
+              <li>Die 2D-Daten <em>liegen auf einer Spirale</em> – visuell erkennbar</li>
+              <li>Obwohl 2 Features (x, y) vorhanden: die Spirale ist
+                <span class="key" style="--key-color:var(--color-primary)">intrinsisch eindimensional</span>
+                (nur 1 Koordinate entlang der Spirale nötig)
+              </li>
+              <li>Die Farbe in der rechten Grafik = die entdeckte
+                <span class="key" style="--key-color:var(--color-warning)">latente Variable</span>
+                (Position entlang der Spirale)
+              </li>
+              <li>Das Modell hat eine <strong>neue Koordinatenachse</strong> entdeckt –
+                die nicht in den originalen Features existiert
+              </li>
+            </ul>
+          </article>
+
+        </div>
+
+        <!-- Latente Variable Box -->
+        <div class="card" style="margin-top:var(--space-5)">
+          <h3>
+            <span class="key" style="--key-color:var(--color-warning)">Latente Variable</span>
+            – Eine neue Koordinatenachse
+          </h3>
+          <ul>
+            <li>
+              Die Farbe in der Grafik (Folie 17 rechts) entspricht einer sog.
+              <span class="key" style="--key-color:var(--color-warning)">latenten Variable</span>
+            </li>
+            <li>
+              Latent = <strong>verborgen</strong> – sie war nicht in den originalen Features (Feature 1, Feature 2) vorhanden
+            </li>
+            <li>
+              Das Modell <strong>entdeckt</strong> diese neue Koordinatenachse, die die Datenstruktur beschreibt
+            </li>
+            <li>
+              Im Spiralen-Beispiel: die latente Variable = Position entlang der Spirale
+              (von Anfang = gelb bis Ende = dunkelviolett)
+            </li>
+            <li>
+              Farbskala rechts neben der Grafik: zeigt den Wertebereich der gelernten latenten Variable
+            </li>
+          </ul>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Dimensionsreduktion ist mächtig, weil sie
+            <strong>versteckte Struktur</strong> in Daten aufdeckt.
+            Wenn 2D-Daten auf einer Spirale liegen, brauchen wir nur 1 Zahl,
+            um jeden Punkt eindeutig zu beschreiben – das spart Rechenaufwand
+            und hilft bei der Visualisierung. Die
+            <span class="key" style="--key-color:var(--color-warning)">latente Variable</span>
+            ist das, was das Modell dabei lernt.
+          </p>
+        </div>
+
+        <!-- Ausblick -->
+        <div class="horizon-box">
+          <div>
+            <div class="horizon-box-title">📅 Kommt später ausführlich</div>
+          </div>
+          <div class="horizon-item">
+            <div class="horizon-item-title">🔵 Woche 7 · Kapitel 5/6</div>
+            <div class="horizon-item-sub">
+              PCA (Principal Component Analysis) – die wichtigste
+              Dimensionsreduktionsmethode, vollständige mathematische Herleitung
+              und sklearn-Implementierung
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           ZUSAMMENFASSUNG SEITE 4
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="zusammenfassung">
+        <div class="section-head">
+          <h2>Zusammenfassung: UL – Clustering vs. Dimensionsreduktion</h2>
+          <p>
+            Beide sind Unsupervised-Learning-Methoden ohne Labels –
+            aber sie lösen unterschiedliche Probleme.
+          </p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Aspekt</th>
+              <th>🟢 Clustering</th>
+              <th>🔵 Dimensionsreduktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Ziel</strong></td>
+              <td>Datenpunkte in diskrete <strong>Gruppen</strong> einteilen</td>
+              <td>Daten in <strong>weniger Dimensionen</strong> darstellen</td>
+            </tr>
+            <tr>
+              <td><strong>Output</strong></td>
+              <td>Diskrete <strong>Cluster-Labels</strong> (0, 1, 2, ...)</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">Latente Variablen</span>
+                / reduzierte Koordinaten
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Kernidee</strong></td>
+              <td>
+                <span class="key" style="--key-color:var(--color-success)">Abstandsbetrachtung</span>
+                + Dichteschätzung
+              </td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">Intrinsische Struktur</span>
+                entdecken
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Beispiel</strong></td>
+              <td>Grüne/gelbe/blaue Cluster im Scatter-Plot</td>
+              <td>Spirale → 1D latente Variable (Farbe)</td>
+            </tr>
+            <tr>
+              <td><strong>Problem</strong></td>
+              <td>Wie viele Cluster k?</td>
+              <td>Wie viele Dimensionen bleiben?</td>
+            </tr>
+            <tr>
+              <td><strong>Später in...</strong></td>
+              <td>Woche 5 · k-means, DBSCAN</td>
+              <td>Woche 7 · PCA</td>
+            </tr>
+            <tr>
+              <td><strong>sklearn</strong></td>
+              <td><code>model.fit_predict(X)</code></td>
+              <td><code>model.fit_transform(X)</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="so-what" style="margin-top:var(--space-6)">
+          <div class="so-what-label">💡 Gesamtfazit – Unsupervised Learning Konzepte</div>
+          <p>
+            Unsupervised Learning ist mächtig, weil es ohne Labels auskommt –
+            aber genau das macht es auch schwieriger zu validieren.
+            <strong>Clustering</strong> liefert diskrete Gruppen,
+            <strong>Dimensionsreduktion</strong> liefert kompaktere Repräsentationen.
+            In beiden Fällen gilt: <code>model.fit(X)</code> – kein y!
+            Das Modell entdeckt die Struktur selbst.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Seite 4 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

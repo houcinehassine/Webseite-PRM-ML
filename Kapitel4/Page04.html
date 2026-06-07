@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Validierung von Clustering</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · Validierung von Clustering"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page4"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Seite 4</span>
+            <h1>Validierung von <span class="key" style="--key-color:var(--color-primary)">Clustering</span></h1>
+            <p>
+              Wie bewertet man, ob ein Clustering „gut" ist –
+              ohne Labels? Von einfachen Heuristiken über
+              Dunn-Index und Silhouette Score bis zum Elbow Plot.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Inertia</span>
+              <span class="pill">Dunn-Index</span>
+              <span class="pill">Davies-Bouldin</span>
+              <span class="pill">Silhouette Score</span>
+              <span class="pill">Elbow Plot</span>
+              <span class="pill">SSE</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kennst die vier Arten der Cluster-Validierung,
+              kannst Silhouette-Plots lesen und interpretieren
+              und findest mit dem Elbow Plot das optimale k.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. DEFINITION
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="validierung-definition">
+        <div class="section-head">
+          <h2>4.1 Was bedeutet Validierung?</h2>
+          <p>
+            Beim unüberwachten Lernen gibt es keine Labels –
+            wie beurteilt man dann die Qualität des Ergebnisses?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Definition</span></h3>
+            <ul>
+              <li>Validierung misst die <strong>Güte eines Clusterings</strong></li>
+              <li>Bewertet, ob die Gruppen <strong>natürliche Strukturen</strong> der Daten widerspiegeln</li>
+              <li>Da keine Labels vorliegen → braucht man <strong>spezielle Kriterien</strong></li>
+              <li>Kernfrage: Sind Punkte im gleichen Cluster <strong>ähnlich</strong> und verschiedene Cluster <strong>verschieden</strong>?</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Grundprinzip – So what?</span></h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">Inter-Cluster-Ähnlichkeit</span>
+                → so <strong>gering</strong> wie möglich
+                <br>
+                <small style="color:var(--color-text-muted)">d.h. Cluster sollen weit voneinander entfernt sein</small>
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">Intra-Cluster-Ähnlichkeit</span>
+                → so <strong>hoch</strong> wie möglich
+                <br>
+                <small style="color:var(--color-text-muted)">d.h. Punkte innerhalb eines Clusters sollen nah beieinander sein</small>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Erste Intuition: inertia_ -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-6) 0 var(--space-2)">
+          Erste Intuition · kmeans.inertia_
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# k-means mit k=4 fitten
+kmeans = KMeans(4, random_state=0)
+labels = kmeans.fit_predict(X)
+
+# Clustering visualisieren
+plt.scatter(X[:, 0], X[:, 1],
+            c=labels, s=50, cmap='viridis')
+plt.title("k=4 Clustering")
+plt.show()
+
+# Inertia ausgeben (= SSE)
+print("Inertia:", kmeans.inertia_)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>Inertia: 170.729...</pre>
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:var(--space-3) 0 0;padding-left:1rem;line-height:1.8">
+                <li><code style="color:var(--color-primary)">.inertia_</code> = Summe der quadratischen Abstände aller Punkte zu ihrem Centroid</li>
+                <li>Je <strong>kleiner</strong>, desto kompakter die Cluster</li>
+                <li>Allein nicht aussagekräftig – sinkt immer mit steigendem k</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. ARTEN DER VALIDIERUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="validierung-arten">
+        <div class="section-head">
+          <h2>4.2 Arten der Cluster-Validierung</h2>
+          <p>
+            Vier grundlegende Ansätze – je nach verfügbaren Informationen.
+          </p>
+        </div>
+
+        <div class="overview">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">IN</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-primary)">Internal Evaluation</span></h3>
+              <p>
+                Das Clustering wird durch ein <strong>Gütemaß bewertet</strong>,
+                das nur die Daten selbst und die Cluster-Zuordnung verwendet –
+                ohne externe Information. Beispiele:
+                <strong>Silhouette Score</strong>, <strong>Dunn-Index</strong>,
+                <strong>Davies-Bouldin-Index</strong>.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">EX</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-success)">External Evaluation</span></h3>
+              <p>
+                Das Clustering wird mit einer vorhandenen
+                <strong>„Ground Truth" an Labels</strong> verglichen.
+                Nur möglich, wenn echte Labels bekannt sind –
+                was beim echten Unsupervised Learning meist nicht der Fall ist.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">MA</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-warning)">Manual Evaluation</span></h3>
+              <p>
+                <strong>Manuelle Inspektion</strong> durch einen Fachexperten.
+                Zeitaufwändig, aber oft unverzichtbar in der Praxis –
+                besonders wenn Domänenwissen entscheidend ist.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-purple)">IND</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-purple)">Indirect Evaluation</span></h3>
+              <p>
+                Evaluation durch die <strong>Anwendung des Clustering-Ergebnisses</strong>
+                in einem nachgelagerten Task. Das Clustering gilt als gut,
+                wenn es die Downstream-Aufgabe (z. B. Klassifikation) verbessert.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. DUNN-INDEX
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="dunn-index">
+        <div class="section-head">
+          <h2>4.3 Dunn-Index</h2>
+          <p>
+            Das intuitivste Gütemaß – basierend auf dem Verhältnis
+            von Inter- zu Intra-Cluster-Distanz.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Idee</span></h3>
+            <ul>
+              <li>Verhältnis aus
+                <span class="key" style="--key-color:var(--color-success)">Inter-Cluster-Distanz</span>
+                \(\delta(C_i, C_j)\) zu
+                <span class="key" style="--key-color:var(--color-warning)">Intra-Cluster-Distanz</span>
+                \(\Delta_k\)
+              </li>
+              <li>
+                <strong>Inter-Cluster-Distanz</strong>
+                → Abstände zwischen den Centroids
+              </li>
+              <li>
+                <strong>Intra-Cluster-Distanz</strong>
+                → Maximum der Abstände innerhalb eines Clusters
+              </li>
+              <li>
+                Je <strong>größer</strong> der Dunn-Index, desto
+                <strong>besser</strong> das Clustering
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Formel</span></h3>
+            <div class="math-display">
+              \[
+              DI_m = \frac{
+                \min\limits_{1 \leq i < j \leq m} \delta(C_i,\, C_j)
+              }{
+                \max\limits_{1 \leq k \leq m} \Delta_k
+              }
+              \]
+            </div>
+            <ul>
+              <li><code style="color:var(--color-primary)">m</code> – Anzahl der Cluster</li>
+              <li><code style="color:var(--color-success)">\(\delta(C_i, C_j)\)</code> – kleinste Inter-Cluster-Distanz (Zähler)</li>
+              <li><code style="color:var(--color-warning)">\(\Delta_k\)</code> – größte Intra-Cluster-Distanz (Nenner)</li>
+              <li>Ziel: <strong>Zähler groß, Nenner klein</strong> → \(DI_m\) groß</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. DAVIES-BOULDIN INDEX
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="davies-bouldin">
+        <div class="section-head">
+          <h2>4.4 Davies-Bouldin Index</h2>
+          <p>
+            Weniger intuitiv als der Dunn-Index, aber in sklearn direkt verfügbar.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Beschreibung</span></h3>
+            <ul>
+              <li>Bewertet die <strong>Trennung</strong> zwischen Clustern</li>
+              <li>Und die <strong>Streuung innerhalb</strong> der Cluster</li>
+              <li>
+                <code style="color:var(--color-warning)">s_i</code>
+                = Streuung der Abstände aller Punkte zum Centroid in Cluster \(i\)
+              </li>
+              <li>
+                Je <strong>kleiner</strong> der DB-Index, desto
+                <strong>besser</strong> das Clustering
+                <small style="color:var(--color-text-muted)">(Gegenteil zum Dunn-Index!)</small>
+              </li>
+              <li>
+                In sklearn:
+                <code style="color:var(--color-primary)">davies_bouldin_score(X, y)</code>
+                aus <code>sklearn.metrics</code>
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Formel</span></h3>
+            <div class="math-display">
+              \[
+              DB = \frac{1}{m} \sum_{i=1}^{m}
+              \max_{i \neq j}
+              \left(
+                \frac{s_i + s_j}{d(C_i,\, C_j)}
+              \right)
+              \]
+            </div>
+            <ul>
+              <li><code style="color:var(--color-primary)">s_i + s_j</code> – Summe der Streuungen beider Cluster (Zähler)</li>
+              <li><code style="color:var(--color-success)">d(C_i, C_j)</code> – Abstand zwischen Centroids (Nenner)</li>
+              <li>
+                <strong>max</strong> wählt den <em>schlechtesten Nachbarn</em>
+                für jeden Cluster
+              </li>
+              <li>
+                <strong>Mittelwert</strong> davon über alle Cluster
+              </li>
+            </ul>
+            <div class="note note-primary" style="margin-top:var(--space-3)">
+              <strong>Intuition für min/max:</strong>
+              <code>max</code> – sucht den ähnlichsten (schlechtesten) Nachbar-Cluster.
+              <code>min</code> im Dunn-Index – sucht den am weitesten entfernten Cluster-Abstand.
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           5. SILHOUETTE SCORE
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="silhouette-score">
+        <div class="section-head">
+          <h2>4.5 Silhouette Score</h2>
+          <p>
+            Das vielseitigste Maß – bewertet jeden einzelnen Datenpunkt
+            und liefert ein globales sowie clusterweises Gütemaß.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Beschreibung</span></h3>
+            <ul>
+              <li>Bewertet, wie <strong>ähnlich</strong> ein Punkt seinem eigenen Cluster ist</li>
+              <li>Und wie <strong>unähnlich</strong> er zu allen anderen Clustern ist</li>
+              <li>Wertebereich: <strong>−1 bis +1</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Interpretation</span></h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">Nahe +1</span>
+                – Punkt liegt gut in seinem Cluster
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">Um 0</span>
+                – Punkt liegt zwischen zwei Clustern
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">Negativ (&lt; 0)</span>
+                – Punkt liegt näher an einem fremden Cluster
+                → Clustering verbesserungswürdig
+              </li>
+              <li>
+                Viele hohe Silhouette-Scores → <strong>gutes Clustering</strong>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Formeln -->
+        <div class="overview" style="margin-top:var(--space-6)">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">a(o)</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-primary)">Intra-Cluster-Distanz dist(A, o)</span>
+              </h3>
+              <p>Mittlerer Abstand von Punkt \(o\) zu allen anderen Punkten im eigenen Cluster \(A\):</p>
+              <div class="math-display">
+                \[
+                \text{dist}(A, o) = \frac{1}{n_A - 1}
+                \sum_{\substack{a \in A,\, a \neq o}} \text{dist}(a,\, o)
+                \]
+              </div>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">b(o)</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-warning)">Nächster-Cluster-Abstand dist(B, o)</span>
+              </h3>
+              <p>Kleinster mittlerer Abstand zu allen Punkten der <em>fremden</em> Cluster \(C \neq A\):</p>
+              <div class="math-display">
+                \[
+                \text{dist}(B,\, o) = \min_{C \neq A}
+                \underbrace{
+                  \left(
+                    \frac{1}{n_C} \sum_{c \in C} \text{dist}(c,\, o)
+                  \right)
+                }_{=\,\text{dist}(C,\, o)}
+                \]
+              </div>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">S(o)</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-success)">Silhouette Score für Datenpunkt o</span>
+              </h3>
+              <div class="math-display">
+                \[
+                S(o) =
+                \begin{cases}
+                  0 & \text{wenn } o \text{ einziges Element von } A \\[6pt]
+                  \dfrac{\text{dist}(B,o) - \text{dist}(A,o)}
+                        {\max\{\text{dist}(A,o),\;\text{dist}(B,o)\}}
+                  & \text{sonst}
+                \end{cases}
+                \]
+              </div>
+              <p>
+                Der <strong>Mittelwert</strong> von \(S(o)\) über alle Datenpunkte
+                ist das globale Gütemaß für den gesamten Clustering-Vorgang.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           6. SILHOUETTE PLOT – ÜBUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="silhouette-plot">
+        <div class="section-head">
+          <h2>4.6 Silhouette-Plot – Übung</h2>
+          <p>
+            Cluster-Validierung kann tückisch sein –
+            wir sehen uns das in einer vollständigen Übungsaufgabe an.
+          </p>
+        </div>
+
+        <div class="note note-primary" style="margin-bottom:var(--space-5)">
+          <strong>Szenario:</strong> Ein Datensatz mit 4 Clustern –
+          davon <strong>ein deutlicher</strong> und drei nah beieinanderliegende.
+          Wir testen k = 2 bis 10 und bewerten jedes Clustering
+          mit einem <strong>Silhouette-Plot</strong>.
+        </div>
+
+        <!-- Schritt 1: Daten -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin-bottom:var(--space-2)">
+          Schritt 1 · Datensatz erzeugen
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.datasets import make_blobs
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, silhouette_samples
+
+# Datensatz: 4 Cluster, aber ungleich verteilt
+X, y = make_blobs(
+    n_samples=500,
+    n_features=2,
+    centers=4,
+    cluster_std=1,
+    center_box=(-10.0, 10.0),
+    shuffle=True,
+    random_state=1
+)
+
+# k-Werte, die wir testen wollen
+range_n_clusters = range(2, 11)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Parameter
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li><code style="color:var(--color-primary)">n_samples=500</code> – 500 Datenpunkte</li>
+                <li><code style="color:var(--color-warning)">centers=4</code> – 4 echte Cluster</li>
+                <li><code style="color:var(--color-success)">cluster_std=1</code> – mittlere Streuung</li>
+                <li><code>random_state=1</code> – Reproduzierbarkeit</li>
+                <li>Test für <strong>k = 2 bis 10</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Schleife -->
+        <div class="note" style="margin: var(--space-6) 0 var(--space-3)">
+          <strong>Was macht die folgende Schleife?</strong>
+          Für jedes k wird ein <strong>k-means Clustering</strong> durchgeführt.
+          Dann werden pro Durchlauf zwei Plots erstellt:
+          <ul style="margin-top:var(--space-2)">
+            <li>
+              <span class="key" style="--key-color:var(--color-primary)">Links:</span>
+              <strong>Silhouette-Plot</strong> – zeigt den Score jedes einzelnen Datenpunkts,
+              gruppiert nach Cluster. Die rote gestrichelte Linie = Durchschnitt.
+            </li>
+            <li>
+              <span class="key" style="--key-color:var(--color-warning)">Rechts:</span>
+              <strong>Scatter-Plot</strong> – die tatsächliche Cluster-Zuordnung
+              mit nummerierten Centroids.
+            </li>
+          </ul>
+          So kann man visuell beurteilen, welches k das Clustering am besten beschreibt.
+        </div>
+
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin-bottom:var(--space-2)">
+          Schritt 2 · Silhouette-Analyse Schleife (k = 2 bis 10)
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>for n_clusters in range_n_clusters:
+
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    fig.set_size_inches(18, 7)
+
+    # ── Linker Plot: Silhouette ──────────────────
+    ax1.set_xlim([-0.1, 1])
+    ax1.set_ylim([0, len(X) + (n_clusters + 1) * 10])
+
+    # k-means fitten
+    clusterer = KMeans(n_clusters=n_clusters,
+                       random_state=10)
+    cluster_labels = clusterer.fit_predict(X)
+
+    # Durchschnittlicher Silhouette Score
+    silhouette_avg = silhouette_score(X, cluster_labels)
+    print(f"k={n_clusters} → avg silhouette: "
+          f"{silhouette_avg:.4f}")
+
+    # Score pro Datenpunkt
+    sample_silhouette_values = silhouette_samples(
+        X, cluster_labels)
+
+    y_lower = 10
+    for i in range(n_clusters):
+        # Scores für Cluster i sortieren
+        ith_vals = sample_silhouette_values[
+            cluster_labels == i]
+        ith_vals.sort()
+
+        size_cluster_i = ith_vals.shape[0]
+        y_upper = y_lower + size_cluster_i
+
+        color = cm.nipy_spectral(
+            float(i) / n_clusters)
+        ax1.fill_betweenx(
+            np.arange(y_lower, y_upper),
+            0, ith_vals,
+            facecolor=color, edgecolor=color,
+            alpha=0.7)
+        ax1.text(-0.05,
+                 y_lower + 0.5 * size_cluster_i,
+                 str(i))
+        y_lower = y_upper + 10
+
+    ax1.set_title("Silhouette Plot")
+    ax1.set_xlabel("Silhouette Coefficient")
+    ax1.set_ylabel("Cluster Label")
+    ax1.axvline(x=silhouette_avg,
+                color="red", linestyle="--")
+    ax1.set_yticks([])
+    ax1.set_xticks(
+        [-0.1, 0, 0.2, 0.4, 0.6, 0.8, 1])
+
+    # ── Rechter Plot: Cluster Scatter ───────────
+    colors = cm.nipy_spectral(
+        cluster_labels.astype(float) / n_clusters)
+    ax2.scatter(X[:, 0], X[:, 1],
+                marker='.', s=30, lw=0, alpha=0.7,
+                c=colors, edgecolor='k')
+
+    centers = clusterer.cluster_centers_
+    ax2.scatter(centers[:, 0], centers[:, 1],
+                marker='o', c="white",
+                alpha=1, s=200, edgecolor='k')
+    for i, c in enumerate(centers):
+        ax2.scatter(c[0], c[1],
+                    marker=f'${i}$',
+                    alpha=1, s=50, edgecolor='k')
+
+    ax2.set_title("Clustered Data")
+    ax2.set_xlabel("Feature 1")
+    ax2.set_ylabel("Feature 2")
+
+    plt.suptitle(
+        f"Silhouette Analysis – n_clusters = "
+        f"{n_clusters}",
+        fontsize=14, fontweight='bold')
+    plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output (Auszug)
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>k=2 → avg silhouette: 0.7049
+k=3 → avg silhouette: 0.5882
+k=4 → avg silhouette: 0.6505
+k=5 → avg silhouette: 0.5607
+k=6 → avg silhouette: 0.4501
+k=7 → avg silhouette: 0.3944
+...</pre>
+              <p style="font-size:var(--text-xs);color:var(--color-text-muted);
+                 margin-top:var(--space-3)">
+                📊 Pro k-Wert: 1 Silhouette-Plot + 1 Scatter-Plot
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           7. SILHOUETTE PLOT LESEN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="silhouette-plot-lesen">
+        <div class="section-head">
+          <h2>4.7 Silhouette-Plot lesen &amp; interpretieren</h2>
+          <p>
+            Wie erkennt man auf einen Blick, ob das Clustering gut oder schlecht ist?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Gutes Clustering</span></h3>
+            <ul>
+              <li>Alle Cluster-Balken liegen <strong>rechts der roten Linie</strong> (über dem Durchschnitt)</li>
+              <li>Balken haben <strong>ähnliche Breite</strong> (vergleichbare Clustergrößen)</li>
+              <li>Keine oder wenige Punkte mit <strong>negativem Score</strong></li>
+              <li>Rote Linie liegt <strong>weit rechts</strong> (hoher Durchschnitt)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Schlechtes Clustering</span></h3>
+            <ul>
+              <li>Viele Punkte liegen <strong>links der roten Linie</strong> (unter dem Durchschnitt)</li>
+              <li><strong>Negative Silhouette-Scores</strong> → Punkte im falschen Cluster</li>
+              <li>Stark <strong>unterschiedliche Balkenbreiten</strong> → unnatürliche Clustergrößen</li>
+              <li>Rote Linie liegt <strong>weit links</strong> (niedriger Durchschnitt)</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-warning" style="margin-top:var(--space-5)">
+          <strong>Heuristik:</strong>
+          Natürliche Cluster haben oft <strong>vergleichbare Größen</strong>.
+          Starke Unterschiede in den Balkenbreiten → evtl. schlechtes Clustering.
+          Dies ist jedoch keine universelle Regel.
+        </div>
+
+        <!-- Überleitung zu SSE -->
+        <div class="note" style="margin-top:var(--space-4)">
+          <strong>Was tun wir mit diesen Werten?</strong>
+          Der Silhouette Score ist mächtig, aber aufwändig.
+          Eine einfachere, schnelle Alternative zur k-Wahl bietet der
+          <strong>Elbow Plot</strong> auf Basis der
+          <code style="color:var(--color-primary)">Inertia</code>:
+          <a href="#sse-elbow">→ direkt nach unten</a>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           8. SSE & ELBOW PLOT
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="sse-elbow">
+        <div class="section-head">
+          <h2>4.8 SSE &amp; Elbow Plot</h2>
+          <p>
+            Die schnellste Methode zur Wahl des optimalen k –
+            visuell und intuitiv.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">SSE / Inertia</span></h3>
+            <ul>
+              <li>
+                <strong>Sum of Squared Errors</strong> (SSE) =
+                Summe der quadratischen Abstände aller Datenpunkte zu ihrem Centroid
+              </li>
+              <li>
+                In sklearn:
+                <code style="color:var(--color-primary)">kmeans.inertia_</code>
+              </li>
+              <li>Sinkt <strong>immer</strong> mit steigendem k (trivialerweise)</li>
+              <li>Ab einem gewissen k bringt ein weiterer Cluster
+                <strong>kaum noch Verbesserung</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Elbow Plot / Knee Plot</span></h3>
+            <ul>
+              <li>SSE wird für verschiedene k in einem <strong>Linienplot</strong> aufgetragen</li>
+              <li>Der Graph macht an der optimalen Stelle einen <strong>„Knick" (Elbow)</strong></li>
+              <li>Ab diesem Punkt erklären weitere Cluster zu <strong>wenig Varianz</strong></li>
+              <li>Auch bekannt als: <strong>Knee Plot</strong>, <strong>Scree Plot</strong></li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Schritt 1: Daten -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-6) 0 var(--space-2)">
+          Schritt 1 · Datensatz mit 4 bekannten Clustern
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.datasets import make_blobs
+import matplotlib.pyplot as plt
+
+# Datensatz: 4 kompakte Cluster (Wahrheit bekannt)
+X, y_true = make_blobs(
+    n_samples=3000,
+    centers=4,
+    cluster_std=0.30,
+    random_state=0
+)
+
+# Rohdaten ansehen
+plt.figure()
+plt.scatter(X[:, 0], X[:, 1], s=10, alpha=0.5)
+plt.title("Rohdaten – 4 Cluster")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Info
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li>3000 Punkte, sehr kompakte Cluster (<code>std=0.30</code>)</li>
+                <li>Wir <strong>tun so, als wüssten wir</strong> nicht, dass k=4</li>
+                <li>Elbow-Plot soll k=4 bestätigen</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Elbow -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-6) 0 var(--space-2)">
+          Schritt 2 · SSE für k = 2 bis 10 berechnen &amp; Elbow Plot
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.cluster import KMeans
+
+# SSE für k = 2 bis 10 sammeln
+list_of_inertias = []
+
+for n_clusters in range(2, 11):
+    kmeans = KMeans(n_clusters)
+    kmeans.fit(X)
+    list_of_inertias.append(kmeans.inertia_)
+
+# Elbow Plot
+plt.figure()
+plt.plot(range(2, 11), list_of_inertias, 'go--')
+plt.ylabel('Sum of Squared Distances (SSE)')
+plt.xlabel('k (Anzahl Cluster)')
+plt.title('Elbow Plot')
+plt.xticks(range(2, 11))
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ergebnis
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li>📊 Linienplot mit grünen Punkten</li>
+                <li>Starker Abfall von k=2 → k=3 → k=4</li>
+                <li>
+                  Bei <strong>k=4</strong> macht die Kurve einen
+                  <span class="key" style="--key-color:var(--color-warning)">Elbow (Knick)</span>
+                </li>
+                <li>Ab k=5 nur noch geringer Rückgang</li>
+                <li>→ Optimales k = <strong>4</strong> ✓ bestätigt</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Seite:</strong>
+          k-means hat Grenzen bei nicht-linearen Problemen –
+          Spectral Clustering, k-means++ und k-Median als Lösungen.
+          <br><br>
+          <a href="Page05.html">→ Seite 5: K-means Variationen</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Seite 4 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

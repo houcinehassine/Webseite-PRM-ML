@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Quiz Clustering</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+
+    details.quiz-card {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    details.quiz-card[open] {
+      border-color: var(--color-primary);
+    }
+
+    details.quiz-card summary {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: var(--text-sm);
+      list-style: none;
+      user-select: none;
+    }
+    details.quiz-card summary::-webkit-details-marker { display: none; }
+
+    .quiz-q-icon {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: var(--text-xs);
+      margin-top: 1px;
+    }
+    details.quiz-card[open] .quiz-q-icon {
+      background: var(--color-primary);
+      color: #fff;
+    }
+
+    .quiz-arrow {
+      margin-left: auto;
+      flex-shrink: 0;
+      transition: transform .2s;
+      color: var(--color-text-faint);
+    }
+    details.quiz-card[open] .quiz-arrow {
+      transform: rotate(180deg);
+      color: var(--color-primary);
+    }
+
+    .quiz-answer {
+      padding: 0 var(--space-5) var(--space-5);
+      border-top: 1px solid var(--color-border);
+      margin-top: 0;
+    }
+    .quiz-answer p {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin: var(--space-3) 0 0;
+      line-height: 1.7;
+    }
+    .quiz-answer ul {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin: var(--space-3) 0 0;
+      padding-left: 1.2rem;
+      line-height: 1.8;
+    }
+    .quiz-answer pre {
+      margin-top: var(--space-3);
+      font-size: var(--text-xs);
+    }
+
+    .quiz-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+    .tag-formel  { background: color-mix(in oklab,var(--color-primary) 15%,transparent);
+                   color: var(--color-primary); }
+    .tag-code    { background: color-mix(in oklab,var(--color-success) 15%,transparent);
+                   color: var(--color-success); }
+    .tag-konzept { background: color-mix(in oklab,var(--color-warning) 15%,transparent);
+                   color: var(--color-warning); }
+    .tag-falle   { background: color-mix(in oklab,var(--color-purple) 15%,transparent);
+                   color: var(--color-purple); }
+
+    .score-bar {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-6);
+    }
+    .score-count {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      color: var(--color-primary);
+    }
+    .score-label {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · Quiz"></site-header>
+  <div class="layout">
+    <site-sidebar active="quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Selbsttest</span>
+            <h1>Clustering <span class="key" style="--key-color:var(--color-primary)">Quiz</span></h1>
+            <p>
+              Teste dein Wissen mit typischen Prüfungsfragen.
+              Klappe die Antwort auf, nachdem du selbst überlegt hast.
+            </p>
+            <div class="pill-row">
+              <span class="pill">18 Fragen</span>
+              <span class="pill">Formeln</span>
+              <span class="pill">Code</span>
+              <span class="pill">Konzepte</span>
+              <span class="pill">Fallen</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Anleitung</h2>
+            <p>
+              Lies jede Frage, überlege selbst –
+              dann klappe die Antwort auf.
+              Fragen mit 🪤 sind typische Prüfungsfallen.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ── KONZEPT-FRAGEN ───────────────────── -->
+      <section class="section" id="konzept-fragen">
+        <div class="section-head">
+          <h2>Konzeptfragen</h2>
+        </div>
+        <div class="quiz-grid">
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">1</span>
+              <span>Was sind die zwei Schritte des k-means Algorithmus und was passiert jeweils?</span>
+              <span class="quiz-tag tag-konzept">Konzept</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <ul>
+                <li><strong>E-Schritt (Expectation):</strong> Jeden Datenpunkt dem nächstgelegenen Centroid zuordnen</li>
+                <li><strong>M-Schritt (Maximization):</strong> Centroids als Mittelwert aller zugeordneten Punkte neu berechnen</li>
+                <li>Wiederholen bis keine Änderungen mehr → Konvergenz</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">2</span>
+              <span>Nenne die vier Arten der Cluster-Validierung und erkläre kurz jede.</span>
+              <span class="quiz-tag tag-konzept">Konzept</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <ul>
+                <li><strong>Internal:</strong> Gütemaß nur aus Daten selbst (Silhouette, Dunn, DB)</li>
+                <li><strong>External:</strong> Vergleich mit bekannten Ground-Truth Labels</li>
+                <li><strong>Manual:</strong> Bewertung durch Fachexperten</li>
+                <li><strong>Indirect:</strong> Evaluation über Downstream-Task (z. B. Klassifikation)</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">3</span>
+              <span>Was bedeutet ein Silhouette Score von 0? Von −0.5?</span>
+              <span class="quiz-tag tag-konzept">Konzept</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <ul>
+                <li><strong>Score ≈ 0:</strong> Datenpunkt liegt auf der Grenze zwischen zwei Clustern</li>
+                <li><strong>Score &lt; 0 (z. B. −0.5):</strong> Datenpunkt liegt näher an einem fremden Cluster als am eigenen → falsches Cluster</li>
+                <li>Viele negative Scores → Clustering deutlich verbesserungswürdig</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">4</span>
+              <span>Warum versagt k-means bei make_moons-Daten?</span>
+              <span class="quiz-tag tag-konzept">Konzept</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <ul>
+                <li>k-means erzeugt immer <strong>lineare</strong> Cluster-Grenzen</li>
+                <li>Halbmonde sind nicht linear separierbar</li>
+                <li>Die Heuristik „Punkt gehört zum nächsten Centroid" führt zu falschen Zuordnungen bei komplexen Geometrien</li>
+                <li>Lösung: Spectral Clustering oder DBSCAN</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">5</span>
+              <span>Was ist der Unterschied zwischen Core, Border und Noise in DBSCAN?</span>
+              <span class="quiz-tag tag-konzept">Konzept</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <ul>
+                <li><strong>Core:</strong> ≥ min_samples Punkte in eps-Umgebung → Herzstück des Clusters</li>
+                <li><strong>Border:</strong> In eps-Umgebung eines Core-Punkts, aber selbst nicht dicht genug</li>
+                <li><strong>Noise:</strong> Weder Core noch Border → Label −1, kein Cluster</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">6</span>
+              <span>Was macht Spectral Clustering anders als k-means?</span>
+              <span class="quiz-tag tag-konzept">Konzept</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <ul>
+                <li>Baut einen <strong>Ähnlichkeitsgraph</strong> über die Datenpunkte</li>
+                <li>Spektralzerlegung (Eigenvektoren der Laplace-Matrix) → neuer Raum</li>
+                <li>Im neuen Raum ist das Problem <strong>linear separierbar</strong></li>
+                <li>Dort führt normales k-means zum korrekten Ergebnis</li>
+                <li>Kein <code>.predict()</code> verfügbar</li>
+              </ul>
+            </div>
+          </details>
+
+        </div>
+      </section>
+
+      <!-- ── FORMEL-FRAGEN ───────────────────── -->
+      <section class="section" id="formel-fragen">
+        <div class="section-head">
+          <h2>Formelfragen</h2>
+        </div>
+        <div class="quiz-grid">
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">7</span>
+              <span>Schreibe die Formel des Dunn-Index auf und erkläre Zähler und Nenner.</span>
+              <span class="quiz-tag tag-formel">Formel</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <p>\[DI_m = \frac{\min\limits_{1 \leq i < j \leq m} \delta(C_i, C_j)}{\max\limits_{1 \leq k \leq m} \Delta_k}\]</p>
+              <ul>
+                <li><strong>Zähler:</strong> kleinste Inter-Cluster-Distanz zwischen allen Cluster-Paaren</li>
+                <li><strong>Nenner:</strong> größte Intra-Cluster-Distanz über alle Cluster</li>
+                <li>Ziel: Zähler groß, Nenner klein → \(DI_m\) groß = besser</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">8</span>
+              <span>Welcher Index ist besser: Dunn = 0.8 oder Davies-Bouldin = 0.8?</span>
+              <span class="quiz-tag tag-formel">Formel</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <ul>
+                <li><strong>Dunn = 0.8:</strong> gut – Dunn-Index gilt: größer = besser</li>
+                <li><strong>Davies-Bouldin = 0.8:</strong> auch gut – DB-Index gilt: kleiner = besser</li>
+                <li>⚠️ Richtung nicht verwechseln: beide können 0.8 sein, beide können gut sein – aber aus unterschiedlichen Gründen</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">9</span>
+              <span>Was ist dist(B, o) im Silhouette Score und wie wird er berechnet?</span>
+              <span class="quiz-tag tag-formel">Formel</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <p>\[\text{dist}(B, o) = \min_{C \neq A}\left(\frac{1}{n_C}\sum_{c \in C}\text{dist}(c, o)\right)\]</p>
+              <ul>
+                <li>Mittlerer Abstand zu allen Punkten jedes fremden Clusters</li>
+                <li>Dann: <strong>Minimum</strong> über alle fremden Cluster → nächster fremder Cluster</li>
+              </ul>
+            </div>
+          </details>
+
+        </div>
+      </section>
+
+      <!-- ── CODE-FRAGEN ───────────────────── -->
+      <section class="section" id="code-fragen">
+        <div class="section-head">
+          <h2>Code-Fragen</h2>
+        </div>
+        <div class="quiz-grid">
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">10</span>
+              <span>Wie trainiert man kNN auf DBSCAN-Ergebnissen? Welche Attribute werden genutzt?</span>
+              <span class="quiz-tag tag-code">Code</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <pre><code>knn = KNeighborsClassifier(n_neighbors=50)
+knn.fit(
+    dbscan.components_,                        # Core-Punkte Koordinaten
+    dbscan.labels_[dbscan.core_sample_indices_] # Labels der Core-Punkte
+)</code></pre>
+              <ul>
+                <li><code>components_</code> = Koordinaten aller Core-Punkte</li>
+                <li><code>core_sample_indices_</code> = Indizes der Core-Punkte in X</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">11</span>
+              <span>Wie führt man einen Elbow Plot durch? Schreibe den Code.</span>
+              <span class="quiz-tag tag-code">Code</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <pre><code>inertias = []
+for k in range(2, 11):
+    km = KMeans(k, random_state=0)
+    km.fit(X)
+    inertias.append(km.inertia_)
+
+plt.plot(range(2, 11), inertias, 'go--')
+plt.xlabel('k')
+plt.ylabel('SSE')
+plt.show()</code></pre>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">12</span>
+              <span>Wie wendet man StandardScaler korrekt für Training und neue Punkte an?</span>
+              <span class="quiz-tag tag-code">Code</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <pre><code>scaler = StandardScaler()
+
+# Training: fit_transform
+X_train_scaled = scaler.fit_transform(X_train)
+
+# Neue Punkte: NUR transform (kein fit!)
+X_new_scaled = scaler.transform(X_new)</code></pre>
+              <p>⚠️ Auf neuen Daten niemals <code>fit_transform()</code> –
+              sonst werden die Statistiken neu berechnet!</p>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">13</span>
+              <span>Wie zählt man die Anzahl echter Cluster in DBSCAN-Labels (Noise herausfiltern)?</span>
+              <span class="quiz-tag tag-code">Code</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <pre><code>labels = dbscan.labels_
+
+# Anzahl echter Cluster (ohne Noise=-1)
+n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+print("Cluster:", n_clusters)
+print("Noise-Punkte:", np.sum(labels == -1))</code></pre>
+            </div>
+          </details>
+
+        </div>
+      </section>
+
+      <!-- ── FALLEN-FRAGEN ───────────────────── -->
+      <section class="section" id="fallen-fragen">
+        <div class="section-head">
+          <h2>🪤 Typische Prüfungsfallen</h2>
+        </div>
+        <div class="quiz-grid">
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">14</span>
+              <span>🪤 k-means gibt für k=10 eine kleinere Inertia als k=3. Ist k=10 also besser?</span>
+              <span class="quiz-tag tag-falle">Falle</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <p>
+                <strong>Nein!</strong> Inertia sinkt <em>immer</em> mit steigendem k –
+                auch wenn die Cluster bedeutungslos werden.
+                Bei k=n (Anzahl Datenpunkte) ist Inertia = 0.
+                Inertia allein ist kein geeignetes Maß –
+                immer Elbow Plot + Silhouette kombinieren.
+              </p>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">15</span>
+              <span>🪤 DBSCAN findet 8 Labels: [-1, 0, 1, 2, 3, 4, 5, 6]. Wie viele Cluster gibt es?</span>
+              <span class="quiz-tag tag-falle">Falle</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <p>
+                <strong>7 Cluster</strong> (Labels 0–6), nicht 8!
+                Label −1 = Noise – kein Cluster.
+                <code>len(set(labels)) - 1 = 7</code>
+              </p>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">16</span>
+              <span>🪤 Ist es sinnvoll, SpectralClustering.predict() auf neuen Punkten aufzurufen?</span>
+              <span class="quiz-tag tag-falle">Falle</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <p>
+                <strong>Nein –</strong> SpectralClustering hat kein <code>.predict()</code>.
+                Nur <code>.fit_predict()</code> ist verfügbar.
+                Für neue Punkte → kNN auf den gelernten Labels trainieren.
+              </p>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">17</span>
+              <span>🪤 Sollte man bei Clustering immer skalieren?</span>
+              <span class="quiz-tag tag-falle">Falle</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <p>
+                <strong>Nein –</strong> Scaling ist keine pauschale Regel.
+                Wenn das Feature mit größerem Wertebereich
+                <em>tatsächlich</em> mehr Gewicht verdient
+                (z. B. Temperatur ist wichtiger als Vibration),
+                dann ist kein Scaling sinnvoll.
+                Entscheidung immer aus dem fachlichen Kontext heraus treffen.
+              </p>
+            </div>
+          </details>
+
+          <details class="quiz-card">
+            <summary>
+              <span class="quiz-q-icon">18</span>
+              <span>🪤 knn.fit(X, dbscan.labels_) – Was ist falsch an diesem Code?</span>
+              <span class="quiz-tag tag-falle">Falle</span>
+              <svg class="quiz-arrow" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </summary>
+            <div class="quiz-answer">
+              <p>
+                Wenn kNN für DBSCAN-Predictions genutzt wird,
+                sollte er nur auf <strong>Core-Punkten</strong>
+                trainiert werden:
+              </p>
+              <pre><code># Korrekt:
+knn.fit(
+    dbscan.components_,
+    dbscan.labels_[dbscan.core_sample_indices_]
+)
+# Falsch: knn.fit(X, dbscan.labels_)
+# → trainiert auch auf Noise-Punkten (Label -1)</code></pre>
+            </div>
+          </details>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Quiz · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

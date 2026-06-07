@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Home Page</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner container">
+      <a href="index.html" class="brand" title="Alle Kapitel">
+        <div class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="7" cy="12" r="2.5"/>
+            <circle cx="17" cy="7" r="2.5"/>
+            <circle cx="17" cy="17" r="2.5"/>
+            <path d="M9.4 10.8l5.2-2.6M9.4 13.2l5.2 2.6"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <small>Prüfungsvorbereitung</small>
+          <strong>PRM</strong>
+        </div>
+      </a>
+
+      <button class="theme-toggle" data-theme-toggle aria-label="Dark Mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41 M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <div class="container">
+      <section class="index-hero">
+        <span class="eyebrow">✦ Maschinelles Lernen</span>
+        <h1>Willkommen zur PRM-Prüfungsvorbereitung</h1>
+        <p>Wähle ein Kapitel aus, um mit dem Lernen zu beginnen. Theorie, Mathematik und Code – alles an einem Ort.</p>
+
+        <div class="status-bar">
+          <span class="status-pill active"><span class="dot"></span>2 Kapitel verfügbar</span>
+          <span class="status-pill"><span class="dot"></span>5 in Bearbeitung</span>
+          <span class="status-pill">7 Kapitel gesamt</span>
+        </div>
+      </section>
+
+      <p class="section-label">Alle Kapitel</p>
+
+      <div class="kapitel-grid">
+        <a class="kapitel-card" href="Kapitel1/Kapitel1.html">
+          <div class="card-img">📖</div>
+          <div class="card-body">
+            <div class="card-nummer">Kapitel 1</div>
+            <div class="card-titel">Data Preparation & Feature Engineering</div>
+            <div class="card-desc"> </div>
+          </div>
+        </a>
+
+        <a class="kapitel-card" href="Kapitel2/Kapitel2.html">
+          <div class="card-img">📈</div>
+          <div class="card-body">
+            <div class="card-nummer">Kapitel 2</div>
+            <div class="card-titel">Einführung in Machine Learning</div>
+            <div class="card-desc"> </div>
+          </div>
+        </a>
+
+        <a class="kapitel-card" href="Kapitel3/Kapitel3.html">
+          <div class="card-img">🧠</div>
+          <div class="card-body">
+            <div class="card-nummer">Kapitel 3</div>
+            <div class="card-titel">Klassifikation</div>
+            <div class="card-desc">SVM, Entscheidungsbäume, kNN</div>
+          </div>
+        </a>
+
+        <a class="kapitel-card" href="Kapitel4/Kapitel4.html">
+          <div class="card-img">🔵</div>
+          <div class="card-body">
+            <div class="card-nummer">Kapitel 4</div>
+            <div class="card-titel">Clustering</div>
+            <div class="card-desc">k-Means, DBSCAN, Validierungsmaße und Anwendungen</div>
+          </div>
+        </a>
+
+        <a class="kapitel-card" href="Kapitel5/Kapitel5.html">
+          <div class="card-img">🌲</div>
+          <div class="card-body">
+            <div class="card-nummer">Kapitel 5</div>
+            <div class="card-titel">Random Forests</div>
+            <div class="card-desc">Random Forest, Boosting</div>
+          </div>
+        </a>
+
+        <a class="kapitel-card" href="Kapitel6/Kapitel6.html">
+          <div class="card-img">🤖</div>
+          <div class="card-body">
+            <div class="card-nummer">Kapitel 6</div>
+            <div class="card-titel">GMM - Gaussian Mixture Models</div>
+            <div class="card-desc"> </div>
+          </div>
+        </a>
+
+        <a class="kapitel-card" href="Kapitel7/Kapitel7.html">
+          <div class="card-img">📉</div>
+          <div class="card-body">
+            <div class="card-nummer">Kapitel 7</div>
+            <div class="card-titel">Evaluation von Klassifikatoren</div>
+            <div class="card-desc"> </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Stand Mai 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Random Forest Regression</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page5" title="Kapitel 5 · Random Forest Regression"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page6_2"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Seite 6.2</span>
+            <h1>Random Forest
+              <span class="key" style="--key-color:var(--color-primary)">Regression</span>
+            </h1>
+            <p>
+              Nicht nur Klassifikation –
+              Random Forests können auch
+              <strong>kontinuierliche Werte vorhersagen</strong>.
+              Wie unterscheidet sich Regression von Klassifikation,
+              warum nutzen wir
+              <span class="key" style="--key-color:var(--color-warning)">MSE</span>
+              statt Gini Impurity –
+              und was passiert bei verschiedenen
+              <code>max_depth</code>-Werten?
+            </p>
+            <div class="pill-row">
+              <span class="pill">📈 Regression</span>
+              <span class="pill">🌲 DecisionTreeRegressor</span>
+              <span class="pill">📉 MSE als Gütemaß</span>
+              <span class="pill">🔢 max_depth Einfluss</span>
+              <span class="pill">🌲🌲 RandomForestRegressor</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>
+                Was ändert sich beim Wechsel von
+                <strong>Klassifikation zu Regression</strong>?
+              </li>
+              <li>
+                Warum wird
+                <span class="key" style="--key-color:var(--color-warning)">MSE</span>
+                statt
+                <span class="key" style="--key-color:var(--color-primary)">Gini Impurity</span>
+                verwendet?
+              </li>
+              <li>
+                Wie beeinflusst
+                <code>max_depth</code>
+                die Vorhersagekurve?
+              </li>
+              <li>
+                Wie sieht ein
+                <strong>Regressions-Entscheidungsbaum</strong>
+                aus?
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. REGRESSION VS. KLASSIFIKATION
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="regression-konzept">
+        <div class="section-head">
+          <h2>6.2.1 Regression vs. Klassifikation</h2>
+          <p>
+            Decision Trees und Random Forests sind nicht auf
+            Klassifikation beschränkt –
+            mit einem einfachen Wechsel des
+            <span class="key" style="--key-color:var(--color-primary)">Gütemaßes</span>
+            wird aus einem Classifier ein Regressor.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Klassifikation</span>
+              – Wiederholung
+            </h3>
+            <ul>
+              <li>
+                Vorhersage eines
+                <strong>kategorialen Labels</strong>
+                (z.B. healthy / bad)
+              </li>
+              <li>
+                Aggregation über Bäume:
+                <strong>Majority Voting</strong>
+              </li>
+              <li>
+                Split-Gütemaß:
+                <span class="key" style="--key-color:var(--color-primary)">Gini Impurity</span>
+                oder <strong>Entropy</strong>
+              </li>
+              <li>
+                sklearn-Klasse:
+                <code>RandomForestClassifier()</code>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Regression</span>
+              – neu
+            </h3>
+            <ul>
+              <li>
+                Vorhersage eines
+                <strong>kontinuierlichen Wertes</strong>
+                (z.B. RUL, Temperatur, Preis)
+              </li>
+              <li>
+                Aggregation über Bäume:
+                <strong>Mittelwert</strong>
+                aller Baumvorhersagen
+              </li>
+              <li>
+                Split-Gütemaß:
+                <span class="key" style="--key-color:var(--color-warning)">MSE</span>
+                (Mean Squared Error) –
+                Splits minimieren den Fehler
+              </li>
+              <li>
+                sklearn-Klassen:
+                <code>DecisionTreeRegressor()</code>
+                und
+                <code>RandomForestRegressor()</code>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="overview" style="margin-top:var(--space-6)">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">MSE</div>
+            <div>
+              <h3>Mean Squared Error als Split-Kriterium</h3>
+              <p>
+                Bei jedem Split wird geprüft,
+                welche Aufteilung der Daten den
+                <span class="key" style="--key-color:var(--color-warning)">MSE</span>
+                der Zielwerte innerhalb der Bereiche
+                am stärksten <strong>reduziert</strong>.
+                Der vorhergesagte Wert eines Blatts ist
+                der <strong>Mittelwert</strong>
+                aller Trainingssamples in diesem Blatt.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">⚠️</div>
+            <div>
+              <h3>Overfitting-Risiko bei tiefen Bäumen</h3>
+              <p>
+                Ein Regressionsbaum ohne Tiefenbeschränkung
+                kann jeden Trainingspunkt exakt anpassen –
+                <strong>Overfitting</strong>.
+                <code>max_depth</code>
+                ist daher der wichtigste Regularisierungsparameter.
+                Der Random Forest mildert dieses Problem
+                durch <strong>Ensembling</strong>.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. SCHRITT 1 – DATENSATZ
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="datensatz">
+        <div class="section-head">
+          <h2>6.2.2 Schritt 1 – Datensatz generieren</h2>
+          <p>
+            Wir erzeugen einen einfachen
+            <strong>quadratischen Datensatz</strong>
+            mit additivem Rauschen –
+            ein klassisches Regressionsproblem,
+            das kein lineares Modell perfekt lösen kann.
+          </p>
+        </div>
+
+        <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+          100 zufällige \(x\)-Werte im Intervall \([-1, 1]\)
+          werden quadriert und mit einem uniformen Rauschen
+          \(\mathcal{U}(0, 0.3)\) versehen.
+          Das Ergebnis ist eine
+          <span class="key" style="--key-color:var(--color-warning)">verrauschte Parabel</span> –
+          das Ziel des Regressors ist es,
+          diese Kurve zu rekonstruieren.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Datensatz generieren &amp; visualisieren
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+
+# Quadratische Daten mit Rauschen
+index = np.random.uniform(-1, 1, size=(100, 1))
+data  = index ** 2 + np.random.rand(
+    len(index), 1) * 0.3
+
+fig, ax = plt.subplots(figsize=(6, 4))
+ax.scatter(index, data, color='steelblue',
+           s=30, alpha=0.7,
+           edgecolors='k', linewidths=0.3,
+           label='Datenpunkte')
+ax.set_xlabel('$x_1$', fontsize=13)
+ax.set_ylabel('$y = x_1^2 + \\epsilon$',
+              fontsize=13)
+ax.set_title('Quadratischer Datensatz mit Rauschen\n'
+             '$y = x^2 + \\mathcal{U}(0, 0.3)$')
+ax.legend()
+ax.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    Typische
+                    <span class="key" style="--key-color:var(--color-warning)">Parabel-Form</span>:
+                    Minimum bei \(x=0\),
+                    Anstieg nach beiden Seiten
+                  </li>
+                  <li>
+                    Rauschen sorgt für
+                    <strong>Streuung</strong>
+                    um die wahre Kurve –
+                    kein perfektes Muster
+                  </li>
+                  <li>
+                    Ein lineares Modell würde hier
+                    systematisch versagen –
+                    <strong>Decision Tree Regression</strong>
+                    kann die Kurvenform approximieren
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Datensatz-Eigenschaften:</strong>
+                <ul>
+                  <li>
+                    <code>n_samples = 100</code>
+                  </li>
+                  <li>
+                    \(x \in [-1, 1]\) uniform
+                  </li>
+                  <li>
+                    \(y = x^2 + \epsilon\),
+                    \(\epsilon \sim \mathcal{U}(0, 0.3)\)
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. SCHRITT 2 – DECISION TREE REGRESSOR
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="decision-tree-regressor">
+        <div class="section-head">
+          <h2>6.2.3 Schritt 2 – DecisionTreeRegressor trainieren</h2>
+          <p>
+            Ein einzelner
+            <code class="key" style="--key-color:var(--color-primary)">DecisionTreeRegressor</code>
+            mit
+            <code>max_depth=2</code>
+            wird trainiert und der Baum direkt
+            <strong>visualisiert</strong> –
+            so wird die Struktur der Splits sichtbar.
+          </p>
+        </div>
+
+        <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+          <code>plot_tree()</code> zeigt für jeden Knoten:
+          den Split-Schwellenwert,
+          den MSE der Samples im Knoten,
+          die Anzahl der Samples
+          und den vorhergesagten Wert.
+          <span class="key" style="--key-color:var(--color-warning)">Tiefere Farbe</span>
+          = niedrigerer MSE im Knoten.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – DecisionTreeRegressor: Baum visualisieren
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeRegressor, plot_tree
+
+np.random.seed(42)
+index = np.random.uniform(-1, 1, size=(100, 1))
+data  = index ** 2 + np.random.rand(
+    len(index), 1) * 0.3
+
+# Entscheidungsbaum mit max_depth=2 trainieren
+model = DecisionTreeRegressor(
+    max_depth=2, random_state=42)
+model.fit(index, data)
+
+# Baumstruktur visualisieren
+fig, ax = plt.subplots(figsize=(10, 4))
+plot_tree(model,
+          filled=True,
+          feature_names=['x₁'],
+          ax=ax,
+          rounded=True,
+          precision=3)
+ax.set_title(
+    'DecisionTreeRegressor – max_depth=2\n'
+    'Jeder Knoten zeigt: Split | MSE | Samples | Wert',
+    fontsize=10)
+plt.tight_layout()
+plt.show()
+
+# Anzahl der Blätter und Splits ausgeben
+print(f"Anzahl Blätter:    {model.get_n_leaves()}")
+print(f"Tiefe des Baums:   {model.get_depth()}")
+print(f"Feature Importances: "
+      f"{model.feature_importances_}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Baumstruktur lesen:</strong>
+                <ul>
+                  <li>
+                    Jeder Knoten zeigt:
+                    <strong>Split-Bedingung</strong>
+                    (z.B. \(x_1 \leq 0.5\)),
+                    <code>mse</code>,
+                    <code>samples</code>,
+                    <code>value</code>
+                  </li>
+                  <li>
+                    <code>value</code>
+                    = <strong>Mittelwert der Samples</strong>
+                    in diesem Blatt →
+                    wird als Vorhersage genutzt
+                  </li>
+                  <li>
+                    <strong>Farbe</strong>: je dunkler,
+                    desto reiner (niedrigerer MSE)
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>max_depth=2:</strong>
+                <ul>
+                  <li>
+                    <strong>4 Blätter</strong> →
+                    4 verschiedene Vorhersagewerte
+                  </li>
+                  <li>
+                    Stufenförmige Approximation
+                    der Parabel –
+                    noch grob
+                  </li>
+                  <li>
+                    Jede Erhöhung von
+                    <code>max_depth</code>
+                    verdoppelt die Blattanzahl
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. SCHRITT 3 – VORHERSAGEKURVE
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="vorhersagekurve">
+        <div class="section-head">
+          <h2>6.2.4 Schritt 3 – Vorhersagekurve plotten</h2>
+          <p>
+            Eine dichte Linie von 500 gleichmäßig verteilten
+            \(x\)-Werten wird durch das Modell vorhergesagt –
+            so entsteht die
+            <span class="key" style="--key-color:var(--color-danger)">rote Vorhersagekurve</span>
+            über den Datenpunkten.
+          </p>
+        </div>
+
+        <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+          <code>index_predictions = np.linspace(-1, 1, 500).reshape(-1, 1)</code>
+          erzeugt ein feines Gitter von \(x\)-Werten.
+          Das trainierte Modell gibt für jeden dieser Punkte
+          einen vorhergesagten Wert zurück –
+          die charakteristische
+          <span class="key" style="--key-color:var(--color-warning)">Stufenfunktion</span>
+          des Decision Trees wird so sichtbar.
+          Zusätzlich wird die Hilfsfunktion
+          <code>plot_regression_predictions()</code>
+          vorgestellt, die diesen Vorgang vereinfacht.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Vorhersagekurve &amp; Hilfsfunktion
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeRegressor
+
+np.random.seed(42)
+index = np.random.uniform(-1, 1, size=(100, 1))
+data  = index ** 2 + np.random.rand(
+    len(index), 1) * 0.3
+
+# Modell trainieren
+model = DecisionTreeRegressor(
+    max_depth=2, random_state=42)
+model.fit(index, data)
+
+# Vorhersage auf feinem Gitter
+index_predictions = np.linspace(
+    -1, 1, 500).reshape(-1, 1)
+predictions = model.predict(index_predictions)
+
+# Hilfsfunktion für Regressions-Plots
+def plot_regression_predictions(
+        tree_reg, X, y,
+        axes=[-1, 1, -0.1, 1.3],
+        ylabel="$y$", ax=None):
+    if ax is None:
+        ax = plt.gca()
+    x1 = np.linspace(
+        axes[0], axes[1], 500).reshape(-1, 1)
+    y_pred = tree_reg.predict(x1)
+    ax.axis(axes)
+    ax.set_xlabel("$x_1$", fontsize=12)
+    if ylabel:
+        ax.set_ylabel(ylabel, fontsize=12,
+                      rotation=0, labelpad=15)
+    ax.plot(X, y, "b.", alpha=0.6,
+            label='Datenpunkte')
+    ax.plot(x1, y_pred, "r-",
+            linewidth=2, label=r"$\hat{y}$")
+    ax.legend(fontsize=9)
+    ax.grid(alpha=0.3)
+
+# Vertikal: direkter Plot + Hilfsfunktion
+fig, axes_plot = plt.subplots(
+    2, 1, figsize=(7, 9))
+
+# Plot 1: manueller Scatter + Vorhersagekurve
+axes_plot[0].scatter(
+    index, data, color='steelblue',
+    s=30, alpha=0.7,
+    edgecolors='k', linewidths=0.3,
+    label='Datenpunkte')
+axes_plot[0].plot(
+    index_predictions, predictions,
+    color='red', linewidth=2,
+    label=r'$\hat{y}$ (max_depth=2)')
+axes_plot[0].set_xlabel('$x_1$', fontsize=12)
+axes_plot[0].set_ylabel('$y$', fontsize=12)
+axes_plot[0].set_title(
+    'Vorhersagekurve – DecisionTreeRegressor\n'
+    'max_depth=2 → 4 Stufen sichtbar')
+axes_plot[0].legend()
+axes_plot[0].grid(alpha=0.3)
+
+# Plot 2: via Hilfsfunktion
+plot_regression_predictions(
+    model, index, data,
+    ax=axes_plot[1])
+axes_plot[1].set_title(
+    'Gleicher Plot via plot_regression_predictions()')
+
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Vorhersagekurve (rot):</strong>
+                <ul>
+                  <li>
+                    <span class="key" style="--key-color:var(--color-danger)">Stufenförmig</span>
+                    – typisch für Decision Tree Regression
+                  </li>
+                  <li>
+                    Bei <code>max_depth=2</code>:
+                    <strong>4 konstante Stufen</strong>
+                    = 4 Blattknoten
+                  </li>
+                  <li>
+                    Parabelform wird
+                    <strong>grob approximiert</strong>,
+                    aber nicht glatt
+                  </li>
+                  <li>
+                    Jede Stufe = Mittelwert aller
+                    Trainingssamples im Bereich
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Hilfsfunktion:</strong>
+                <code>plot_regression_predictions()</code>
+                kapselt den Visualisierungsvorgang –
+                wiederverwendbar für verschiedene
+                <code>max_depth</code>-Werte.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5. SCHRITT 4 – max_depth EINFLUSS
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="max-depth-einfluss">
+        <div class="section-head">
+          <h2>6.2.5 Schritt 4 – Einfluss von <code>max_depth</code></h2>
+          <p>
+            Sechs verschiedene
+            <code class="key" style="--key-color:var(--color-warning)">max_depth</code>-Werte
+            werden direkt verglichen –
+            von zu einfach (Underfitting)
+            bis zu komplex (Overfitting).
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-danger)">Overfitting</span>
+              – zu tief
+            </h3>
+            <ul>
+              <li>
+                Hohe
+                <code>max_depth</code>
+                (z.B. 10): Baum passt sich
+                jedem Rauschpunkt an
+              </li>
+              <li>
+                Vorhersagekurve springt stark →
+                <strong>keine Generalisierung</strong>
+              </li>
+              <li>
+                Training-Fehler sehr klein,
+                Test-Fehler groß
+              </li>
+              <li>
+                Random Forest mildert dies –
+                durch <strong>Mittelwertbildung</strong>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Underfitting</span>
+              – zu flach
+            </h3>
+            <ul>
+              <li>
+                <code>max_depth=1</code>:
+                nur <strong>1 Split</strong> →
+                2 konstante Vorhersagewerte
+              </li>
+              <li>
+                Kann Parabelstruktur
+                <strong>überhaupt nicht</strong>
+                erfassen
+              </li>
+              <li>
+                Sowohl Trainings- als auch
+                Test-Fehler hoch
+              </li>
+              <li>
+                Modell zu
+                <strong>simpel für die Datenstruktur</strong>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Sechs Modelle mit
+          <code>max_depth ∈ {1, 2, 3, 4, 5, 10}</code>
+          werden trainiert und ihre Vorhersagekurven
+          im vertikalen Grid ausgegeben.
+          So wird der Übergang von Underfitting zu Overfitting
+          direkt sichtbar.
+          Das ursprüngliche <code>(2, 3)</code>-Grid
+          wurde auf ein vertikales
+          <code>(6, 1)</code>-Layout umgestellt.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – max_depth Vergleich (6 Modelle, vertikal)
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_squared_error
+
+np.random.seed(42)
+index = np.random.uniform(-1, 1, size=(100, 1))
+data  = index ** 2 + np.random.rand(
+    len(index), 1) * 0.3
+
+index_predictions = np.linspace(
+    -1, 1, 500).reshape(-1, 1)
+
+max_depth_values = [1, 2, 3, 4, 5, 10]
+
+# Vertikales Layout: 6 Zeilen, 1 Spalte
+fig, axes = plt.subplots(
+    6, 1, figsize=(7, 24))
+fig.subplots_adjust(hspace=0.4)
+
+for ax, max_depth in zip(axes, max_depth_values):
+    model = DecisionTreeRegressor(
+        max_depth=max_depth, random_state=42)
+    model.fit(index, data)
+
+    predictions = model.predict(index_predictions)
+    train_mse   = mean_squared_error(
+        data, model.predict(index))
+
+    ax.scatter(index, data,
+               color='steelblue', s=20,
+               alpha=0.6, zorder=2,
+               label='Datenpunkte')
+    ax.plot(index_predictions, predictions,
+            color='red', linewidth=2,
+            label=r'$\hat{y}$')
+    ax.set_xlim(-1.1, 1.1)
+    ax.set_ylim(-0.1, 1.35)
+    ax.set_xlabel('$x_1$', fontsize=10)
+    ax.set_ylabel('$y$', fontsize=10,
+                  rotation=0, labelpad=12)
+    ax.set_title(
+        f'max_depth = {max_depth}   '
+        f'│   Blätter: {model.get_n_leaves()}   '
+        f'│   Train-MSE: {train_mse:.4f}',
+        fontsize=10)
+    ax.legend(fontsize=8, loc='upper center')
+    ax.grid(alpha=0.3)
+
+plt.suptitle(
+    'DecisionTreeRegressor – '
+    'Einfluss von max_depth\n'
+    '(oben = Underfitting  →  '
+    'unten = Overfitting)',
+    fontsize=12, y=1.005)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Von oben nach unten:</strong>
+                <ul>
+                  <li>
+                    <code>max_depth=1</code>:
+                    <span class="key" style="--key-color:var(--color-primary)">Underfitting</span>
+                    – 2 Stufen, Parabel nicht erkennbar
+                  </li>
+                  <li>
+                    <code>max_depth=2–3</code>:
+                    <strong>guter Kompromiss</strong> –
+                    Parabelform erkennbar,
+                    keine Überanpassung
+                  </li>
+                  <li>
+                    <code>max_depth=4–5</code>:
+                    feiner, aber erste
+                    Rausch-Anpassungen sichtbar
+                  </li>
+                  <li>
+                    <code>max_depth=10</code>:
+                    <span class="key" style="--key-color:var(--color-danger)">Overfitting</span>
+                    – springende Kurve,
+                    viele unnötige Stufen
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Train-MSE:</strong>
+                Fällt monoton mit steigendem
+                <code>max_depth</code>.
+                Das allein ist
+                <strong>kein gutes Modell-Kriterium</strong>
+                – Cross-Validation-MSE ist entscheidend.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           6. SCHRITT 5 – RANDOM FOREST REGRESSOR
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="rf-regressor">
+        <div class="section-head">
+          <h2>6.2.6 Schritt 5 – RandomForestRegressor</h2>
+          <p>
+            Vom einzelnen Baum zum Ensemble:
+            <code class="key" style="--key-color:var(--color-primary)">RandomForestRegressor()</code>
+            kombiniert viele Bäume und liefert eine
+            <strong>deutlich glattere und robustere</strong>
+            Vorhersagekurve.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">RandomForestRegressor</span>
+            </h3>
+            <ul>
+              <li>
+                Gleiche API wie
+                <code>RandomForestClassifier()</code>
+              </li>
+              <li>
+                Aggregation: <strong>Mittelwert</strong>
+                aller Baumvorhersagen
+                statt Majority Voting
+              </li>
+              <li>
+                Parameter:
+                <code>n_estimators</code>,
+                <code>max_depth</code>,
+                <code>max_features</code>,
+                <code>bootstrap</code>
+              </li>
+              <li>
+                Vorhersagekurve ist
+                <strong>weicher als ein einzelner Baum</strong>
+                mit gleicher Tiefe
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>🔄 Vergleich: Single Tree vs. Forest</h3>
+            <ul>
+              <li>
+                <strong>Single Tree</strong>:
+                stufige Kurve, Overfitting bei tiefer Tiefe
+              </li>
+              <li>
+                <strong>Random Forest</strong>:
+                geglättete Kurve durch Mittelwertbildung –
+                Rauschpunkte werden gemittelt heraus
+              </li>
+              <li>
+                Forest mit vielen flachen Bäumen ≈
+                Forest mit wenigen tiefen Bäumen –
+                aber die Varianz ist niedriger
+              </li>
+              <li>
+                <code>oob_score=True</code>
+                liefert \(R^2\) ohne separates Testset
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Direkter Vergleich:
+          Ein einzelner
+          <code>DecisionTreeRegressor(max_depth=5)</code>
+          gegen einen
+          <code>RandomForestRegressor(n_estimators=100)</code>
+          auf demselben Datensatz.
+          Die Vorhersagekurven werden übereinander geplottet,
+          dazu MSE und \(R^2\) beider Modelle ausgegeben.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – RandomForestRegressor vs. Single Tree
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import (
+    mean_squared_error, r2_score)
+from sklearn.model_selection import train_test_split
+
+np.random.seed(42)
+index = np.random.uniform(-1, 1, size=(100, 1))
+data  = index ** 2 + np.random.rand(
+    len(index), 1) * 0.3
+
+X_train, X_test, y_train, y_test = train_test_split(
+    index, data.ravel(),
+    test_size=0.2, random_state=42)
+
+# Modelle
+tree = DecisionTreeRegressor(
+    max_depth=5, random_state=42)
+forest = RandomForestRegressor(
+    n_estimators=100, max_depth=5,
+    random_state=42, oob_score=True)
+
+tree.fit(X_train, y_train)
+forest.fit(X_train, y_train)
+
+# Vorhersagegitter
+x_pred = np.linspace(-1, 1, 500).reshape(-1, 1)
+y_tree   = tree.predict(x_pred)
+y_forest = forest.predict(x_pred)
+
+# Metriken
+print("── Single Tree (max_depth=5) ──────────────")
+print(f"Test MSE: "
+      f"{mean_squared_error(y_test, tree.predict(X_test)):.4f}")
+print(f"Test R²:  "
+      f"{r2_score(y_test, tree.predict(X_test)):.4f}")
+print("\n── Random Forest (n=100, max_depth=5) ────")
+print(f"Test MSE: "
+      f"{mean_squared_error(y_test, forest.predict(X_test)):.4f}")
+print(f"Test R²:  "
+      f"{r2_score(y_test, forest.predict(X_test)):.4f}")
+print(f"OOB R²:   {forest.oob_score_:.4f}")
+
+# Visualisierung: vertikal (3 × 1)
+fig, axes = plt.subplots(3, 1, figsize=(7, 13))
+
+# Plot 1: Single Tree
+axes[0].scatter(index, data, color='steelblue',
+                s=20, alpha=0.6, label='Daten')
+axes[0].plot(x_pred, y_tree, color='red',
+             linewidth=2, label='Single Tree')
+axes[0].set_title(
+    'DecisionTreeRegressor – max_depth=5\n'
+    f'Test R² = '
+    f'{r2_score(y_test, tree.predict(X_test)):.3f}')
+axes[0].set_xlabel('$x_1$')
+axes[0].set_ylabel('$y$', rotation=0, labelpad=12)
+axes[0].legend(fontsize=9)
+axes[0].grid(alpha=0.3)
+
+# Plot 2: Random Forest
+axes[1].scatter(index, data, color='steelblue',
+                s=20, alpha=0.6, label='Daten')
+axes[1].plot(x_pred, y_forest, color='darkgreen',
+             linewidth=2, label='Random Forest')
+axes[1].set_title(
+    'RandomForestRegressor – n=100, max_depth=5\n'
+    f'Test R² = '
+    f'{r2_score(y_test, forest.predict(X_test)):.3f}  '
+    f'│  OOB R² = {forest.oob_score_:.3f}')
+axes[1].set_xlabel('$x_1$')
+axes[1].set_ylabel('$y$', rotation=0, labelpad=12)
+axes[1].legend(fontsize=9)
+axes[1].grid(alpha=0.3)
+
+# Plot 3: Direkter Vergleich
+axes[2].scatter(index, data, color='steelblue',
+                s=20, alpha=0.5, label='Daten',
+                zorder=1)
+axes[2].plot(x_pred, y_tree, color='red',
+             linewidth=2, linestyle='--',
+             label='Single Tree (max_depth=5)',
+             zorder=2)
+axes[2].plot(x_pred, y_forest, color='darkgreen',
+             linewidth=2.5,
+             label='Random Forest (n=100)',
+             zorder=3)
+axes[2].set_title(
+    'Direkter Vergleich:\n'
+    'Single Tree (rot gestrichelt) vs. '
+    'Random Forest (grün)')
+axes[2].set_xlabel('$x_1$')
+axes[2].set_ylabel('$y$', rotation=0, labelpad=12)
+axes[2].legend(fontsize=9)
+axes[2].grid(alpha=0.3)
+
+plt.suptitle(
+    'RandomForestRegressor vs. DecisionTreeRegressor',
+    fontsize=12, y=1.005)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Plot 1 vs. Plot 2:</strong>
+                <ul>
+                  <li>
+                    <span style="color:red"><strong>Single Tree</strong></span>:
+                    stufige, sprungreiche Kurve
+                  </li>
+                  <li>
+                    <span style="color:darkgreen"><strong>Random Forest</strong></span>:
+                    deutlich
+                    <strong>glattere Approximation</strong>
+                    der Parabel
+                  </li>
+                  <li>
+                    Höheres \(R^2\) beim Forest –
+                    trotz gleichem
+                    <code>max_depth</code>
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>OOB Score:</strong>
+                Ohne separates Testset berechenbar –
+                nutzt die Samples,
+                die nicht im Bootstrap-Sample
+                des jeweiligen Baums waren.
+                Sehr nützlicher
+                <span class="key" style="--key-color:var(--color-warning)">kostenloser Validierungsindikator</span>.
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Fazit:</strong>
+                Random Forest Regression liefert
+                glattere, robustere Kurven –
+                <strong>ohne zusätzliches Hyperparameter-Tuning</strong>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Schritte:</strong>
+          <br><br>
+          <a href="Page07.html">
+            → Seite 7: Boosting –
+            AdaBoost &amp; Gradient Boosting
+          </a>
+          &nbsp;·&nbsp;
+          <a href="Page06_1.html">
+            ← Zurück zu Seite 6.1: Servo Fault Classification
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 5 · Seite 6.2 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

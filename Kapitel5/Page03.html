@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Vom Baum zum Random Forest</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page5" title="Kapitel 5 · Vom Baum zum Random Forest"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page3"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Seite 3</span>
+            <h1>Vom Baum zum
+              <span class="key" style="--key-color:var(--color-primary)">Random Forest</span>
+            </h1>
+            <p>
+              Warum werden viele <strong>schwache Modelle</strong> zusammen
+              zu einem starken Klassifikator?
+              Diese Seite erklärt die Ensemble-Idee, das Prinzip des
+              <strong>Bagging</strong>, den <strong>Out-of-Bag Error</strong>
+              und das <strong>Feature Bagging</strong> – alles Schritt für Schritt.
+            </p>
+            <div class="pill-row">
+              <span class="pill">🧩 Ensemble-Idee</span>
+              <span class="pill">🎒 Bagging</span>
+              <span class="pill">🔁 Bootstrapping</span>
+              <span class="pill">📊 OOB Error</span>
+              <span class="pill">🎲 Feature Bagging</span>
+              <span class="pill">📐 Random Subspace</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Was ist ein <strong>Weak vs. Strong Learner</strong>?</li>
+              <li>Wie funktioniert <strong>Bagging</strong> (Bootstrap Aggregating)?</li>
+              <li>Was ist der <strong>Out-of-Bag Error</strong> und wie wird er berechnet?</li>
+              <li>Warum dekorreliert <strong>Feature Bagging</strong> die Bäume?</li>
+              <li>Was ist die <strong>Random Subspace Method</strong>?</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. ENSEMBLE-IDEE
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="ensemble-idee">
+        <div class="section-head">
+          <h2>3.1 Die Ensemble-Idee</h2>
+          <p>
+            Ein einzelner Decision Tree neigt zum Overfitting.
+            Die Lösung: viele
+            <span class="key" style="--key-color:var(--color-warning)">Weak Learner</span>
+            kombinieren und zum
+            <span class="key" style="--key-color:var(--color-primary)">Strong Learner</span>
+            aggregieren.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Weak Learner</span></h3>
+            <ul>
+              <li>
+                Ein einzelner Decision Tree mit begrenzter Tiefe –
+                <strong>leicht besser als Zufall</strong>
+              </li>
+              <li>Neigt stark zum <strong>Overfitting</strong></li>
+              <li>Instabil: kleine Änderung der Daten → stark veränderte Grenzen</li>
+              <li>
+                Durch <span class="key" style="--key-color:var(--color-warning)">Randomisierung</span>
+                erzeugt man gezielt viele verschiedene Weak Learner
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Strong Learner</span></h3>
+            <ul>
+              <li>
+                Entsteht durch <strong>Kombination</strong> vieler Weak Learner
+              </li>
+              <li>
+                <strong>„Das Ganze ist mehr als die Summe seiner Teile!"</strong>
+              </li>
+              <li>
+                Aggregation der Einzelergebnisse z.B. via
+                <span class="key" style="--key-color:var(--color-primary)">Majoritätsvotum</span>
+                (Klassifikation) oder
+                <span class="key" style="--key-color:var(--color-primary)">Mittelwert</span>
+                (Regression)
+              </li>
+              <li>
+                Reduziertes Overfitting durch
+                <strong>Mittelung der Varianz</strong>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>So what – Generischer Ansatz:</strong>
+          Ensembles aus Modellen sind ein
+          <strong>generisches Konzept im Machine Learning</strong>.
+          Man kann verschiedene Modelle kombinieren,
+          um eine robustere Klassifikation bzw. Vorhersage zu erhalten →
+          <span class="key" style="--key-color:var(--color-primary)">Ensemble-Ansatz</span>.
+          Random Forest ist der bekannteste Vertreter –
+          basierend auf Decision Trees.
+        </div>
+
+        <!-- Visualisierungscode: Weak Learner → Ensemble -->
+        <div class="section-head" style="margin-top:var(--space-8)">
+          <h3>💡 Weak Learner vs. Ensemble – visuell</h3>
+          <p>
+            Der folgende Code zeigt, wie
+            <strong>5 einzelne schwache Bäume</strong> (depth=1, Stumps)
+            und ein <strong>Random Forest</strong> aus 100 Bäumen
+            dieselben Daten klassifizieren –
+            und warum das Ensemble deutlich stabiler ist.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Weak Learner vs. Ensemble
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+
+def plot_decision_boundary(model, X, y, ax, title):
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200),
+                         np.linspace(y_min, y_max, 200))
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    ax.contourf(xx, yy, Z, alpha=0.3, cmap='viridis',
+                levels=np.arange(5) - 0.5,
+                clim=(y.min(), y.max()))
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=25,
+               cmap='viridis', edgecolors='k',
+               linewidths=0.4, zorder=3)
+    ax.axis('off')
+    ax.set_title(title, fontsize=9)
+
+X, y = make_blobs(n_samples=300, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+fig, axes = plt.subplots(2, 3, figsize=(12, 7))
+axes = axes.ravel()
+
+# 5 Weak Learner (Decision Stumps depth=1)
+for i in range(5):
+    # Verschiedene Subsets simulieren
+    idx = np.random.RandomState(i).choice(
+        len(X), size=int(len(X)*0.7), replace=True)
+    model = DecisionTreeClassifier(max_depth=1,
+                                   random_state=i)
+    model.fit(X[idx], y[idx])
+    plot_decision_boundary(model, X, y, axes[i],
+                           f'Weak Learner {i+1} (depth=1)')
+
+# Random Forest als Strong Learner
+rf = RandomForestClassifier(n_estimators=100,
+                            random_state=0)
+rf.fit(X, y)
+plot_decision_boundary(rf, X, y, axes[5],
+                       'Random Forest – 100 Bäume\n(Strong Learner)')
+
+plt.suptitle('Weak Learner vs. Strong Learner (Ensemble)',
+             fontsize=12, y=1.01)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-warning">
+                <strong>Weak Learner (depth=1):</strong>
+                <ul>
+                  <li>Jeder Stump macht nur <strong>einen einzigen Split</strong></li>
+                  <li>Sehr grobe Trennung – allein kaum brauchbar</li>
+                  <li>Verschiedene Subsets → <strong>verschiedene Grenzen</strong></li>
+                </ul>
+              </div>
+              <div class="note note-primary" style="margin-top:var(--space-3)">
+                <strong>Random Forest (100 Bäume):</strong>
+                <ul>
+                  <li>
+                    Kombination der 100 Einzelurteile →
+                    <span class="key" style="--key-color:var(--color-primary)">klare, stabile Grenzen</span>
+                  </li>
+                  <li>Overfitting stark reduziert</li>
+                  <li>
+                    <strong>Majoritätsvotum</strong> glättet
+                    inkonsistente Einzelurteile heraus
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. BAGGING & BOOTSTRAPPING
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="bagging">
+        <div class="section-head">
+          <h2>3.2 Bagging &amp; Bootstrapping</h2>
+          <p>
+            Die Methode, die aus einem Datensatz
+            <strong>viele verschiedene Trainingsdatensätze</strong> macht –
+            die Grundlage für die Erzeugung dekorrelierter Weak Learner.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Bootstrapping</span>
+              – Ziehen mit Zurücklegen
+            </h3>
+            <ul>
+              <li>
+                Aus dem gesamten Datensatz (n Samples) werden
+                <strong>Stichproben gleicher Größe</strong> gezogen –
+                aber <span class="key" style="--key-color:var(--color-primary)">mit Zurücklegen</span>
+              </li>
+              <li>
+                Jede Stichprobe heißt
+                <strong>Bootstrap Sample</strong>
+              </li>
+              <li>
+                Samples <strong>können mehrfach vorkommen</strong> –
+                ca. 63.2% einzigartiger Samples pro Bootstrap-Stichprobe
+              </li>
+              <li>
+                Die restlichen ~36.8% der Daten bleiben außen vor
+                → <span class="key" style="--key-color:var(--color-success)">Out-of-Bag Samples</span>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Aggregating</span>
+              – Ergebnisse zusammenführen
+            </h3>
+            <ul>
+              <li>
+                Auf jede Stichprobe wird ein
+                <strong>eigener Decision Tree</strong> trainiert
+              </li>
+              <li>
+                Jeder Baum sieht <strong>leicht andere Daten</strong> →
+                leicht andere Grenzen → Dekorrelation
+              </li>
+              <li>
+                Alle Einzelvorhersagen werden aggregiert:
+                <ul>
+                  <li>
+                    Klassifikation →
+                    <span class="key" style="--key-color:var(--color-primary)">Majoritätsvotum (Modus)</span>
+                  </li>
+                  <li>
+                    Regression →
+                    <span class="key" style="--key-color:var(--color-primary)">Mittelwert</span>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <strong>Stabilität &amp; Genauigkeit</strong> verbessert –
+                <strong>Overfitting reduziert</strong>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Drei Reflexionsfragen -->
+        <div class="overview" style="margin-top:var(--space-6)">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">?</div>
+            <div>
+              <h3>Warum zieht man <em>mit</em> Zurücklegen?</h3>
+              <p>
+                Ohne Zurücklegen wären alle Bootstrap Samples
+                <strong>identisch verteilt</strong> – kein Unterschied zwischen
+                den Bäumen, keine Dekorrelation.
+                Mit Zurücklegen entsteht <strong>zufällige Variation</strong>:
+                jeder Baum lernt eine leicht andere Perspektive auf die Daten.
+                Diese <span class="key" style="--key-color:var(--color-primary)">künstliche Diversität</span>
+                ist der Schlüssel zur Verbesserung des Ensembles.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">?</div>
+            <div>
+              <h3>Ist Cross Validation dasselbe wie Bootstrapping?</h3>
+              <p>
+                <strong>Nein</strong> – aber beides sind Resampling-Techniken.
+                Bei <span class="key" style="--key-color:var(--color-success)">Cross Validation</span>
+                wird der Datensatz in k Folds aufgeteilt –
+                jedes Sample kommt <strong>genau einmal</strong> in den Validation-Set.
+                Bei <span class="key" style="--key-color:var(--color-warning)">Bootstrapping</span>
+                wird <em>mit Zurücklegen</em> gezogen –
+                Samples können mehrfach im Trainingsset erscheinen.
+                Cross Validation ist kein Bootstrapping.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-purple)">?</div>
+            <div>
+              <h3>Wie aggregiert man am besten?</h3>
+              <p>
+                Die Wahl der Aggregationsmethode hängt vom
+                <strong>Aufgabentyp</strong> ab:
+                <span class="key" style="--key-color:var(--color-primary)">Majoritätsvotum</span>
+                für Klassifikation (die häufigste Klasse gewinnt) und
+                <span class="key" style="--key-color:var(--color-primary)">Mittelwert</span>
+                für Regression.
+                Wichtig: Aggregation <em>nach</em> dem Training –
+                nie die Trainingsdaten mischen!
+              </p>
+            </div>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>So what?</strong>
+          Bagging = <strong>B</strong>ootstrap <strong>Agg</strong>regat<strong>ing</strong>.
+          Die Kombination aus zufälligem Ziehen mit Zurücklegen und
+          anschließender Aggregation verbessert
+          <strong>Stabilität und Genauigkeit</strong> –
+          und reduziert gleichzeitig das <strong>Overfitting</strong>.
+        </div>
+
+        <!-- Code: Bootstrapping visuell -->
+        <div class="section-head" style="margin-top:var(--space-8)">
+          <h3>💡 Bootstrapping – Ziehen mit Zurücklegen visualisiert</h3>
+          <p>
+            Der Code demonstriert, wie Bootstrap Samples aus einem
+            Datensatz gezogen werden und welche Samples jeweils
+            <strong>„in the bag"</strong> und
+            <strong>„out-of-bag"</strong> sind.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Bootstrap Sampling
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+
+# Datensatz
+X, y = make_blobs(n_samples=40, centers=2,
+                  random_state=42, cluster_std=1.5)
+n = len(X)
+
+fig, axes = plt.subplots(1, 3, figsize=(13, 4))
+
+for i, ax in enumerate(axes):
+    rng = np.random.RandomState(i * 7)
+    # Bootstrap Sample: n Samples mit Zurücklegen
+    boot_idx = rng.choice(n, size=n, replace=True)
+    oob_mask = np.ones(n, dtype=bool)
+    oob_mask[np.unique(boot_idx)] = False
+
+    in_bag  = X[~oob_mask]
+    out_bag = X[oob_mask]
+    in_y    = y[~oob_mask]
+    out_y   = y[oob_mask]
+
+    ax.scatter(in_bag[:, 0], in_bag[:, 1],
+               c=in_y, cmap='viridis', s=60,
+               edgecolors='k', linewidths=0.7,
+               label=f'In-Bag ({len(in_bag)})',
+               zorder=3)
+    ax.scatter(out_bag[:, 0], out_bag[:, 1],
+               c='lightgray', s=60, marker='x',
+               linewidths=1.5,
+               label=f'Out-of-Bag ({len(out_bag)})',
+               zorder=2)
+
+    pct_oob = len(out_bag) / n * 100
+    ax.set_title(
+        f'Bootstrap Sample {i+1}\n'
+        f'OOB: {len(out_bag)}/{n} = {pct_oob:.0f}%',
+        fontsize=9)
+    ax.legend(fontsize=7)
+    ax.axis('off')
+
+plt.suptitle('Bootstrapping: 3 verschiedene Stichproben\n'
+             '(grau × = Out-of-Bag)',
+             fontsize=11, y=1.02)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    Jede der 3 Stichproben enthält
+                    <strong>andere Datenpunkte</strong>
+                    (manche mehrfach, manche gar nicht)
+                  </li>
+                  <li>
+                    Graue <strong>×</strong> = Out-of-Bag Samples –
+                    nicht im Trainingsdatensatz dieses Baumes
+                  </li>
+                  <li>
+                    Typisch: ~<strong>36.8% OOB</strong>
+                    pro Bootstrap Sample
+                    \(\approx e^{-1}\)
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Merksatz:</strong>
+                Verschiedene Bäume sehen
+                <strong>verschiedene Datenpunkte</strong> →
+                verschiedene Grenzen →
+                <span class="key" style="--key-color:var(--color-warning)">Dekorrelation</span>
+                ist das Ziel!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. OUT-OF-BAG ERROR
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="oob-error">
+        <div class="section-head">
+          <h2>3.3 Out-of-Bag Error</h2>
+          <p>
+            Bootstrapping schenkt uns kostenlos einen
+            <strong>eingebauten Validierungsmechanismus</strong> –
+            ohne separaten Validation-Split nötig zu sein.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Grundprinzip</span></h3>
+            <ul>
+              <li>
+                Beim Bagging verbleibt immer ein Teil der Daten
+                <strong>außerhalb des „Bags"</strong>
+                (≈ 36.8% pro Baum)
+              </li>
+              <li>
+                Diese <span class="key" style="--key-color:var(--color-primary)">OOB-Samples</span>
+                wurden vom jeweiligen Baum
+                <strong>nicht trainiert</strong>
+              </li>
+              <li>
+                → Sie können als <strong>unabhängiges Testset</strong>
+                für diesen Baum verwendet werden
+              </li>
+              <li>
+                Kein zusätzliches Train/Test-Split nötig –
+                <strong>kostenlose Validierung!</strong>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Berechnung</span></h3>
+            <ol>
+              <li>
+                Finde alle Decision Trees, die die OOB-Instanz
+                <strong>x<sub>i</sub></strong>
+                <em>nicht</em> in ihrem Trainingsdatensatz hatten
+              </li>
+              <li>
+                Bestimme das
+                <span class="key" style="--key-color:var(--color-primary)">Majoritätsvotum</span>
+                dieser Trees und vergleiche es mit dem
+                <strong>wahren Label</strong> von x<sub>i</sub>
+              </li>
+              <li>
+                Führe 1. und 2. für
+                <strong>alle OOB-Instanzen</strong> durch
+              </li>
+              <li>
+                Berechne die Genauigkeit bzw. den
+                <span class="key" style="--key-color:var(--color-warning)">OOB Error</span>
+              </li>
+            </ol>
+          </article>
+        </div>
+
+        <!-- Code: OOB Error in sklearn -->
+        <div class="section-head" style="margin-top:var(--space-8)">
+          <h3>💡 OOB Error in sklearn messen</h3>
+          <p>
+            Mit <code>oob_score=True</code> berechnet
+            <code>RandomForestClassifier</code> den OOB-Score automatisch –
+            ohne dass man explizit ein Testset trennen muss.
+            Der Code vergleicht außerdem OOB Score vs. Test Accuracy.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – OOB Score vs. Test Accuracy
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+X, y = make_blobs(n_samples=500, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42)
+
+# n_estimators variieren und OOB vs. Test vergleichen
+n_trees_range = range(10, 201, 10)
+oob_scores  = []
+test_scores = []
+
+for n in n_trees_range:
+    rf = RandomForestClassifier(
+        n_estimators=n,
+        oob_score=True,      # OOB Score aktivieren
+        random_state=42
+    )
+    rf.fit(X_train, y_train)
+    oob_scores.append(rf.oob_score_)
+    test_scores.append(rf.score(X_test, y_test))
+
+# Ergebnis ausgeben
+best_n = list(n_trees_range)[np.argmax(oob_scores)]
+print(f"Bester OOB Score:   "
+      f"{max(oob_scores):.4f} bei n={best_n}")
+print(f"Test Accuracy dort: "
+      f"{test_scores[np.argmax(oob_scores)]:.4f}")
+
+# Visualisierung
+plt.figure(figsize=(7, 4))
+plt.plot(list(n_trees_range), oob_scores,
+         label='OOB Score', color='steelblue',
+         linewidth=2, marker='o', markersize=4)
+plt.plot(list(n_trees_range), test_scores,
+         label='Test Accuracy', color='darkorange',
+         linewidth=2, linestyle='--',
+         marker='s', markersize=4)
+plt.xlabel('Anzahl Bäume (n_estimators)')
+plt.ylabel('Accuracy')
+plt.title('OOB Score vs. Test Accuracy')
+plt.legend()
+plt.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    <span class="key" style="--key-color:steelblue">OOB Score</span>
+                    (blau) nähert sich der
+                    <span class="key" style="--key-color:darkorange">Test Accuracy</span>
+                    (orange) an
+                  </li>
+                  <li>
+                    Ab ca. <strong>50–100 Bäumen</strong> stabilisieren
+                    sich beide Kurven
+                  </li>
+                  <li>
+                    OOB Score ≈ Test Accuracy →
+                    <strong>zuverlässige Schätzung ohne separaten Test-Split</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Merksatz:</strong>
+                <code>oob_score_</code> ist der Anteil korrekt
+                klassifizierter OOB-Samples –
+                automatisch berechnet von sklearn.
+                Ein <strong>hoher OOB Score</strong> ≈
+                gutes Generalisierungsvermögen.
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Achtung:</strong>
+                OOB Score ist kein Ersatz für
+                vollständige Cross Validation –
+                aber eine schnelle, kostenlose
+                <strong>Sanity-Check-Methode</strong>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. FEATURE BAGGING
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="feature-bagging">
+        <div class="section-head">
+          <h2>3.4 Feature Bagging</h2>
+          <p>
+            Zusätzlich zum Bagging der Samples führt Random Forest
+            noch ein <strong>Bagging der Features</strong> durch –
+            die sogenannte
+            <span class="key" style="--key-color:var(--color-primary)">Random Subspace Method</span>.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Was ist Feature Bagging?</span></h3>
+            <ul>
+              <li>
+                Bei jedem Split wird nur ein
+                <strong>zufälliges Subset der Features</strong>
+                als Kandidaten betrachtet
+              </li>
+              <li>
+                Nicht alle Features stehen jedem Baum zur Verfügung –
+                <strong>erzwungene Diversität</strong>
+              </li>
+              <li>
+                Typischer Wert: <code>max_features='sqrt'</code> →
+                \(\sqrt{p}\) Features pro Split (p = Gesamtzahl Features)
+              </li>
+              <li>
+                Alternativ: <code>max_features='log2'</code> oder
+                fester Integer
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Warum tut man das?</span></h3>
+            <ul>
+              <li>
+                Ohne Feature Bagging würden alle Bäume bei
+                <strong>einem dominanten Feature</strong>
+                stets denselben ersten Split machen →
+                <strong>hochkorrelierte Bäume</strong>
+              </li>
+              <li>
+                Stark korrelierte Bäume reduzieren beim Aggregieren
+                die Varianz <em>kaum</em>
+              </li>
+              <li>
+                Feature Bagging
+                <span class="key" style="--key-color:var(--color-warning)">dekorreliert</span>
+                die Bäume → erhöht effektive Diversität
+              </li>
+              <li>
+                Ergebnis: bessere
+                <strong>Generalisierung</strong> des Ensembles
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>So what – Random Subspace Method:</strong>
+          Feature Bagging ist ein generischer Ansatz im ML:
+          <span class="key" style="--key-color:var(--color-primary)">Random Subspace Method</span>.
+          Durch die zufällige Wahl eines Feature-Subsets pro Split
+          werden die Decision Trees
+          <strong>dekorreliert</strong> –
+          Erhöhung der Varianz zwischen den Bäumen und
+          damit <strong>Vermeidung von Overfitting</strong> im Ensemble.
+        </div>
+
+        <!-- Code: Feature Bagging Einfluss auf Korrelation -->
+        <div class="section-head" style="margin-top:var(--space-8)">
+          <h3>💡 Einfluss von <code>max_features</code> auf Performance</h3>
+          <p>
+            Der Code sweept über verschiedene
+            <code>max_features</code>-Werte und zeigt,
+            wie die Wahl des Feature-Subsets die
+            <strong>OOB Score</strong> und
+            <strong>Test Accuracy</strong> beeinflusst.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – max_features Sweep
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+# Datensatz mit 10 Features (realistischer)
+X, y = make_classification(
+    n_samples=600, n_features=10,
+    n_informative=6, n_redundant=2,
+    random_state=42)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42)
+
+# Verschiedene max_features Werte testen
+max_features_options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                        'sqrt', 'log2']
+labels      = [str(v) for v in max_features_options]
+oob_list    = []
+test_list   = []
+
+for mf in max_features_options:
+    rf = RandomForestClassifier(
+        n_estimators=100,
+        max_features=mf,
+        oob_score=True,
+        random_state=42
+    )
+    rf.fit(X_train, y_train)
+    oob_list.append(rf.oob_score_)
+    test_list.append(rf.score(X_test, y_test))
+
+x = np.arange(len(labels))
+width = 0.35
+
+fig, ax = plt.subplots(figsize=(10, 4))
+bars1 = ax.bar(x - width/2, oob_list, width,
+               label='OOB Score', color='steelblue',
+               alpha=0.8)
+bars2 = ax.bar(x + width/2, test_list, width,
+               label='Test Accuracy', color='darkorange',
+               alpha=0.8)
+
+# sqrt und log2 hervorheben
+for i, label in enumerate(labels):
+    if label in ('sqrt', 'log2'):
+        ax.axvline(x[i], color='red', linestyle='--',
+                   alpha=0.4, linewidth=1.5)
+
+ax.set_xlabel('max_features')
+ax.set_ylabel('Score')
+ax.set_title('Feature Bagging: Einfluss von max_features\n'
+             '(rot gestrichelt = sqrt, log2)')
+ax.set_xticks(x)
+ax.set_xticklabels(labels)
+ax.set_ylim(0.7, 1.0)
+ax.legend()
+ax.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# Empfehlung ausgeben
+best_idx = np.argmax(oob_list)
+print(f"Bestes max_features: '{labels[best_idx]}' "
+      f"→ OOB Score: {oob_list[best_idx]:.4f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    <code>max_features=1</code>: Extremes Feature Bagging –
+                    jeder Baum sieht nur <strong>1 Feature</strong> pro Split →
+                    stark dekorreliert, aber zu schwach
+                  </li>
+                  <li>
+                    <code>max_features=</code>alle: Alle Bäume identisch →
+                    <strong>keine Dekorrelation</strong>
+                  </li>
+                  <li>
+                    <code class="key" style="--key-color:var(--color-primary)">'sqrt'</code>
+                    und
+                    <code class="key" style="--key-color:var(--color-primary)">'log2'</code>
+                    (rot) treffen oft das beste <strong>Gleichgewicht</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Faustregel:</strong>
+                <ul>
+                  <li>Klassifikation → <code>max_features='sqrt'</code></li>
+                  <li>Regression → <code>max_features='1/3'</code> aller Features</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zusammenfassung Bagging vs Feature Bagging -->
+        <div style="margin-top:var(--space-8)">
+          <p style="font-size:var(--text-xs); font-weight:700;
+             letter-spacing:.08em; text-transform:uppercase;
+             color:var(--color-text-faint); margin-bottom:var(--space-3)">
+            Zusammenfassung: Randomisierungsstrategien im Random Forest
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Strategie</th>
+                <th>Was wird randomisiert?</th>
+                <th>Ziel</th>
+                <th>sklearn Parameter</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <span class="key" style="--key-color:var(--color-primary)">Bagging</span>
+                </td>
+                <td>Trainings-<strong>Samples</strong> (mit Zurücklegen)</td>
+                <td>Diversität zwischen Bäumen</td>
+                <td><code>bootstrap=True</code> (Default)</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="key" style="--key-color:var(--color-success)">Feature Bagging</span>
+                </td>
+                <td><strong>Features</strong> pro Split-Kandidat</td>
+                <td>Dekorrelation der Bäume</td>
+                <td><code>max_features='sqrt'</code></td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="key" style="--key-color:var(--color-warning)">Kombination</span>
+                </td>
+                <td>Samples <strong>und</strong> Features</td>
+                <td>Maximale Diversität</td>
+                <td>beide aktiv (Default RF)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Schritte:</strong>
+          <br><br>
+          <a href="Page04.html">→ Seite 4: RandomForestClassifier in sklearn –
+          Hyperparameter &amp; predict_proba()</a>
+          &nbsp;·&nbsp;
+          <a href="Page05.html">→ Seite 5: Feature Importance &amp; Permutation Importance</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 5 · Seite 3 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

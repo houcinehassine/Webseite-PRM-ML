@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Quiz</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    .quiz-progress-bar {
+      height: 6px; border-radius: var(--radius-full);
+      background: var(--color-border); overflow: hidden; margin-bottom: var(--space-6);
+    }
+    .quiz-progress-fill {
+      height: 100%; border-radius: var(--radius-full);
+      background: var(--color-primary);
+      transition: width .4s ease;
+    }
+    .quiz-card {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      margin-bottom: var(--space-4);
+      display: none;
+    }
+    .quiz-card.active { display: block; }
+    .quiz-q-num {
+      font-size: var(--text-xs); font-weight: 800;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--color-primary); margin-bottom: var(--space-3);
+    }
+    .quiz-q-text {
+      font-size: var(--text-base); font-weight: 700;
+      line-height: 1.5; margin-bottom: var(--space-5);
+    }
+    .quiz-q-code {
+      background: var(--color-surface-offset);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-5);
+      white-space: pre;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: var(--space-3); }
+    .quiz-option {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      padding: var(--space-4); border-radius: var(--radius-xl);
+      border: 2px solid var(--color-border);
+      background: var(--color-surface);
+      cursor: pointer; font-size: var(--text-sm); line-height: 1.5;
+      transition: border-color .15s, background .15s;
+      text-align: left;
+    }
+    .quiz-option:hover:not(:disabled) {
+      border-color: var(--color-primary);
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface));
+    }
+    .quiz-option .opt-letter {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--color-surface-offset);
+      border: 1.5px solid var(--color-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: var(--text-xs); font-weight: 800;
+      flex-shrink: 0; transition: background .15s, border-color .15s;
+    }
+    .quiz-option.correct {
+      border-color: var(--color-success) !important;
+      background: color-mix(in oklab, var(--color-success) 8%, var(--color-surface)) !important;
+    }
+    .quiz-option.correct .opt-letter {
+      background: var(--color-success); color: #fff;
+      border-color: var(--color-success);
+    }
+    .quiz-option.wrong {
+      border-color: #ef4444 !important;
+      background: color-mix(in oklab, #ef4444 8%, var(--color-surface)) !important;
+    }
+    .quiz-option.wrong .opt-letter {
+      background: #ef4444; color: #fff; border-color: #ef4444;
+    }
+    .quiz-option.disabled { cursor: default; pointer-events: none; opacity: .6; }
+    .quiz-feedback {
+      margin-top: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border-radius: var(--radius-xl);
+      font-size: var(--text-sm);
+      display: none;
+      line-height: 1.6;
+    }
+    .quiz-feedback.show { display: block; }
+    .quiz-feedback.ok {
+      background: color-mix(in oklab, var(--color-success) 8%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-success) 30%, var(--color-border));
+    }
+    .quiz-feedback.err {
+      background: color-mix(in oklab, #ef4444 8%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, #ef4444 30%, var(--color-border));
+    }
+    .quiz-feedback-title {
+      font-weight: 800; margin-bottom: var(--space-2);
+      font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .07em;
+    }
+    .quiz-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-top: var(--space-5);
+    }
+    .quiz-btn {
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-full);
+      border: none; cursor: pointer; font-weight: 700;
+      font-size: var(--text-sm); transition: background .15s;
+    }
+    .quiz-btn.primary {
+      background: var(--color-primary); color: #fff;
+    }
+    .quiz-btn.primary:hover { background: var(--color-primary-hover); }
+    .quiz-btn.secondary {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+    }
+    .quiz-btn:disabled { opacity: .4; cursor: default; }
+
+    /* Result screen */
+    .quiz-result {
+      display: none; text-align: center;
+      padding: var(--space-10) var(--space-6);
+      background: var(--color-surface-2); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+    }
+    .quiz-result.show { display: block; }
+    .quiz-score-circle {
+      width: 120px; height: 120px; border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      margin: 0 auto var(--space-5);
+      border: 4px solid var(--color-primary);
+      font-family: var(--font-display);
+    }
+    .quiz-score-num { font-size: 2.5rem; font-weight: 800; color: var(--color-primary); line-height: 1; }
+    .quiz-score-den { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .quiz-dot-row {
+      display: flex; flex-wrap: wrap; gap: var(--space-2);
+      justify-content: center; margin: var(--space-4) 0;
+    }
+    .quiz-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+    }
+    .quiz-dot.ok   { background: var(--color-success); }
+    .quiz-dot.err  { background: #ef4444; }
+  </style>
+</head>
+<body>
+  <site-header active="page2" title="Kapitel 2 · Quiz"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="quiz"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero" style="padding-bottom:var(--space-4)">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Prüfungsvorbereitung · 15 Fragen</span>
+            <h1>🧠 Quiz – <span class="key" style="--key-color:var(--color-primary)">Einführung ML</span></h1>
+            <p>Teste dein Wissen zu allen Themen aus Kapitel 2: Kategorien, sklearn API, Model Validation, Cross-Validation, Bias-Variance Trade-off, Validierungskurven und Grid Search.</p>
+            <div class="pill-row">
+              <span class="pill">15 Fragen</span>
+              <span class="pill">Multiple Choice</span>
+              <span class="pill">Sofortiges Feedback</span>
+              <span class="pill">Erklärungen</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Hinweis</h2>
+            <p>Jede Frage hat genau <strong>eine richtige Antwort</strong>. Nach deiner Wahl siehst du sofort die Erklärung und kannst weiter zur nächsten Frage.</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- PROGRESS -->
+      <div class="quiz-progress-bar">
+        <div class="quiz-progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div style="text-align:right; font-size:var(--text-xs); color:var(--color-text-faint); margin-top:calc(-1 * var(--space-5)); margin-bottom:var(--space-5)">
+        Frage <span id="qCounter">1</span> / 15
+      </div>
+
+      <!-- QUESTIONS (generated by JS) -->
+      <div id="quizContainer"></div>
+
+      <!-- RESULT SCREEN -->
+      <div class="quiz-result" id="quizResult">
+        <div class="quiz-score-circle" id="scoreCircle">
+          <div class="quiz-score-num" id="scoreNum">0</div>
+          <div class="quiz-score-den">/ 15</div>
+        </div>
+        <h2 id="resultTitle" style="margin-bottom:var(--space-2)">Ergebnis</h2>
+        <p id="resultMsg" style="color:var(--color-text-muted); font-size:var(--text-sm); margin-bottom:var(--space-4)"></p>
+        <div class="quiz-dot-row" id="dotRow"></div>
+        <div style="display:flex; gap:var(--space-3); justify-content:center; margin-top:var(--space-5)">
+          <button class="quiz-btn primary" onclick="restartQuiz()">🔄 Quiz neu starten</button>
+          <a href="PageCheatsheet.html" class="quiz-btn secondary">📋 Cheatsheet öffnen</a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Quiz · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+<script>
+const questions = [
+  {
+    topic: "ML Kategorien",
+    q: "Welche der folgenden Aussagen beschreibt Supervised Learning korrekt?",
+    opts: [
+      "Es gibt keine Labels – das Modell entdeckt Struktur selbst",
+      "Die Feature-Matrix X und ein Label-Vektor y sind für das Training nötig",
+      "Das Modell lernt durch Belohnungen und Strafen",
+      "Es wird nur X.transform() aufgerufen – kein .predict()"
+    ],
+    correct: 1,
+    explanation: "✅ Beim Supervised Learning benötigen wir sowohl die Feature-Matrix <strong>X</strong> als auch den Label-Vektor <strong>y</strong>. Das Modell lernt die Funktion f: X → y.<br><em>Seite 2 · Folie 7–8</em>"
+  },
+  {
+    topic: "Notation",
+    q: "Was beschreibt die Shape (150, 4) der Feature-Matrix X beim Iris-Datensatz?",
+    opts: [
+      "150 Features und 4 Samples",
+      "150 Samples und 4 Features",
+      "150 Klassen und 4 Labels",
+      "150 Epochen und 4 Parameter"
+    ],
+    correct: 1,
+    explanation: "✅ X hat die Shape (N, T): <strong>N = 150 Samples</strong> (Zeilen = Beobachtungen), <strong>T = 4 Features</strong> (Spalten).<br><em>Seite 2 · Folie 8</em>"
+  },
+  {
+    topic: "sklearn API",
+    q: "In welcher Reihenfolge werden die 4 Schritte beim sklearn-Prozess ausgeführt?",
+    opts: [
+      "fit → import → predict → instanziieren",
+      "import → fit → instanziieren → predict",
+      "import → instanziieren → fit → predict",
+      "instanziieren → import → predict → fit"
+    ],
+    correct: 2,
+    explanation: "✅ Der korrekte Ablauf: <strong>1) Import</strong>, <strong>2) Instanziieren</strong> (Hyperparameter wählen), <strong>3) .fit(X, y)</strong> – Training, <strong>4) .predict(X_new)</strong> – Scoring.<br><em>Seite 5 · Folie 20</em>"
+  },
+  {
+    topic: "Model Validation",
+    code: `model = KNeighborsClassifier(n_neighbors=1)
+model.fit(X, y)
+y_pred = model.predict(X)
+print(accuracy_score(y, y_pred))  # → 1.0`,
+    q: "Was ist das Problem mit diesem Code-Beispiel?",
+    opts: [
+      "KNeighborsClassifier ist nicht importiert",
+      "Man muss n_neighbors=5 verwenden, nicht 1",
+      "Trainings- und Validierungsdaten sind identisch – das ist kein ehrlicher Test",
+      "accuracy_score gibt immer 1.0 zurück"
+    ],
+    correct: 2,
+    explanation: "✅ Das ist der <strong>'Not-So-Right Way'</strong>: das Modell wird auf denselben Daten trainiert UND getestet. Mit n_neighbors=1 kennt sich jeder Punkt selbst → 100% Accuracy auf Trainingsdaten. Kein ehrlicher Test der Generalisierungsfähigkeit!<br><em>Seite 6 · Folie 25</em>"
+  },
+  {
+    topic: "Model Validation",
+    q: "Welche zwei Methoden berechnen die Klassifikationsgenauigkeit und sind äquivalent?",
+    opts: [
+      "model.fit() und model.predict()",
+      "accuracy_score(y_test, y_pred) und model.score(X_test, y_test)",
+      "cross_val_score() und validation_curve()",
+      "train_test_split() und GridSearchCV()"
+    ],
+    correct: 1,
+    explanation: "✅ <strong>accuracy_score(y_test, y_pred)</strong> und <strong>model.score(X_test, y_test)</strong> sind äquivalent – beide geben denselben Wert (z.B. 0.96). .score() ruft intern predict auf.<br><em>Seite 6 · Folie 26</em>"
+  },
+  {
+    topic: "Cross-Validation",
+    code: `scores = cross_val_score(model, X, y, cv=5)
+print(scores)
+# → [0.9667, 0.9667, 0.9333, 0.9333, 1.0]`,
+    q: "Was bedeutet cv=5 in diesem Aufruf?",
+    opts: [
+      "Das Modell wird 5-mal importiert",
+      "Die Daten werden in 5 Teile aufgeteilt, jeder Teil einmal als Validation",
+      "Es werden 5 verschiedene Modelle trainiert",
+      "Die Accuracy wird auf 5 Dezimalstellen gerundet"
+    ],
+    correct: 1,
+    explanation: "✅ Bei <strong>5-Fold Cross-Validation</strong> werden die Daten in 5 gleiche Teile aufgeteilt. Jeder Teil wird einmal als Validation-Set verwendet, die restlichen 4 als Training. Das ergibt 5 Scores → mitteln für globale Performance.<br><em>Seite 7 · Folie 29</em>"
+  },
+  {
+    topic: "Cross-Validation",
+    q: "Beim 3-Way Split (State-of-the-Art): Wofür werden die drei Datensätze verwendet?",
+    opts: [
+      "Training=Modell fitten · Validation=Hyperparameter optimieren · Test=finale realistische Evaluation",
+      "Training=Testen · Validation=Trainieren · Test=Importieren",
+      "Alle drei Datensätze werden für das Training verwendet",
+      "Training=Features · Validation=Labels · Test=Predictions"
+    ],
+    correct: 0,
+    explanation: "✅ <strong>Training Set</strong>: Modell fitten (.fit), <strong>Validation Set</strong>: Hyperparameter optimieren (Cross-Validation), <strong>Test Set</strong>: nur einmal am Ende für die finale, realistische Performance. Test-Set ist während der Entwicklung 'tabu'!<br><em>Seite 7 · Folie 30</em>"
+  },
+  {
+    topic: "Bias-Variance",
+    q: "Welche Aussage beschreibt High-Variance (Overfitting) korrekt?",
+    opts: [
+      "Training-Score und Validation-Score sind beide niedrig",
+      "Training-Score ist hoch, Validation-Score ist deutlich niedriger",
+      "Training-Score und Validation-Score sind beide hoch und ähnlich",
+      "Training-Score ist niedrig, Validation-Score ist hoch"
+    ],
+    correct: 1,
+    explanation: "✅ Bei <strong>High-Variance (Overfitting)</strong>: Training-Score hoch (nahe 1.0), Validation-Score deutlich niedriger – der <strong>Gap</strong> zwischen beiden ist das Signal. Das Modell hat die Trainingsdaten auswendig gelernt.<br><em>Seite 8 · Folie 34+36</em>"
+  },
+  {
+    topic: "Bias-Variance",
+    q: "Was bedeutet 'Bias' in der Dartscheiben-Metapher?",
+    opts: [
+      "Die Streuung der Vorhersagen (wie weit die Punkte auseinander liegen)",
+      "Die Anzahl der Trainingsdaten",
+      "Der Abstand vom Mittelpunkt (wie weit Vorhersagen vom wahren Wert entfernt sind)",
+      "Die Lernrate des Modells"
+    ],
+    correct: 2,
+    explanation: "✅ <strong>Bias = Abstand vom Mittelpunkt</strong> = Validität / Genauigkeit. Hoher Bias = Vorhersagen systematisch weit vom wahren Wert entfernt. Varianz = Streuung der Punkte = Reliabilität.<br><em>Seite 8 · Folie 35</em>"
+  },
+  {
+    topic: "Bias-Variance",
+    q: "Wo liegt das 'Best Model' in einer Validierungskurve (X-Achse = Modellkomplexität)?",
+    opts: [
+      "Dort wo der Training-Score maximal ist (ganz rechts)",
+      "Dort wo der Validation-Score maximal ist (Peak der roten Kurve)",
+      "Dort wo Training-Score und Validation-Score am weitesten auseinander liegen",
+      "Immer bei minimaler Modellkomplexität (ganz links)"
+    ],
+    correct: 1,
+    explanation: "✅ Das <strong>Best Model</strong> liegt am <strong>Maximum des Validation-Scores</strong> (Peak der roten Kurve). Links davon: High-Bias/Underfitting. Rechts davon: High-Variance/Overfitting. training_score ist immer ≥ validation_score.<br><em>Seite 8 · Folie 37</em>"
+  },
+  {
+    topic: "Polynomiale Regression",
+    q: "Was ist der Hyperparameter bei einer Polynomialen Regression?",
+    opts: [
+      "Die Koeffizienten a₀, a₁, ..., aₙ",
+      "Der Polynomgrad (n) – er repräsentiert die Modellkomplexität",
+      "Die Anzahl der Trainingsdaten",
+      "Der Lernraten-Parameter"
+    ],
+    correct: 1,
+    explanation: "✅ Bei der Polynomialen Regression f(x) = aₙxⁿ + ... + a₁x + a₀ ist der <strong>Polynomgrad</strong> (degree) der <strong>Hyperparameter</strong> – er repräsentiert die Modellkomplexität und wird vor dem Training festgelegt. Die Koeffizienten (a₀, a₁, ...) sind die gelernten Parameter.<br><em>Seite 9 · Folie 38</em>"
+  },
+  {
+    topic: "Validierungskurven",
+    code: `train_s, val_s = validation_curve(
+    PolynomialRegression(), X, y,
+    param_name='polynomialfeatures__degree',
+    param_range=degree, cv=7)`,
+    q: "Was gibt validation_curve() zurück?",
+    opts: [
+      "Einen einzelnen Score-Wert (das Optimum)",
+      "Nur die besten Hyperparameter als Dictionary",
+      "Zwei Arrays: train_scores und val_scores (Shape: n_params × cv)",
+      "Das trainierte Modell mit optimalen Parametern"
+    ],
+    correct: 2,
+    explanation: "✅ validation_curve() gibt <strong>zwei Arrays zurück</strong>: train_scores und val_scores, beide mit Shape (n_params × cv). Zum Plotten: np.median(scores, 1) über CV-Folds aggregieren. Das Optimum ist der Peak des val_score-Medians.<br><em>Seite 9 · Folie 40</em>"
+  },
+  {
+    topic: "Learning Curves",
+    q: "Was zeigt eine Learning Curve, bei der Training-Score und Validation-Score bereits früh konvergieren?",
+    opts: [
+      "Das Modell leidet unter starkem Overfitting – mehr Daten sind nötig",
+      "Mehr Daten würden kaum helfen – das Modell hat ein gutes Bias-Variance-Gleichgewicht",
+      "Der Hyperparameter muss erhöht werden",
+      "Das Modell ist noch nicht trainiert worden"
+    ],
+    correct: 1,
+    explanation: "✅ Wenn die Kurven <strong>früh konvergieren</strong>: das Modell hat bereits ein gutes Gleichgewicht. Mehr Daten bringen ab diesem Punkt kaum Mehrwert. → Ab einem gewissen Punkt bringt mehr Daten KEINEN Mehrwert mehr!<br><em>Seite 9 · Folie 44</em>"
+  },
+  {
+    topic: "Grid Search",
+    code: `param_grid = {
+    'polynomialfeatures__degree': np.arange(21),
+    'linearregression__fit_intercept': [True, False]
+}
+grid = GridSearchCV(PolynomialRegression(), param_grid, cv=7)
+grid.fit(X, y)`,
+    q: "Wie viele Modelle werden insgesamt trainiert?",
+    opts: [
+      "21 Modelle (nur die Polynomgrade)",
+      "2 Modelle (True und False)",
+      "42 × 7 = 294 Modelle (alle Kombis × CV-Folds)",
+      "7 Modelle (nur die CV-Folds)"
+    ],
+    correct: 2,
+    explanation: "✅ Grid Search = Brute Force: 21 Degree-Werte × 2 fit_intercept-Werte = <strong>42 Kombinationen</strong>. Jede Kombination wird mit 7-Fold CV evaluiert → 42 × 7 = <strong>294 Trainings</strong>!<br><em>Seite 10 · Folie 47</em>"
+  },
+  {
+    topic: "Grid Search",
+    q: "Welche Attribute hat grid nach grid.fit(X, y) ?",
+    opts: [
+      "grid.result_ und grid.model_",
+      "grid.best_params_, grid.best_score_, grid.best_estimator_",
+      "grid.scores_ und grid.hyperparams_",
+      "grid.train_score_ und grid.test_score_"
+    ],
+    correct: 1,
+    explanation: "✅ Nach grid.fit(): <strong>grid.best_params_</strong> (bestes Dictionary, z.B. {'degree': 4}), <strong>grid.best_score_</strong> (bester CV-Score), <strong>grid.best_estimator_</strong> (konfiguriertes Modell, direkt verwendbar).<br><em>Seite 10 · Folie 48</em>"
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = [];
+let userAnswers = [];
+
+function buildQuiz() {
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = '';
+  questions.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'quiz-card' + (qi === 0 ? ' active' : '');
+    card.id = 'qcard-' + qi;
+
+    const letters = ['A', 'B', 'C', 'D'];
+    const codeBlock = q.code ? `<div class="quiz-q-code">${q.code}</div>` : '';
+
+    card.innerHTML = `
+      <div class="quiz-q-num">
+        🏷️ ${q.topic} &nbsp;·&nbsp; Frage ${qi + 1} von ${questions.length}
+      </div>
+      <div class="quiz-q-text">${q.q}</div>
+      ${codeBlock}
+      <div class="quiz-options" id="opts-${qi}">
+        ${q.opts.map((o, oi) => `
+          <button class="quiz-option" onclick="choose(${qi},${oi})" id="opt-${qi}-${oi}">
+            <span class="opt-letter">${letters[oi]}</span>
+            <span>${o}</span>
+          </button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="fb-${qi}">
+        <div class="quiz-feedback-title" id="fbt-${qi}"></div>
+        <div id="fbc-${qi}"></div>
+      </div>
+      <div class="quiz-nav">
+        <div style="font-size:var(--text-xs); color:var(--color-text-faint)">
+          <span id="score-live-${qi}"></span>
+        </div>
+        <button class="quiz-btn primary" id="nextbtn-${qi}" onclick="nextQ(${qi})" disabled>
+          ${qi < questions.length - 1 ? 'Nächste Frage →' : '🏆 Ergebnis ansehen'}
+        </button>
+      </div>`;
+    container.appendChild(card);
+  });
+}
+
+function choose(qi, oi) {
+  if (answered[qi]) return;
+  answered[qi] = true;
+  userAnswers[qi] = oi;
+  const q = questions[qi];
+  const isCorrect = oi === q.correct;
+  if (isCorrect) score++;
+
+  // Style all options
+  q.opts.forEach((_, i) => {
+    const btn = document.getElementById(`opt-${qi}-${i}`);
+    btn.classList.add('disabled');
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === oi && !isCorrect) btn.classList.add('wrong');
+  });
+
+  // Show feedback
+  const fb = document.getElementById(`fb-${qi}`);
+  const fbt = document.getElementById(`fbt-${qi}`);
+  const fbc = document.getElementById(`fbc-${qi}`);
+  fb.classList.add('show', isCorrect ? 'ok' : 'err');
+  fbt.style.color = isCorrect ? 'var(--color-success)' : '#ef4444';
+  fbt.textContent = isCorrect ? '✅ Richtig!' : '❌ Leider falsch';
+  fbc.innerHTML = q.explanation;
+
+  // Enable next
+  document.getElementById(`nextbtn-${qi}`).disabled = false;
+  document.getElementById(`score-live-${qi}`).textContent = `Punkte bisher: ${score} / ${qi+1}`;
+}
+
+function nextQ(qi) {
+  document.getElementById(`qcard-${qi}`).classList.remove('active');
+  if (qi + 1 < questions.length) {
+    current = qi + 1;
+    document.getElementById(`qcard-${current}`).classList.add('active');
+    document.getElementById('qCounter').textContent = current + 1;
+    document.getElementById('progressFill').style.width = ((current) / questions.length * 100) + '%';
+    window.scrollTo({ top: document.getElementById('quizContainer').offsetTop - 20, behavior: 'smooth' });
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById('progressFill').style.width = '100%';
+  const result = document.getElementById('quizResult');
+  result.classList.add('show');
+  document.getElementById('scoreNum').textContent = score;
+
+  // Color based on score
+  const pct = score / questions.length;
+  const color = pct >= 0.8 ? 'var(--color-success)' : pct >= 0.5 ? 'var(--color-warning)' : '#ef4444';
+  document.getElementById('scoreCircle').style.borderColor = color;
+  document.getElementById('scoreNum').style.color = color;
+
+  const titles = ['Noch üben – du schaffst das! 💪', 'Guter Anfang! Weiter so! 📚', 'Sehr gut! Fast alles richtig! 🌟', 'Perfekt! Prüfungsbereit! 🏆'];
+  const t = pct >= 0.93 ? 3 : pct >= 0.73 ? 2 : pct >= 0.5 ? 1 : 0;
+  document.getElementById('resultTitle').textContent = titles[t];
+  document.getElementById('resultMsg').textContent =
+    `Du hast ${score} von ${questions.length} Fragen richtig beantwortet (${Math.round(pct*100)}%).`;
+
+  const dotRow = document.getElementById('dotRow');
+  dotRow.innerHTML = userAnswers.map((a, i) =>
+    `<div class="quiz-dot ${a === questions[i].correct ? 'ok' : 'err'}" title="Frage ${i+1}: ${a === questions[i].correct ? '✓' : '✗'}"></div>`
+  ).join('');
+
+  result.scrollIntoView({ behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  current = 0; score = 0; answered = []; userAnswers = [];
+  document.getElementById('quizResult').classList.remove('show');
+  document.getElementById('qCounter').textContent = '1';
+  document.getElementById('progressFill').style.width = '0%';
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+</script>
+</body>
+</html>

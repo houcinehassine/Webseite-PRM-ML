@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Model Validation: Grundlagen &amp; Holdout Sets</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ── FAIL / CHECK BADGE ─────────────────────────── */
+    .verdict-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .verdict-badge.fail {
+      background: color-mix(in oklab, #ef4444 12%, var(--color-surface-2));
+      color: #ef4444;
+      border: 2px solid #ef4444;
+    }
+    .verdict-badge.ok {
+      background: color-mix(in oklab, var(--color-success) 12%, var(--color-surface-2));
+      color: var(--color-success);
+      border: 2px solid var(--color-success);
+    }
+
+    /* ── SPLIT VISUAL (Holdout Balken) ──────────────── */
+    .split-visual {
+      margin: var(--space-5) 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    .split-bar-label {
+      font-size: var(--text-xs); font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+      color: var(--color-text-faint); margin-bottom: var(--space-1);
+    }
+    .split-bar {
+      height: 44px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .split-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: #fff;
+      transition: flex .3s;
+    }
+    .split-segment.train  { background: var(--color-success); }
+    .split-segment.test   { background: #3b82f6; }
+    .split-segment.all    { background: var(--color-text-muted); }
+    .split-segment.bad    { background: #ef4444; }
+    .split-segment.bad2   { background: #f97316; }
+    .split-legend {
+      display: flex; gap: var(--space-4); flex-wrap: wrap;
+    }
+    .split-legend-item {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-size: var(--text-xs); color: var(--color-text-muted);
+    }
+    .split-legend-dot {
+      width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+    }
+
+    /* ── SO WHAT + FRAGE BOX ────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── PROBLEM HIGHLIGHT BOX ──────────────────────── */
+    .problem-box {
+      margin: var(--space-5) 0;
+      padding: var(--space-4) var(--space-5);
+      border-left: 3px solid #ef4444;
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      background: color-mix(in oklab, #ef4444 5%, var(--color-surface-2));
+    }
+    .problem-label {
+      font-size: var(--text-xs); font-weight: 700; letter-spacing: .08em;
+      text-transform: uppercase; color: #ef4444; margin-bottom: var(--space-2);
+    }
+    .problem-box p { font-size: var(--text-sm); margin: 0; line-height: 1.7; }
+
+    /* ── ACCURACY COMPARE GRID ──────────────────────── */
+    .accuracy-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 640px) { .accuracy-compare { grid-template-columns: 1fr; } }
+    .acc-card {
+      padding: var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      display: flex; flex-direction: column; gap: var(--space-3);
+    }
+    .acc-card-title {
+      font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em; color: var(--color-text-faint);
+    }
+    .acc-value {
+      font-size: 2.5rem; font-weight: 800; font-family: var(--font-display);
+      color: var(--color-success); line-height: 1;
+    }
+    .acc-formula {
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      color: var(--color-text-muted); padding: var(--space-2) var(--space-3);
+      background: var(--color-surface-offset); border-radius: var(--radius-md);
+    }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Model Validation"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page6"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Seite 6 · Folien 23–27</span>
+            <h1>Model Validation:
+              <span class="key" style="--key-color:var(--color-primary)">Grundlagen</span>
+              &amp;
+              <span class="key" style="--key-color:var(--color-success)">Holdout Sets</span>
+            </h1>
+            <p>
+              Sind wir nach dem Training wirklich fertig? Nein –
+              erst die Validierung zeigt, ob das Modell tatsächlich generalisiert.
+              Diese Seite erklärt, warum naiver Ansatz scheitert,
+              wie <code>accuracy_score</code> funktioniert,
+              und wie Holdout Sets das Problem lösen.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Warum validieren?</span>
+              <span class="pill">Not-So-Right Way</span>
+              <span class="pill">accuracy_score</span>
+              <span class="pill">model.score()</span>
+              <span class="pill">train_test_split</span>
+              <span class="pill">Holdout Sets</span>
+              <span class="pill">Generalisierung</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du verstehst, <strong>warum man Validierung braucht</strong>
+              (Modell + Hyperparameter müssen Daten repräsentieren).
+              Du kennst das Problem des naiven Ansatzes (Training = Test)
+              und kannst
+              <span class="key" style="--key-color:var(--color-success)">train_test_split</span>
+              korrekt einsetzen, um ein ehrliches Bild der Modell-Performance zu bekommen.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           6.1  WARUM VALIDIEREN?  (Folie 24)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="warum-validieren">
+        <div class="section-head">
+          <h2>6.1 Warum validieren?</h2>
+          <p>
+            Wir kennen den 4-Schritte-Prozess – aber
+            <strong>Schritte 1 und 2</strong> (Modell &amp; Hyperparameter wählen)
+            sind entscheidend. Wie trifft man diese Wahl
+            <span class="key" style="--key-color:var(--color-primary)">objektiv</span>?
+          </p>
+        </div>
+
+        <!-- ML Ablauf Recap -->
+        <div class="card-grid">
+          <article class="card">
+            <h3>Der typische ML-Ablauf – Recap</h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">① Modell wählen</span>
+                &amp; entsprechende sklearn-Klasse importieren
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">② Hyperparameter wählen</span>
+                → Instanziierung
+              </li>
+              <li>③ Modell trainieren: <code>.fit(X, y)</code></li>
+              <li>④ Modell anwenden: <code>.predict(X_new)</code></li>
+              <li>
+                Die Punkte <strong>① und ②</strong> sind von
+                <span class="key" style="--key-color:var(--color-warning)">entscheidender Bedeutung</span>
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              Warum
+              <span class="key" style="--key-color:var(--color-primary)">Validierung</span>
+              notwendig ist
+            </h3>
+            <ul>
+              <li>
+                Um eine <strong>objektive Wahl</strong> für Modell und Hyperparameter
+                treffen zu können, muss das Modell <strong>validiert</strong> werden
+              </li>
+              <li>
+                Das Modell und die gewählten Hyperparameter müssen die
+                <span class="key" style="--key-color:var(--color-primary)">zugrundeliegenden Daten gut repräsentieren</span>
+              </li>
+              <li>
+                Ohne Validierung: reine Intuition oder Zufall –
+                <strong>keine objektive Aussage</strong> möglich
+              </li>
+              <li>
+                Ziel: ein Modell, das auf
+                <strong>neuen, ungesehenen Daten</strong> gut performt
+                (= <em>Generalisierung</em>)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>„Was denken Sie? Wie würden Sie intuitiv an die Modellvalidierung herangehen?"</p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           6.2  THE "NOT-SO-RIGHT" WAY  (Folie 25)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="not-so-right">
+        <div class="section-head">
+          <h2>6.2 The "Not-So-Right" Way</h2>
+          <p>
+            Der intuitive Ansatz: trainieren, dann auf einem Teil der
+            <strong>gleichen Daten</strong> testen.
+            Klingt sinnvoll – ist aber fundamental falsch.
+          </p>
+        </div>
+
+        <!-- Problem Visual -->
+        <div class="split-visual">
+          <div class="split-bar-label">❌ Not-So-Right: Train &amp; Test auf denselben Daten</div>
+          <div class="split-bar">
+            <div class="split-segment bad" style="flex:1">Training</div>
+            <div style="width:3px; background:rgba(255,255,255,0.4)"></div>
+            <div class="split-segment bad2" style="flex:1">Test ← dieselben Daten!</div>
+          </div>
+          <div class="split-legend">
+            <div class="split-legend-item">
+              <div class="split-legend-dot" style="background:#ef4444"></div>
+              <span>Training Set (alle Daten)</span>
+            </div>
+            <div class="split-legend-item">
+              <div class="split-legend-dot" style="background:#f97316"></div>
+              <span>Test Set = dieselben Daten → PROBLEM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 1: Daten laden -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Schritt 1 — Iris-Datensatz laden
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Der <span class="key" style="--key-color:var(--color-primary)">Iris-Datensatz</span>
+          (150 Blumen, 4 Features, 3 Klassen) ist ein klassischer sklearn-Beispieldatensatz.
+          Wir laden ihn direkt aus sklearn.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Daten laden
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code># Iris-Datensatz laden
+from sklearn.datasets import load_iris
+iris = load_iris()
+X = iris.data    # Feature-Matrix: (150, 4)
+y = iris.target  # Labels: (150,)
+
+print("X.shape:", X.shape)
+print("y.shape:", y.shape)
+print("Klassen:", iris.target_names)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ausgabe
+              </span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); color:var(--color-text-muted); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3)">
+                X.shape: (150, 4)<br>
+                y.shape: (150,)<br>
+                Klassen: ['setosa' 'versicolor' 'virginica']
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li><strong>150</strong> Blumen-Messungen</li>
+                <li><strong>4</strong> Features pro Messung (Kelch/Blütenblatt Länge+Breite)</li>
+                <li><strong>3</strong> Klassen: Setosa, Versicolor, Virginica</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Trainieren & Testen auf denselben Daten (PROBLEM) -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Schritt 2 — Modell trainieren &amp; auf
+          <span class="key" style="--key-color:#ef4444">denselben Daten</span> testen
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Intuitiver Ansatz: Modell fitten, dann direkt auf denselben Trainingsdaten
+          vorhersagen und die Genauigkeit messen.
+          Das Ergebnis sieht gut aus – aber es ist
+          <span class="key" style="--key-color:#ef4444">fundamental falsch</span>.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Not-So-Right Way
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+
+# Modell mit n_neighbors=1
+model = KNeighborsClassifier(n_neighbors=1)
+
+# Training auf ALLEN Daten
+model.fit(X, y)
+
+# Predict auf DENSELBEN Daten → Problem!
+y_model = model.predict(X)
+
+# Accuracy auf Trainingsdaten
+accuracy_score(y, y_model)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ausgabe &amp; Problem
+              </span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:1.5rem; font-weight:800; color:#ef4444; text-align:center; padding:var(--space-4); background:color-mix(in oklab,#ef4444 8%,var(--color-surface-offset)); border-radius:var(--radius-lg); margin-bottom:var(--space-3)">
+                1.0
+              </div>
+              <div style="display:flex; justify-content:center; margin-bottom:var(--space-3)">
+                <span class="verdict-badge fail">❌ FAIL</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>Mit <code>n_neighbors=1</code>: jeder Punkt kennt sich selbst als nächsten Nachbarn</li>
+                <li>→ 100% Accuracy auf Trainingsdaten</li>
+                <li><strong>Problem:</strong> wir trainieren UND validieren auf denselben Daten!</li>
+                <li>Das sagt uns <strong>nichts</strong> über die echte Performance</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Problem-Erklärung -->
+        <div class="problem-box">
+          <div class="problem-label">❌ Das Problem – Warum FAIL?</div>
+          <p>
+            Nachdem wir das Modell mit den ausgesuchten Hyperparametern trainiert haben,
+            wenden wir es auf <strong>einen Teil dieser selben Daten</strong> an und vergleichen
+            die vorhergesagten Werte mit den tatsächlichen.
+            Mit <code>n_neighbors=1</code> erhalten wir ein Modell, das zu
+            <strong>100% genau die Labels der Trainingsdaten vorhersagen</strong> kann –
+            aber das ist kein gutes Zeichen! Das Modell hat die Daten
+            <em>auswendig gelernt</em>.
+            <strong>Wir trainieren UND validieren das Modell an denselben Daten</strong> –
+            das sagt uns gar nichts über die echte Generalisierungsfähigkeit.
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>„Was denken Sie? Was tun wir jetzt, um dieses Problem zu beheben?"</p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           6.3  ACCURACY & MODEL SCORE  (Folie 26)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="accuracy-score">
+        <div class="section-head">
+          <h2>6.3 Accuracy &amp; Model Score – Einschub</h2>
+          <p>
+            Bevor wir den richtigen Weg zeigen: zwei äquivalente Methoden,
+            um die Klassifikationsgenauigkeit zu berechnen –
+            <span class="key" style="--key-color:var(--color-primary)">accuracy_score()</span>
+            und
+            <span class="key" style="--key-color:var(--color-success)">model.score()</span>.
+          </p>
+        </div>
+
+        <!-- Accuracy Compare Cards -->
+        <div class="accuracy-compare">
+          <div class="acc-card">
+            <div class="acc-card-title">Methode 1 – Funktion aus sklearn.metrics</div>
+            <div class="acc-formula">
+              accuracy_score(y_test, y_predicted)
+            </div>
+            <ul style="font-size:var(--text-xs); color:var(--color-text-muted); padding-left:1rem; margin:0; line-height:1.9">
+              <li>Importieren: <code>from sklearn.metrics import accuracy_score</code></li>
+              <li>Input: tatsächliche Labels + vorhergesagte Labels</li>
+              <li>Berechnet: Anteil korrekter Vorhersagen</li>
+            </ul>
+            <div class="acc-value">0.96</div>
+          </div>
+          <div class="acc-card">
+            <div class="acc-card-title">Methode 2 – .score() Methode des Modells</div>
+            <div class="acc-formula">
+              model.score(X_test, y_test)
+            </div>
+            <ul style="font-size:var(--text-xs); color:var(--color-text-muted); padding-left:1rem; margin:0; line-height:1.9">
+              <li>In den meisten sklearn-Modellen verfügbar</li>
+              <li>Intern: <code>.predict(X_test)</code> → <code>accuracy_score()</code></li>
+              <li>Praktisch: kompakter, kein separater Import nötig</li>
+            </ul>
+            <div class="acc-value">0.96</div>
+          </div>
+        </div>
+
+        <!-- Code: Accuracy Score -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Code — Beide Varianten im Vergleich
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Beide Methoden sind äquivalent und liefern dasselbe Ergebnis.
+          Voraussetzung: Modell wurde bereits auf <code>X_train</code> trainiert
+          und wir evaluieren auf <code>X_test</code> (einem getrennten Datensatz).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – accuracy_score vs. model.score
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.metrics import accuracy_score
+
+# Modell auf Training-Set trainieren
+model.fit(X_train, y_train)
+
+# ── Variante 1: accuracy_score() ────────────────
+y_predicted = model.predict(X_test)
+score_v1 = accuracy_score(y_test, y_predicted)
+print("accuracy_score:", score_v1)
+
+# ── Variante 2: model.score() ───────────────────
+score_v2 = model.score(X_test, y_test)
+print("model.score:   ", score_v2)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ausgabe
+              </span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); color:var(--color-text-muted); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3)">
+                accuracy_score: 0.96<br>
+                model.score:    0.96
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>Beide Varianten → <strong>0.96</strong> (96% Genauigkeit)</li>
+                <li><code>accuracy_score(y_test, y_predicted)</code> – explizit, flexibel</li>
+                <li><code>model.score(X_test, y_test)</code> – kompakt, weniger Code</li>
+                <li>Faustregel: <code>.score()</code> für schnelle Checks,<br><code>accuracy_score()</code> wenn weitere Metriken folgen</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:var(--space-5)">
+          <h3>Vergleich: beide Methoden</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Aspekt</th>
+                <th><code>accuracy_score(y_test, y_pred)</code></th>
+                <th><code>model.score(X_test, y_test)</code></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Import</strong></td>
+                <td><code>from sklearn.metrics import accuracy_score</code></td>
+                <td>kein extra Import nötig</td>
+              </tr>
+              <tr>
+                <td><strong>Intern</strong></td>
+                <td>vergleicht direkt Labels</td>
+                <td>ruft intern <code>.predict()</code> + <code>accuracy_score()</code> auf</td>
+              </tr>
+              <tr>
+                <td><strong>Flexibilität</strong></td>
+                <td>höher – eignet sich für andere Metriken</td>
+                <td>kompakter für Quick-Checks</td>
+              </tr>
+              <tr>
+                <td><strong>Ergebnis</strong></td>
+                <td>0.96</td>
+                <td>0.96</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            <code class="key" style="--key-color:var(--color-primary)">accuracy_score(ytest, ypredicted)</code>
+            und
+            <code class="key" style="--key-color:var(--color-success)">model.score(Xtest, ytest)</code>
+            sind äquivalent. Beide berechnen den Anteil korrekt klassifizierter Datenpunkte.
+            Wichtig: <strong>X_test und y_test dürfen NICHT im Training verwendet worden sein!</strong>
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           6.4  HOLDOUT SETS – THE RIGHT WAY  (Folie 27)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="holdout-sets">
+        <div class="section-head">
+          <h2>6.4 Holdout Sets – The Right Way</h2>
+          <p>
+            Lösung: Den Datensatz <strong>aufteilen</strong> in Training- und Test-Set.
+            Training auf dem einen, Evaluation auf dem anderen –
+            das Modell hat das Test-Set nie gesehen.
+          </p>
+        </div>
+
+        <!-- Richtige Split-Visualisierung -->
+        <div class="split-visual">
+          <div class="split-bar-label">✅ The Right Way: Train/Test aufteilen</div>
+          <div class="split-bar">
+            <div class="split-segment all" style="flex:1; background:var(--color-text-faint)">
+              All Data (150 Samples)
+            </div>
+          </div>
+          <div class="split-bar">
+            <div class="split-segment train" style="flex:1">
+              Training Set (75 Samples) – .fit(X_train, y_train)
+            </div>
+            <div style="width:3px; background:#fff"></div>
+            <div class="split-segment test" style="flex:1">
+              Test Set (75 Samples) – .score(X_test, y_test)
+            </div>
+          </div>
+          <div class="split-legend">
+            <div class="split-legend-item">
+              <div class="split-legend-dot" style="background:var(--color-success)"></div>
+              <span>Training Set – Modell wird darauf trainiert</span>
+            </div>
+            <div class="split-legend-item">
+              <div class="split-legend-dot" style="background:#3b82f6"></div>
+              <span>Test Set – zur Evaluation, nie beim Training gesehen</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 1: .shape prüfen -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Schritt 1 — Datensatz-Dimensionen prüfen
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Bevor wir aufteilen: prüfen wir die Dimensionen unserer Daten.
+          <code>X.shape</code> zeigt (n_samples, n_features),
+          <code>y.shape</code> zeigt (n_samples,).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Datensatz-Dimensionen
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>print("X.shape:", X.shape)
+print("y.shape:", y.shape)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ausgabe
+              </span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                X.shape: (150, 4)<br>
+                y.shape: (150,)
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li><strong>150</strong> Beobachtungen, <strong>4</strong> Features</li>
+                <li><strong>150</strong> Label-Werte (1D)</li>
+                <li>Genug Daten zum Aufteilen (z.B. 50/50 oder 80/20)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: train_test_split -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Schritt 2 —
+          <span class="key" style="--key-color:var(--color-success)">train_test_split()</span>
+          – Datensatz aufteilen
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          sklearn stellt eine vorfertige Funktion bereit:
+          <code class="key" style="--key-color:var(--color-success)">train_test_split(X, y, train_size=&lt;ratio&gt;)</code>.
+          Sie mischt die Daten zufällig und teilt sie im gewünschten Verhältnis auf.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – train_test_split
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.model_selection import train_test_split
+
+# Datensatz 50/50 aufteilen
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, train_size=0.5)
+
+# Dimensionen der Splits prüfen
+print("X_train:", X_train.shape)
+print("X_test: ", X_test.shape)
+print("y_train:", y_train.shape)
+print("y_test: ", y_test.shape)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ausgabe
+              </span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                X_train: (75, 4)<br>
+                X_test:  (75, 4)<br>
+                y_train: (75,)<br>
+                y_test:  (75,)
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li><code>train_size=0.5</code> → 50% Training, 50% Test</li>
+                <li>75 + 75 = 150 Samples total ✓</li>
+                <li>Daten werden automatisch <strong>gemischt</strong> (zufällig)</li>
+                <li>Verwende <code>random_state=42</code> für Reproduzierbarkeit</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 3: Training + Evaluation -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Schritt 3 — Training auf <code>X_train</code> + Evaluation auf
+          <code class="key" style="--key-color:var(--color-success)">X_test</code>
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Jetzt trainieren wir nur auf <code>X_train</code> / <code>y_train</code>
+          und evaluieren auf dem komplett getrennten <code>X_test</code> / <code>y_test</code>.
+          Das Modell hat das Test-Set nie gesehen – ein ehrliches Bild.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Training &amp; Evaluation (The Right Way)
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.neighbors import KNeighborsClassifier
+
+model = KNeighborsClassifier(n_neighbors=1)
+
+# Training NUR auf X_train
+model.fit(X_train, y_train)
+
+# Evaluation auf X_test (nie beim Training gesehen!)
+score = model.score(X_test, y_test)
+print("Test-Accuracy:", score)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ausgabe
+              </span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:1.2rem; font-weight:800; color:var(--color-success); text-align:center; padding:var(--space-3); background:color-mix(in oklab,var(--color-success) 8%,var(--color-surface-offset)); border-radius:var(--radius-lg); margin-bottom:var(--space-3)">
+                Test-Accuracy: 0.96
+              </div>
+              <div style="display:flex; justify-content:center; margin-bottom:var(--space-3)">
+                <span class="verdict-badge ok">✅ Richtig</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>96% Genauigkeit auf <strong>ungesehenen</strong> Daten</li>
+                <li>Das ist ein <strong>ehrliches Ergebnis</strong></li>
+                <li>Modell kann gut <strong>generalisieren</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fragen aus Folie 27 -->
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage 1 aus der Vorlesung</div>
+          <p>„Was denken Sie? Sie rufen die <code>train_test_split</code>-Funktion mehrfach auf: bekommen Sie jedes Mal dasselbe Ergebnis?"</p>
+        </div>
+
+        <div class="frage-box" style="margin-top:var(--space-3)">
+          <div class="frage-label">💬 Denkfrage 2 aus der Vorlesung</div>
+          <p>„Was denken Sie? Wie könnten wir diesen Gedanken nun weiterdenken? Was ist ein Nachteil hierbei?"</p>
+        </div>
+
+        <!-- Concept Cards -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Holdout Sets</span>
+              – Das Prinzip
+            </h3>
+            <ul>
+              <li>
+                Um die Model Performance nicht an Daten zu testen,
+                die das Modell schon <strong>„gesehen"</strong> hat →
+                <span class="key" style="--key-color:var(--color-success)">Holdout Sets</span>
+              </li>
+              <li>Datensatz wird in <strong>Training-</strong> und <strong>Test-Sets</strong> aufgeteilt</li>
+              <li>Am <strong>Training-Set</strong>: Modell trainieren/fitten</li>
+              <li>Am <strong>Test-Set</strong>: Genauigkeit des trainierten Modells überprüfen</li>
+              <li>→ Ein genaues Modell kann gut <strong>generalisieren</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <code class="key" style="--key-color:var(--color-success)">train_test_split()</code>
+              – Parameter
+            </h3>
+            <ul>
+              <li><code>X, y</code> – Feature-Matrix und Label-Vektor</li>
+              <li>
+                <code class="key" style="--key-color:var(--color-primary)">train_size=0.5</code>
+                – 50% Training (oder z.B. 0.8 für 80%)
+              </li>
+              <li>
+                <code>test_size=0.2</code> – alternativ Test-Anteil angeben
+              </li>
+              <li>
+                <code>random_state=42</code> – für <strong>Reproduzierbarkeit</strong>
+                (gleiche Aufteilung bei jedem Aufruf)
+              </li>
+              <li>
+                Rückgabe: <code>X_train, X_test, y_train, y_test</code>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? – Nachteil von Holdout Sets</div>
+          <p>
+            Holdout Sets lösen das Problem des naiven Ansatzes – aber sie haben einen Nachteil:
+            Man <strong>„verliert"</strong> Daten, auf denen man das Modell hätte trainieren können.
+            Bei kleineren Datensätzen ist das problematisch.
+            Außerdem: das Ergebnis hängt von der <em>zufälligen</em> Aufteilung ab.
+            → Lösung: <strong>Cross-Validation</strong> (→ Seite 7)
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Seite 6 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

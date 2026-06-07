@@ -1,0 +1,263 @@
+/* ============================================================
+   css_codes/sidebar-styles.css
+   ============================================================ */
+
+/* ── Layout-Fix: Sidebar scrollt unabhängig vom Header ── */
+.layout {
+  display: flex;
+  align-items: flex-start;
+}
+
+.sidebar {
+  width: 240px;
+  min-width: 200px;
+  height: calc(100vh - var(--header-height, 56px));
+  position: sticky;
+  top: var(--header-height, 100px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-4) 0 var(--space-12) 0;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+  flex-shrink: 0;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 99px;
+}
+
+/* ── Fortschrittsleiste ──────────────────────── */
+.toc-progress-wrap {
+  padding: 0 var(--space-5) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-3);
+}
+.toc-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-1);
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+.toc-progress-bar {
+  height: 3px;
+  background: var(--color-border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.toc-progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 99px;
+  transition: width .25s ease;
+  width: 0%;
+}
+
+/* ── TOC Titel ───────────────────────────────── */
+.toc-title {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  padding: 0 var(--space-5);
+  margin: 0 0 var(--space-2);
+}
+
+/* ── Kapitel-Toggle ──────────────────────────── */
+.toc-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: left;
+  gap: var(--space-2);
+  transition: color .15s;
+}
+.toc-toggle:hover { color: var(--color-primary); }
+
+/* ── Chevron ─────────────────────────────────── */
+.toc-chevron {
+  transition: transform .2s ease;
+  font-size: .65rem;
+  flex-shrink: 0;
+  color: var(--color-text-faint);
+  display: inline-block;
+}
+.toc-toggle[aria-expanded="true"] .toc-chevron,
+.toc-page-toggle[aria-expanded="true"] .toc-chevron {
+  transform: rotate(90deg);
+}
+.toc-toggle[aria-expanded="true"] .toc-chevron {
+  color: var(--color-primary);
+}
+
+/* ── Seiten-Toggle ───────────────────────────── */
+.toc-page-group {
+  position: relative;
+}
+
+.toc-page-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 7px var(--space-4) 7px var(--space-5);
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-align: left;
+  gap: var(--space-2);
+  transition: color .15s, background .15s, border-color .15s;
+  line-height: 1.45;
+  position: relative;
+}
+.toc-page-toggle:hover {
+  color: var(--color-text);
+  background: var(--color-surface-2);
+}
+
+/* Aktive Seite */
+.toc-page-toggle.active {
+  color: var(--color-primary);
+  font-weight: 700;
+  background: color-mix(in oklab, var(--color-primary) 8%, transparent);
+  border-left-color: var(--color-primary);
+}
+.toc-page-toggle[aria-expanded="true"] .toc-chevron {
+  color: var(--color-primary);
+}
+
+/* Prüfungsseiten */
+.toc-page-pruefung {
+  color: color-mix(in oklab, var(--color-warning) 70%, var(--color-text-muted)) !important;
+}
+.toc-page-pruefung:hover {
+  color: var(--color-warning) !important;
+}
+.toc-page-pruefung.active {
+  color: var(--color-warning) !important;
+  background: color-mix(in oklab, var(--color-warning) 8%, transparent) !important;
+  border-left-color: var(--color-warning) !important;
+}
+.toc-page-pruefung[aria-expanded="true"] .toc-chevron {
+  color: var(--color-warning) !important;
+}
+
+/* ── Sublist ─────────────────────────────────── */
+.toc-sublist {
+  padding: 2px 0 var(--space-2);
+  margin-left: var(--space-5);
+  border-left: 2px solid var(--color-border);
+}
+.toc-page-pruefung-sub {
+  border-left-color: color-mix(in oklab, var(--color-warning) 30%, var(--color-border));
+}
+
+/* ── Abschnitts-Links ────────────────────────── */
+.toc-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 5px var(--space-3) 5px var(--space-3);
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: var(--color-text-faint);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  margin-left: -2px;
+  transition: color .12s, background .12s, border-color .12s, padding-left .12s;
+  line-height: 1.45;
+}
+.toc-link:hover {
+  color: var(--color-text);
+  background: var(--color-surface-2);
+  padding-left: calc(var(--space-3) + 3px);
+}
+
+/* Aktiver Abschnitt */
+.toc-link.toc-link--active {
+  color: var(--color-primary);
+  font-weight: 600;
+  background: color-mix(in oklab, var(--color-primary) 7%, transparent);
+  border-left-color: var(--color-primary);
+  padding-left: calc(var(--space-3) + 3px);
+}
+.toc-link.toc-link--active::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* Aktiver Link in Prüfungsbereich */
+.toc-page-pruefung-sub .toc-link.toc-link--active {
+  color: var(--color-warning);
+  border-left-color: var(--color-warning);
+  background: color-mix(in oklab, var(--color-warning) 7%, transparent);
+}
+.toc-page-pruefung-sub .toc-link.toc-link--active::before {
+  background: var(--color-warning);
+}
+
+/* ── Divider ─────────────────────────────────── */
+.toc-divider {
+  padding: var(--space-4) var(--space-5) var(--space-1);
+}
+.toc-divider-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.toc-divider-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ── "Nach oben" Button ──────────────────────── */
+.toc-top-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: calc(100% - var(--space-10));
+  margin: var(--space-5) var(--space-5) 0;
+  padding: var(--space-2) var(--space-4);
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  font-size: 0.72rem;
+  color: var(--color-text-faint);
+  transition: color .15s, border-color .15s, background .15s;
+}
+.toc-top-btn:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: color-mix(in oklab, var(--color-primary) 5%, transparent);
+}

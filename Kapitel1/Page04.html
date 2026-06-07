@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Feature Extraction aus Zeitserien</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       SPEKTRUM-LEISTE  (Domänengetrieben ↔ Datengetrieben)
+    ═══════════════════════════════════════════════════════ */
+    .spektrum-outer {
+      margin-top: var(--space-6);
+    }
+    .spektrum-bar {
+      position: relative;
+      height: 12px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(
+        to right,
+        var(--color-primary),
+        color-mix(in oklab, var(--color-primary) 50%, var(--color-success)),
+        var(--color-success)
+      );
+      margin-bottom: var(--space-2);
+    }
+    .spektrum-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: var(--space-6);
+    }
+    .spektrum-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .spektrum-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: var(--space-3);
+    }
+    .spektrum-card {
+      padding: var(--space-4) var(--space-4);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .spektrum-card .sc-tag {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      padding: 0.15rem 0.5rem;
+      border-radius: var(--radius-full);
+      display: inline-block;
+      margin-bottom: var(--space-2);
+    }
+    .spektrum-card h4 {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      margin: 0 0 var(--space-2) 0;
+    }
+    .spektrum-card p {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ZEITSERIEN-ILLUSTRATION  (Strom-Signal)
+    ═══════════════════════════════════════════════════════ */
+    .signal-box {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+      margin-top: var(--space-5);
+    }
+    .signal-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--color-text-faint);
+      margin-bottom: var(--space-4);
+    }
+    .signal-svg-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+    .signal-svg-wrap svg {
+      display: block;
+      min-width: 400px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       EVENT-TRIGGERED vs. KONTINUIERLICH
+    ═══════════════════════════════════════════════════════ */
+    .ts-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+      margin-top: var(--space-6);
+    }
+    @media (max-width: 680px) { .ts-compare { grid-template-columns: 1fr; } }
+    .ts-type-card {
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    .ts-type-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .ts-type-icon { font-size: 1.6rem; flex-shrink: 0; }
+    .ts-type-title { font-size: var(--text-base); font-weight: 700; }
+    .ts-type-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      line-height: 1.7;
+    }
+    .ts-type-props {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      margin-top: var(--space-1);
+    }
+    .ts-type-prop {
+      display: flex;
+      gap: var(--space-2);
+      align-items: baseline;
+      font-size: var(--text-xs);
+    }
+    .ts-prop-key {
+      font-weight: 700;
+      white-space: nowrap;
+      color: var(--color-text-muted);
+    }
+    .ts-prop-val { color: var(--color-text); }
+
+    /* Mini-Zeitserien Visualisierung */
+    .mini-ts {
+      margin-top: var(--space-3);
+      height: 50px;
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+    }
+    .mini-ts svg { display: block; width: 100%; height: 100%; }
+
+    /* ═══════════════════════════════════════════════════════
+       MATHEMATIK  (Formel-Box)
+    ═══════════════════════════════════════════════════════ */
+    .formula-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      margin-top: var(--space-6);
+      align-items: start;
+    }
+    @media (max-width: 680px) { .formula-box { grid-template-columns: 1fr; } }
+
+    .formula-card {
+      padding: var(--space-6);
+      border-radius: var(--radius-xl);
+      border: 2px solid color-mix(in oklab, var(--color-primary) 25%, var(--color-border));
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface));
+      text-align: center;
+    }
+    .formula-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--color-primary);
+      margin-bottom: var(--space-4);
+    }
+    .formula-display {
+      font-family: var(--font-mono);
+      font-size: clamp(1.1rem, 3vw, 1.5rem);
+      font-weight: 700;
+      color: var(--color-text);
+      line-height: 1.4;
+    }
+    .formula-display .sym-input  { color: var(--color-success);  }
+    .formula-display .sym-output { color: var(--color-primary); }
+    .formula-display .sym-arrow  { color: var(--color-text-faint); }
+
+    .formula-legend {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    .formula-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+    }
+    .formula-sym {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      font-weight: 700;
+      width: 2.5rem;
+      flex-shrink: 0;
+    }
+    .formula-desc { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.5; }
+
+    /* ═══════════════════════════════════════════════════════
+       EXKURS  (Deep-Dive Block)
+    ═══════════════════════════════════════════════════════ */
+    .exkurs-block {
+      margin-top: var(--space-8);
+      border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+    }
+    .exkurs-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-5) var(--space-6);
+      background: color-mix(in oklab, var(--color-primary) 8%, var(--color-surface-2));
+      border-bottom: 1px solid color-mix(in oklab, var(--color-primary) 15%, var(--color-border));
+    }
+    .exkurs-badge {
+      padding: 0.2rem 0.7rem;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .exkurs-title-block { display: flex; flex-direction: column; gap: 0.2rem; }
+    .exkurs-title { font-size: var(--text-base); font-weight: 700; }
+    .exkurs-sub { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .exkurs-stats {
+      margin-left: auto;
+      display: flex;
+      gap: var(--space-4);
+      flex-shrink: 0;
+    }
+    .exkurs-stat { text-align: center; }
+    .exkurs-stat-num {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1;
+    }
+    .exkurs-stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--color-text-faint);
+    }
+    @media (max-width: 700px) { .exkurs-stats { display: none; } }
+
+    .exkurs-body { padding: var(--space-6); }
+
+    /* 6 Kernfragen Grid */
+    .kernfragen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+    .kernfrage-card {
+      display: flex;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .kernfrage-card:hover {
+      border-color: color-mix(in oklab, var(--color-primary) 30%, var(--color-border));
+      background: color-mix(in oklab, var(--color-primary) 4%, var(--color-surface-2));
+    }
+    .kernfrage-letter {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: var(--text-base);
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+    .kernfrage-body { display: flex; flex-direction: column; gap: 0.2rem; }
+    .kernfrage-title { font-size: var(--text-sm); font-weight: 700; }
+    .kernfrage-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       DEMO LINKS  (CompEngine, BirdNET)
+    ═══════════════════════════════════════════════════════ */
+    .demo-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-6);
+    }
+    .demo-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      text-decoration: none;
+      color: var(--color-text);
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .demo-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .demo-header { display: flex; align-items: center; gap: var(--space-3); }
+    .demo-icon { font-size: 1.8rem; flex-shrink: 0; }
+    .demo-name { font-weight: 700; font-size: var(--text-base); }
+    .demo-url {
+      font-size: var(--text-xs);
+      color: var(--color-primary);
+      font-family: var(--font-mono);
+    }
+    .demo-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      line-height: 1.65;
+    }
+    .demo-arrow {
+      margin-top: auto;
+      align-self: flex-end;
+      font-size: var(--text-sm);
+      color: var(--color-primary);
+      transition: transform 0.15s;
+    }
+    .demo-card:hover .demo-arrow { transform: translateX(4px); }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page1" title="Kapitel 1 · Feature Extraction: Zeitserien"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page4"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 1 · Seite 4</span>
+            <h1>Feature Extraction
+              <span class="key" style="--key-color:var(--color-success)">aus Zeitserien</span>
+            </h1>
+            <p>
+              Vom Rohsignal zum Merkmalsvektor – wie man aus einer Zeitreihe
+              (T Messpunkte) einen kompakten Feature-Vektor (K Skalare) erzeugt
+              und welche Strategien dabei zur Verfügung stehen.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Domänen- vs. Datengetrieben</span>
+              <span class="pill">Zeitserien-Szenario</span>
+              <span class="pill">Event-triggered</span>
+              <span class="pill">f: ℝᵀ → ℝᴷ</span>
+              <span class="pill">38.190 Zeitserien</span>
+              <span class="pill">9.613 Methoden</span>
+              <span class="pill">CompEngine</span>
+              <span class="pill">BirdNET</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du verstehst das Spektrum der Extraktionsansätze, kennst
+              die formale Abbildung f:&nbsp;ℝᵀ&nbsp;→&nbsp;ℝᴷ und weißt,
+              was der Exkurs zur <strong>Feature-Based Time Series Analysis</strong>
+              über die 6 Kernfragen aussagt.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           4.1  SPEKTRUM
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="spektrum">
+        <div class="section-head">
+          <h2>4.1 Das Spektrum: Domänengetrieben ↔ Datengetrieben</h2>
+          <p>
+            Feature Extraction ist kein einzelnes Verfahren – es ist ein
+            <strong>Spektrum</strong> zwischen zwei Polen.
+          </p>
+        </div>
+
+        <!-- Spektrum-Balken -->
+        <div class="spektrum-outer">
+          <div class="spektrum-bar"></div>
+          <div class="spektrum-labels">
+            <span class="spektrum-label"
+                  style="color:var(--color-primary)">← Domänengetrieben</span>
+            <span class="spektrum-label"
+                  style="color:var(--color-success)">Datengetrieben →</span>
+          </div>
+
+          <div class="spektrum-grid">
+
+            <div class="spektrum-card">
+              <span class="sc-tag"
+                    style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface));
+                           color:var(--color-primary)">Domäne</span>
+              <h4>Statistische Features</h4>
+              <p>Mittelwert, Varianz, Min, Max, RMS – klassische Signal-Kenngrößen aus dem Domänenwissen.</p>
+            </div>
+
+            <div class="spektrum-card">
+              <span class="sc-tag"
+                    style="background:color-mix(in oklab,var(--color-primary) 8%,var(--color-surface));
+                           color:var(--color-primary)">Domäne</span>
+              <h4>Frequenz-Features</h4>
+              <p>FFT, Spektralleistung, Dominant-Frequenz – erfordern Wissen über physikalische Prozesse.</p>
+            </div>
+
+            <div class="spektrum-card" style="
+              border-color:color-mix(in oklab,var(--color-primary) 20%,var(--color-success) 20%,var(--color-border));">
+              <span class="sc-tag"
+                    style="background:color-mix(in oklab,var(--color-primary) 8%,var(--color-success) 8%,var(--color-surface));
+                           color:color-mix(in oklab,var(--color-primary) 60%,var(--color-success))">Hybrid</span>
+              <h4>tsfresh / TSFEL</h4>
+              <p>Bibliotheken, die hunderte Features automatisch berechnen – Domänenwissen hilft bei der Auswahl.</p>
+            </div>
+
+            <div class="spektrum-card">
+              <span class="sc-tag"
+                    style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface));
+                           color:var(--color-success)">Daten</span>
+              <h4>Autoencoder</h4>
+              <p>Neuronales Netz, das komprimierte Features im Bottleneck lernt. Keine manuellen Features nötig.</p>
+            </div>
+
+            <div class="spektrum-card">
+              <span class="sc-tag"
+                    style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface));
+                           color:var(--color-success)">Daten</span>
+              <h4>Deep Learning End-to-End</h4>
+              <p>CNN / RNN lernen Features direkt aus den Rohdaten. Maximale Flexibilität, aber weniger Interpretierbarkeit.</p>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-6)">
+          <strong>Faustregel:</strong> &nbsp;
+          Je mehr Domänenwissen vorhanden ist, desto weiter links (domänengetrieben) kann man ansetzen
+          und interpretierbarere Features erzeugen. Je komplexer die Daten und je weniger
+          Domänenwissen, desto mehr lohnt sich der datengetriebene Ansatz.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           4.2  SZENARIO  (Motorausfall)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="szenario">
+        <div class="section-head">
+          <h2>4.2 Das Zeitserien-Szenario: Motorausfall-Erkennung</h2>
+          <p>
+            Ein konkretes Beispiel – von der Messung zum Feature-Vektor.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">Das Problem</span>
+            </h3>
+            <p>
+              Ein Elektromotor soll überwacht werden. Ziel: <strong>Motorausfall
+              erkennen bevor er passiert</strong>, um ungeplante Stillstandszeiten
+              zu vermeiden.
+            </p>
+            <p style="margin-top:var(--space-3)">
+              Verfügbare Daten: <strong>Stromverbrauch-Zeitserien</strong>
+              (Messung des Stroms in Ampere über die Zeit).
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Die Lösung</span>
+            </h3>
+            <p>
+              Aus dem Rohsignal (T Messpunkte) werden <strong>K Features extrahiert</strong>,
+              die einen bevorstehenden Ausfall anzeigen – z.&nbsp;B. steigende
+              Grundfrequenz, veränderte Harmonische oder zunehmende Varianz.
+            </p>
+            <p style="margin-top:var(--space-3)">
+              Diese Features werden dann an ein <strong>Klassifikationsmodell</strong>
+              übergeben (z.&nbsp;B. Random Forest).
+            </p>
+          </article>
+        </div>
+
+        <!-- Stilisiertes Stromsignal -->
+        <div class="signal-box">
+          <div class="signal-label">Stilisiertes Stromsignal eines Motors (Normalbetrieb → Anomalie)</div>
+          <div class="signal-svg-wrap">
+            <svg viewBox="0 0 600 120" xmlns="http://www.w3.org/2000/svg"
+                 aria-label="Zeitserien-Illustration: Stromsignal mit normalen und anomalen Abschnitten">
+              <!-- Hintergrund-Zonen -->
+              <rect x="0"   y="0" width="360" height="120" fill="color-mix(in oklab,#01696f 5%,#f7f6f2)" rx="0"/>
+              <rect x="360" y="0" width="240" height="120" fill="color-mix(in oklab,#964219 7%,#f7f6f2)" rx="0"/>
+              <!-- Zonen-Labels -->
+              <text x="180" y="14" text-anchor="middle"
+                    font-size="9" font-weight="700" fill="#01696f"
+                    font-family="system-ui,sans-serif" letter-spacing="0.06em">NORMALBETRIEB</text>
+              <text x="480" y="14" text-anchor="middle"
+                    font-size="9" font-weight="700" fill="#964219"
+                    font-family="system-ui,sans-serif" letter-spacing="0.06em">ANOMALIE</text>
+              <!-- Signal: normaler Bereich (ruhige Sinuskurve) -->
+              <polyline
+                points="
+                  0,65  15,52  30,40  45,52  60,65  75,78  90,65
+                  105,52 120,40 135,52 150,65 165,78 180,65
+                  195,52 210,40 225,52 240,65 255,78 270,65
+                  285,52 300,40 315,52 330,65 345,78 358,70"
+                fill="none"
+                stroke="#01696f"
+                stroke-width="2"
+                stroke-linejoin="round"
+                stroke-linecap="round"/>
+              <!-- Signal: Anomalie-Bereich (unruhig, Ausschläge größer) -->
+              <polyline
+                points="
+                  360,68  368,45  376,78  384,30  392,85
+                  400,38  408,88  416,28  424,90  432,35
+                  440,92  448,20  456,95  464,25  472,95
+                  480,30  488,100 496,18  504,100 512,20
+                  520,98  528,15  536,100 544,20  552,95
+                  560,25  568,98  576,20  584,95  592,28 600,90"
+                fill="none"
+                stroke="#964219"
+                stroke-width="2"
+                stroke-linejoin="round"
+                stroke-linecap="round"/>
+              <!-- Trennlinie -->
+              <line x1="360" y1="0" x2="360" y2="120"
+                    stroke="#aaa" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <!-- Zeitachse -->
+              <line x1="0" y1="110" x2="600" y2="110"
+                    stroke="#ccc" stroke-width="1"/>
+              <text x="0"   y="118" font-size="8" fill="#aaa"
+                    font-family="system-ui,sans-serif">t = 0</text>
+              <text x="570" y="118" font-size="8" fill="#aaa"
+                    font-family="system-ui,sans-serif">t = T</text>
+              <text x="300" y="118" text-anchor="middle" font-size="8"
+                    fill="#888" font-family="system-ui,sans-serif">Zeit →</text>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           4.3  EVENT-TRIGGERED vs. KONTINUIERLICH
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="event-triggered">
+        <div class="section-head">
+          <h2>4.3 Event-triggered vs. Kontinuierliche Zeitserien</h2>
+          <p>
+            Nicht alle Zeitserien sind gleich – die Art der Aufzeichnung
+            bestimmt die Feature-Extraction-Strategie.
+          </p>
+        </div>
+
+        <div class="ts-compare">
+
+          <!-- Event-triggered -->
+          <div class="ts-type-card" style="
+            border-color:color-mix(in oklab,var(--color-primary) 25%,var(--color-border));">
+            <div class="ts-type-header">
+              <span class="ts-type-icon">⚡</span>
+              <span class="ts-type-title"
+                    style="color:var(--color-primary)">Event-triggered</span>
+            </div>
+            <p class="ts-type-desc">
+              Die Messung wird durch ein <strong>Ereignis ausgelöst</strong>
+              (z.&nbsp;B. Motor startet, Taste wird gedrückt).
+              Alle Zeitserien haben dann dieselbe Länge und sind
+              am Ereignis ausgerichtet.
+            </p>
+            <div class="ts-type-props">
+              <div class="ts-type-prop">
+                <span class="ts-prop-key">Länge:</span>
+                <span class="ts-prop-val">Fest (T immer gleich)</span>
+              </div>
+              <div class="ts-type-prop">
+                <span class="ts-prop-key">Ausrichtung:</span>
+                <span class="ts-prop-val">Am Trigger-Zeitpunkt</span>
+              </div>
+              <div class="ts-type-prop">
+                <span class="ts-prop-key">Vergleich:</span>
+                <span class="ts-prop-val">Direkt möglich</span>
+              </div>
+              <div class="ts-type-prop">
+                <span class="ts-prop-key">Beispiel:</span>
+                <span class="ts-prop-val">Motoranlauf, Schlagzeug-Hit</span>
+              </div>
+            </div>
+            <!-- Mini-Signal: geordnet, regelmäßig -->
+            <div class="mini-ts">
+              <svg viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+                <polyline points="0,25 10,15 20,25 30,35 40,25 50,15 60,25 70,35 80,25 90,15 100,25 110,35 120,25 130,15 140,25 150,35 160,25 170,15 180,25 190,35 200,25"
+                  fill="none" stroke="#01696f" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Kontinuierlich -->
+          <div class="ts-type-card" style="
+            border-color:color-mix(in oklab,var(--color-success) 25%,var(--color-border));">
+            <div class="ts-type-header">
+              <span class="ts-type-icon">🔄</span>
+              <span class="ts-type-title"
+                    style="color:var(--color-success)">Kontinuierlich</span>
+            </div>
+            <p class="ts-type-desc">
+              Die Messung läuft <strong>ununterbrochen</strong>.
+              Kein klares Start-/Endereignis. Für die Feature Extraction
+              werden <strong>Fenster (Windows)</strong> über das Signal
+              geschoben.
+            </p>
+            <div class="ts-type-props">
+              <div class="ts-type-prop">
+                <span class="ts-prop-key">Länge:</span>
+                <span class="ts-prop-val">Variabel (Fenstergröße wählbar)</span>
+              </div>
+              <div class="ts-type-prop">
+                <span class="ts-prop-key">Ausrichtung:</span>
+                <span class="ts-prop-val">Sliding Window</span>
+              </div>
+              <div class="ts-type-prop">
+                <span class="ts-prop-key">Vergleich:</span>
+                <span class="ts-prop-val">Über Fenstergröße normierbar</span>
+              </div>
+              <div class="ts-type-prop">
+                <span class="ts-prop-key">Beispiel:</span>
+                <span class="ts-prop-val">Langzeit-EKG, Windmessung</span>
+              </div>
+            </div>
+            <!-- Mini-Signal: unregelmäßig -->
+            <div class="mini-ts">
+              <svg viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+                <!-- Fenster-Markierungen -->
+                <rect x="10" y="2"  width="60" height="46" fill="#43772210" rx="2"/>
+                <rect x="80" y="2"  width="60" height="46" fill="#43772210" rx="2"/>
+                <rect x="150" y="2" width="50" height="46" fill="#43772210" rx="2"/>
+                <polyline points="0,28 8,20 18,32 28,15 38,30 48,22 58,38 68,20 78,30 88,12 98,35 108,18 118,40 128,22 138,32 148,18 158,38 168,20 178,35 188,18 200,30"
+                  fill="none" stroke="#437a22" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           4.4  MATHEMATISCHE FORMULIERUNG
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="mathematik">
+        <div class="section-head">
+          <h2>4.4 Mathematische Formulierung</h2>
+          <p>
+            Feature Extraction aus Zeitserien als formale Abbildungsfunktion.
+          </p>
+        </div>
+
+        <div class="formula-box">
+
+          <!-- Formel-Karte -->
+          <div class="formula-card">
+            <div class="formula-label">Die Feature-Extraction-Funktion</div>
+            <div class="formula-display">
+              <span>f :&nbsp;</span>
+              <span class="sym-input">ℝᵀ</span>
+              <span class="sym-arrow"> → </span>
+              <span class="sym-output">ℝᴷ</span>
+            </div>
+            <div style="margin-top:var(--space-4);font-size:var(--text-xs);
+                        color:var(--color-text-muted)">
+              Eine Zeitserien-Eingabe wird auf einen<br>
+              K-dimensionalen Feature-Vektor abgebildet.
+            </div>
+            <div style="margin-top:var(--space-5);padding-top:var(--space-4);
+                        border-top:1px solid var(--color-border);
+                        font-size:var(--text-xs);color:var(--color-text-muted)">
+              <strong>Ziel:</strong> In der Regel gilt K&nbsp;≪&nbsp;T<br>
+              (Feature-Vektor viel kleiner als Rohsignal)
+            </div>
+          </div>
+
+          <!-- Legende -->
+          <div class="formula-legend">
+            <div class="formula-row">
+              <span class="formula-sym" style="color:var(--color-success)">ℝᵀ</span>
+              <span class="formula-desc">
+                <strong>Eingang: T Messpunkte</strong><br>
+                Die Zeitserien-Eingabe als T-dimensionaler Vektor.
+                T = Anzahl der Zeitschritte (kann sehr groß sein –
+                z.&nbsp;B. 10.000 Messpunkte bei 10&nbsp;kHz über 1 Sekunde).
+              </span>
+            </div>
+            <div class="formula-row">
+              <span class="formula-sym" style="color:var(--color-primary)">ℝᴷ</span>
+              <span class="formula-desc">
+                <strong>Ausgang: K Features</strong><br>
+                Der kompakte Feature-Vektor.
+                K = Anzahl der extrahierten Merkmale.
+                Typisch: K ≪ T (z.&nbsp;B. K&nbsp;=&nbsp;20 Features aus T&nbsp;=&nbsp;10.000 Punkten).
+              </span>
+            </div>
+            <div class="formula-row">
+              <span class="formula-sym" style="color:var(--color-text-faint)">f</span>
+              <span class="formula-desc">
+                <strong>Die Abbildungsfunktion</strong><br>
+                Kann statistisch (Mittelwert, Varianz),
+                frequenzbasiert (FFT), wavelet-basiert oder
+                neuronalbasiert (Autoencoder) sein.
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-6)">
+          <strong>Wichtig:</strong> &nbsp;
+          Die Funktion f muss nicht differenzierbar oder parametrisch sein.
+          Sie kann eine einfache Mittelwert-Berechnung oder ein komplexes
+          Deep Learning Modell sein – solange sie ℝᵀ auf ℝᴷ abbildet, ist es Feature Extraction.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           4.5  EXKURS  (Feature-Based Time Series Analysis)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="exkurs">
+        <div class="section-head">
+          <h2>4.5 Exkurs: Feature-Based Time Series Analysis</h2>
+          <p>Eine empirische Studie im großen Maßstab – was passiert, wenn man alles systematisch misst?</p>
+        </div>
+
+        <div class="exkurs-block">
+
+          <!-- Exkurs-Header mit Stats -->
+          <div class="exkurs-header">
+            <span class="exkurs-badge">Deep Dive</span>
+            <div class="exkurs-title-block">
+              <span class="exkurs-title">Feature-Based Time Series Analysis</span>
+              <span class="exkurs-sub">
+                Systematische Untersuchung von Features über reale Zeitserien aus verschiedenen Domänen
+              </span>
+            </div>
+            <div class="exkurs-stats">
+              <div class="exkurs-stat">
+                <div class="exkurs-stat-num">38.190</div>
+                <div class="exkurs-stat-label">Zeitserien</div>
+              </div>
+              <div class="exkurs-stat">
+                <div class="exkurs-stat-num">9.613</div>
+                <div class="exkurs-stat-label">Methoden</div>
+              </div>
+              <div class="exkurs-stat">
+                <div class="exkurs-stat-num">6</div>
+                <div class="exkurs-stat-label">Kernfragen</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="exkurs-body">
+
+            <!-- Motivation -->
+            <div class="card-grid" style="margin-bottom:var(--space-6)">
+              <article class="card">
+                <h3>
+                  <span class="key" style="--key-color:var(--color-primary)">Die Idee</span>
+                </h3>
+                <p>
+                  Statt Features intuitiv zu wählen: <strong>alle verfügbaren
+                  Feature-Methoden</strong> auf einem riesigen, domänenübergreifenden
+                  Zeitserien-Datensatz berechnen und systematisch analysieren,
+                  welche Features tatsächlich nützlich sind.
+                </p>
+              </article>
+              <article class="card">
+                <h3>
+                  <span class="key" style="--key-color:var(--color-success)">Die Skala</span>
+                </h3>
+                <p>
+                  <strong>38.190 reale Zeitserien</strong> aus Geophysik, Medizin,
+                  Finanzmarkt, Industrie, u.v.m. ×
+                  <strong>9.613 Feature-Berechnungsmethoden</strong>
+                  = eine Riesige Feature-Matrix, die dann analysiert wurde.
+                </p>
+              </article>
+            </div>
+
+            <!-- 6 Kernfragen -->
+            <p style="font-size:var(--text-sm);font-weight:700;
+                      margin-bottom:var(--space-4);color:var(--color-text)">
+              Die 6 Kernfragen (a – f)
+            </p>
+
+            <div class="kernfragen-grid">
+
+              <div class="kernfrage-card">
+                <div class="kernfrage-letter">a</div>
+                <div class="kernfrage-body">
+                  <div class="kernfrage-title">Welche Features hängen zusammen?</div>
+                  <div class="kernfrage-desc">
+                    Korrelationsanalyse und Cluster-Analyse der Feature-Methoden –
+                    welche Features messen im Wesentlichen dasselbe?
+                  </div>
+                </div>
+              </div>
+
+              <div class="kernfrage-card">
+                <div class="kernfrage-letter">b</div>
+                <div class="kernfrage-body">
+                  <div class="kernfrage-title">Welche Features sind informativ?</div>
+                  <div class="kernfrage-desc">
+                    Welche Feature-Methoden liefern für Klassifikationsaufgaben
+                    den größten Informationsgewinn?
+                  </div>
+                </div>
+              </div>
+
+              <div class="kernfrage-card">
+                <div class="kernfrage-letter">c</div>
+                <div class="kernfrage-body">
+                  <div class="kernfrage-title">Was ist das minimale Feature-Set?</div>
+                  <div class="kernfrage-desc">
+                    Wie viele Features braucht man wirklich?
+                    Gibt es ein kompaktes Set, das gut genug ist
+                    (Redundanzreduktion)?
+                  </div>
+                </div>
+              </div>
+
+              <div class="kernfrage-card">
+                <div class="kernfrage-letter">d</div>
+                <div class="kernfrage-body">
+                  <div class="kernfrage-title">Wie universell sind Features?</div>
+                  <div class="kernfrage-desc">
+                    Wie gut verhalten sich dieselben Features über verschiedene
+                    Domänen (Medizin vs. Geophysik vs. Industrie)?
+                  </div>
+                </div>
+              </div>
+
+              <div class="kernfrage-card">
+                <div class="kernfrage-letter">e</div>
+                <div class="kernfrage-body">
+                  <div class="kernfrage-title">Was ist übertragbar?</div>
+                  <div class="kernfrage-desc">
+                    Können Features, die auf einem Datensatz gut funktionieren,
+                    auf einen anderen übertragen werden?
+                    (Verbindung zu Transfer Learning)
+                  </div>
+                </div>
+              </div>
+
+              <div class="kernfrage-card">
+                <div class="kernfrage-letter">f</div>
+                <div class="kernfrage-body">
+                  <div class="kernfrage-title">Neue Features entdecken?</div>
+                  <div class="kernfrage-desc">
+                    Können aus dem systematischen Vergleich neue
+                    Feature-Konzepte entstehen, die bisher nicht
+                    bekannt waren?
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="note note-primary" style="margin-top:var(--space-6)">
+              <strong>Erkenntnis:</strong> &nbsp;
+              Viele Feature-Methoden sind hoch-korreliert und damit redundant.
+              Ein kleines Set gut gewählter Features übertrifft oft ein riesiges Set
+              zufällig kombinierter Features. Genau das motiviert
+              <a href="Page07.html">Feature Selection (Seite&nbsp;7)</a>.
+            </div>
+
+          </div><!-- /exkurs-body -->
+        </div><!-- /exkurs-block -->
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           4.6  DEMOS  (CompEngine + BirdNET)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="compengine">
+        <div class="section-head">
+          <h2>4.6 Demos &amp; Anwendungen</h2>
+          <p>
+            Zwei Anwendungsbeispiele aus dem Skript – einmal für die Exploration
+            von Zeitserien, einmal für Audio Feature Extraction in der Praxis.
+          </p>
+        </div>
+
+        <div class="demo-links">
+
+          <a href="https://www.comp-engine.org"
+             target="_blank" rel="noopener"
+             class="demo-card">
+            <div class="demo-header">
+              <span class="demo-icon">🌐</span>
+              <div>
+                <div class="demo-name">CompEngine</div>
+                <div class="demo-url">comp-engine.org</div>
+              </div>
+            </div>
+            <p class="demo-desc">
+              Online-Tool zur Exploration und dem Vergleich von Zeitserien.
+              Lädt eine eigene Zeitserien-Datei hoch und zeigt via t-SNE,
+              welchen bekannten Zeitserien-Typen sie ähnelt.
+              Direkte Anwendung der Feature-Based Analysis aus dem Exkurs.
+            </p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-2)">
+              <span class="tag">Zeitserien</span>
+              <span class="tag">t-SNE</span>
+              <span class="tag">Exploration</span>
+            </div>
+            <span class="demo-arrow">→ Demo öffnen</span>
+          </a>
+
+          <a href="https://birdnet.cornell.edu"
+             target="_blank" rel="noopener"
+             class="demo-card">
+            <div class="demo-header">
+              <span class="demo-icon">🐦</span>
+              <div>
+                <div class="demo-name">BirdNET</div>
+                <div class="demo-url">birdnet.cornell.edu</div>
+              </div>
+            </div>
+            <p class="demo-desc">
+              Vogelarten-Erkennung aus Audio-Aufnahmen. Unter der Haube:
+              Feature Extraction aus dem Audio-Signal (Spektrogramm-Features,
+              mel-Filterbank) → Deep Learning Klassifikator.
+              Vorzeige-Beispiel für datengetriebene Audio Feature Extraction.
+            </p>
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-2)">
+              <span class="tag">Audio</span>
+              <span class="tag">Spektrogramm</span>
+              <span class="tag">Deep Learning</span>
+            </div>
+            <span class="demo-arrow">→ Demo öffnen</span>
+          </a>
+
+        </div>
+
+        <!-- Weiter-Link -->
+        <div class="note" style="margin-top:var(--space-8)">
+          <strong>Nächste Seite:</strong> &nbsp;
+          Feature Extraction für kategoriale Variablen und Text –
+          Label-Encoding, One-Hot-Encoding und Bag-of-Words.
+          <br><br>
+          <a href="Page05.html">→ Seite 5: Encoding &amp; Text Features</a>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 1 · Seite 4 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

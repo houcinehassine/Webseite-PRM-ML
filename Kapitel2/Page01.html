@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Einführung: Was dich erwartet</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       WOCHENPLAN-TABELLE
+    ═══════════════════════════════════════════════════════ */
+    .week-highlight td {
+      background: color-mix(in oklab, var(--color-primary) 8%, var(--color-surface));
+      font-weight: 600;
+    }
+    .week-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      white-space: nowrap;
+    }
+    .week-dim { opacity: 0.5; }
+
+    /* ═══════════════════════════════════════════════════════
+       AGENDA GRID (6 Punkte, 2×3)
+    ═══════════════════════════════════════════════════════ */
+    .agenda-grid-k2 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 860px) { .agenda-grid-k2 { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 540px) { .agenda-grid-k2 { grid-template-columns: 1fr; } }
+
+    .ag-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      text-decoration: none;
+      color: var(--color-text);
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      position: relative;
+    }
+    .ag-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .ag-card.current {
+      border-color: color-mix(in oklab, var(--color-primary) 40%, var(--color-border));
+      background: color-mix(in oklab, var(--color-primary) 4%, var(--color-surface));
+    }
+    .ag-card.dim {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+    .ag-num {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+    }
+    .ag-icon { font-size: 1.5rem; line-height: 1; margin-bottom: 0.2rem; }
+    .ag-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .ag-sub {
+      font-size: 0.7rem;
+      color: var(--color-text-muted);
+      line-height: 1.45;
+    }
+    .ag-pages {
+      margin-top: auto;
+      padding-top: var(--space-2);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      opacity: 0.75;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       AUSGANGSSITUATION – VORHER / NACHHER SPLIT
+    ═══════════════════════════════════════════════════════ */
+    .vergleich-split {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-4);
+      align-items: start;
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 680px) {
+      .vergleich-split { grid-template-columns: 1fr; }
+      .vergleich-arrow { transform: rotate(90deg); }
+    }
+    .vergleich-box {
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+    }
+    .vergleich-box.left {
+      background: color-mix(in oklab, var(--color-success) 5%, var(--color-surface-2));
+      border-color: color-mix(in oklab, var(--color-success) 25%, var(--color-border));
+    }
+    .vergleich-box.right {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border-color: color-mix(in oklab, var(--color-primary) 25%, var(--color-border));
+    }
+    .vergleich-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-3);
+    }
+    .vergleich-box.left  .vergleich-label { color: var(--color-success); }
+    .vergleich-box.right .vergleich-label { color: var(--color-primary); }
+    .vergleich-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: var(--color-text-faint);
+      padding-top: var(--space-8);
+    }
+    .vergleich-box ul {
+      padding-left: 1.1rem;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .vergleich-box li { font-size: var(--text-sm); line-height: 1.5; }
+
+    /* ═══════════════════════════════════════════════════════
+       ML DEFINITION – KONZEPT-KARTEN
+    ═══════════════════════════════════════════════════════ */
+    .ml-def-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 680px) { .ml-def-grid { grid-template-columns: 1fr; } }
+    .ml-def-card {
+      padding: var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    .ml-def-icon { font-size: 1.6rem; }
+    .ml-def-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+    }
+    .ml-def-text {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SO WHAT? BOX  (grün – aus Prof-Skript)
+    ═══════════════════════════════════════════════════════ */
+    .so-what {
+      margin: var(--space-6) 0;
+      padding: var(--space-4) var(--space-5);
+      border-left: 3px solid var(--color-success);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      background: color-mix(in oklab, var(--color-success) 5%, var(--color-surface-2));
+    }
+    .so-what-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--color-success);
+      margin-bottom: var(--space-2);
+    }
+    .so-what p { font-size: var(--text-sm); margin: 0; line-height: 1.7; }
+
+    /* ═══════════════════════════════════════════════════════
+       PROF FRAGE BOX  (gelb/orange – blaue Sprechblasen)
+    ═══════════════════════════════════════════════════════ */
+    .frage-box {
+      margin: var(--space-5) 0;
+      padding: var(--space-4) var(--space-5);
+      border-left: 3px solid var(--color-warning);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      background: color-mix(in oklab, var(--color-warning) 6%, var(--color-surface-2));
+    }
+    .frage-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: color-mix(in oklab, var(--color-warning) 80%, #000);
+      margin-bottom: var(--space-2);
+    }
+    .frage-box p { font-size: var(--text-sm); margin: 0; line-height: 1.7; font-style: italic; }
+
+    /* ═══════════════════════════════════════════════════════
+       QUOTE BLOCK  (Parameter-Zitat)
+    ═══════════════════════════════════════════════════════ */
+    .quote-block {
+      margin: var(--space-6) 0;
+      padding: var(--space-6);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      text-align: center;
+    }
+    .quote-block blockquote {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-style: italic;
+      color: var(--color-text);
+      margin: 0 0 var(--space-3) 0;
+      line-height: 1.4;
+    }
+    .quote-block cite {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       NAVIGATIONS-GRID  (Alle Seiten)
+    ═══════════════════════════════════════════════════════ */
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-5);
+    }
+    .nav-card {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      color: var(--color-text);
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .nav-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-card-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .nav-card-body { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+    .nav-card-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--color-text-faint);
+    }
+    .nav-card-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-card-sub {
+      font-size: 0.68rem;
+      color: var(--color-text-muted);
+      line-height: 1.3;
+    }
+    /* Farbvariante Grün */
+    .nav-card.green:hover { border-color: var(--color-success); }
+    .nav-card.green .nav-card-num { color: var(--color-success); }
+    /* Farbvariante Orange */
+    .nav-card.orange:hover { border-color: var(--color-warning); }
+    .nav-card.orange .nav-card-num {
+      color: color-mix(in oklab, var(--color-warning) 80%, #000);
+    }
+    /* Farbvariante Violett */
+    .nav-card.purple:hover { border-color: #8b5cf6; }
+    .nav-card.purple .nav-card-num { color: #7c3aed; }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Einführung in Machine Learning"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page1"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Seite 1 · Woche 3</span>
+            <h1>Einführung
+              <span class="key" style="--key-color:var(--color-primary)">Was dich erwartet</span>
+            </h1>
+            <p>
+              Wo stehen wir im Semester? Was wissen wir schon – und was kommt jetzt?
+              Diese Seite gibt dir den vollständigen Überblick: Wochenplan,
+              die 6 Agenda-Punkte als klickbare Roadmap und den Kern von
+              Machine Learning in wenigen Sätzen.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Wochenplan</span>
+              <span class="pill">6 Agenda-Punkte</span>
+              <span class="pill">Ausgangssituation</span>
+              <span class="pill">Was ist ML?</span>
+              <span class="pill">Navigation</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du verstehst, <strong>wo wir uns im Semester befinden</strong>,
+              weißt was wir aus Kapitel 1 mitbringen und kennst die Kerndefinition
+              von Machine Learning – bevor wir in die einzelnen Algorithmen
+              und Konzepte eintauchen.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1.1  WO SIND WIR? — Wochenplan
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="wochenplan">
+        <div class="section-head">
+          <h2>1.1 Wo sind wir?</h2>
+          <p>Das vollständige Semesterprogramm auf einen Blick – wir befinden uns in <strong>Woche&nbsp;3</strong>.</p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:5.5rem">Woche</th>
+              <th>Thema (in der Sitzung)</th>
+              <th>Aufgaben außerhalb</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="week-dim">
+              <td>1</td>
+              <td>Getting Started: Orga, Daten laden, Descriptive Maintenance</td>
+              <td>Getting Started: Kaggle Python Tutorial</td>
+            </tr>
+            <tr class="week-dim">
+              <td>2</td>
+              <td>Data Preparation 2: Feature Engineering</td>
+              <td>Kaggle Pandas Tutorial + NumPy</td>
+            </tr>
+            <!-- ── Woche 3 hervorgehoben ── -->
+            <tr class="week-highlight">
+              <td><span class="week-badge">3 ← Wir</span></td>
+              <td><strong>Modeling 1: Einführung zu Machine Learning</strong></td>
+              <td>Kaggle ML1 Tutorial</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Modeling 2: Supervised Learning – Support Vector Machines</td>
+              <td>Modeling 2: Übungszettel</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Modeling 3: Unsupervised Learning – Clustering</td>
+              <td>Modeling 3: Übungszettel</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Modeling 4: Supervised Learning – Random Forest</td>
+              <td>Modeling 4: Übungszettel</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>Modeling 5: Unsupervised Learning – Principal Component Analysis</td>
+              <td>Modeling 5: Übungszettel</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Modeling 6: Supervised Learning – Naive Bayes</td>
+              <td>Modeling 6: Übungszettel</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1.2  AGENDA — 6 Punkte als visuelle Roadmap
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="agenda">
+        <div class="section-head">
+          <h2>1.2 Agenda – Die 6 Themenblöcke</h2>
+          <p>
+            Klicke auf eine Karte, um direkt zur passenden Seite zu springen.
+            Die ersten beiden Punkte (Was ist ML? + Kategorien) bilden das Fundament –
+            alles andere baut darauf auf.
+          </p>
+        </div>
+
+        <div class="agenda-grid-k2">
+
+          <!-- 1 -->
+          <a href="Page01.html" class="ag-card current">
+            <div class="ag-num">Punkt 1</div>
+            <div class="ag-icon">🧠</div>
+            <div class="ag-title">Was ist Machine Learning?</div>
+            <div class="ag-sub">
+              Building Models of Data · tunable parameters · Modell lernt · Vorhersagen
+            </div>
+            <div class="ag-pages">← Diese Seite</div>
+          </a>
+
+          <!-- 2 -->
+          <a href="Page02.html" class="ag-card">
+            <div class="ag-num">Punkt 2</div>
+            <div class="ag-icon">🗂️</div>
+            <div class="ag-title">Kategorien des ML</div>
+            <div class="ag-sub">
+              Supervised · Unsupervised · Reinforcement Learning · qualitative Beispiele
+            </div>
+            <div class="ag-pages">→ Seiten 02 – 04</div>
+          </a>
+
+          <!-- 3 -->
+          <a href="Page05.html" class="ag-card">
+            <div class="ag-num">Punkt 3</div>
+            <div class="ag-icon">🐍</div>
+            <div class="ag-title">ML in Python: scikit-learn</div>
+            <div class="ag-sub">
+              sklearn API · fit / predict · 4-Schritte-Prozess · Linear Regression
+            </div>
+            <div class="ag-pages">→ Seite 05</div>
+          </a>
+
+          <!-- 4 -->
+          <a href="Page06.html" class="ag-card">
+            <div class="ag-num">Punkt 4</div>
+            <div class="ag-icon">✅</div>
+            <div class="ag-title">Hyperparameter &amp; Model Validation</div>
+            <div class="ag-sub">
+              Holdout Sets · accuracy_score · train_test_split · GridSearchCV
+            </div>
+            <div class="ag-pages">→ Seiten 06 · 10</div>
+          </a>
+
+          <!-- 5 -->
+          <a href="Page08.html" class="ag-card">
+            <div class="ag-num">Punkt 5</div>
+            <div class="ag-icon">⚖️</div>
+            <div class="ag-title">Bias-Variance Trade-off</div>
+            <div class="ag-sub">
+              Underfitting · Overfitting · Dartscheiben-Metapher · Validierungskurven
+            </div>
+            <div class="ag-pages">→ Seiten 08 – 09</div>
+          </a>
+
+          <!-- 6 -->
+          <a href="Page07.html" class="ag-card">
+            <div class="ag-num">Punkt 6</div>
+            <div class="ag-icon">🔀</div>
+            <div class="ag-title">Cross-Validation &amp; Generalisierung</div>
+            <div class="ag-sub">
+              K-Fold · Leave-One-Out · Train/Val/Test Split · Repeated K-Fold
+            </div>
+            <div class="ag-pages">→ Seite 07</div>
+          </a>
+
+        </div>
+
+        <!-- Hinweis auf optionale Themen -->
+        <div style="margin-top:var(--space-4); padding:var(--space-4);
+             background:var(--color-surface-2); border:1px solid var(--color-border);
+             border-radius:var(--radius-lg); font-size:var(--text-xs);
+             color:var(--color-text-muted);">
+          📌 <strong>Aus der Vorlesung:</strong> Kostenfunktionen (Punkt 7) und
+          ML Pipelines (Punkt 8) sind im Skript als <em>„evtl. in der letzten Sitzung"</em>
+          markiert und werden in späteren Kapiteln vertieft.
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1.3  AUSGANGSSITUATION
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="ausgangssituation">
+        <div class="section-head">
+          <h2>1.3 Ausgangssituation</h2>
+          <p>
+            Wo stehen wir nach Kapitel 1 – und was ist der nächste Schritt?
+          </p>
+        </div>
+
+        <div class="vergleich-split">
+
+          <!-- LINKS: Was wir schon wissen -->
+          <div class="vergleich-box left">
+            <div class="vergleich-label">✓ Was wir schon können</div>
+            <ul>
+              <li>Was ein <strong>Feature</strong> ist und welche Eigenschaften es haben muss</li>
+              <li>Daten in einem <strong>Feature-Raum</strong> repräsentieren und geometrisch denken</li>
+              <li>Eine <strong>Feature-Matrix X</strong> (N × T) aufbauen</li>
+              <li>Daten <strong>explorieren</strong>: deskriptiv und inferenzstatistisch Schlüsse ziehen</li>
+              <li>Features <strong>extrahieren, selektieren und skalieren</strong></li>
+            </ul>
+          </div>
+
+          <!-- PFEIL -->
+          <div class="vergleich-arrow">→</div>
+
+          <!-- RECHTS: Was jetzt kommt -->
+          <div class="vergleich-box right">
+            <div class="vergleich-label">→ Was jetzt kommt</div>
+            <ul>
+              <li><strong>Algorithmen</strong>, die für uns Schlüsse ziehen und Urteile fällen</li>
+              <li>Mathematische <strong>Modelle</strong>, die zugrundeliegende Daten verstehen</li>
+              <li>Modelle mit <strong>tunable parameters</strong> an die Daten anpassen</li>
+              <li><strong>Labels ungesehener Daten</strong> vorhersagen (Prediction / Scoring)</li>
+              <li><strong>scikit-learn</strong> als einheitliches Python-Framework nutzen</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Im Machine Learning bringen wir Algorithmen bei, <em>wissenschaftlich zu denken</em> –
+            d.h. aus Daten zu lernen und dieses Wissen auf neue, unseen Daten anzuwenden.
+            Das Fundament aus Kapitel 1 (Feature-Matrix, Feature-Raum) ist genau das Format,
+            das ML-Algorithmen als Eingabe erwarten.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1.4  WAS IST MACHINE LEARNING?
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="was-ist-ml">
+        <div class="section-head">
+          <h2>1.4 Was ist Machine Learning?</h2>
+          <p>
+            Die Kerndefinition und die drei zentralen Konzepte, auf denen alles aufbaut.
+          </p>
+        </div>
+
+        <!-- Hauptdefinition -->
+        <div class="card" style="margin-bottom:var(--space-5)">
+          <h3>
+            <span class="key" style="--key-color:var(--color-primary)">Machine Learning</span>
+            == „Building Models of Data"
+          </h3>
+          <p>
+            Machine Learning zeichnet sich dadurch aus, dass <strong>mathematische Modelle</strong>
+            entstehen, um zugrundeliegende Daten zu verstehen.
+          </p>
+          <ul style="margin-top:var(--space-3)">
+            <li>
+              Diese Modelle werden an die Daten <strong>angepasst</strong>,
+              damit sie diese so optimal wie möglich repräsentieren
+            </li>
+            <li>
+              Diese Anpassung kann stattfinden, da ML-Modelle
+              <span class="key" style="--key-color:var(--color-primary)">&bdquo;tunable parameters&ldquo;</span>
+              haben → das Modell <strong>lernt aus den Daten</strong>
+            </li>
+            <li>
+              Nach dem <strong>Training</strong> können Modelle
+              <span class="key" style="--key-color:var(--color-success)">Labels ungesehener Daten vorhersagen</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 3 Kern-Konzept-Karten -->
+        <div class="ml-def-grid">
+
+          <div class="ml-def-card">
+            <div class="ml-def-icon">🔧</div>
+            <div class="ml-def-title">
+              <span class="key" style="--key-color:var(--color-primary)">Tunable Parameters</span>
+            </div>
+            <div class="ml-def-text">
+              Im Gegensatz zu klassischen Algorithmen hat ein ML-Modell
+              Parameter, die <em>nicht</em> vom Entwickler gesetzt werden –
+              sie werden durch das Training aus den Daten <strong>gelernt</strong>.
+              Der Optimierungsprozess passt diese Parameter so an, dass das
+              Modell die Daten möglichst gut beschreibt.
+            </div>
+          </div>
+
+          <div class="ml-def-card">
+            <div class="ml-def-icon">📚</div>
+            <div class="ml-def-title">
+              <span class="key" style="--key-color:var(--color-warning)">Training / Lernen</span>
+            </div>
+            <div class="ml-def-text">
+              Beim Training wird dem Modell ein
+              <strong>Trainingsdatensatz</strong> (Feature-Matrix
+              <strong>X</strong> + Label-Vektor <strong>y</strong>)
+              präsentiert. Das Modell schätzt die Abhängigkeit zwischen
+              Features und Labels und speichert dieses Wissen in seinen
+              Parametern.
+            </div>
+          </div>
+
+          <div class="ml-def-card">
+            <div class="ml-def-icon">🎯</div>
+            <div class="ml-def-title">
+              <span class="key" style="--key-color:var(--color-success)">Prediction / Scoring</span>
+            </div>
+            <div class="ml-def-text">
+              Nach dem Training kann das Modell auf <strong>neue, ungesehene Daten</strong>
+              angewendet werden. Neue Beobachtungen werden dem Modell übergeben –
+              es weist ihnen Labels zu. Dieser Prozess heißt
+              <strong>Scoring</strong> (bei Regression) oder
+              <strong>Classification</strong> (bei Klassifikation).
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Prof-Frage aus den Folien -->
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>
+            „Was denken Sie? Worin steckt das Gelebte Model Learning –
+            und wie wird ein Modell aussehen?"
+          </p>
+        </div>
+
+        <!-- So What? + Unser Ansatz -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>Unser Ansatz in dieser Vorlesung</h3>
+            <ul>
+              <li>
+                Wir führen die wichtigsten Konzepte anhand
+                <strong>einfacher und qualitativer Beispiele</strong> ein
+              </li>
+              <li>
+                Zuerst das <strong>Konzept verstehen</strong>,
+                dann die formale Notation und den sklearn-Code
+              </li>
+              <li>
+                Wichtige Unterscheidung: <strong>Supervised</strong> (mit Labels <strong>y</strong>)
+                vs. <strong>Unsupervised</strong> (ohne Labels, nur Feature-Matrix <strong>X</strong>)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Kernzitat -->
+        <div class="quote-block">
+          <blockquote>„Learning is finding parameters."</blockquote>
+          <cite>Prof. – Kernaussage dieser Einheit · Folie 11</cite>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Wenn du ein Modell anwenden kannst – kannst du jedes anwenden,
+            zumindest bezüglich der Syntax. Das generische Muster in sklearn ist immer:
+            <strong>import → instanziieren → fit → predict</strong>.
+            Das gilt für lineare Regression genauso wie für Random Forest oder k-Means.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1.5  ALLE SEITEN — Direktnavigation
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="alle-seiten">
+        <div class="section-head">
+          <h2>1.5 Alle Seiten auf einen Blick</h2>
+          <p>
+            Direkt zum Thema springen – oder der Reihe nach durcharbeiten.
+            Seiten 02–04 bauen das Fundament, 05–06 den sklearn-Einstieg,
+            07–10 die Validierung und Optimierung.
+          </p>
+        </div>
+
+        <!-- Gruppe: Grundlagen & Konzepte -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+                  text-transform:uppercase;color:var(--color-text-faint);
+                  margin-bottom:var(--space-3);">🧩 Grundlagen &amp; Konzepte</p>
+        <div class="nav-grid" style="margin-bottom:var(--space-6)">
+
+          <a href="Page02.html" class="nav-card green">
+            <span class="nav-card-icon">🗂️</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 2</span>
+              <span class="nav-card-title">Kategorien des ML: Überblick</span>
+              <span class="nav-card-sub">Supervised · Unsupervised · Notation</span>
+            </div>
+          </a>
+
+          <a href="Page03.html" class="nav-card green">
+            <span class="nav-card-icon">📐</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 3</span>
+              <span class="nav-card-title">Supervised Learning</span>
+              <span class="nav-card-sub">Klassifikation · Regression · Scoring</span>
+            </div>
+          </a>
+
+          <a href="Page04.html" class="nav-card green">
+            <span class="nav-card-icon">🔍</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 4</span>
+              <span class="nav-card-title">Unsupervised Learning</span>
+              <span class="nav-card-sub">Clustering · Dimensionsreduktion</span>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Gruppe: Python & scikit-learn -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+                  text-transform:uppercase;color:var(--color-text-faint);
+                  margin-bottom:var(--space-3);">🐍 Python &amp; scikit-learn</p>
+        <div class="nav-grid" style="margin-bottom:var(--space-6)">
+
+          <a href="Page05.html" class="nav-card orange">
+            <span class="nav-card-icon">⚙️</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 5</span>
+              <span class="nav-card-title">ML in Python: scikit-learn</span>
+              <span class="nav-card-sub">API · .fit() · .predict() · Beispiel</span>
+            </div>
+          </a>
+
+          <a href="Page06.html" class="nav-card orange">
+            <span class="nav-card-icon">✅</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 6</span>
+              <span class="nav-card-title">Model Validation: Grundlagen</span>
+              <span class="nav-card-sub">Holdout · accuracy_score · train_test_split</span>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Gruppe: Modellvalidierung & Optimierung -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+                  text-transform:uppercase;color:var(--color-text-faint);
+                  margin-bottom:var(--space-3);">📈 Modellvalidierung &amp; Optimierung</p>
+        <div class="nav-grid" style="margin-bottom:var(--space-6)">
+
+          <a href="Page07.html" class="nav-card purple">
+            <span class="nav-card-icon">🔀</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 7</span>
+              <span class="nav-card-title">Cross-Validation &amp; Splits</span>
+              <span class="nav-card-sub">K-Fold · LOO · 3-Way Split · Workflow</span>
+            </div>
+          </a>
+
+          <a href="Page08.html" class="nav-card purple">
+            <span class="nav-card-icon">⚖️</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 8</span>
+              <span class="nav-card-title">Bias-Variance Trade-off</span>
+              <span class="nav-card-sub">Underfitting · Overfitting · Dartscheibe</span>
+            </div>
+          </a>
+
+          <a href="Page09.html" class="nav-card purple">
+            <span class="nav-card-icon">📉</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 9</span>
+              <span class="nav-card-title">Validierungskurven &amp; Learning Curves</span>
+              <span class="nav-card-sub">validation_curve · learning_curve · degree</span>
+            </div>
+          </a>
+
+          <a href="Page10.html" class="nav-card purple">
+            <span class="nav-card-icon">🔧</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 10</span>
+              <span class="nav-card-title">Grid Search &amp; Hyperparameter-Tuning</span>
+              <span class="nav-card-sub">GridSearchCV · param_grid · best_params_</span>
+            </div>
+          </a>
+
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Seite 1 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Cheatsheet Kapitel 7 · Evaluation</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    /* ── Formel-Karte ──────────────────────────────────────── */
+    .formula-row {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: var(--space-2) var(--space-4);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border);
+      align-items: start;
+    }
+    .formula-row:last-child { border-bottom: none; }
+    .formula-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--color-text-muted);
+      padding-top: 2px;
+    }
+
+    /* ── Quick-Nav ─────────────────────────────────────────── */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+    }
+    .quick-nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-text);
+      text-decoration: none;
+      transition: background .15s, border-color .15s;
+    }
+    .quick-nav a:hover {
+      background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    /* ── Merksatz ──────────────────────────────────────────── */
+    .merksatz {
+      border-left: 3px solid var(--color-primary);
+      padding: var(--space-3) var(--space-4);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+      margin-bottom: var(--space-3);
+    }
+    .merksatz.success { border-color: var(--color-success); background: color-mix(in srgb, var(--color-success) 5%, var(--color-surface)); }
+    .merksatz.warning { border-color: var(--color-warning); background: color-mix(in srgb, var(--color-warning) 5%, var(--color-surface)); }
+    .merksatz.danger  { border-color: #e55; background: color-mix(in srgb, #e55 5%, var(--color-surface)); }
+    .merksatz .m-nr {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--color-primary);
+      margin-bottom: var(--space-1);
+    }
+    .merksatz.success .m-nr { color: var(--color-success); }
+    .merksatz.warning .m-nr { color: var(--color-warning); }
+    .merksatz.danger  .m-nr { color: #e55; }
+    .merksatz p { font-size: var(--text-sm); margin: 0; line-height: 1.6; }
+
+    /* ── Fallen ────────────────────────────────────────────── */
+    .fallen-item {
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+      gap: var(--space-3);
+      align-items: start;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      border: 1px solid color-mix(in srgb, #e55 30%, var(--color-border));
+      background: color-mix(in srgb, #e55 5%, var(--color-surface));
+      font-size: var(--text-sm);
+      margin-bottom: var(--space-3);
+    }
+    .fallen-icon { font-size: 1.1rem; line-height: 1.5; }
+    .fallen-item strong { display: block; margin-bottom: 2px; }
+
+    /* ── Vergleichs-Matrix ─────────────────────────────────── */
+    .matrix {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      font-size: var(--text-sm);
+      margin-top: var(--space-4);
+    }
+    .matrix-header {
+      display: grid;
+      grid-template-columns: 150px 1fr 1fr;
+      background: var(--color-text);
+      color: #fff;
+      font-weight: 700;
+      font-size: var(--text-xs);
+      letter-spacing: .05em;
+    }
+    .matrix-row {
+      display: grid;
+      grid-template-columns: 150px 1fr 1fr;
+      border-top: 1px solid var(--color-border);
+    }
+    .matrix-row:nth-child(even) { background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface)); }
+    .matrix-cell {
+      padding: var(--space-2) var(--space-3);
+      border-right: 1px solid var(--color-border);
+    }
+    .matrix-cell:last-child { border-right: none; }
+    .matrix-header .matrix-cell { padding: var(--space-2) var(--space-3); }
+
+    /* ── API-Tabelle ───────────────────────────────────────── */
+    .api-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); margin-top: var(--space-4); }
+    .api-table th {
+      background: var(--color-primary);
+      color: #fff;
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--text-xs);
+      letter-spacing: .05em;
+      text-align: left;
+    }
+    .api-table th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+    .api-table th:last-child  { border-radius: 0 var(--radius-sm) 0 0; }
+    .api-table td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: top;
+    }
+    .api-table tr:nth-child(even) td { background: color-mix(in srgb, var(--color-primary) 3%, var(--color-surface)); }
+
+    /* ── Confusion-Matrix-Grid ─────────────────────────────── */
+    .cm-grid {
+      display: grid;
+      grid-template-columns: auto 1fr 1fr;
+      grid-template-rows: auto 1fr 1fr;
+      gap: 3px;
+      max-width: 420px;
+      margin: var(--space-4) 0;
+    }
+    .cm-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-2);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      color: var(--color-text-muted);
+    }
+    .cm-cell {
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      text-align: center;
+      font-size: var(--text-sm);
+    }
+    .cm-tp { background: color-mix(in srgb, var(--color-success) 18%, var(--color-surface)); border: 2px solid var(--color-success); }
+    .cm-fp { background: color-mix(in srgb, #e55 12%, var(--color-surface)); border: 2px solid #e55; }
+    .cm-fn { background: color-mix(in srgb, var(--color-warning) 15%, var(--color-surface)); border: 2px solid var(--color-warning); }
+    .cm-tn { background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); border: 2px solid var(--color-primary); }
+    .cm-cell strong { display: block; font-size: var(--text-lg); }
+    .cm-cell small { color: var(--color-text-muted); font-size: var(--text-xs); }
+
+    /* ── Print ─────────────────────────────────────────────── */
+    @media print {
+      site-header, site-sidebar, .quick-nav { display: none !important; }
+      .layout { display: block !important; }
+      .content { padding: 0 !important; }
+      .card, .merksatz, .fallen-item { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <site-header active="page7" title="Cheatsheet · Kapitel 7 Evaluation"></site-header>
+  <div class="layout">
+    <site-sidebar active="page-cheatsheet"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 7 · Prüfungsreferenz</span>
+            <h1>Cheatsheet –
+              <span class="key" style="--key-color:var(--color-primary)">Evaluation</span>
+              &amp;
+              <span class="key" style="--key-color:var(--color-warning)">ROC Curves</span>
+            </h1>
+            <p>
+              Alle Formeln, sklearn-Funktionen, Entscheidungsregeln und
+              typische Prüfungsfallen auf einer Seite –
+              zum Nachschlagen, Drucken und Mitnehmen.
+            </p>
+            <nav class="quick-nav">
+              <a href="#confusion-matrix">📐 Confusion Matrix</a>
+              <a href="#formeln">∫ Formeln</a>
+              <a href="#api">🔧 sklearn API</a>
+              <a href="#wann-was">🗺️ Wann was?</a>
+              <a href="#fallen">⚠️ Fallen</a>
+              <a href="#merksaetze">💡 Merksätze</a>
+            </nav>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Seiten-Überblick</h2>
+            <ul>
+              <li><a href="Page01.html">Seite 1 – Confusion Matrix Grundlagen</a></li>
+              <li><a href="Page02.html">Seite 2 – ROC Curves Theorie</a></li>
+              <li><a href="Page03.html">Seite 3 – ROC Curves in sklearn</a></li>
+              <li><a href="Page04.html">Seite 4 – Decision Threshold</a></li>
+              <li><a href="Page05.html">Seite 5 – Confusion Matrix sklearn &amp; AUC</a></li>
+              <li><a href="Page06.html">Seite 6 – Precision-Recall &amp; F1</a></li>
+              <li><a href="Page07.html">Seite 7 – Multi-Class ROC</a></li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════
+           A. CONFUSION MATRIX VISUELL
+      ═══════════════════════════════════════════════════════ -->
+      <section class="section" id="confusion-matrix">
+        <div class="section-head">
+          <h2>📊 Die Confusion Matrix auf einen Blick</h2>
+          <p>Vier Felder, zwei Klassen – die komplette Übersicht aller Ergebnistypen.</p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card" style="grid-column: span 2">
+            <!-- Achsenbeschriftungen + Felder -->
+            <div style="display:flex; gap: var(--space-6); flex-wrap: wrap; align-items: flex-start;">
+              <div>
+                <p style="font-size:var(--text-xs); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--color-text-muted); margin-bottom: var(--space-3);">
+                  Zeile = Wahrer Zustand &nbsp;|&nbsp; Spalte = Vorhersage des Modells
+                </p>
+                <div class="cm-grid">
+                  <!-- Leer oben links -->
+                  <div></div>
+                  <div class="cm-label">Predicted: Positiv</div>
+                  <div class="cm-label">Predicted: Negativ</div>
+
+                  <div class="cm-label" style="writing-mode: vertical-lr; transform: rotate(180deg);">Actual: Positiv</div>
+                  <div class="cm-cell cm-tp">
+                    <strong>TP</strong>
+                    True Positive
+                    <small>Richtig erkannt</small>
+                  </div>
+                  <div class="cm-cell cm-fn">
+                    <strong>FN</strong>
+                    False Negative
+                    <small>Verpasst (Typ-II-Fehler)</small>
+                  </div>
+
+                  <div class="cm-label" style="writing-mode: vertical-lr; transform: rotate(180deg);">Actual: Negativ</div>
+                  <div class="cm-cell cm-fp">
+                    <strong>FP</strong>
+                    False Positive
+                    <small>Falscher Alarm (Typ-I)</small>
+                  </div>
+                  <div class="cm-cell cm-tn">
+                    <strong>TN</strong>
+                    True Negative
+                    <small>Richtig abgelehnt</small>
+                  </div>
+                </div>
+              </div>
+              <div style="flex: 1; min-width: 240px;">
+                <div class="formula-row" style="border-bottom:1px solid var(--color-border)">
+                  <span class="formula-label">TPR / Recall / Sensitivity</span>
+                  <div>
+                    \( \text{TPR} = \dfrac{TP}{P} = \dfrac{TP}{TP + FN} = 1 - \text{FNR} \)
+                  </div>
+                </div>
+                <div class="formula-row" style="border-bottom:1px solid var(--color-border)">
+                  <span class="formula-label">FPR = 1 − Specificity</span>
+                  <div>
+                    \( \text{FPR} = \dfrac{FP}{N} = \dfrac{FP}{FP + TN} = 1 - \text{TNR} \)
+                  </div>
+                </div>
+                <div class="formula-row" style="border-bottom:1px solid var(--color-border)">
+                  <span class="formula-label">Precision / PPV</span>
+                  <div>
+                    \( \text{PPV} = \dfrac{TP}{TP + FP} \)
+                    <br><small style="color:var(--color-text-muted)">Anteil richtig positiver Calls</small>
+                  </div>
+                </div>
+                <div class="formula-row">
+                  <span class="formula-label">Accuracy</span>
+                  <div>
+                    \( \text{Acc} = \dfrac{TP + TN}{P + N} \)
+                    <br><small style="color:var(--color-text-muted)">Täuscht bei Klassenungleichgewicht!</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════
+           B. ALLE FORMELN
+      ═══════════════════════════════════════════════════════ -->
+      <section class="section" id="formeln">
+        <div class="section-head">
+          <h2>📐 Alle Kernformeln</h2>
+          <p>Von Confusion Matrix bis Multi-Class – jede Formel mit kurzer Erklärung.</p>
+        </div>
+
+        <div class="card-grid">
+
+          <!-- ROC & Threshold -->
+          <article class="card">
+            <h3>📈 ROC-Kurve & Decision Threshold</h3>
+            <div class="formula-row">
+              <span class="formula-label">TPR(T)</span>
+              <div>
+                \( \text{TPR}(T) = \displaystyle\int_T^{+\infty} f_1(x)\,dx \)
+                <br><small style="color:var(--color-text-muted)">\(f_1\) = Dichtefunktion der positiven Klasse</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">FPR(T)</span>
+              <div>
+                \( \text{FPR}(T) = \displaystyle\int_T^{+\infty} f_0(x)\,dx \)
+                <br><small style="color:var(--color-text-muted)">\(f_0\) = Dichtefunktion der negativen Klasse</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">ROC Kurve</span>
+              <div>
+                Parametrische Kurve: \(T\) von \(-\infty\) bis \(+\infty\) durchlaufen
+                → Punkte \((\text{FPR}(T),\;\text{TPR}(T))\) bilden die Kurve
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Prediction</span>
+              <div>
+                \( \hat y = 1 \iff \text{score}(x) \geq T \)
+              </div>
+            </div>
+          </article>
+
+          <!-- AUC & Youden -->
+          <article class="card">
+            <h3>📏 AUC & Youden-Index</h3>
+            <div class="formula-row">
+              <span class="formula-label">AUC</span>
+              <div>
+                \( \text{AUC} = \displaystyle\int_0^1 \text{TPR}(\text{FPR}^{-1}(u))\,du \)
+                <br><small style="color:var(--color-text-muted)">Fläche unter ROC-Kurve · 0.5 = Zufall · 1.0 = Perfekt</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Youden J</span>
+              <div>
+                \( J = \text{TPR} - \text{FPR} \)
+                <br>
+                \( T^* = \arg\max_T\;J(T) \)
+                <br><small style="color:var(--color-text-muted)">Optimale Balance zwischen TP- und FP-Rate</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Idealer Klass.</span>
+              <div>
+                AUC = 1.0 &nbsp;·&nbsp; Zufallsklassifikator: AUC = 0.5
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Threshold-inv.</span>
+              <div>
+                AUC ist unabhängig vom gewählten Threshold → robusteres Maß
+              </div>
+            </div>
+          </article>
+
+          <!-- Precision-Recall & F1 -->
+          <article class="card">
+            <h3>🎯 Precision-Recall & F1-Score</h3>
+            <div class="formula-row">
+              <span class="formula-label">Precision</span>
+              <div>
+                \( P = \text{PPV} = \dfrac{TP}{TP + FP} \)
+                <br><small style="color:var(--color-text-muted)">Welcher Anteil meiner Entdeckungen war richtig?</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Recall</span>
+              <div>
+                \( R = \text{TPR} = \dfrac{TP}{TP + FN} \)
+                <br><small style="color:var(--color-text-muted)">Wie viele tatsächlich positive Fälle fand ich?</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">F1-Score</span>
+              <div>
+                \( F_1 = 2 \cdot \dfrac{P \cdot R}{P + R} = \dfrac{2\,TP}{2\,TP + FP + FN} \)
+                <br><small style="color:var(--color-text-muted)">Harmonisches Mittel · Wertebereich: 0 (schlecht) – 1 (perfekt)</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Wann PR?</span>
+              <div>
+                Wenn <strong>True Negatives nicht verfügbar / bedeutungslos</strong>
+                (z.B. Object Detection, stark unbalancierte Daten)
+              </div>
+            </div>
+          </article>
+
+          <!-- Multi-Class ROC -->
+          <article class="card">
+            <h3>🔢 Multi-Class ROC (OvR)</h3>
+            <div class="formula-row">
+              <span class="formula-label">Mikro-Avg</span>
+              <div>
+                Alle TP, FP, FN gemeinsam aggregieren:
+                <code>roc_curve(y_test.ravel(), y_score.ravel())</code>
+                <br><small style="color:var(--color-text-muted)">Bevorzugt häufige Klassen</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Makro-Avg</span>
+              <div>
+                Einzelne ROC-Kurven interpolieren &amp; mitteln:
+                <code>np.interp(all_fpr, fpr[i], tpr[i])</code>
+                <br><small style="color:var(--color-text-muted)">Alle Klassen gleichgewichtig</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">OvO vs OvR</span>
+              <div>
+                OvO: \(\binom{k}{2}\) Kurven ·
+                OvR: \(k\) Kurven (eine pro Klasse vs. alle anderen)
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Binarisierung</span>
+              <div>
+                <code>label_binarize(y, classes=[0,1,2])</code>
+                → One-Hot-Matrix, dann <code>OneVsRestClassifier</code>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════
+           C. SKLEARN API
+      ═══════════════════════════════════════════════════════ -->
+      <section class="section" id="api">
+        <div class="section-head">
+          <h2>🔧 sklearn API – Alle Funktionen auf einen Blick</h2>
+          <p>Signatur, wichtigste Parameter und Rückgabewert.</p>
+        </div>
+
+        <table class="api-table">
+          <thead>
+            <tr>
+              <th>Funktion / Klasse</th>
+              <th>Wichtige Parameter</th>
+              <th>Rückgabe / Output</th>
+              <th>Hinweis</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>roc_curve(y_true, y_score)</code></td>
+              <td><code>pos_label</code></td>
+              <td><code>fpr, tpr, thresholds</code></td>
+              <td>Nur binär! <code>y_score</code> = <code>.decision_function()</code> oder <code>.predict_proba()[:,1]</code></td>
+            </tr>
+            <tr>
+              <td><code>RocCurveDisplay.from_estimator(model, X, y)</code></td>
+              <td><code>ax</code></td>
+              <td>Plot inkl. AUC im Label</td>
+              <td>Convenience-Funktion – direkt nach fit aufrufen</td>
+            </tr>
+            <tr>
+              <td><code>roc_auc_score(y_true, y_score)</code></td>
+              <td><code>multi_class='ovr'</code>, <code>average='macro'</code></td>
+              <td>Skalarer AUC-Wert</td>
+              <td>Auch für Multi-Class! Bei binär: <code>y_score</code> = Scores</td>
+            </tr>
+            <tr>
+              <td><code>confusion_matrix(y_true, y_pred)</code></td>
+              <td><code>normalize='true'</code> / <code>'pred'</code> / <code>'all'</code></td>
+              <td>Matrix (k × k)</td>
+              <td><code>normalize='true'</code> → Zeilen summieren zu 1 (TPR pro Klasse)</td>
+            </tr>
+            <tr>
+              <td><code>precision_recall_curve(y_true, y_score)</code></td>
+              <td><code>pos_label</code></td>
+              <td><code>precisions, recalls, thresholds</code></td>
+              <td>Nur binär; Threshold-Reihenfolge: steigend</td>
+            </tr>
+            <tr>
+              <td><code>f1_score(y_true, y_pred)</code></td>
+              <td><code>average='binary'/'macro'/'micro'</code></td>
+              <td>Skalarer F1-Wert</td>
+              <td>Bei Multi-Class: <code>average='macro'</code> oder <code>'weighted'</code></td>
+            </tr>
+            <tr>
+              <td><code>label_binarize(y, classes=[...])</code></td>
+              <td><code>classes</code></td>
+              <td>One-Hot-Matrix</td>
+              <td>Pflicht vor OvR Multi-Class ROC</td>
+            </tr>
+            <tr>
+              <td><code>OneVsRestClassifier(estimator)</code></td>
+              <td><code>estimator</code></td>
+              <td>Wrapper-Klassifikator</td>
+              <td>Gibt <code>.decision_function()</code> für jede Klasse zurück</td>
+            </tr>
+            <tr>
+              <td><code>auc(fpr, tpr)</code></td>
+              <td>—</td>
+              <td>Skalarer AUC-Wert</td>
+              <td>Aus Trapezformel; benötigt bereits berechnete fpr/tpr Arrays</td>
+            </tr>
+            <tr>
+              <td><code>sns.heatmap(cm, annot=True, ...)</code></td>
+              <td><code>xticklabels, yticklabels, cmap</code></td>
+              <td>Confusion Matrix Plot</td>
+              <td><code>cmap='viridis'</code>; immer <code>plt.ylabel('True')</code> oben!</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Code-Snippet: adjusted_predict -->
+        <div class="card" style="margin-top: var(--space-6)">
+          <h3><span class="key" style="--key-color:var(--color-warning)">adjusted_predict()</span> – Vollständiger Code</h3>
+          <pre><code class="language-python">def adjusted_predict(model, Xtest, ytest, tpfp_value, tp=True):
+    """Passe den Decision Threshold an gewünschte TPR oder FPR an."""
+    yscore = model.decision_function(Xtest)
+    fpr, tpr, thresholds = roc_curve(ytest, yscore)
+
+    tpfpr = tpr if tp else fpr                # tp=True → TPR-Ziel, tp=False → FPR-Ziel
+    index = np.argmin(np.abs(tpfpr - tpfp_value))
+    threshold = thresholds[index]
+
+    # ROC-Kurve mit markiertem Punkt plotten
+    plt.plot(fpr, tpr, marker='.', label='Model')
+    plt.scatter(fpr[index], tpr[index], c='black', label='searched')
+    plt.xlabel('FPR'); plt.ylabel('TPR'); plt.legend()
+
+    return yscore > threshold                 # Boolean-Array als neue Predictions
+
+# Verwendung:
+ypred_tp97 = adjusted_predict(model, Xtest, ytest, 0.97, tp=True)   # TPR ≥ 97 %
+ypred_fp023 = adjusted_predict(model, Xtest, ytest, 0.023, tp=False)# FPR ≤ 2.3 %</code></pre>
+        </div>
+
+        <!-- Code-Snippet: Youden -->
+        <div class="card" style="margin-top: var(--space-4)">
+          <h3><span class="key" style="--key-color:var(--color-primary)">Youden-Index</span> – Optimalen Threshold finden</h3>
+          <pre><code class="language-python">fpr, tpr, thresholds = roc_curve(y_test, y_score)
+
+J = tpr - fpr                                # Youden J für jeden Threshold
+best_idx = np.argmax(J)                      # Index mit maximalem J
+best_threshold = thresholds[best_idx]
+best_tpr = tpr[best_idx]
+best_fpr = fpr[best_idx]
+
+plt.scatter(best_fpr, best_tpr, c='red', label=f'J={J[best_idx]:.2f}')
+# best_threshold kann direkt in adjusted_predict übergeben werden</code></pre>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════
+           D. WANN WAS?  – ENTSCHEIDUNGSREGELN
+      ═══════════════════════════════════════════════════════ -->
+      <section class="section" id="wann-was">
+        <div class="section-head">
+          <h2>🗺️ Wann verwende ich was?</h2>
+          <p>Schnelle Entscheidungsregeln für Prüfung und Praxis.</p>
+        </div>
+
+        <div class="card-grid">
+
+          <!-- ROC vs PR -->
+          <article class="card">
+            <h3>ROC Curve vs. Precision-Recall Curve</h3>
+            <div class="matrix" style="margin-top: var(--space-3)">
+              <div class="matrix-header">
+                <div class="matrix-cell">Kriterium</div>
+                <div class="matrix-cell">ROC Curve</div>
+                <div class="matrix-cell">PR Curve</div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>True Negatives</strong></div>
+                <div class="matrix-cell">✅ vorhanden &amp; relevant</div>
+                <div class="matrix-cell">❌ nicht verfügbar/irrelevant</div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>Klassenbalance</strong></div>
+                <div class="matrix-cell">Balanced oder leicht unbalanciert</div>
+                <div class="matrix-cell">Stark unbalanciert (z.B. 99:1)</div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>Use Case</strong></div>
+                <div class="matrix-cell">Klassifikation, Hearing, Bearing</div>
+                <div class="matrix-cell">Object Detection, Anomaly Detection</div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>Gütekriterium</strong></div>
+                <div class="matrix-cell">AUC (0.5 – 1.0)</div>
+                <div class="matrix-cell">Average Precision, F1-Score</div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>X-Achse</strong></div>
+                <div class="matrix-cell">FPR</div>
+                <div class="matrix-cell">Recall (= TPR)</div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>Y-Achse</strong></div>
+                <div class="matrix-cell">TPR</div>
+                <div class="matrix-cell">Precision (= PPV)</div>
+              </div>
+            </div>
+          </article>
+
+          <!-- TPR vs FPR Ziel -->
+          <article class="card">
+            <h3>Threshold-Ziel: TPR oder FPR maximieren?</h3>
+            <div class="note note-primary" style="margin-bottom: var(--space-4)">
+              <strong>Faustregel:</strong>
+              Wähle je nachdem, was teurer ist – ein verpasster Fall (FN) oder ein falscher Alarm (FP).
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">TPR maximieren</span>
+              <div>
+                <strong>Krankheitserkennung</strong> – kein kranker Patient darf übersehen werden.
+                → Threshold <em>senken</em> (liberaler → mehr TP, aber auch mehr FP)
+                <br><code>adjusted_predict(model, X, y, 0.97, tp=True)</code>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">FPR minimieren</span>
+              <div>
+                <strong>Predictive Maintenance</strong> – unnötige Wartungen kosten Geld.
+                → Threshold <em>erhöhen</em> (konservativer → weniger FP, aber auch weniger TP)
+                <br><code>adjusted_predict(model, X, y, 0.023, tp=False)</code>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Youden</span>
+              <div>
+                <strong>Optimale Balance</strong> ohne domänenspezifische Anforderungen.
+                → \(J = \text{TPR} - \text{FPR}\) maximieren
+              </div>
+            </div>
+          </article>
+
+          <!-- OvO vs OvR -->
+          <article class="card">
+            <h3>Multi-Class: OvO vs. OvR</h3>
+            <div class="matrix" style="margin-top: var(--space-3)">
+              <div class="matrix-header">
+                <div class="matrix-cell">Aspekt</div>
+                <div class="matrix-cell">One-vs-One (OvO)</div>
+                <div class="matrix-cell">One-vs-Rest (OvR)</div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>Anzahl Modelle</strong></div>
+                <div class="matrix-cell">\(k(k-1)/2\)</div>
+                <div class="matrix-cell">\(k\)</div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>ROC-Kurven</strong></div>
+                <div class="matrix-cell">Eine pro Klassenpaar</div>
+                <div class="matrix-cell">Eine pro Klasse</div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>sklearn Impl.</strong></div>
+                <div class="matrix-cell">manuell oder <code>SVC</code></div>
+                <div class="matrix-cell"><code>OneVsRestClassifier</code></td></div>
+              </div>
+              <div class="matrix-row">
+                <div class="matrix-cell"><strong>Mittelung</strong></div>
+                <div class="matrix-cell">Makro-Average empfohlen</div>
+                <div class="matrix-cell">Mikro- oder Makro-Average</div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Mikro vs Makro Average -->
+          <article class="card">
+            <h3>Mikro- vs. Makro-Average</h3>
+            <div class="formula-row">
+              <span class="formula-label">Mikro-Average</span>
+              <div>
+                Alle Klassen in eine gemeinsame ROC-Kurve aggregieren.
+                <br><code>roc_curve(y_test.ravel(), y_score.ravel())</code>
+                <br><small style="color:var(--color-text-muted)">Häufige Klassen dominieren das Ergebnis</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Makro-Average</span>
+              <div>
+                Kurven interpolieren &amp; gleichmäßig mitteln.
+                <br><code>mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])</code>
+                <br><code>mean_tpr /= n_classes</code>
+                <br><small style="color:var(--color-text-muted)">Alle Klassen gleichgewichtig – sensitiv für seltene Klassen</small>
+              </div>
+            </div>
+            <div class="note note-primary" style="margin-top:var(--space-4)">
+              <strong>Empfehlung der Vorlesung:</strong>
+              Makro-Average für ausgewogene Bewertung aller Klassen bevorzugen.
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════
+           E. TYPISCHE PRÜFUNGSFALLEN
+      ═══════════════════════════════════════════════════════ -->
+      <section class="section" id="fallen">
+        <div class="section-head">
+          <h2>⚠️ Typische Prüfungsfallen</h2>
+          <p>Diese Fehler passieren häufig – lerne sie auswendig.</p>
+        </div>
+
+        <div class="fallen-item">
+          <div class="fallen-icon">⚠️</div>
+          <div>
+            <strong>Accuracy allein reicht nicht – die Accuracy-Falle</strong>
+            Wenn du bei 200 Durchgängen (100 Signal, 100 Rauschen) immer „Ja" sagst:
+            100 % TP, aber 100 % FP. Accuracy = 50 %, Modell wertlos.
+            <strong>Lösung:</strong> Immer TPR <em>und</em> FPR gemeinsam betrachten.
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <div class="fallen-icon">⚠️</div>
+          <div>
+            <strong>roc_curve() benötigt Scores – nicht Klassen-Labels</strong>
+            <code>roc_curve(y_test, model.predict(X_test))</code> ist <span style="color:#e55">falsch</span>.
+            Du brauchst <code>model.decision_function(X_test)</code> oder <code>model.predict_proba(X_test)[:,1]</code>.
+            Nur mit kontinuierlichen Scores kann der Threshold variiert werden.
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <div class="fallen-icon">⚠️</div>
+          <div>
+            <strong>roc_curve() ist auf binäre Klassifikation beschränkt</strong>
+            Die Funktion <code>roc_curve()</code> akzeptiert <em>nur</em> binäre Labels.
+            Für Multi-Class: erst <code>label_binarize()</code> + <code>OneVsRestClassifier</code>, dann loop.
+            <code>roc_auc_score()</code> dagegen unterstützt Multi-Class direkt mit <code>multi_class='ovr'</code>.
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <div class="fallen-icon">⚠️</div>
+          <div>
+            <strong>Liberal vs. konservativ verändert den Klassifikator nicht – nur das Kriterium</strong>
+            Die ROC-Kurve bleibt dieselbe, egal wie konservativ oder liberal das Kriterium ist.
+            Nur der <em>Punkt auf der Kurve</em> verschiebt sich. Die zugrundeliegende
+            Unterscheidungsfähigkeit (AUC) ändert sich nicht.
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <div class="fallen-icon">⚠️</div>
+          <div>
+            <strong>normalize='true' in confusion_matrix ≠ True</strong>
+            Der Parameter heißt <code>normalize</code> und nimmt den String <code>'true'</code> (nicht den Boolean <code>True</code>).
+            Optionen: <code>'true'</code> (Zeilen-Normalisierung = TPR pro Klasse),
+            <code>'pred'</code> (Spalten), <code>'all'</code> (Gesamt), <code>None</code> (absolut).
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <div class="fallen-icon">⚠️</div>
+          <div>
+            <strong>Threshold senken → mehr TP, aber auch mehr FP (nicht weniger!)</strong>
+            Viele denken: „Niedrigerer Threshold = weniger Fehler." Falsch.
+            Niedrigerer Threshold = liberaler = mehr Positive Calls insgesamt → TP ↑ UND FP ↑.
+            Für Krankheitserkennung gut (kein Patient verpasst), für Predictive Maintenance schlecht.
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <div class="fallen-icon">⚠️</div>
+          <div>
+            <strong>PR-Kurve rechts oben ist gut – ROC-Kurve auch, aber anders</strong>
+            ROC: links oben ist ideal (FPR=0, TPR=1). PR-Kurve: rechts oben ist ideal (Recall=1, Precision=1).
+            Beide haben AUC-nahe Gütermaße, aber die Interpretation der Ecken unterscheidet sich.
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <div class="fallen-icon">⚠️</div>
+          <div>
+            <strong>Diagonale der ROC = Zufallsklassifikator (AUC = 0.5)</strong>
+            Ein Modell, das auf der Diagonale liegt, trifft zufällige Entscheidungen –
+            also TPR = FPR für jeden Threshold. Ein Klassifikator <em>unterhalb</em> der
+            Diagonale wäre sogar schlechter als Zufall (Labels umkehren würde ihn besser machen).
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════════
+           F. MERKSÄTZE
+      ═══════════════════════════════════════════════════════ -->
+      <section class="section" id="merksaetze">
+        <div class="section-head">
+          <h2>💡 Merksätze zum Einprägen</h2>
+          <p>Kernsätze aus der Vorlesung – direkt prüfungsrelevant.</p>
+        </div>
+
+        <div class="merksatz">
+          <div class="m-nr">Merksatz 1 – Signalentdeckungstheorie</div>
+          <p>
+            <strong>„Erst durch die gleichzeitige Betrachtung von TPR und FPR lässt sich die Güte eines Klassifikators wirklich beurteilen."</strong>
+            Der Arzt, der nur TP misst, macht einen grundlegenden wissenschaftlichen Fehler.
+          </p>
+        </div>
+
+        <div class="merksatz warning">
+          <div class="m-nr">Merksatz 2 – ROC Kurve</div>
+          <p>
+            <strong>„Die ROC-Kurve beschreibt den Klassifikator – nicht die Entscheidung."</strong>
+            Alle Punkte auf der Kurve gehören zum selben Modell, nur mit anderem Threshold.
+            Die Kurve selbst (= AUC) ist das eigentliche Gütekriterium.
+          </p>
+        </div>
+
+        <div class="merksatz success">
+          <div class="m-nr">Merksatz 3 – Idealer Klassifikator</div>
+          <p>
+            <strong>„Der ideale Klassifikator steigt bei FPR = 0 sofort auf TPR = 1 und bleibt konstant."</strong>
+            AUC = 1.0 bedeutet: bei keinem Threshold werden False Positives produziert, solange Positives noch übrig sind.
+          </p>
+        </div>
+
+        <div class="merksatz">
+          <div class="m-nr">Merksatz 4 – Decision Threshold</div>
+          <p>
+            <strong>„X ≥ T → Klasse positiv."</strong>
+            Der Threshold T verschiebt den Punkt auf der ROC-Kurve.
+            Höheres T = konservativer = weniger FP, aber auch weniger TP.
+          </p>
+        </div>
+
+        <div class="merksatz warning">
+          <div class="m-nr">Merksatz 5 – AUC ist Threshold-invariant</div>
+          <p>
+            <strong>„Die AUC vergleicht Klassifikatoren unabhängig vom gewählten Threshold."</strong>
+            Sie integriert über alle möglichen Thresholds – dadurch ist sie ein robusteres Gütekriterium als
+            ein einzelner Accuracy-Wert.
+          </p>
+        </div>
+
+        <div class="merksatz success">
+          <div class="m-nr">Merksatz 6 – Youden-Index</div>
+          <p>
+            <strong>„J = TPR – FPR maximieren gibt den Punkt auf der ROC-Kurve, der am weitesten von der Diagonale entfernt ist."</strong>
+            Pragmatisch und einfach – wenn kein domänenspezifisches Threshold-Ziel bekannt ist.
+          </p>
+        </div>
+
+        <div class="merksatz danger">
+          <div class="m-nr">Merksatz 7 – PR-Kurve</div>
+          <p>
+            <strong>„Nutze die Precision-Recall-Kurve, wenn True Negatives nicht verfügbar oder bedeutungslos sind."</strong>
+            Klassisches Beispiel: Object Detection – das Modell findet Objekte in Bildern; „kein Objekt gefunden" ist kein TN.
+          </p>
+        </div>
+
+        <div class="merksatz">
+          <div class="m-nr">Merksatz 8 – Sensitivity-Specificity Trade-off</div>
+          <p>
+            <strong>„TPR = Sensitivity, TNR = Specificity – man kann nicht beides gleichzeitig maximieren."</strong>
+            Jede Verschiebung des Thresholds erhöht das eine und senkt das andere.
+            Der ROC-Kurve liegt genau dieser Trade-off zugrunde.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 7 · Cheatsheet · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

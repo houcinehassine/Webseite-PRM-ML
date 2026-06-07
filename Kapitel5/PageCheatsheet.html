@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Cheatsheet: Random Forest & Boosting</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    /* ── Nur minimale Ergänzungen zum bestehenden Stil ── */
+
+    /* Formel-Zeile */
+    .formula-row {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: var(--space-3);
+      align-items: start;
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: var(--text-sm);
+    }
+    .formula-row:last-child { border-bottom: none; }
+    .formula-label {
+      font-weight: 700;
+      color: var(--color-primary);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding-top: 3px;
+    }
+
+    /* Inline Code-Snippet (Syntax-Farben) */
+    .snippet {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: var(--radius-md);
+      padding: var(--space-3) var(--space-4);
+      font-family: var(--font-mono, monospace);
+      font-size: var(--text-xs);
+      line-height: 1.8;
+      overflow-x: auto;
+      margin: var(--space-2) 0 0;
+    }
+    .sy { color: #cba6f7; } /* keyword / purple  */
+    .sg { color: #a6e3a1; } /* string  / green   */
+    .sb { color: #89dceb; } /* value   / blue    */
+    .sy2{ color: #f9e2af; } /* param   / yellow  */
+    .sr { color: #f38ba8; } /* error   / red     */
+    .sc { color: #6c7086; } /* comment / gray    */
+
+    /* Merksatz-Karte */
+    .merksatz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: var(--space-3);
+    }
+    .merksatz {
+      border-left: 4px solid var(--color-primary);
+      padding: var(--space-3) var(--space-4);
+      background: var(--color-surface);
+      border-radius: 0 var(--radius-md) var(--radius-md) 0;
+      box-shadow: var(--shadow-sm);
+    }
+    .merksatz.success { border-color: var(--color-success); }
+    .merksatz.warning { border-color: var(--color-warning); }
+    .merksatz.danger  { border-color: #e55; }
+    .merksatz .m-nr {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--color-primary);
+      margin-bottom: var(--space-1);
+    }
+    .merksatz.success .m-nr { color: var(--color-success); }
+    .merksatz.warning .m-nr { color: var(--color-warning); }
+    .merksatz.danger  .m-nr { color: #e55; }
+    .merksatz p { font-size: var(--text-sm); margin: 0; line-height: 1.6; }
+
+    /* Fallen-Item */
+    .fallen-item {
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+      gap: var(--space-3);
+      align-items: start;
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-md);
+      border: 1px solid color-mix(in srgb, #e55 30%, var(--color-border));
+      background: color-mix(in srgb, #e55 5%, var(--color-surface));
+      font-size: var(--text-sm);
+    }
+    .fallen-icon { font-size: 1.1rem; line-height: 1.5; }
+    .fallen-item strong { display: block; margin-bottom: 2px; }
+
+    /* Aufklapp-Fragen */
+    details.frage {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+    details.frage summary {
+      padding: var(--space-3) var(--space-4);
+      cursor: pointer;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      background: var(--color-surface);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      list-style: none;
+      user-select: none;
+    }
+    details.frage summary::before {
+      content: '▶';
+      font-size: .6rem;
+      color: var(--color-primary);
+      flex-shrink: 0;
+      transition: transform .2s;
+    }
+    details.frage[open] summary::before { transform: rotate(90deg); }
+    .frage-answer {
+      padding: var(--space-4);
+      font-size: var(--text-sm);
+      border-top: 1px solid var(--color-border);
+      background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+      line-height: 1.75;
+    }
+    .frage-answer ul { padding-left: var(--space-5); margin: var(--space-2) 0 0; }
+    .frage-answer li { margin-bottom: var(--space-1); }
+
+    /* Kategorie-Badge für Fragen */
+    .badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 99px;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .badge-konzept { background:#dbeafe; color:#1e40af; }
+    .badge-formel  { background:#ede9fe; color:#5b21b6; }
+    .badge-code    { background:#dcfce7; color:#166534; }
+    .badge-falle   { background:#fee2e2; color:#991b1b; }
+
+    /* Hyperparameter-Tabelle */
+    .hp-table { width:100%; border-collapse:collapse; font-size:var(--text-sm); margin-top:var(--space-4); }
+    .hp-table th {
+      background: var(--color-primary);
+      color: #fff;
+      padding: var(--space-2) var(--space-3);
+      font-size: var(--text-xs);
+      letter-spacing: .05em;
+      text-align: left;
+    }
+    .hp-table th:first-child { border-radius: var(--radius-sm) 0 0 0; }
+    .hp-table th:last-child  { border-radius: 0 var(--radius-sm) 0 0; }
+    .hp-table td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      vertical-align: top;
+    }
+    .hp-table tr:nth-child(even) td {
+      background: color-mix(in srgb, var(--color-primary) 3%, var(--color-surface));
+    }
+    .tag-up   { background:#dcfce7; color:#166534; border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700; }
+    .tag-down { background:#fee2e2; color:#991b1b; border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700; }
+    .tag-note { background:#fef9c3; color:#854d0e; border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700; }
+
+    /* Vergleichsmatrix */
+    .matrix {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+      font-size: var(--text-sm);
+    }
+    .matrix-header {
+      display: grid;
+      grid-template-columns: 150px 1fr 1fr;
+      background: var(--color-text);
+      color: #fff;
+      font-weight: 700;
+      font-size: var(--text-xs);
+      letter-spacing: .05em;
+    }
+    .matrix-row {
+      display: grid;
+      grid-template-columns: 150px 1fr 1fr;
+      border-top: 1px solid var(--color-border);
+    }
+    .matrix-row:nth-child(even) {
+      background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+    }
+    .matrix-cell {
+      padding: var(--space-2) var(--space-3);
+      border-right: 1px solid var(--color-border);
+    }
+    .matrix-cell:last-child { border-right: none; }
+    .matrix-header .matrix-cell { padding: var(--space-2) var(--space-3); }
+
+    /* Quick-Nav Anker */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-top: var(--space-4);
+    }
+    .quick-nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-sm);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-text);
+      text-decoration: none;
+      transition: background .15s, border-color .15s;
+    }
+    .quick-nav a:hover {
+      background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    /* Print */
+    @media print {
+      site-header, site-sidebar, .quick-nav { display: none !important; }
+      .layout { display: block !important; }
+      .content { padding: 0 !important; }
+      .card, .merksatz, .fallen-item { break-inside: avoid; }
+      details.frage { break-inside: avoid; }
+      details.frage .frage-answer { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+  <site-header active="page5" title="Cheatsheet · RF & Boosting"></site-header>
+  <div class="layout">
+    <site-sidebar active="cheatsheet_rf"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Prüfungsreferenz</span>
+            <h1>Cheatsheet –
+              <span class="key" style="--key-color:var(--color-primary)">Random Forest</span>
+              &amp;
+              <span class="key" style="--key-color:var(--color-warning)">Boosting</span>
+            </h1>
+            <p>
+              Alles auf einer Seite – Formeln, sklearn-API,
+              Entscheidungsregeln, Hyperparameter,
+              Fallen &amp; Prüfungsfragen.
+              Zum Mitnehmen, Drucken &amp; Nachschlagen.
+            </p>
+            <nav class="quick-nav">
+              <a href="#formeln">📐 Formeln</a>
+              <a href="#api">🔧 sklearn API</a>
+              <a href="#wann-was">🗺️ Wann was?</a>
+              <a href="#hyperparameter">⚙️ Parameter</a>
+              <a href="#vergleich">⚖️ Vergleich</a>
+              <a href="#fallen">⚠️ Fallen</a>
+              <a href="#merksaetze">💡 Merksätze</a>
+              <a href="#fragen">❓ Fragen</a>
+            </nav>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Seiten-Übersicht</h2>
+            <ul>
+              <li><a href="Page05.html">Seite 5 – Feature &amp; Permutation Importance</a></li>
+              <li><a href="Page06.html">Seite 6 – RUL Prediction (NASA)</a></li>
+              <li><a href="Page06_1.html">Seite 6.1 – Servo Fault Classification</a></li>
+              <li><a href="Page06_2.html">Seite 6.2 – RF Regression</a></li>
+              <li><a href="Page07.html">Seite 7 – Boosting &amp; AdaBoost</a></li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           A. FORMELN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="formeln">
+        <div class="section-head">
+          <h2>📐 Formeln</h2>
+          <p>Alle Kernformeln des Kapitels – direkt ablesbar.</p>
+        </div>
+
+        <div class="card-grid">
+
+          <!-- Gini & MSE -->
+          <article class="card">
+            <h3>🌲 Decision Tree – Split-Kriterien</h3>
+            <div class="formula-row">
+              <span class="formula-label">Gini Impurity</span>
+              <div>
+                \( G = 1 - \displaystyle\sum_k p_k^2 \)
+                <br><small style="color:var(--color-text-muted)">
+                  \(p_k\) = Anteil Klasse \(k\) · \(G=0\) → reiner Knoten
+                </small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">MSE (Regression)</span>
+              <div>
+                \( \text{MSE} = \dfrac{1}{N}\displaystyle\sum_n (y_n - \bar y)^2 \)
+                <br><small style="color:var(--color-text-muted)">
+                  \(\bar y\) = Mittelwert im Blatt = Vorhersage
+                </small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Vorhersage Blatt</span>
+              <div>
+                Klassifikation →
+                <span class="key" style="--key-color:var(--color-primary)">Mehrheitsklasse</span>
+                <br>
+                Regression →
+                <span class="key" style="--key-color:var(--color-success)">Mittelwert</span>
+                aller Samples
+              </div>
+            </div>
+          </article>
+
+          <!-- Permutation Importance -->
+          <article class="card">
+            <h3>🔀 Permutation Importance</h3>
+            <div class="formula-row">
+              <span class="formula-label">Definition</span>
+              <div>
+                \( \text{PI}_j = \overline{\text{Acc}}_\text{base} - \overline{\text{Acc}}_{\text{perm}_j} \)
+                <br><small style="color:var(--color-text-muted)">
+                  Accuracy-Rückgang wenn Feature \(j\) permutiert wird
+                </small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Auslesen</span>
+              <div>
+                <code>result.importances_mean</code> → Mittelwert<br>
+                <code>result.importances_std</code> → Streuung<br>
+                <code>result.importances</code> → alle Einzelwerte
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">PI ≈ 0</span>
+              <div>
+                Feature trägt
+                <span class="key" style="--key-color:#e55">nichts bei</span>
+                → weglassen
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Wichtig!</span>
+              <div>
+                Immer auf
+                <span class="key" style="--key-color:var(--color-warning)">Testdaten</span>
+                berechnen – niemals auf Trainingsdaten!
+              </div>
+            </div>
+          </article>
+
+          <!-- AdaBoost Formeln -->
+          <article class="card">
+            <h3>⚡ AdaBoost – Alle Formeln</h3>
+            <div class="formula-row">
+              <span class="formula-label">Init</span>
+              <div>
+                \( w_n^{(1)} = \dfrac{1}{N} \)
+                <br><small style="color:var(--color-text-muted)">Alle Punkte gleichgewichtet</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Fehler \(\varepsilon_m\)</span>
+              <div>
+                \( \varepsilon_m = \dfrac{\sum_n w_n^{(m)}\,\mathbb{I}(y_m \neq t_n)}{\sum_n w_n^{(m)}} \)
+                <br><small style="color:var(--color-text-muted)">\(\varepsilon_m &lt; 0.5\) = besser als Zufall</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Gewicht \(\alpha_m\)</span>
+              <div>
+                \( \alpha_m = \ln\!\left(\dfrac{1-\varepsilon_m}{\varepsilon_m}\right) \)
+                <br><small style="color:var(--color-text-muted)">
+                  Kleines \(\varepsilon\) → großes \(\alpha\) → mehr Einfluss
+                </small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Update</span>
+              <div>
+                \( w_n^{(m+1)} = w_n^{(m)}\, e^{\,\alpha_m\,\mathbb{I}(y_m \neq t_n)} \)
+                <br><small style="color:var(--color-text-muted)">Falsch klassifiziert → Gewicht ↑</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Finale Vorhersage</span>
+              <div>
+                \( Y_M(x) = \operatorname{sign}\!\left(\displaystyle\sum_{m=1}^M \alpha_m\,y_m(x)\right) \)
+              </div>
+            </div>
+          </article>
+
+          <!-- RUL -->
+          <article class="card">
+            <h3>✈️ RUL – Crude Approximation</h3>
+            <div class="formula-row">
+              <span class="formula-label">TTF</span>
+              <div>
+                \( \text{TTF}_n = \text{max\_cycle}_\text{Motor} - \text{cycle}_n \)
+                <br><small style="color:var(--color-text-muted)">Fällt von Anfang an linear → 0</small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">RUL (approx.)</span>
+              <div>
+                \( \text{RUL}_n = \min(\text{TTF}_n,\;125) \)
+                <br><small style="color:var(--color-text-muted)">
+                  Konstant bei 125, dann linear fallend
+                </small>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Code</span>
+              <div>
+                <code>df['RUL'] = df['TTF'].clip(upper=125)</code>
+              </div>
+            </div>
+            <div class="formula-row">
+              <span class="formula-label">Warum?</span>
+              <div>
+                Gesunde Phase bietet
+                <span class="key" style="--key-color:var(--color-warning)">keine Lern-Information</span>
+                – Modell soll kritische Phase lernen
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           B. SKLEARN API
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="api">
+        <div class="section-head">
+          <h2>🔧 sklearn API</h2>
+          <p>Alle wichtigen Klassen &amp; Methoden –
+            kompakt und ausführbar.</p>
+        </div>
+
+        <div class="card-grid">
+
+          <!-- RF Classifier -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">RandomForestClassifier</span>
+            </h3>
+            <ul>
+              <li>Klassifikation mit Ensemble aus Bäumen</li>
+              <li><code>.predict()</code> → Klasse</li>
+              <li><code>.predict_proba()</code> → Wahrscheinlichkeiten</li>
+              <li><code>.feature_importances_</code> → Tree-based Importance</li>
+              <li><code>.score()</code> → Accuracy</li>
+              <li><code>.estimators_[i]</code> → einzelner Baum</li>
+            </ul>
+            <div class="snippet">
+<span class="sy">from</span> sklearn.ensemble <span class="sy">import</span> RandomForestClassifier<br>
+model = RandomForestClassifier(<br>
+&nbsp;&nbsp;<span class="sy2">n_estimators</span>=100, <span class="sy2">max_depth</span>=None,<br>
+&nbsp;&nbsp;<span class="sy2">max_features</span>=<span class="sg">'sqrt'</span>, <span class="sy2">random_state</span>=42)<br>
+model.<span class="sb">fit</span>(X_train, y_train)<br>
+model.<span class="sb">predict_proba</span>(X_test)   <span class="sc"># [n × K]</span>
+            </div>
+          </article>
+
+          <!-- RF Regressor -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">RandomForestRegressor</span>
+            </h3>
+            <ul>
+              <li>Regression → Mittelwert der Baumvorhersagen</li>
+              <li><code>oob_score=True</code> → gratis Validierung</li>
+              <li><code>.oob_score_</code> → \(R^2\) ohne Testset</li>
+              <li>Split-Kriterium: <span class="key" style="--key-color:var(--color-warning)">MSE</span></li>
+            </ul>
+            <div class="snippet">
+<span class="sy">from</span> sklearn.ensemble <span class="sy">import</span> RandomForestRegressor<br>
+model = RandomForestRegressor(<br>
+&nbsp;&nbsp;<span class="sy2">n_estimators</span>=100, <span class="sy2">max_depth</span>=10,<br>
+&nbsp;&nbsp;<span class="sy2">oob_score</span>=<span class="sb">True</span>, <span class="sy2">random_state</span>=42)<br>
+model.<span class="sb">fit</span>(X_train, y_train)<br>
+model.<span class="sb">oob_score_</span>  <span class="sc"># R² kostenlos</span>
+            </div>
+          </article>
+
+          <!-- Permutation Importance -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">permutation_importance()</span>
+            </h3>
+            <ul>
+              <li>Immer auf <strong>Testdaten</strong> berechnen</li>
+              <li><code>n_repeats</code>: 10–30 empfohlen</li>
+              <li>Funktioniert mit jedem sklearn-Modell</li>
+              <li>Robuster als Tree-based Importance</li>
+            </ul>
+            <div class="snippet">
+<span class="sy">from</span> sklearn.inspection <span class="sy">import</span> permutation_importance<br>
+result = permutation_importance(<br>
+&nbsp;&nbsp;model, X_test, y_test,<br>
+&nbsp;&nbsp;<span class="sy2">n_repeats</span>=10, <span class="sy2">random_state</span>=42)<br>
+result.<span class="sb">importances_mean</span>  <span class="sc"># Mittelwert</span><br>
+result.<span class="sb">importances_std</span>   <span class="sc"># Streuung</span>
+            </div>
+          </article>
+
+          <!-- plot_tree -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">plot_tree()</span>
+              &amp; Einzelbaum
+            </h3>
+            <ul>
+              <li>Zeigt: Split-Bedingung, MSE/Gini, Samples, Wert</li>
+              <li><code>filled=True</code> → Farbe nach Klasse/Reinheit</li>
+              <li><code>forest.estimators_[i]</code> → Baum Nr. i+1</li>
+              <li>One-Liner: direkt beim Training aufrufen</li>
+            </ul>
+            <div class="snippet">
+<span class="sy">from</span> sklearn.tree <span class="sy">import</span> plot_tree<br>
+<span class="sc"># Baum Nr. 2 aus Forest:</span><br>
+plot_tree(forest.<span class="sb">estimators_</span>[<span class="sb">1</span>],<br>
+&nbsp;&nbsp;<span class="sy2">filled</span>=<span class="sb">True</span>,<br>
+&nbsp;&nbsp;<span class="sy2">feature_names</span>=[<span class="sg">'math'</span>, <span class="sg">'lang'</span>],<br>
+&nbsp;&nbsp;<span class="sy2">class_names</span>=[<span class="sg">'A'</span>, <span class="sg">'B'</span>])<br>
+<span class="sc"># One-Liner:</span><br>
+plot_tree(RandomForestClassifier(<br>
+&nbsp;&nbsp;n_estimators=5).<span class="sb">fit</span>(X,y)[<span class="sb">0</span>], ...)
+            </div>
+          </article>
+
+          <!-- predict_proba Unsicherheit -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">.predict_proba()</span>
+              – Unsicherheit
+            </h3>
+            <ul>
+              <li>Gibt für jeden Punkt Wahrscheinlichkeiten zurück</li>
+              <li><code>max(axis=1)</code> → maximale Konfidenz</li>
+              <li>Unter Schwellenwert → Experten-Review</li>
+              <li>Schwellenwert anwendungsspezifisch: 60–90%</li>
+            </ul>
+            <div class="snippet">
+proba = model.<span class="sb">predict_proba</span>(X_test)<br>
+max_p = proba.<span class="sb">max</span>(axis=<span class="sb">1</span>)<br>
+uncertain = max_p &lt; <span class="sb">0.75</span>  <span class="sc"># &lt;75%</span><br>
+plt.<span class="sb">scatter</span>(X[:,<span class="sb">0</span>], X[:,<span class="sb">1</span>],<br>
+&nbsp;&nbsp;c=uncertain)  <span class="sc"># gelb=unsicher</span>
+            </div>
+          </article>
+
+          <!-- AdaBoost -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">AdaBoostClassifier</span>
+            </h3>
+            <ul>
+              <li>Weak Learner: Decision Stumps (<code>max_depth=1</code>)</li>
+              <li><code>estimator_weights_</code> → alle \(\alpha_m\)</li>
+              <li><code>estimator_errors_</code> → alle \(\varepsilon_m\)</li>
+              <li><code>'SAMME'</code>: diskret, kein predict_proba nötig</li>
+            </ul>
+            <div class="snippet">
+<span class="sy">from</span> sklearn.ensemble <span class="sy">import</span> AdaBoostClassifier<br>
+ada = AdaBoostClassifier(<br>
+&nbsp;&nbsp;<span class="sy2">estimator</span>=DecisionTreeClassifier(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="sy2">max_depth</span>=<span class="sb">1</span>),<br>
+&nbsp;&nbsp;<span class="sy2">n_estimators</span>=50,<br>
+&nbsp;&nbsp;<span class="sy2">algorithm</span>=<span class="sg">'SAMME'</span>)<br>
+ada.<span class="sb">fit</span>(X_train, y_train)<br>
+ada.<span class="sb">estimator_weights_</span>  <span class="sc"># α_m</span>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           C. WANN WAS?
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="wann-was">
+        <div class="section-head">
+          <h2>🗺️ Wann welches Modell?</h2>
+          <p>Entscheidungshilfe für Prüfungsaufgaben –
+            drei Fragen reichen meist.</p>
+        </div>
+
+        <div class="overview">
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">1</div>
+            <div>
+              <h3>Regression oder Klassifikation?</h3>
+              <ul>
+                <li>
+                  Zielwert
+                  <strong>kontinuierlich</strong>
+                  (Temperatur, RUL, Preis) →
+                  <span class="key" style="--key-color:var(--color-success)">RandomForestRegressor</span>
+                  · Split-Kriterium: MSE
+                </li>
+                <li>
+                  Zielwert
+                  <strong>kategorial</strong>
+                  (Klassen, Labels) →
+                  <span class="key" style="--key-color:var(--color-primary)">RandomForestClassifier</span>
+                  · Split-Kriterium: Gini
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">2</div>
+            <div>
+              <h3>Bagging oder Boosting?</h3>
+              <ul>
+                <li>
+                  Daten <strong>verrauscht / Ausreißer</strong> →
+                  <span class="key" style="--key-color:var(--color-primary)">Random Forest</span>
+                  (robust, parallel)
+                </li>
+                <li>
+                  <strong>Bias reduzieren</strong>
+                  / schwierige Punkte besonders lernen →
+                  <span class="key" style="--key-color:var(--color-warning)">AdaBoost</span>
+                  (seriell, adaptiv)
+                </li>
+                <li>
+                  <strong>Parallelisierung</strong>
+                  wichtig →
+                  <span class="key" style="--key-color:var(--color-primary)">Random Forest</span>
+                  (<code>n_jobs=-1</code>)
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">3</div>
+            <div>
+              <h3>Feature Importance: Tree-based oder Permutation?</h3>
+              <ul>
+                <li>
+                  <strong>Schnell &amp; einfach</strong> →
+                  <code>model.feature_importances_</code>
+                  (Tree-based)
+                </li>
+                <li>
+                  <strong>Korrelierte Features</strong>
+                  vorhanden →
+                  <span class="key" style="--key-color:var(--color-success)">permutation_importance()</span>
+                  (robuster!)
+                </li>
+                <li>
+                  <strong>PI ≈ 0</strong> oder negativ →
+                  Feature
+                  <span class="key" style="--key-color:#e55">weglassen</span>
+                  → Modell schlanker
+                </li>
+              </ul>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           D. HYPERPARAMETER
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="hyperparameter">
+        <div class="section-head">
+          <h2>⚙️ Hyperparameter – Übersicht &amp; Effekte</h2>
+          <p>Was passiert beim Erhöhen oder Senken jedes Parameters?</p>
+        </div>
+
+        <div style="overflow-x:auto">
+          <table class="hp-table">
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Standard</th>
+                <th>Erhöhen →</th>
+                <th>Senken →</th>
+                <th>Prüfungs-Tipp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>n_estimators</code></td>
+                <td>100</td>
+                <td><span class="tag-up">↑ Stabilität</span> <span class="tag-down">↑ Zeit</span></td>
+                <td><span class="tag-down">↓ Stabilität</span></td>
+                <td>Ab 100 kaum Gewinn</td>
+              </tr>
+              <tr>
+                <td><code>max_depth</code></td>
+                <td>None</td>
+                <td><span class="tag-down">Overfitting</span></td>
+                <td><span class="tag-down">Underfitting</span></td>
+                <td>None = voll ausgewachsen</td>
+              </tr>
+              <tr>
+                <td><code>max_features</code></td>
+                <td><code>'sqrt'</code></td>
+                <td><span class="tag-down">Weniger Diversität</span></td>
+                <td><span class="tag-up">Mehr Diversität</span></td>
+                <td><code>'sqrt'</code> für Klassif.</td>
+              </tr>
+              <tr>
+                <td><code>bootstrap</code></td>
+                <td>True</td>
+                <td>OOB Score möglich</td>
+                <td>Kein Bagging</td>
+                <td>True für <code>oob_score</code></td>
+              </tr>
+              <tr>
+                <td><code>oob_score</code></td>
+                <td>False</td>
+                <td>Gratis \(R^2\)/Acc</td>
+                <td>—</td>
+                <td><span class="tag-up">Immer nutzen!</span></td>
+              </tr>
+              <tr>
+                <td><code>n_repeats</code> (PI)</td>
+                <td>5</td>
+                <td><span class="tag-up">Stabilere PI</span> <span class="tag-down">↑ Zeit</span></td>
+                <td><span class="tag-down">Instabile Schätzung</span></td>
+                <td>10–30 typisch</td>
+              </tr>
+              <tr>
+                <td><code>n_estimators</code> (ADA)</td>
+                <td>50</td>
+                <td><span class="tag-down">Overfitting möglich</span></td>
+                <td><span class="tag-down">Underfitting</span></td>
+                <td>ADA kann overfittten!</td>
+              </tr>
+              <tr>
+                <td><code>learning_rate</code> (ADA)</td>
+                <td>1.0</td>
+                <td><span class="tag-down">Instabil</span></td>
+                <td><span class="tag-up">Stabiler, mehr Runden</span></td>
+                <td>Klein + mehr Runden = besser</td>
+              </tr>
+              <tr>
+                <td><code>algorithm</code> (ADA)</td>
+                <td><code>'SAMME.R'</code></td>
+                <td><code>'SAMME.R'</code>: braucht proba</td>
+                <td><code>'SAMME'</code>: diskret, robust</td>
+                <td><code>'SAMME'</code> ohne predict_proba</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           E. BAGGING vs. BOOSTING
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="vergleich">
+        <div class="section-head">
+          <h2>⚖️ Bagging vs. Boosting</h2>
+          <p>Der wichtigste Vergleich des Kapitels – immer prüfungsrelevant.</p>
+        </div>
+
+        <div class="matrix" style="margin-top:var(--space-4)">
+          <div class="matrix-header">
+            <div class="matrix-cell">Eigenschaft</div>
+            <div class="matrix-cell">🌲 Bagging (Random Forest)</div>
+            <div class="matrix-cell">⚡ Boosting (AdaBoost)</div>
+          </div>
+          <div class="matrix-row">
+            <div class="matrix-cell"><strong>Training</strong></div>
+            <div class="matrix-cell">
+              <span class="key" style="--key-color:var(--color-primary)">Parallel</span>
+              – unabhängig
+            </div>
+            <div class="matrix-cell">
+              <span class="key" style="--key-color:var(--color-warning)">Seriell</span>
+              – aufeinander aufbauend
+            </div>
+          </div>
+          <div class="matrix-row">
+            <div class="matrix-cell"><strong>Gewichtung</strong></div>
+            <div class="matrix-cell">Alle Samples gleich</div>
+            <div class="matrix-cell">Adaptiv – Fehler erhöhen Gewicht</div>
+          </div>
+          <div class="matrix-row">
+            <div class="matrix-cell"><strong>Aggregation</strong></div>
+            <div class="matrix-cell">Mittelwert / Majority Vote</div>
+            <div class="matrix-cell">Gewichtete Summe der \(\alpha_m\)</div>
+          </div>
+          <div class="matrix-row">
+            <div class="matrix-cell"><strong>Reduziert</strong></div>
+            <div class="matrix-cell">
+              <span class="key" style="--key-color:var(--color-primary)">Varianz</span>
+            </div>
+            <div class="matrix-cell">
+              <span class="key" style="--key-color:var(--color-warning)">Bias</span>
+            </div>
+          </div>
+          <div class="matrix-row">
+            <div class="matrix-cell"><strong>Overfitting</strong></div>
+            <div class="matrix-cell">Robust – schwer zu overfittten</div>
+            <div class="matrix-cell">
+              <span class="key" style="--key-color:#e55">Möglich</span>
+              bei vielen Runden
+            </div>
+          </div>
+          <div class="matrix-row">
+            <div class="matrix-cell"><strong>Ausreißer</strong></div>
+            <div class="matrix-cell">Robust</div>
+            <div class="matrix-cell">
+              <span class="key" style="--key-color:#e55">Empfindlich</span>
+              – Gewichte steigen
+            </div>
+          </div>
+          <div class="matrix-row">
+            <div class="matrix-cell"><strong>Parallelisierbar</strong></div>
+            <div class="matrix-cell">✅ Ja – <code>n_jobs=-1</code></div>
+            <div class="matrix-cell">❌ Nein – streng seriell</div>
+          </div>
+          <div class="matrix-row">
+            <div class="matrix-cell"><strong>Weak Learner</strong></div>
+            <div class="matrix-cell">Tiefe Bäume (niedriger Bias)</div>
+            <div class="matrix-cell">Decision Stumps (<code>max_depth=1</code>)</div>
+          </div>
+          <div class="matrix-row">
+            <div class="matrix-cell"><strong>Diversität durch</strong></div>
+            <div class="matrix-cell">Zufälligkeit – Bootstrap + Feature Bagging</div>
+            <div class="matrix-cell">Gewichtung – Fokus auf Fehler</div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           F. FALLEN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="fallen">
+        <div class="section-head">
+          <h2>⚠️ Typische Fallen &amp; Missverständnisse</h2>
+          <p>Die häufigsten Punkte, die zu Fehlern in der Prüfung führen.</p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:var(--space-3); margin-top:var(--space-4)">
+
+          <div class="fallen-item">
+            <div class="fallen-icon">⚠️</div>
+            <div>
+              <strong>feature_importances_ bei korrelierten Features</strong>
+              Korrelierte Features teilen sich die Importance auf –
+              beide erscheinen weniger wichtig.
+              Lösung:
+              <code class="key" style="--key-color:var(--color-success)">permutation_importance()</code>
+              ist robust dagegen.
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <div class="fallen-icon">⚠️</div>
+            <div>
+              <strong>predict() gibt immer eine Klasse – auch bei 34% Konfidenz</strong>
+              <code>[0.34, 0.33, 0.33]</code> →
+              <code>.predict()</code> wählt trotzdem Klasse 0.
+              Immer
+              <code>.predict_proba().max(axis=1)</code>
+              zusätzlich prüfen!
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <div class="fallen-icon">⚠️</div>
+            <div>
+              <strong>Permutation Importance auf Trainingsdaten</strong>
+              Trainingsdaten kennt das Modell → Importances verzerrt.
+              <span class="key" style="--key-color:#e55">Immer X_test, y_test verwenden!</span>
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <div class="fallen-icon">⚠️</div>
+            <div>
+              <strong>RUL ≠ TTF – clip() nicht vergessen</strong>
+              TTF fällt von Beginn an.
+              RUL (Crude Approx.) bleibt bei 125 und fällt erst in der kritischen Phase.
+              <code>df['RUL'] = df['TTF'].clip(upper=125)</code>
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <div class="fallen-icon">⚠️</div>
+            <div>
+              <strong>AdaBoost kann overfittten – Random Forest kaum</strong>
+              Bei zu vielen Boost-Runden passt AdaBoost sich dem Rauschen an.
+              RF mittelt Fehler heraus – robuster durch Bagging.
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <div class="fallen-icon">⚠️</div>
+            <div>
+              <strong>oob_score braucht bootstrap=True</strong>
+              <code>oob_score=True</code> ohne <code>bootstrap=True</code>
+              → <code>ValueError</code>.
+              Default ist True – also nur beim expliziten Deaktivieren aufpassen.
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <div class="fallen-icon">⚠️</div>
+            <div>
+              <strong>Ohne Baseline ist RMSE = 18 nichts sagend</strong>
+              Immer konstante Vorhersage + lineare Regression als Baseline.
+              Nur wenn RF <em>signifikant</em> besser ist → Mehraufwand gerechtfertigt.
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <div class="fallen-icon">⚠️</div>
+            <div>
+              <strong>Konstante Sensorspalten vor Training entfernen</strong>
+              Spalten mit <code>std ≈ 0</code> tragen nichts bei.
+              Prüfen mit:
+              <code>[c for c in cols if df[c].std() > 0.01]</code>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           G. MERKSÄTZE
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="merksaetze">
+        <div class="section-head">
+          <h2>💡 Merksätze</h2>
+          <p>Ein Satz pro Konzept – auswendig lernbar.</p>
+        </div>
+
+        <div class="merksatz-grid" style="margin-top:var(--space-4)">
+          <div class="merksatz">
+            <div class="m-nr">M 1 · Random Forest</div>
+            <p>Viele zufällige, schwache Bäume gemeinsam abstimmen lassen → stärker als ein einzelner perfekter Baum.</p>
+          </div>
+          <div class="merksatz success">
+            <div class="m-nr">M 2 · Bagging</div>
+            <p>Bootstrap + Feature Bagging = Dekorrelation der Bäume = Varianzreduktion.</p>
+          </div>
+          <div class="merksatz warning">
+            <div class="m-nr">M 3 · Boosting</div>
+            <p>Jeder neue Learner lernt aus den Fehlern des letzten – seriell, fokussiert, adaptiv.</p>
+          </div>
+          <div class="merksatz danger">
+            <div class="m-nr">M 4 · α_m in AdaBoost</div>
+            <p>Kleines ε_m → großes α_m: bessere Klassifikatoren dürfen mehr mitreden.</p>
+          </div>
+          <div class="merksatz">
+            <div class="m-nr">M 5 · Permutation Importance</div>
+            <p>Wenn das Feature fehlt (permutiert): wie stark sinkt die Accuracy? Das ist seine Importance.</p>
+          </div>
+          <div class="merksatz success">
+            <div class="m-nr">M 6 · predict_proba</div>
+            <p>Nicht nur die Klasse, sondern wie sicher – Punkte unter 75% an Experten weiterleiten.</p>
+          </div>
+          <div class="merksatz warning">
+            <div class="m-nr">M 7 · RUL Crude Approx.</div>
+            <p>Motor ist lange gesund → RUL konstant bei 125; erst die letzten 125 Zyklen sind lehrreich.</p>
+          </div>
+          <div class="merksatz danger">
+            <div class="m-nr">M 8 · Baseline Models</div>
+            <p>Schlägt ML nicht mal die konstante Vorhersage? Dann lohnt sich der Aufwand nicht.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           H. PRÜFUNGSFRAGEN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="fragen">
+        <div class="section-head">
+          <h2>❓ Typische Prüfungsfragen</h2>
+          <p>Aufklappen → Antwort lesen → Karte zuklappen und selbst formulieren.</p>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:var(--space-3); margin-top:var(--space-4)">
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-konzept">Konzept</span>
+              Was ist der wichtigste Unterschied zwischen Bagging und Boosting?
+            </summary>
+            <div class="frage-answer">
+              <strong>Bagging</strong>: Weak Learner werden <em>parallel</em> trainiert,
+              alle Samples gleichgewichtet. Diversität durch Zufälligkeit
+              (Bootstrap + Feature Bagging). Reduziert <strong>Varianz</strong>.<br><br>
+              <strong>Boosting</strong>: Weak Learner werden <em>seriell</em> trainiert.
+              Falsch klassifizierte Samples erhalten höhere Gewichte →
+              nächster Learner fokussiert sich darauf. Reduziert <strong>Bias</strong>.<br><br>
+              Merke: Bagging = robust gegenüber Ausreißern, Boosting = anfällig dafür.
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-konzept">Konzept</span>
+              Warum funktioniert Random Forest besser als ein einzelner Entscheidungsbaum?
+            </summary>
+            <div class="frage-answer">
+              Durch <strong>Bagging</strong> (Bootstrap Sampling) und
+              <strong>Feature Bagging</strong> (zufällige Feature-Subsets pro Split)
+              werden die Bäume dekorreliert. Ihr gemeinsames Majority Vote /
+              Mittelwert reduziert die <strong>Varianz</strong> drastisch –
+              ohne den Bias wesentlich zu erhöhen.
+              Ein einzelner tiefer Baum overfit tet; viele verschiedene
+              Bäume mitteln Fehler heraus.
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-konzept">Konzept</span>
+              Wozu braucht man Baseline Models? Nenne drei Beispiele.
+            </summary>
+            <div class="frage-answer">
+              Ohne Baseline ist eine Metrik (z.B. RMSE = 18) nicht bewertbar –
+              gut oder schlecht? Baseline Models zeigen, was das
+              <strong>einfachste denkbare Modell</strong> leistet.
+              ML muss <em>signifikant</em> besser sein.<br><br>
+              Typische Baselines:
+              <ul>
+                <li>Konstante Vorhersage (immer Mittelwert / häufigste Klasse)</li>
+                <li>Lineare Regression / Logistische Regression</li>
+                <li>Moving Average / Exponential Smoothing</li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-formel">Formel</span>
+              Was passiert mit α_m wenn ε_m = 0,5? Und wenn ε_m → 0?
+            </summary>
+            <div class="frage-answer">
+              \[ \alpha_m = \ln\!\left(\frac{1-\varepsilon_m}{\varepsilon_m}\right) \]
+              <ul>
+                <li>\(\varepsilon_m = 0.5\) → \(\alpha_m = \ln(1) = 0\):
+                  Zufallsklassifikator trägt <strong>nichts</strong> bei</li>
+                <li>\(\varepsilon_m \to 0\) → \(\alpha_m \to \infty\):
+                  Perfekter Klassifikator <strong>dominiert</strong> komplett</li>
+                <li>\(\varepsilon_m > 0.5\) → \(\alpha_m < 0\):
+                  Klassifikator wird <strong>invertiert</strong></li>
+              </ul>
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-formel">Formel</span>
+              Warum verwendet Regression MSE statt Gini Impurity als Split-Kriterium?
+            </summary>
+            <div class="frage-answer">
+              <strong>Gini Impurity</strong> misst Klassen-Reinheit →
+              nur sinnvoll für kategoriale Labels.<br><br>
+              <strong>MSE</strong> misst die Streuung der
+              <em>kontinuierlichen</em> Zielwerte im Knoten.
+              Das Split-Kriterium sucht die Aufteilung,
+              die den MSE der Kinder minimiert.
+              Der vorhergesagte Wert im Blatt ist dann der
+              <strong>Mittelwert</strong> aller Samples im Blatt.
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-formel">Formel</span>
+              Warum Crude Approximation statt echte TTF als RUL-Target?
+            </summary>
+            <div class="frage-answer">
+              In der gesunden Phase (TTF &gt; 125) verhalten sich alle Sensoren normal –
+              das Modell könnte dort keinen Zusammenhang zwischen
+              Sensordaten und RUL lernen, weil alle Werte ähnlich sind.<br><br>
+              Die Crude Approximation hält RUL konstant auf 125 und
+              fokussiert das Modell auf die
+              <strong>letzten 125 kritischen Zyklen</strong>,
+              wo Verschleiß tatsächlich in den Sensordaten sichtbar wird.
+              <br><br>Code: <code>df['RUL'] = df['TTF'].clip(upper=125)</code>
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-code">Code</span>
+              Wie ruft man Permutation Importance auf und wie liest man das Ergebnis?
+            </summary>
+            <div class="frage-answer">
+              <div class="snippet">
+<span class="sy">from</span> sklearn.inspection <span class="sy">import</span> permutation_importance<br>
+result = permutation_importance(<br>
+&nbsp;&nbsp;model, X_test, y_test,<br>
+&nbsp;&nbsp;<span class="sy2">n_repeats</span>=10, <span class="sy2">random_state</span>=42)<br>
+<br>
+result.<span class="sb">importances_mean</span>  <span class="sc"># mittlerer Acc-Rückgang</span><br>
+result.<span class="sb">importances_std</span>   <span class="sc"># Streuung (Stabilität)</span>
+              </div>
+              Feature mit größtem <code>importances_mean</code> = wichtigstes.
+              Features nahe/unter 0 = irrelevant → weglassen.
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-code">Code</span>
+              Wie visualisiert man unsichere Klassifikationen mit predict_proba()?
+            </summary>
+            <div class="frage-answer">
+              <div class="snippet">
+proba = model.<span class="sb">predict_proba</span>(X_test)  <span class="sc"># [n × K]</span><br>
+max_p = proba.<span class="sb">max</span>(axis=<span class="sb">1</span>)          <span class="sc"># max pro Punkt</span><br>
+uncertain = max_p &lt; <span class="sb">0.75</span><br>
+<br>
+plt.<span class="sb">hist</span>(max_p, bins=<span class="sb">20</span>)  <span class="sc"># Verteilung</span><br>
+plt.<span class="sb">scatter</span>(X[:,<span class="sb">0</span>], X[:,<span class="sb">1</span>],<br>
+&nbsp;&nbsp;c=uncertain)           <span class="sc"># gelb = unsicher</span>
+              </div>
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-code">Code</span>
+              Wie greift man auf einen einzelnen Baum des Forests zu?
+            </summary>
+            <div class="frage-answer">
+              <div class="snippet">
+<span class="sc"># Baum Nr. 2 (Index 1):</span><br>
+forest.<span class="sb">estimators_</span>[<span class="sb">1</span>]<br>
+<br>
+<span class="sc"># One-Liner beim Training:</span><br>
+plot_tree(RandomForestClassifier(<br>
+&nbsp;&nbsp;n_estimators=5).<span class="sb">fit</span>(X, y)[<span class="sb">1</span>],<br>
+&nbsp;&nbsp;<span class="sy2">feature_names</span>=[...],<br>
+&nbsp;&nbsp;<span class="sy2">class_names</span>=[...])<br>
+<br>
+<span class="sc"># .fit() gibt das Modell zurück</span><br>
+<span class="sc"># [1] indexiert estimators_[1]</span>
+              </div>
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-falle">Falle</span>
+              Warum ist feature_importances_ bei korrelierten Features problematisch?
+            </summary>
+            <div class="frage-answer">
+              Wenn Feature A und Feature B stark korreliert sind,
+              kann der Baum für einen Split entweder A <em>oder</em> B nutzen.
+              Dadurch wird die Importance auf beide aufgeteilt –
+              <strong>beide erscheinen halb so wichtig</strong> wie sie wirklich sind.<br><br>
+              <strong>Lösung:</strong>
+              <code>permutation_importance()</code> misst den direkten
+              Einfluss auf die Testgenauigkeit –
+              unabhängig davon, welches Feature der Baum zufällig gewählt hat.
+            </div>
+          </details>
+
+          <details class="frage">
+            <summary>
+              <span class="badge badge-falle">Falle</span>
+              Warum kann AdaBoost bei Ausreißern versagen, Random Forest aber nicht?
+            </summary>
+            <div class="frage-answer">
+              <strong>AdaBoost</strong>: Ausreißer werden wiederholt falsch klassifiziert →
+              ihr Gewicht steigt exponentiell mit \(e^{\alpha_m}\).
+              Das Ensemble versucht, sich auf diesen Ausreißer zu konzentrieren
+              → <strong>Overfitting auf Rauschen</strong>.<br><br>
+              <strong>Random Forest</strong>: Ausreißer tauchen durch Bootstrap Sampling
+              nur in ~63% der Bäume auf. Es gibt keine Gewichtserhöhung –
+              die anderen 37% der Bäume ignorieren ihn.
+              → Robuster durch Mittelwertbildung.
+            </div>
+          </details>
+
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Drucken / PDF:</strong>
+          Diese Seite ist druckoptimiert –
+          alle Prüfungsfragen klappen sich beim Drucken automatisch aus.
+          <button onclick="window.print()"
+                  style="margin-left:var(--space-4); padding:var(--space-1) var(--space-4);
+                         background:var(--color-primary); color:#fff; border:none;
+                         border-radius:var(--radius-sm); font-size:var(--text-sm);
+                         font-weight:700; cursor:pointer;">
+            🖨️ Drucken / PDF
+          </button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>
+        PRM Prüfungsvorbereitung · Cheatsheet · Random Forest &amp; Boosting · Stand Juni 2026
+      </small>
+    </div>
+  </footer>
+
+</body>
+</html>

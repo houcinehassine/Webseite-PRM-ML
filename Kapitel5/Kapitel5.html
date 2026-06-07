@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Kapitel 5 · Ensemble-Methoden</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+</head>
+<body>
+
+  <!-- ══ SITE-HEADER (identisch zu Kapitel 4) ══════════════ -->
+  <site-header active="page5" title="Kapitel 5 · Ensemble-Methoden"></site-header>
+
+  <!-- ══ MAIN ══════════════════════════════════════════════ -->
+  <main id="main-content">
+    <div class="container">
+
+      <!-- HERO -->
+      <section class="k5-hero">
+        <span class="eyebrow">🌲 Kapitel 5</span>
+        <h1>Ensemble-Methoden & Random Forests</h1>
+        <p>
+          Vom einzelnen Entscheidungsbaum zum mächtigen Ensemble –
+          Theorie, sklearn-Praxis und reale Anwendungen aus dem PRM-Kontext.
+        </p>
+
+        <!-- Themen-Überblick als Pills -->
+        <div class="overview-strip">
+          <span class="overview-pill">🌳 Entscheidungsbäume</span>
+          <span class="overview-pill">📐 Gini Impurity</span>
+          <span class="overview-pill">🌲 Random Forest</span>
+          <span class="overview-pill">🎲 Bagging & Bootstrapping</span>
+          <span class="overview-pill">⚙️ sklearn API</span>
+          <span class="overview-pill">🔍 Feature Importance</span>
+          <span class="overview-pill">📈 RF Regression</span>
+          <span class="overview-pill">⚡ Boosting & AdaBoost</span>
+        </div>
+
+        <!-- Status Pills -->
+        <div class="status-bar">
+          <span class="status-pill active"><span class="dot"></span>7 Seiten verfügbar</span>
+          <span class="status-pill"><span class="dot"></span>2 Praxisbeispiele</span>
+          <span class="status-pill">sklearn · numpy · matplotlib</span>
+        </div>
+      </section>
+
+      <!-- ══ SEKTION: THEORIE ════════════════════════════ -->
+      <p class="section-label">Theorie & Grundlagen</p>
+      <div class="pages-grid">
+
+        <!-- Page 01 -->
+        <a class="page-card" href="Page01.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-2)),
+                 color-mix(in oklab, var(--color-primary) 4%, var(--color-surface-offset)));">
+            🗺️
+            <span class="card-num">Seite 01</span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Überblick</div>
+            <div class="card-titel">Random Forest – Einführung & Überblick</div>
+            <div class="card-desc">
+              Wo befinden wir uns im ML-Kontext? Grobe Vorstellung aller Themen:
+              Entscheidungsbäume, Gini Impurity, Random Forest, Feature Importance,
+              Boosting und RF Regression. Pros &amp; Cons des Verfahrens.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Überblick</span>
+              <span class="tag">Pros &amp; Cons</span>
+              <span class="tag">Ensemble</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Einstieg · 1 Abschnitt</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 02 -->
+        <a class="page-card" href="Page02.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #22c55e 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #22c55e 4%, var(--color-surface-offset)));">
+            🌳
+            <span class="card-num"
+                  style="color:#16a34a; background:color-mix(in oklab,#22c55e 12%,var(--color-surface))">
+              Seite 02
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Fundament</div>
+            <div class="card-titel">Entscheidungsbäume verstehen</div>
+            <div class="card-desc">
+              Wie funktioniert das Basismodell? Splits im Feature-Raum,
+              Gini Impurity als Gütekriterium, Overfitting-Tendenz von
+              Decision Trees – alles direkt an Daten ausprobiert.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Decision Tree</span>
+              <span class="tag">Gini Impurity</span>
+              <span class="tag">Overfitting</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie &amp; Code · 3 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 03 -->
+        <a class="page-card" href="Page03.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #f59e0b 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #f59e0b 4%, var(--color-surface-offset)));">
+            🎲
+            <span class="card-num"
+                  style="color:#d97706; background:color-mix(in oklab,#f59e0b 12%,var(--color-surface))">
+              Seite 03
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Ensemble-Idee</div>
+            <div class="card-titel">Vom Baum zum Random Forest</div>
+            <div class="card-desc">
+              Warum werden viele schwache Modelle zusammen gut?
+              Bagging, Bootstrap Aggregating, Out-of-Bag Error und
+              Feature Bagging – die Random Subspace Method.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Bagging</span>
+              <span class="tag">OOB Error</span>
+              <span class="tag">Feature Bagging</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie · 3 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Theorie -->
+
+      <!-- ══ SEKTION: PRAXIS ════════════════════════════ -->
+      <p class="section-label">Praxis & sklearn</p>
+      <div class="pages-grid">
+
+        <!-- Page 04 -->
+        <a class="page-card" href="Page04.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #6366f1 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #6366f1 4%, var(--color-surface-offset)));">
+            ⚙️
+            <span class="card-num"
+                  style="color:#4f46e5; background:color-mix(in oklab,#6366f1 12%,var(--color-surface))">
+              Seite 04
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">sklearn-Anwendung</div>
+            <div class="card-titel">Praktische Anwendung in sklearn</div>
+            <div class="card-desc">
+              <code>RandomForestClassifier</code>, <code>.predict_proba()</code>,
+              Hyperparameter Sweep, Random Search und Bayesian Optimization –
+              das Modell wirklich benutzen können.
+            </div>
+            <div class="card-tags">
+              <span class="tag">RandomForestClassifier</span>
+              <span class="tag">predict_proba</span>
+              <span class="tag">Random Search</span>
+              <span class="tag">Bayesian Opt.</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Code-intensiv · 4 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 05 -->
+        <a class="page-card" href="Page05.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #ec4899 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #ec4899 4%, var(--color-surface-offset)));">
+            🔍
+            <span class="card-num"
+                  style="color:#db2777; background:color-mix(in oklab,#ec4899 12%,var(--color-surface))">
+              Seite 05
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Interpretation</div>
+            <div class="card-titel">Interpretation & Vertrauen ins Modell</div>
+            <div class="card-desc">
+              Die Black Box aufbrechen: Feature Importance und Permutation Importance.
+              Welche Features haben den größten Impact? White-Box-Beispiel mit
+              <code>plot_tree</code> und Eignungstest.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Feature Importance</span>
+              <span class="tag">Permutation</span>
+              <span class="tag">White-Box</span>
+              <span class="tag">plot_tree</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie &amp; Code · 2 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 07 -->
+        <a class="page-card" href="Page07.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #ef4444 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #ef4444 4%, var(--color-surface-offset)));">
+            ⚡
+            <span class="card-num"
+                  style="color:#dc2626; background:color-mix(in oklab,#ef4444 12%,var(--color-surface))">
+              Seite 07
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Gegenkonzept</div>
+            <div class="card-titel">Boosting als Gegenkonzept</div>
+            <div class="card-desc">
+              Bagging vs. Boosting: serielle statt parallele Weak Learner.
+              Deep Dive in den AdaBoost-Algorithmus mit vollständiger
+              Formelherleitung und Visualisierung.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Boosting</span>
+              <span class="tag">AdaBoost</span>
+              <span class="tag">Weak Learner</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie · 2 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Praxis -->
+
+      <!-- ══ SEKTION: ANWENDUNGEN ══════════════════════ -->
+      <p class="section-label">Anwendungsbeispiele</p>
+      <div class="pages-grid">
+
+        <!-- Page 06 -->
+        <a class="page-card" href="Page06.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #0ea5e9 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #0ea5e9 4%, var(--color-surface-offset)));">
+            🗺️
+            <span class="card-num"
+                  style="color:#0284c7; background:color-mix(in oklab,#0ea5e9 12%,var(--color-surface))">
+              Übersicht
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">PRM-Kontext</div>
+            <div class="card-titel">Anwendungen im PRM-Kontext</div>
+            <div class="card-desc">
+              Transfer auf echte Probleme: RUL Prediction mit dem NASA Turbofan-Datensatz,
+              Baseline Models und der Unterschied zwischen RUL und TTF.
+            </div>
+            <div class="card-tags">
+              <span class="tag">RUL Prediction</span>
+              <span class="tag">NASA Datensatz</span>
+              <span class="tag">Baseline Models</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Anwendung · 2 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 06_1 -->
+        <a class="page-card" href="Page06_1.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, var(--color-success) 12%, var(--color-surface-2)),
+                 color-mix(in oklab, var(--color-success) 4%, var(--color-surface-offset)));">
+            🏭
+            <span class="card-num"
+                  style="color:var(--color-success); background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface))">
+              Beispiel 1
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Spezifisches Beispiel</div>
+            <div class="card-titel">Servo Fault Classification</div>
+            <div class="card-desc">
+              300 Servomotoren, Sensordaten (temperature, current).
+              <code>.predict_proba()</code> zur Unsicherheitsvisualisierung –
+              Datenpunkte mit &lt;75% Konfidenz im Scatter-Plot hervorheben.
+            </div>
+            <div class="card-tags">
+              <span class="tag">predict_proba</span>
+              <span class="tag">Unsicherheit</span>
+              <span class="tag">Scatter-Plot</span>
+              <span class="tag">Fault Detection</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Code-Aufgabe · Praxisbeispiel</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 06_2 -->
+        <a class="page-card" href="Page06_2.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, var(--color-purple) 12%, var(--color-surface-2)),
+                 color-mix(in oklab, var(--color-purple) 4%, var(--color-surface-offset)));">
+            📈
+            <span class="card-num"
+                  style="color:var(--color-purple); background:color-mix(in oklab,var(--color-purple) 12%,var(--color-surface))">
+              Beispiel 2
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Regression</div>
+            <div class="card-titel">Random Forest Regression</div>
+            <div class="card-desc">
+              Kontinuierliche statt kategoriale Vorhersage. MSE statt Gini Impurity
+              als Split-Kriterium. <code>RandomForestRegressor</code> in sklearn –
+              Visualisierung für verschiedene <code>max_depth</code>-Werte.
+            </div>
+            <div class="card-tags">
+              <span class="tag">RandomForestRegressor</span>
+              <span class="tag">MSE</span>
+              <span class="tag">Regression</span>
+              <span class="tag">max_depth</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie &amp; Code · Regression</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Anwendungen -->
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- ══ FOOTER ═════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 5 – Ensemble-Methoden · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

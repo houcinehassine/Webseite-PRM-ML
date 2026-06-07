@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K-means</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · K-means"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page2"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Seite 2</span>
+            <h1>K-means <span class="key" style="--key-color:var(--color-primary)">Algorithmus</span></h1>
+            <p>
+              Funktionsweise, Heuristik und vollständige Implementierung
+              in sklearn – von den Rohdaten bis zu den gefärbten Clustern
+              mit eingezeichneten Centroids.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Funktionsweise</span>
+              <span class="pill">Heuristik</span>
+              <span class="pill">KMeans in sklearn</span>
+              <span class="pill">.fit() / .predict()</span>
+              <span class="pill">cluster_centers_</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du verstehst, wie k-means intern arbeitet, welche zwei
+              Heuristiken den Algorithmus definieren und wie du ihn
+              vollständig in sklearn von Problem bis Visualisierung umsetzt.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. FUNKTIONSWEISE
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="funktionsweise">
+        <div class="section-head">
+          <h2>2.1 Funktionsweise</h2>
+          <p>
+            Was macht k-means – und was braucht er als Eingabe?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Aufgabe des Algorithmus</span></h3>
+            <p>
+              Der k-means Algorithmus sucht nach einer
+              <strong>vorab bestimmten Anzahl an Clustern</strong>
+              in einem <strong>nicht gelabelten Datensatz</strong>.
+              Er versucht, die Datenpunkte so in <strong>k Gruppen</strong>
+              aufzuteilen, dass die Punkte innerhalb einer Gruppe
+              möglichst nah beieinander liegen.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Wichtige Voraussetzung</span></h3>
+            <p>
+              Die Anzahl der Cluster <strong>k</strong> muss vor dem Training
+              festgelegt werden – der Algorithmus lernt sie nicht selbst
+              aus den Daten. Die richtige Wahl von k ist daher entscheidend
+              und wird durch Validierungsmaße wie den
+              <a href="Page04.html">Elbow Plot oder Silhouette Score</a>
+              unterstützt.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. HEURISTIK
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="heuristik">
+        <div class="section-head">
+          <h2>2.2 Heuristik des K-means Algorithmus</h2>
+          <p>
+            Zwei fundamentale Annahmen definieren, was ein „gutes" Cluster ist.
+          </p>
+        </div>
+
+        <div class="overview">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">①</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-primary)">
+                  Centroid = Arithmetisches Mittel
+                </span>
+              </h3>
+              <p>
+                Der <strong>Cluster-Mittelpunkt (Centroid)</strong> ist definiert als
+                das <strong>arithmetische Mittel</strong> aller Punkte des jeweiligen
+                Clusters. Er liegt also im geometrischen Zentrum der zugehörigen
+                Datenpunkte – und wird nach jeder Iteration neu berechnet.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">②</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-success)">
+                  Jeder Punkt liegt näher am eigenen Centroid
+                </span>
+              </h3>
+              <p>
+                Jeder Datenpunkt ist <strong>näher an seinem eigenen Centroid</strong>
+                als an jedem anderen Centroid. Diese Bedingung wird nach jeder
+                Zuweisung neu überprüft – und ist das Konvergenzkriterium
+                des Algorithmus.
+              </p>
+            </div>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Zusammenspiel:</strong> Beide Heuristiken zusammen ergeben den
+          iterativen <strong>Expectation-Maximization-Ablauf</strong> von k-means –
+          mehr dazu auf
+          <a href="Page03.html">Seite 3: EM-Algorithmus</a>.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. K-MEANS IN SKLEARN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="kmeans-sklearn">
+        <div class="section-head">
+          <h2>2.3 K-means in Sklearn</h2>
+          <p>
+            Die sklearn-Implementierung folgt dem bekannten
+            <strong>fit → predict</strong>-Schema aller Modelle in sklearn.
+          </p>
+        </div>
+
+        <div class="overview">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">API</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-primary)">Gleiche Struktur wie alle sklearn-Modelle</span></h3>
+              <p>
+                In sklearn weist der k-means Algorithmus
+                <strong>die gleiche Struktur wie andere Modelle</strong> auf –
+                instanziieren, fitten, vorhersagen.
+                Als wichtiger Zusatz bei der <strong>Instanziierung</strong>
+                muss die Anzahl der Cluster <code>n_clusters</code> angegeben werden.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">.predict()</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-success)">.predict() – Zugehörigkeit von Datenpunkten</span></h3>
+              <p>
+                Die <strong>Zugehörigkeit der Datenpunkte</strong> zu den jeweiligen
+                Centroids – auch für <em>neue, ungesehene Datenpunkte</em> –
+                erhalten wir über die <code>.predict()</code> Methode.
+                Sie gibt für jeden Punkt den Index des nächstgelegenen Centroids zurück.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">attr</div>
+            <div>
+              <h3><span class="key" style="--key-color:var(--color-warning)">.cluster_centers_ – Die erlernten Centroids</span></h3>
+              <p>
+                Die <strong>erlernten Centroids</strong> nach dem Training
+                stecken im Attribut <code>.cluster_centers_</code> des Modells.
+                Es handelt sich um ein Array der Form
+                <code>(n_clusters, n_features)</code> –
+                also k Punkte im Feature-Raum.
+              </p>
+            </div>
+          </article>
+        </div>
+
+        <!-- API Übersicht Tabelle -->
+        <div style="margin-top:var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>Element</th>
+                <th>Beschreibung</th>
+                <th>Beispiel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>KMeans(n_clusters=k)</code></td>
+                <td>Modell instanziieren mit k Clustern</td>
+                <td><code>KMeans(n_clusters=4)</code></td>
+              </tr>
+              <tr>
+                <td><code>.fit(X)</code></td>
+                <td>Modell auf Daten trainieren – Centroids lernen</td>
+                <td><code>kmeans.fit(X)</code></td>
+              </tr>
+              <tr>
+                <td><code>.predict(X)</code></td>
+                <td>Cluster-Label für jeden Datenpunkt bestimmen</td>
+                <td><code>kmeans.predict(X)</code></td>
+              </tr>
+              <tr>
+                <td><code>.fit_predict(X)</code></td>
+                <td>fit + predict in einem Schritt</td>
+                <td><code>kmeans.fit_predict(X)</code></td>
+              </tr>
+              <tr>
+                <td><code>.cluster_centers_</code></td>
+                <td>Koordinaten der erlernten Centroids</td>
+                <td><code>kmeans.cluster_centers_</code></td>
+              </tr>
+              <tr>
+                <td><code>.inertia_</code></td>
+                <td>Summe der quadratischen Abstände (SSE) – Gütemaß</td>
+                <td><code>kmeans.inertia_</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. PROBLEM BEISPIEL
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="problem-beispiel">
+        <div class="section-head">
+          <h2>2.4 Problem Beispiel</h2>
+          <p>
+            Wir erzeugen einen synthetischen Datensatz mit 4 Clustern
+            und visualisieren ihn zunächst ohne Labels.
+          </p>
+        </div>
+
+        <div class="note" style="margin-bottom:var(--space-5)">
+          <strong>Szenario:</strong> 300 Datenpunkte werden mit
+          <code>make_blobs</code> um 4 Cluster-Zentren generiert.
+          Die Cluster sind kompakt (<code>cluster_std=0.60</code>).
+          Ziel: k-means soll diese 4 Gruppen automatisch erkennen –
+          ohne die wahren Labels <code>y_true</code> zu kennen.
+        </div>
+
+        <!-- Schritt 1: Daten erzeugen -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+           text-transform:uppercase; color:var(--color-text-faint);
+           margin-bottom:var(--space-2)">
+          Schritt 1 · Datensatz erzeugen und visualisieren
+        </p>
+<div class="code-cell-split">
+  <div class="code-side">
+    <div class="code-side-header">
+      <span class="cell-lang">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+        Python
+      </span>
+      <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+    </div>
+    <pre><code>import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()  # Plot-Styling aktivieren
+
+from sklearn.datasets import make_blobs
+
+# Synthetischen Datensatz mit 4 Clustern erzeugen
+X, y_true = make_blobs(
+    n_samples=300,
+    centers=4,
+    cluster_std=0.60,
+    random_state=0
+)
+
+# Datenpunkte ohne Labels plotten (unsupervised → keine Farben)
+plt.scatter(X[:, 0], X[:, 1], s=50)
+plt.title("Rohdaten – keine Labels bekannt")
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.show()</code></pre>
+  </div>
+  <div class="output-side">
+    <div class="output-side-header">
+      <span class="cell-lang">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Output
+      </span>
+    </div>
+    <div class="output-side-body">
+      <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+        📊 Scatter-Plot mit 300 grauen Punkten –
+        die Clusterstruktur ist erkennbar,
+        aber noch nicht gelabelt.
+      </p>
+    </div>
+  </div>
+</div>
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">make_blobs</span></h3>
+            <ul>
+              <li><code>n_samples=300</code> – Anzahl der Datenpunkte</li>
+              <li><code>centers=4</code> – Anzahl der Cluster-Zentren</li>
+              <li><code>cluster_std=0.60</code> – Streuung um das Zentrum</li>
+              <li><code>random_state=0</code> – Reproduzierbarkeit</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Warum ungelabelt?</span></h3>
+            <p>
+              Im unüberwachten Lernen stehen uns <strong>keine Labels</strong>
+              zur Verfügung. <code>y_true</code> wird hier nur für den
+              Vergleich nach dem Clustering verwendet –
+              im echten Anwendungsfall ist es nicht vorhanden.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           5. K-MEANS LÖSUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="kmeans-loesung">
+        <div class="section-head">
+          <h2>2.5 K-means Lösung</h2>
+          <p>
+            Jetzt wenden wir k-means an und visualisieren
+            Cluster-Zugehörigkeiten und Centroids.
+          </p>
+        </div>
+
+        <!-- Schritt 2: KMeans fitten -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+           text-transform:uppercase; color:var(--color-text-faint);
+           margin-bottom:var(--space-2)">
+          Schritt 2 · K-means fitten und Labels bestimmen
+        </p>
+<div class="code-cell-split">
+  <div class="code-side">
+    <div class="code-side-header">
+      <span class="cell-lang">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+        Python
+      </span>
+      <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+    </div>
+    <pre><code>from sklearn.cluster import KMeans
+
+# Modell mit k=4 Clustern instanziieren
+kmeans = KMeans(n_clusters=4)
+
+# Modell auf die Daten fitten → Centroids lernen
+kmeans.fit(X)
+
+# Cluster-Labels für jeden Datenpunkt bestimmen
+y_kmeans = kmeans.predict(X)
+
+print("Cluster-Labels (erste 10):", y_kmeans[:10])
+print("Anzahl Punkte pro Cluster:", 
+      {i: (y_kmeans == i).sum() for i in range(4)})</code></pre>
+  </div>
+  <div class="output-side">
+    <div class="output-side-header">
+      <span class="cell-lang">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Output
+      </span>
+    </div>
+    <div class="output-side-body">
+      <pre>Cluster-Labels (erste 10): [1 3 2 0 3 1 2 0 1 3]
+Anzahl Punkte pro Cluster: {0: 75, 1: 75, 2: 75, 3: 75}</pre>
+    </div>
+  </div>
+</div>
+
+        <!-- Schritt 3: Visualisieren -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+           text-transform:uppercase; color:var(--color-text-faint);
+           margin-bottom:var(--space-2)">
+          Schritt 3 · Cluster und Centroids visualisieren
+        </p>
+<div class="code-cell-split">
+  <div class="code-side">
+    <div class="code-side-header">
+      <span class="cell-lang">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+        Python
+      </span>
+      <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+    </div>
+    <pre><code>import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
+
+# Datenpunkte eingefärbt nach Cluster-Zugehörigkeit
+plt.scatter(
+    X[:, 0], X[:, 1],
+    c=y_kmeans,       # Farbe = Cluster-Label
+    s=50,
+    cmap='viridis'
+)
+
+# Erlernten Centroids aus dem Modell holen
+centers = kmeans.cluster_centers_   # Shape: (4, 2)
+
+# Centroids als große schwarze Punkte einzeichnen
+plt.scatter(
+    centers[:, 0], centers[:, 1],
+    c='black',
+    s=200,
+    alpha=0.5,
+    label='Centroids'
+)
+
+plt.title("K-means Clustering – k=4")
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.legend()
+plt.show()</code></pre>
+  </div>
+  <div class="output-side">
+    <div class="output-side-header">
+      <span class="cell-lang">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Output
+      </span>
+    </div>
+    <div class="output-side-body">
+      <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+        📊 Scatter-Plot mit 4 farbigen Cluster-Gruppen (viridis).
+        4 schwarze Punkte markieren die Centroids
+        im Zentrum jedes Clusters.
+      </p>
+    </div>
+  </div>
+</div>
+
+        <!-- Erklärung der Visualisierung -->
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">c=y_kmeans</span></h3>
+            <p>
+              Der Parameter <code>c=y_kmeans</code> in <code>plt.scatter()</code>
+              weist jedem Datenpunkt eine <strong>Farbe basierend auf seinem
+              Cluster-Label</strong> zu. Mit <code>cmap='viridis'</code> werden
+              die Labels 0–3 auf eine Farbskala gemappt.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">cluster_centers_</span></h3>
+            <p>
+              <code>kmeans.cluster_centers_</code> ist ein Array mit den
+              Koordinaten der <strong>k erlernten Centroids</strong>.
+              Sie werden separat mit größeren schwarzen Punkten
+              (<code>s=200</code>) eingezeichnet, um sie
+              visuell hervorzuheben.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Was sehen wir?</span></h3>
+            <p>
+              Vier klar abgegrenzte Farbgruppen – jede mit einem
+              zentralen schwarzen Centroid. Der Algorithmus hat die
+              4 natürlichen Cluster korrekt erkannt, obwohl er
+              <code>y_true</code> nie gesehen hat.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-purple)">Nächster Schritt</span></h3>
+            <p>
+              Wie genau findet k-means diese Centroids?
+              Das steckt im <strong>EM-Algorithmus</strong> –
+              der mathematischen Grundlage hinter den
+              Iterationsschritten. Weiter auf
+              <a href="Page03.html">Seite 3 →</a>
+            </p>
+          </article>
+        </div>
+
+        <!-- Vollständiger Code auf einen Blick -->
+        <div style="margin-top:var(--space-8)">
+          <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+             text-transform:uppercase; color:var(--color-text-faint);
+             margin-bottom:var(--space-3)">
+            Vollständiger Code auf einen Blick
+          </p>
+<div class="code-cell-split">
+  <div class="code-side">
+    <div class="code-side-header">
+      <span class="cell-lang">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <polyline points="16 18 22 12 16 6"/>
+          <polyline points="8 6 2 12 8 18"/>
+        </svg>
+        Python – Komplett
+      </span>
+      <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+    </div>
+    <pre><code>import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+
+# 1. Daten erzeugen
+X, y_true = make_blobs(n_samples=300, centers=4,
+                       cluster_std=0.60, random_state=0)
+
+# 2. K-means fitten
+kmeans = KMeans(n_clusters=4)
+kmeans.fit(X)
+y_kmeans = kmeans.predict(X)
+
+# 3. Cluster plotten
+plt.scatter(X[:, 0], X[:, 1], c=y_kmeans, s=50, cmap='viridis')
+
+# 4. Centroids plotten
+centers = kmeans.cluster_centers_
+plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5)
+
+plt.title("K-means – k=4")
+plt.show()</code></pre>
+  </div>
+  <div class="output-side">
+    <div class="output-side-header">
+      <span class="cell-lang">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Output
+      </span>
+    </div>
+    <div class="output-side-body">
+      <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+        📊 Finales Clustering – 4 farbige Gruppen,
+        schwarze Centroids in der Mitte jedes Clusters.
+      </p>
+    </div>
+  </div>
+</div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Seite:</strong>
+          Wie iteriert k-means intern bis zur Konvergenz?
+          Der <strong>EM-Algorithmus</strong> dahinter –
+          mit mathematischer Herleitung und From-Scratch-Implementierung.
+          <br><br>
+          <a href="Page03.html">→ Seite 3: EM-Algorithmus in K-means</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Seite 2 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

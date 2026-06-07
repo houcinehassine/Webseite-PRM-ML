@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Kapitel 7 Einführung</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    /* Roadmap-Timeline */
+    .roadmap {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      margin-top: var(--space-6);
+    }
+    .roadmap-item {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 0 var(--space-4);
+      position: relative;
+    }
+    .roadmap-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .roadmap-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .roadmap-connector {
+      width: 2px;
+      flex: 1;
+      min-height: var(--space-4);
+      background: var(--color-border);
+    }
+    .roadmap-item:last-child .roadmap-connector { display: none; }
+    .roadmap-content {
+      padding-bottom: var(--space-5);
+    }
+    .roadmap-content h3 {
+      font-size: var(--text-base);
+      margin: 4px 0 var(--space-1);
+    }
+    .roadmap-content p {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+    .roadmap-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-bottom: var(--space-1);
+    }
+
+    /* Frage-Karte */
+    .question-card {
+      display: flex;
+      gap: var(--space-3);
+      align-items: flex-start;
+      padding: var(--space-4);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface);
+      font-size: var(--text-sm);
+    }
+    .question-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      line-height: 1.4;
+    }
+    .question-card strong { display: block; margin-bottom: 2px; }
+    .question-card span { color: var(--color-text-muted); }
+  </style>
+</head>
+<body>
+  <site-header active="page7" title="Kapitel 7 · Einführung"></site-header>
+  <div class="layout">
+    <site-sidebar active="Einführung"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 7 · Seite 1</span>
+            <h1>Einführung –
+              <span class="key" style="--key-color:var(--color-primary)">Evaluation</span>
+              von Klassifikatoren
+            </h1>
+            <p>
+              Wir können Modelle trainieren – aber wie gut sind sie wirklich?
+              Dieses Kapitel beantwortet, wie man einen Klassifikator
+              ehrlich bewertet, Fehlertypen unterscheidet und Schwellwerte
+              gezielt einstellt.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Confusion Matrix</span>
+              <span class="pill">ROC Curves</span>
+              <span class="pill">AUC</span>
+              <span class="pill">Decision Threshold</span>
+              <span class="pill">F1-Score</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Was dich erwartet</h2>
+            <p>
+              8 Seiten Theorie & Code, ein vollständiges Praxisbeispiel
+              (Kugellager-Klassifikation), ein Cheatsheet mit allen Formeln
+              und ein Quiz mit 20 Prüfungsfragen.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ═══════════════════════════════════════════
+           1. WO BEFINDEN WIR UNS?
+           ════════════════════════════════════════════ -->
+      <section class="section" id="kontext">
+        <div class="section-head">
+          <h2>1.1 Wo befinden wir uns?</h2>
+          <p>Einordnung im ML-Prozess – von den Rohdaten bis zur Bewertung des Modells.</p>
+        </div>
+
+        <div class="overview-3">
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-text-muted)">1</div>
+            <div>
+              <h3>Daten & Modell</h3>
+              <p>
+                Wir haben Daten gesammelt, Features engineered und ein
+                Klassifikationsmodell trainiert – z.B. SVM, Random Forest.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-text-muted)">2</div>
+            <div>
+              <h3>Vorhersagen</h3>
+              <p>
+                Das Modell liefert für neue Daten eine Klasse zurück –
+                z.B. „defekt" oder „intakt". Aber wie verlässlich ist diese Aussage?
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">3</div>
+            <div>
+              <h3>Evaluation ← wir sind hier</h3>
+              <p>
+                Wie gut unterscheidet das Modell wirklich? Welche Fehlertypen macht es?
+                Kann man das Verhalten gezielt steuern?
+              </p>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="note note-primary" style="margin-top: var(--space-6)">
+          <strong>Supervised Learning → Classification → Evaluation</strong><br>
+          Wir befinden uns im Bereich des <em>Supervised Learning</em>.
+          Nach dem Training eines Klassifikators ist die Evaluation der nächste
+          obligatorische Schritt – bevor das Modell in der Praxis eingesetzt wird.
+        </div>
+      </section>
+
+
+      <!-- ═══════════════════════════════════════════
+           2. WARUM BRAUCHEN WIR EVALUATION?
+           ════════════════════════════════════════════ -->
+      <section class="section" id="warum">
+        <div class="section-head">
+          <h2>1.2 Warum reicht Accuracy nicht?</h2>
+          <p>Das zentrale Problem, das dieses Kapitel motiviert.</p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Das Problem</span></h3>
+            <p>
+              Stell dir vor, du hast ein Modell, das 95 % der Datenpunkte
+              korrekt klassifiziert. Klingt gut – oder?
+            </p>
+            <p style="margin-top: var(--space-3)">
+              Wenn aber 95 % der Daten zur selben Klasse gehören,
+              erreicht ein Modell das gleiche Ergebnis, indem es
+              <strong>immer dieselbe Klasse vorhersagt.</strong>
+            </p>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Die Lösung</span></h3>
+            <p>
+              Wir brauchen Maße, die <strong>beide</strong> Fehlertypen berücksichtigen:
+            </p>
+            <ul style="margin-top: var(--space-3); padding-left: var(--space-5); font-size: var(--text-sm); line-height: 2;">
+              <li>Fälle, die <em>übersehen</em> wurden (False Negatives)</li>
+              <li>Fälle, die <em>fälschlicherweise gemeldet</em> wurden (False Positives)</li>
+            </ul>
+            <p style="margin-top: var(--space-3)">
+              → Die <strong>Confusion Matrix</strong> und die
+              <strong>ROC-Kurve</strong> tun genau das.
+            </p>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Praxisrelevanz</span></h3>
+            <p>
+              Je nach Anwendung hat ein Fehlertyp <strong>andere Konsequenzen:</strong>
+            </p>
+            <ul style="margin-top: var(--space-3); padding-left: var(--space-5); font-size: var(--text-sm); line-height: 2;">
+              <li>Krankheit übersehen → lebensbedrohlich</li>
+              <li>Falscher Alarm bei Wartung → kostspielig</li>
+              <li>Spam nicht erkannt → lästig</li>
+            </ul>
+            <p style="margin-top: var(--space-3)">
+              → Das Modell muss <strong>gezielt einstellbar</strong> sein.
+            </p>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ═══════════════════════════════════════════
+           3. WELCHE FRAGEN BEANTWORTET DIESES KAPITEL?
+           ════════════════════════════════════════════ -->
+      <section class="section" id="fragen">
+        <div class="section-head">
+          <h2>1.3 Fragen, die dieses Kapitel beantwortet</h2>
+          <p>Halte diese Fragen im Kopf – jede Seite liefert eine Antwort.</p>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+
+          <div class="question-card">
+            <div class="question-icon">❓</div>
+            <div>
+              <strong>Was genau macht mein Modell falsch – und in welche Richtung?</strong>
+              <span>→ Seite 2: Confusion Matrix</span>
+            </div>
+          </div>
+
+          <div class="question-card">
+            <div class="question-icon">❓</div>
+            <div>
+              <strong>Wie vergleiche ich zwei Modelle unabhängig von einem bestimmten Schwellwert?</strong>
+              <span>→ Seite 3 & 4: ROC Curves Theorie & sklearn</span>
+            </div>
+          </div>
+
+          <div class="question-card">
+            <div class="question-icon">❓</div>
+            <div>
+              <strong>Kann ich mein Modell so einstellen, dass es bei diesem Use Case optimal arbeitet?</strong>
+              <span>→ Seite 5: Decision Threshold</span>
+            </div>
+          </div>
+
+          <div class="question-card">
+            <div class="question-icon">❓</div>
+            <div>
+              <strong>Wie gut ist mein Modell insgesamt – mit einer einzigen Zahl?</strong>
+              <span>→ Seite 6: AUC & Youden-Index</span>
+            </div>
+          </div>
+
+          <div class="question-card">
+            <div class="question-icon">❓</div>
+            <div>
+              <strong>Was tue ich, wenn True Negatives in meinem Problem gar nicht vorkommen?</strong>
+              <span>→ Seite 7: Precision-Recall & F1-Score</span>
+            </div>
+          </div>
+
+          <div class="question-card">
+            <div class="question-icon">❓</div>
+            <div>
+              <strong>Wie evaluiere ich einen Klassifikator mit mehr als zwei Klassen?</strong>
+              <span>→ Seite 8: Multi-Class ROC</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ═══════════════════════════════════════════
+           4. ROADMAP DES KAPITELS
+           ════════════════════════════════════════════ -->
+      <section class="section" id="roadmap">
+        <div class="section-head">
+          <h2>1.4 Roadmap des Kapitels</h2>
+          <p>Der rote Faden – von der Intuition bis zum vollständigen Evaluations-Toolkit.</p>
+        </div>
+
+        <div class="roadmap">
+
+          <div class="roadmap-item">
+            <div class="roadmap-line">
+              <div class="roadmap-dot" style="background: var(--color-primary)">2</div>
+              <div class="roadmap-connector"></div>
+            </div>
+            <div class="roadmap-content">
+              <span class="roadmap-tag" style="background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); color: var(--color-primary);">Konzept</span>
+              <h3>Confusion Matrix – Die 4 Felder</h3>
+              <p>TP, FP, TN, FN · TPR & FPR · liberal vs. konservativ · Signalentdeckungstheorie</p>
+            </div>
+          </div>
+
+          <div class="roadmap-item">
+            <div class="roadmap-line">
+              <div class="roadmap-dot" style="background: var(--color-primary)">3</div>
+              <div class="roadmap-connector"></div>
+            </div>
+            <div class="roadmap-content">
+              <span class="roadmap-tag" style="background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); color: var(--color-primary);">Konzept</span>
+              <h3>Towards ROC – vom Kriterium zur Kurve</h3>
+              <p>Drei Fälle im Koordinatensystem · Idealer Klassifikator · Sensitivity-Specificity-Trade-off</p>
+            </div>
+          </div>
+
+          <div class="roadmap-item">
+            <div class="roadmap-line">
+              <div class="roadmap-dot" style="background: var(--color-warning)">4</div>
+              <div class="roadmap-connector"></div>
+            </div>
+            <div class="roadmap-content">
+              <span class="roadmap-tag" style="background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface)); color: var(--color-warning);">Code</span>
+              <h3>ROC Curves in sklearn</h3>
+              <p><code>roc_curve()</code> · <code>RocCurveDisplay</code> · Streuungs-Loop</p>
+            </div>
+          </div>
+
+          <div class="roadmap-item">
+            <div class="roadmap-line">
+              <div class="roadmap-dot" style="background: var(--color-primary)">5</div>
+              <div class="roadmap-connector"></div>
+            </div>
+            <div class="roadmap-content">
+              <span class="roadmap-tag" style="background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); color: var(--color-primary);">Theorie + Code</span>
+              <h3>Decision Threshold</h3>
+              <p>Integral-Formeln · Use Cases · <code>adjusted_predict()</code></p>
+            </div>
+          </div>
+
+          <div class="roadmap-item">
+            <div class="roadmap-line">
+              <div class="roadmap-dot" style="background: var(--color-warning)">6</div>
+              <div class="roadmap-connector"></div>
+            </div>
+            <div class="roadmap-content">
+              <span class="roadmap-tag" style="background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface)); color: var(--color-warning);">Code</span>
+              <h3>Confusion Matrix sklearn & AUC</h3>
+              <p><code>confusion_matrix()</code> · <code>sns.heatmap</code> · <code>roc_auc_score()</code> · Youden-Index</p>
+            </div>
+          </div>
+
+          <div class="roadmap-item">
+            <div class="roadmap-line">
+              <div class="roadmap-dot" style="background: var(--color-primary)">7</div>
+              <div class="roadmap-connector"></div>
+            </div>
+            <div class="roadmap-content">
+              <span class="roadmap-tag" style="background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface)); color: var(--color-primary);">Konzept + Code</span>
+              <h3>Weitere Maße – Precision-Recall & F1</h3>
+              <p>Wenn TN nicht verfügbar · PPV · <code>precision_recall_curve()</code> · F1-Score</p>
+            </div>
+          </div>
+
+          <div class="roadmap-item">
+            <div class="roadmap-line">
+              <div class="roadmap-dot" style="background: var(--color-warning)">8</div>
+              <div class="roadmap-connector"></div>
+            </div>
+            <div class="roadmap-content">
+              <span class="roadmap-tag" style="background: color-mix(in srgb, var(--color-warning) 12%, var(--color-surface)); color: var(--color-warning);">Code</span>
+              <h3>Multi-Class ROC</h3>
+              <p>OvO vs. OvR · <code>label_binarize()</code> · Mikro- & Makro-Average · Iris-Beispiel</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="margin-top: var(--space-6); text-align: center;">
+          <a href="Page02.html" class="btn btn-primary" style="
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-6);
+            background: var(--color-primary);
+            color: #fff;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: var(--text-sm);
+          ">
+            Los geht's → Seite 2: Confusion Matrix
+          </a>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 7 · Einführung · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

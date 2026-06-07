@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Kapitel 1 · Data Preparation</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+</head>
+<body>
+  <site-header active="page1" title="Kapitel 1 · Data Preparation"></site-header>
+
+  <main id="main-content">
+
+    <!-- ══════════════════════════════════════════════════════
+         HERO
+    ════════════════════════════════════════════════════════ -->
+    <div class="container">
+      <section class="k1-hero">
+        <span class="eyebrow">✦ Kapitel 1 · Woche 2</span>
+        <h1>Data Preparation &amp;<br>Feature Engineering</h1>
+        <p>
+          Von rohen Daten zu aussagekräftigen Features – das Fundament jedes
+          Machine-Learning-Projekts. Den meisten Aufwand steckt man in
+          Datenbereinigung und Feature Engineering. Modellierung macht
+          gefühlte&nbsp;20&nbsp;% aus.
+        </p>
+        <div class="k1-pills">
+          <span class="pill">Feature Extraction</span>
+          <span class="pill">Feature Selection</span>
+          <span class="pill">Feature Scaling</span>
+          <span class="pill">One-Hot Encoding</span>
+          <span class="pill">t-SNE</span>
+          <span class="pill">SelectKBest</span>
+          <span class="pill">Zeitserien</span>
+          <span class="pill">Autoencoder</span>
+          <span class="pill">Haar Features</span>
+          <span class="pill">StandardScaler</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STAT STRIP
+    ════════════════════════════════════════════════════════ -->
+    <div class="stat-strip">
+      <div class="stat-item">
+        <span class="stat-value">8</span>
+        <span class="stat-label">Seiten</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">3</span>
+        <span class="stat-label">Themenblöcke</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">4</span>
+        <span class="stat-label">Agenda-Punkte</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <span class="stat-value">Woche&nbsp;2</span>
+        <span class="stat-label">Semesterplan</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         DATA PIPELINE VISUAL
+    ════════════════════════════════════════════════════════ -->
+    <div class="pipeline-outer">
+      <p class="pipeline-label">Der Weg vom Datenpunkt zum Modell</p>
+      <div class="pipeline">
+
+        <div class="pipe-step">
+          <span class="p-icon">🗄️</span>
+          <span class="p-name">Rohdaten</span>
+          <span class="p-sub">Datenquellen<br>zusammenführen</span>
+        </div>
+
+        <div class="pipe-arrow">→</div>
+
+        <div class="pipe-step active">
+          <span class="p-icon">⚙️</span>
+          <span class="p-name">Feature Extraction</span>
+          <span class="p-sub">Phänomen&nbsp;→&nbsp;Skalar<br>Seiten&nbsp;2&nbsp;–&nbsp;6</span>
+        </div>
+
+        <div class="pipe-arrow">→</div>
+
+        <div class="pipe-step active">
+          <span class="p-icon">🎯</span>
+          <span class="p-name">Feature Selection</span>
+          <span class="p-sub">Redundanz&nbsp;vermeiden<br>Seite&nbsp;7</span>
+        </div>
+
+        <div class="pipe-arrow">→</div>
+
+        <div class="pipe-step active">
+          <span class="p-icon">⚖️</span>
+          <span class="p-name">Feature Scaling</span>
+          <span class="p-sub">Gleiche Gewichtung<br>Seite&nbsp;8</span>
+        </div>
+
+        <div class="pipe-arrow">→</div>
+
+        <div class="pipe-step">
+          <span class="p-icon">🤖</span>
+          <span class="p-name">ML-Modell</span>
+          <span class="p-sub">Training &amp;<br>Vorhersage</span>
+        </div>
+
+        <div class="pipe-arrow">→</div>
+
+        <div class="pipe-step">
+          <span class="p-icon">💡</span>
+          <span class="p-name">Erkenntnis</span>
+          <span class="p-sub">Entscheidungen<br>ableiten</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         AGENDA QUICK-JUMP
+    ════════════════════════════════════════════════════════ -->
+    <div class="agenda-outer">
+      <p class="pipeline-label" style="margin-top: var(--space-8);">Die 4 Agenda-Punkte – direkt springen</p>
+      <div class="agenda-row">
+        <a href="Page02.html" class="agenda-card">
+          <div class="agenda-badge">1</div>
+          <div>
+            <div class="agenda-text">Was ist ein Feature?</div>
+            <div class="agenda-sub">Daten- in den Feature-Raum</div>
+          </div>
+        </a>
+        <a href="Page04.html" class="agenda-card">
+          <div class="agenda-badge">2</div>
+          <div>
+            <div class="agenda-text">Feature-Extraktion</div>
+            <div class="agenda-sub">Zeitserien, Encoding, Haar</div>
+          </div>
+        </a>
+        <a href="Page07.html" class="agenda-card">
+          <div class="agenda-badge">3</div>
+          <div>
+            <div class="agenda-text">Feature-Selektion</div>
+            <div class="agenda-sub">Variance, Korrelation, KBest</div>
+          </div>
+        </a>
+        <a href="Page08.html" class="agenda-card">
+          <div class="agenda-badge">4</div>
+          <div>
+            <div class="agenda-text">Feature Scaling</div>
+            <div class="agenda-sub">MinMax, Standardisierung</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         GRUPPE 1: FUNDAMENT
+    ════════════════════════════════════════════════════════ -->
+    <div class="group-header">
+      <span class="group-badge" style="
+        background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface-2));
+        color: var(--color-primary);">
+        🧱 Fundament
+      </span>
+      <div class="group-info">
+        <span class="group-title">Konzepte, Definitionen &amp; Feature-Raum</span>
+        <span class="group-desc">Was sind Features – und warum brauchen wir sie?</span>
+      </div>
+      <div class="group-line"></div>
+    </div>
+
+    <div class="pages-grid">
+
+      <!-- Page 01 -->
+      <a class="page-card" href="Page01.html">
+        <div class="card-banner" style="background: linear-gradient(135deg,
+          color-mix(in oklab, var(--color-primary) 14%, var(--color-surface-2)) 0%,
+          color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2)) 100%);">
+          🗺️
+          <span class="card-num" style="
+            color: var(--color-primary);
+            background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));">
+            Seite&nbsp;1
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Einführung: Was erwartet dich?</div>
+          <div class="card-desc">
+            Zeitliche Einordnung (Woche&nbsp;2 im Semesterplan), die 4&nbsp;Agenda-Punkte als
+            visuelle Roadmap und warum Feature Engineering den Großteil des
+            Data-Science-Aufwands ausmacht. Links zu allen Unterseiten.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Wochenplan</span>
+            <span class="tag">Agenda</span>
+            <span class="tag">Roadmap</span>
+            <span class="tag">Motivation</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Einstieg</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 02 -->
+      <a class="page-card" href="Page02.html">
+        <div class="card-banner" style="background: linear-gradient(135deg,
+          color-mix(in oklab, var(--color-primary) 14%, var(--color-surface-2)) 0%,
+          color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2)) 100%);">
+          🔄
+          <span class="card-num" style="
+            color: var(--color-primary);
+            background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));">
+            Seite&nbsp;2
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Von Daten zu Features</div>
+          <div class="card-desc">
+            Definition mit englischem Zitat, die 3&nbsp;Eigenschaften (Informativ, Diskriminativ,
+            Unabhängig) als Card-Grid, Feature-Matrix N×K, die Pipeline
+            Quellen&nbsp;→ Rohdaten&nbsp;→ Features&nbsp;→ Modelle und der
+            Feedback-Loop zwischen Features und Modell.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Definition</span>
+            <span class="tag">Feature-Matrix</span>
+            <span class="tag">Pipeline</span>
+            <span class="tag">Domänenwissen</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 03 -->
+      <a class="page-card" href="Page03.html">
+        <div class="card-banner" style="background: linear-gradient(135deg,
+          color-mix(in oklab, var(--color-primary) 14%, var(--color-surface-2)) 0%,
+          color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2)) 100%);">
+          🧭
+          <span class="card-num" style="
+            color: var(--color-primary);
+            background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));">
+            Seite&nbsp;3
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Feature-Raum &amp; Visualisierung</div>
+          <div class="card-desc">
+            Geometrische Interpretation (Punkte im K-dimensionalen Raum), 3D-Beispiel mit
+            konkreten Werten&nbsp;(6,&nbsp;3.5,&nbsp;1), t-SNE Erklärung und das
+            Digits-Beispiel (64-dim&nbsp;→ 2D). Links: TensorFlow Projector &amp; Distill.pub.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Geometrie</span>
+            <span class="tag">t-SNE</span>
+            <span class="tag">Digits</span>
+            <span class="tag">Visualisierung</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Visualisierung</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         GRUPPE 2: FEATURE EXTRACTION
+    ════════════════════════════════════════════════════════ -->
+    <div class="group-header">
+      <span class="group-badge" style="
+        background: color-mix(in oklab, var(--color-success) 10%, var(--color-surface-2));
+        color: var(--color-success);">
+        ⚙️ Feature Extraction
+      </span>
+      <div class="group-info">
+        <span class="group-title">Vom Phänomen zum Skalar</span>
+        <span class="group-desc">Verschiedene Wege der Feature-Gewinnung – domänengetrieben bis automatisiert</span>
+      </div>
+      <div class="group-line"></div>
+    </div>
+
+    <div class="pages-grid">
+
+      <!-- Page 04 -->
+      <a class="page-card" href="Page04.html">
+        <div class="card-banner" style="background: linear-gradient(135deg,
+          color-mix(in oklab, var(--color-success) 14%, var(--color-surface-2)) 0%,
+          color-mix(in oklab, var(--color-success) 5%, var(--color-surface-2)) 100%);">
+          📈
+          <span class="card-num" style="
+            color: var(--color-success);
+            background: color-mix(in oklab, var(--color-success) 10%, var(--color-surface));">
+            Seite&nbsp;4
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Feature Extraction aus Zeitserien</div>
+          <div class="card-desc">
+            Spektrum domänengetrieben&nbsp;↔ datengetrieben, Motorausfall-Szenario (Stromdaten),
+            Event-triggered vs. kontinuierliche Zeitserien, mathematische Formulierung
+            f:&nbsp;ℝᵀ&nbsp;→&nbsp;ℝᴷ und Exkurs: 38.190&nbsp;Zeitserien, 9.613&nbsp;Methoden.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Zeitserien</span>
+            <span class="tag">Mathematik</span>
+            <span class="tag">CompEngine</span>
+            <span class="tag">BirdNET</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Mathematik</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 05 -->
+      <a class="page-card" href="Page05.html">
+        <div class="card-banner" style="background: linear-gradient(135deg,
+          color-mix(in oklab, var(--color-success) 14%, var(--color-surface-2)) 0%,
+          color-mix(in oklab, var(--color-success) 5%, var(--color-surface-2)) 100%);">
+          🔤
+          <span class="card-num" style="
+            color: var(--color-success);
+            background: color-mix(in oklab, var(--color-success) 10%, var(--color-surface));">
+            Seite&nbsp;5
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Encoding &amp; Text Features</div>
+          <div class="card-desc">
+            Kategoriale Variablen: Label-Encoding (Problem: künstliche Ordnung),
+            One-Hot-Encoding als Lösung, Bag-of-Words (CountVectorizer) für Texte.
+            Die sklearn-Syntax .fit()&nbsp;/ .transform()&nbsp;/ .fit_transform() systematisch.
+          </div>
+          <div class="card-tags">
+            <span class="tag">LabelEncoder</span>
+            <span class="tag">OneHotEncoder</span>
+            <span class="tag">Bag-of-Words</span>
+            <span class="tag">sklearn</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 06 -->
+      <a class="page-card" href="Page06.html">
+        <div class="card-banner" style="background: linear-gradient(135deg,
+          color-mix(in oklab, var(--color-success) 14%, var(--color-surface-2)) 0%,
+          color-mix(in oklab, var(--color-success) 5%, var(--color-surface-2)) 100%);">
+          🧠
+          <span class="card-num" style="
+            color: var(--color-success);
+            background: color-mix(in oklab, var(--color-success) 10%, var(--color-surface));">
+            Seite&nbsp;6
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Autoencoder &amp; Haar Features</div>
+          <div class="card-desc">
+            Autoencoder-Architektur (Encoder&nbsp;→ Bottleneck&nbsp;→ Decoder),
+            Haar-Features in der Bildverarbeitung (Intensitätsdifferenz&nbsp;→ Skalar),
+            Rechenbeispiele (Ideal: 255−0=255, Realistisch: 220.25) und
+            Buchverweis „The Art of Feature Engineering".
+          </div>
+          <div class="card-tags">
+            <span class="tag">Autoencoder</span>
+            <span class="tag">Haar Features</span>
+            <span class="tag">Bildverarbeitung</span>
+            <span class="tag">Bottleneck</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         GRUPPE 3: SELECTION & SCALING
+    ════════════════════════════════════════════════════════ -->
+    <div class="group-header">
+      <span class="group-badge" style="
+        background: color-mix(in oklab, var(--color-warning) 10%, var(--color-surface-2));
+        color: color-mix(in oklab, var(--color-warning) 80%, #000);">
+        🎯 Selection &amp; Scaling
+      </span>
+      <div class="group-info">
+        <span class="group-title">Features filtern &amp; normalisieren</span>
+        <span class="group-desc">Für bessere Modelle, faire Gewichtung und weniger Overfitting</span>
+      </div>
+      <div class="group-line"></div>
+    </div>
+
+    <div class="pages-grid" style="padding-bottom: var(--space-16);">
+
+      <!-- Page 07 -->
+      <a class="page-card" href="Page07.html">
+        <div class="card-banner" style="background: linear-gradient(135deg,
+          color-mix(in oklab, var(--color-warning) 14%, var(--color-surface-2)) 0%,
+          color-mix(in oklab, var(--color-warning) 5%, var(--color-surface-2)) 100%);">
+          🔍
+          <span class="card-num" style="
+            color: color-mix(in oklab, var(--color-warning) 80%, #000);
+            background: color-mix(in oklab, var(--color-warning) 10%, var(--color-surface));">
+            Seite&nbsp;7
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Feature Selection</div>
+          <div class="card-desc">
+            Curse of Dimensionality, Occam's Razor, Garbage In/Out. Einfache Methoden:
+            VarianceThreshold (Missing Values, Constant Values, Low Variance). Korrelations-basiert
+            (Clustermap, paarweise) und SelectKBest mit mutual_info_classif (64→20).
+          </div>
+          <div class="card-tags">
+            <span class="tag">Curse of Dimensionality</span>
+            <span class="tag">VarianceThreshold</span>
+            <span class="tag">Korrelation</span>
+            <span class="tag">SelectKBest</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 08 -->
+      <a class="page-card" href="Page08.html">
+        <div class="card-banner" style="background: linear-gradient(135deg,
+          color-mix(in oklab, var(--color-warning) 14%, var(--color-surface-2)) 0%,
+          color-mix(in oklab, var(--color-warning) 5%, var(--color-surface-2)) 100%);">
+          ⚖️
+          <span class="card-num" style="
+            color: color-mix(in oklab, var(--color-warning) 80%, #000);
+            background: color-mix(in oklab, var(--color-warning) 10%, var(--color-surface));">
+            Seite&nbsp;8
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Feature Scaling &amp; Normalisierung</div>
+          <div class="card-desc">
+            Warum skalieren? MinMax-Transformation (Formel&nbsp;+&nbsp;From-Scratch&nbsp;+&nbsp;MinMaxScaler),
+            Standardisierung Z=(X−μ)/σ (StandardScaler mit Code), Power Transformations (Box-Cox).
+            Vergleich: Wann welche Methode?
+          </div>
+          <div class="card-tags">
+            <span class="tag">MinMaxScaler</span>
+            <span class="tag">StandardScaler</span>
+            <span class="tag">Z-Score</span>
+            <span class="tag">Box-Cox</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 1 · Data Preparation &amp; Feature Engineering · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Random Forest in sklearn</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page5" title="Kapitel 5 · Praxis in sklearn"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page4"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Seite 4</span>
+            <h1>Random Forest
+              <span class="key" style="--key-color:var(--color-primary)">in sklearn</span>
+            </h1>
+            <p>
+              Von der Theorie zur Praxis: Wie trainiert man einen
+              <strong>RandomForestClassifier</strong>, was bringt
+              <code>.predict_proba()</code> –
+              und wie findet man die besten Hyperparameter
+              ohne Brute-Force?
+            </p>
+            <div class="pill-row">
+              <span class="pill">🌲 RandomForestClassifier</span>
+              <span class="pill">🎲 predict_proba()</span>
+              <span class="pill">🔍 Hyperparameter Sweep</span>
+              <span class="pill">⚡ Random Search</span>
+              <span class="pill">🧠 Bayesian Optimization</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Welche Parameter hat <code>RandomForestClassifier</code>?</li>
+              <li>Was bedeutet <code>.predict_proba()</code> und wann hilft es?</li>
+              <li>Wie schränkt man den Hyperparameterraum sinnvoll ein?</li>
+              <li>Warum ist <strong>Random Search</strong> oft besser als Grid Search?</li>
+              <li>Was ist <strong>Bayesian Optimization</strong> und wo liegt ihr Vorteil?</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. RANDOM FOREST CLASSIFIER
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="random-forest-sklearn">
+        <div class="section-head">
+          <h2>4.1 RandomForestClassifier</h2>
+          <p>
+            In sklearn gibt es für einen Random Forest die Klasse
+            <code class="key" style="--key-color:var(--color-primary)">RandomForestClassifier()</code>
+            – mit einer Reihe wichtiger Steuerparameter.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Wichtige Parameter</span></h3>
+            <ul>
+              <li>
+                <code class="key" style="--key-color:var(--color-primary)">n_estimators</code>
+                – Anzahl der Decision Trees im Wald
+                <br>
+                <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                  Mehr Bäume = stabiler, aber mehr Rechenzeit.
+                  Ab einem Schwellenwert kein Genauigkeitsgewinn mehr
+                </span>
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-success)">criterion</code>
+                – Gütemaß für Splits
+                <br>
+                <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                  Default: <code>'gini'</code> · Alternative: <code>'entropy'</code>
+                </span>
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-warning)">max_depth</code>
+                – Maximale Tiefe der Bäume
+                <br>
+                <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                  <code>None</code> = unbegrenzt (Overfitting-Risiko)
+                </span>
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-purple)">bootstrap</code>
+                – Bagging an/aus
+                <br>
+                <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                  <code>True</code> (Default) = mit Zurücklegen ·
+                  <code>False</code> = gesamter Datensatz für jeden Baum
+                </span>
+              </li>
+              <li>
+                <code>max_features</code>
+                – Feature Bagging pro Split
+                <br>
+                <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                  Default: <code>'sqrt'</code>
+                </span>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>❓ Mehr Bäume = mehr Genauigkeit?</h3>
+            <ul>
+              <li>
+                <strong>Grundsätzlich ja</strong> – mehr Bäume stabilisieren
+                die Vorhersage durch Mittelung
+              </li>
+              <li>
+                <strong>Aber:</strong> Ab einem bestimmten
+                <span class="key" style="--key-color:var(--color-warning)">Sättigungspunkt</span>
+                bringt jeder zusätzliche Baum kaum noch Genauigkeitsgewinn
+              </li>
+              <li>
+                Gleichzeitig steigt die <strong>Trainings- und Vorhersagezeit</strong>
+                linear mit <code>n_estimators</code>
+              </li>
+              <li>
+                → Sinnvoll: OOB Score oder Validierungskurve nutzen,
+                um den <strong>optimalen Trade-off</strong> zu finden
+              </li>
+              <li>
+                Typischer Praxiswert: <code>n_estimators=100–500</code>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Der folgende Code trainiert einen
+          <code>RandomForestClassifier</code> auf einem Blob-Datensatz
+          und visualisiert die Entscheidungsgrenzen des Ensembles.
+          Die Hilfsfunktion
+          <code>visualize_classifier()</code> zeichnet sowohl die
+          Trainingspunkte als auch die farbigen Klassifikationsbereiche.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – RandomForestClassifier trainieren &amp; visualisieren
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.ensemble import RandomForestClassifier
+
+def visualize_classifier(model, X, y,
+                         ax=None, cmap='rainbow'):
+    ax = ax or plt.gca()
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=30,
+               cmap=cmap, clim=(y.min(), y.max()),
+               zorder=3)
+    ax.axis('tight')
+    ax.axis('off')
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+    model.fit(X, y)
+    xx, yy = np.meshgrid(
+        np.linspace(*xlim, num=200),
+        np.linspace(*ylim, num=200))
+    Z = model.predict(
+        np.c_[xx.ravel(), yy.ravel()]
+    ).reshape(xx.shape)
+    n_classes = len(np.unique(y))
+    ax.contourf(xx, yy, Z, alpha=0.3,
+                levels=np.arange(n_classes + 1) - 0.5,
+                cmap=cmap, clim=(y.min(), y.max()),
+                zorder=1)
+    ax.set(xlim=xlim, ylim=ylim)
+
+# Datensatz
+X, y = make_blobs(n_samples=300, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+# Modell
+model = RandomForestClassifier(
+    n_estimators=100, random_state=0)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+visualize_classifier(model, X, y, ax=ax)
+ax.set_title('RandomForest – 100 Bäume\nEntscheidungsgrenzen')
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    Weiche, <strong>geschwungene Grenzen</strong> –
+                    anders als ein einzelner Baum
+                  </li>
+                  <li>
+                    Keine schmalen „Ausreißer-Taschen" mehr
+                    → <strong>Overfitting reduziert</strong>
+                  </li>
+                  <li>
+                    Grenzen reflektieren die
+                    <strong>echte Datenstruktur</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>So what:</strong>
+                Die Kombination der randomisierten Decision Trees führt
+                zu einem Klassifikator, der die
+                zugrundeliegende Struktur der Daten
+                <strong>besser modelliert</strong>
+                als einzelne Bäume.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Hier wird der Effekt von
+          <code>n_estimators</code> auf die Genauigkeit
+          direkt sichtbar gemacht: Vier verschiedene Waldgrößen
+          werden nebeneinander visualisiert.
+          Die Grenzen werden mit wachsender Baumanzahl stabiler.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – n_estimators Vergleich
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.ensemble import RandomForestClassifier
+
+def visualize_classifier(model, X, y,
+                         ax=None, cmap='rainbow'):
+    ax = ax or plt.gca()
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=30,
+               cmap=cmap, clim=(y.min(), y.max()),
+               zorder=3)
+    ax.axis('tight')
+    ax.axis('off')
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+    model.fit(X, y)
+    xx, yy = np.meshgrid(
+        np.linspace(*xlim, num=200),
+        np.linspace(*ylim, num=200))
+    Z = model.predict(
+        np.c_[xx.ravel(), yy.ravel()]
+    ).reshape(xx.shape)
+    n_classes = len(np.unique(y))
+    ax.contourf(xx, yy, Z, alpha=0.3,
+                levels=np.arange(n_classes + 1) - 0.5,
+                cmap=cmap, clim=(y.min(), y.max()),
+                zorder=1)
+    ax.set(xlim=xlim, ylim=ylim)
+
+X, y = make_blobs(n_samples=300, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+n_list = [1, 5, 20, 100]
+
+# Vertikales Layout: 4 Zeilen, 1 Spalte
+fig, axes = plt.subplots(4, 1, figsize=(5, 16))
+fig.subplots_adjust(hspace=0.3)
+
+for ax, n in zip(axes, n_list):
+    model = RandomForestClassifier(
+        n_estimators=n, random_state=0)
+    visualize_classifier(model, X, y, ax=ax)
+    ax.set_title(f'n_estimators = {n}', fontsize=11)
+
+plt.suptitle('Einfluss von n_estimators auf die Grenzen',
+             fontsize=12, y=1.01)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-warning">
+                <strong>Was du siehst (von oben nach unten):</strong>
+                <ul>
+                  <li>
+                    <code>n=1</code>: Ein einzelner Baum –
+                    <strong>instabile, eckige Grenzen</strong>
+                  </li>
+                  <li>
+                    <code>n=5</code>: Leichte Verbesserung,
+                    aber noch grob
+                  </li>
+                  <li>
+                    <code>n=20</code>: Deutlich
+                    <strong>glattere Grenzen</strong>
+                  </li>
+                  <li>
+                    <code>n=100</code>: Stabile, weiche Grenzen –
+                    <span class="key" style="--key-color:var(--color-primary)">Sättigungseffekt</span>
+                    sichtbar
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Fazit:</strong>
+                Mehr Bäume ≠ immer mehr Genauigkeit –
+                ab einem Punkt
+                <strong>stabilisieren sich die Grenzen</strong>
+                und weiteres Training lohnt sich kaum noch.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. PREDICT_PROBA
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="predict-proba">
+        <div class="section-head">
+          <h2>4.2 <code>.predict_proba()</code></h2>
+          <p>
+            Neben der reinen Klassenvorhersage kann der
+            <code>RandomForestClassifier</code>
+            auch
+            <span class="key" style="--key-color:var(--color-primary)">Klassenwahrscheinlichkeiten</span>
+            ausgeben – ein großer praktischer Vorteil.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Was ist predict_proba()?</span>
+            </h3>
+            <ul>
+              <li>
+                Gibt für jeden Datenpunkt die
+                <strong>Wahrscheinlichkeit zur Zugehörigkeit jeder Klasse</strong>
+                aus – nicht nur die wahrscheinlichste Klasse
+              </li>
+              <li>
+                Rückgabe: Matrix der Form
+                <code>[n_samples × n_classes]</code>,
+                Zeilensumme = <strong>1.0</strong>
+              </li>
+              <li>
+                Berechnung: Anteil der Bäume im Wald,
+                die für Klasse <em>k</em> gestimmt haben
+              </li>
+              <li>
+                Ermöglicht das Ausdrücken von
+                <span class="key" style="--key-color:var(--color-warning)">Unsicherheit</span>
+                – z.B. <code>[0.51, 0.49]</code> vs. <code>[0.99, 0.01]</code>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>❓ Warum ist das bei RF einfacher?</h3>
+            <ul>
+              <li>
+                Unser Modell besteht aus <strong>vielen kleinen Modellen</strong>
+                – jedes macht eine eigenständige Vorhersage
+              </li>
+              <li>
+                Die
+                <span class="key" style="--key-color:var(--color-success)">Verteilung der Stimmen</span>
+                über alle Bäume ergibt natürlich eine Wahrscheinlichkeit
+              </li>
+              <li>
+                Bei einem einzelnen Decision Tree gibt es nur
+                <strong>harte 0/1-Entscheidungen</strong> –
+                keine natürliche Unsicherheit
+              </li>
+              <li>
+                <strong>Anwendungsbeispiele:</strong>
+                Risikobewertung, Schwellenwert-Tuning,
+                Anomalie-Erkennung, Ranking
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Der Code demonstriert
+          <code>.predict_proba()</code> auf einem Testset:
+          Ausgabe der Wahrscheinlichkeitsmatrix,
+          Vergleich mit <code>.predict()</code>
+          und Visualisierung der Vorhersage-Sicherheit
+          als Heatmap über den Feature-Raum.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – predict_proba() anwenden
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+X, y = make_blobs(n_samples=300, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42)
+
+model = RandomForestClassifier(
+    n_estimators=100, random_state=0)
+model.fit(X_train, y_train)
+
+# Wahrscheinlichkeitsmatrix
+proba = model.predict_proba(X_test)
+pred  = model.predict(X_test)
+
+print("Shape predict_proba:", proba.shape)
+print("\nErste 5 Vorhersagen:")
+print(f"{'predict':>10} | predict_proba")
+print("-" * 45)
+for i in range(5):
+    p = proba[i]
+    prob_str = "  ".join([f"K{j}:{v:.2f}"
+                          for j, v in enumerate(p)])
+    print(f"{pred[i]:>10} | {prob_str}")
+
+# Confidence = max. Wahrscheinlichkeit
+confidence = proba.max(axis=1)
+
+# Visualisierung: Confidence im Feature-Raum
+x_min, x_max = X[:, 0].min()-1, X[:, 0].max()+1
+y_min, y_max = X[:, 1].min()-1, X[:, 1].max()+1
+xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200),
+                     np.linspace(y_min, y_max, 200))
+proba_grid = model.predict_proba(
+    np.c_[xx.ravel(), yy.ravel()])
+conf_grid  = proba_grid.max(axis=1).reshape(xx.shape)
+
+fig, axes = plt.subplots(2, 1, figsize=(6, 10))
+
+# Plot 1: Klassifikationsgrenzen
+axes[0].contourf(xx, yy, conf_grid, alpha=0.4,
+                 cmap='RdYlGn', levels=20)
+axes[0].scatter(X_test[:, 0], X_test[:, 1],
+                c=pred, cmap='rainbow', s=40,
+                edgecolors='k', linewidths=0.5,
+                zorder=3)
+axes[0].set_title('Vorhersage-Konfidenz im Feature-Raum\n'
+                  '(grün=sicher, rot=unsicher)', fontsize=10)
+axes[0].axis('off')
+
+# Plot 2: Histogramm der Konfidenz
+axes[1].hist(confidence, bins=20, color='steelblue',
+             edgecolor='white', alpha=0.85)
+axes[1].axvline(confidence.mean(), color='red',
+                linestyle='--', linewidth=2,
+                label=f'Mittelwert: {confidence.mean():.2f}')
+axes[1].set_xlabel('Konfidenz (max. Wahrscheinlichkeit)')
+axes[1].set_ylabel('Anzahl Testpunkte')
+axes[1].set_title('Verteilung der Vorhersage-Konfidenz')
+axes[1].legend()
+axes[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>predict_proba() Output:</strong>
+                <ul>
+                  <li>
+                    Shape: <code>[n_test × 4]</code>
+                    (4 Klassen im Beispiel)
+                  </li>
+                  <li>
+                    Jede Zeile summiert zu
+                    <strong>1.0</strong>
+                  </li>
+                  <li>
+                    Hohe Konfidenz: z.B. <code>[0.98, 0.01, 0.01, 0.00]</code>
+                    → Baum einig
+                  </li>
+                  <li>
+                    Niedrige Konfidenz: z.B. <code>[0.45, 0.40, 0.10, 0.05]</code>
+                    → Grenzbereich
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Konfidenz-Karte:</strong>
+                <ul>
+                  <li>
+                    <span style="color:green"><strong>Grün</strong></span>
+                    = sichere Bereiche (alle Bäume einig)
+                  </li>
+                  <li>
+                    <span style="color:red"><strong>Rot</strong></span>
+                    = unsichere Grenzbereiche
+                  </li>
+                  <li>
+                    Histogram: Die meisten Punkte haben
+                    <strong>hohe Konfidenz</strong> –
+                    Unsicherheit nur an den Grenzen
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. HYPERPARAMETER SWEEP
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="hyperparameter-sweep">
+        <div class="section-head">
+          <h2>4.3 Hyperparameter Sweep</h2>
+          <p>
+            <span class="key" style="--key-color:var(--color-primary)">„Sophisticated Guesses"</span>
+            – anstatt blind alle Kombinationen zu testen,
+            schränkt man den Suchraum durch
+            <strong>Datenwissen und erste Modelle</strong> ein.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Warum nicht einfach Grid Search?</span></h3>
+            <ul>
+              <li>
+                Grid Search ist
+                <span class="key" style="--key-color:var(--color-warning)">Exhaustive Search</span>
+                (Brute Force) im aufgespannten Parameterraum
+              </li>
+              <li>
+                Je mehr Dimensionen, desto
+                <strong>exponentiell länger</strong> das Training
+              </li>
+              <li>
+                Viele Kombinationen sind offensichtlich
+                <strong>sinnlos</strong> – z.B.
+                <code>max_depth=1</code> bei großem Datensatz
+              </li>
+              <li>
+                → Lösung: Suchraum vorab durch
+                <strong>Datenwissen einschränken</strong>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>🔍 Strategien zur Einschränkung</h3>
+            <ul>
+              <li>
+                <strong>Eigenschaften erster Modelle:</strong>
+                Wie sehen die Hyperparameterwerte erster Versuche aus?
+                Was lässt sich ableiten?
+              </li>
+              <li>
+                <strong>Einschränkung durch Dateneigenschaften:</strong>
+                Legen uns Datengröße, Feature-Anzahl oder
+                Klassenverteilung sinnvolle Grenzen auf?
+              </li>
+              <li>
+                <strong>Wertebereiche filtern:</strong>
+                Für den vorliegenden Use Case:
+                welche Bereiche sind sinnvoll /
+                welche sind es definitiv nicht?
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="overview" style="margin-top:var(--space-6)">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">1</div>
+            <div>
+              <h3>Grid Search</h3>
+              <p>
+                <span class="key" style="--key-color:var(--color-warning)">Brute Force</span>
+                – alle Kombinationen aus dem definierten Raster werden
+                evaluiert. Garantiert das Optimum im definierten Raster,
+                aber <strong>exponentiell teuer</strong> bei vielen Parametern.
+                Geeignet nur bei kleinen Parameterräumen.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">2</div>
+            <div>
+              <h3>Random Search</h3>
+              <p>
+                Parameter werden
+                <span class="key" style="--key-color:var(--color-success)">zufällig aus Verteilungen gezogen</span>
+                – nicht aus einem festen Raster.
+                Mehr individuelle Werte auf jeder Achse als Grid Search.
+                Oft <strong>besser als Grid Search</strong> bei gleichem Budget.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-purple)">3</div>
+            <div>
+              <h3>Bayesian Optimization</h3>
+              <p>
+                Baut iterativ ein
+                <span class="key" style="--key-color:var(--color-purple)">Surrogate-Modell der Kostenfunktion</span>
+                auf. Jede neue Evaluation wird
+                <strong>intelligent</strong> gewählt –
+                basierend auf bisherigen Ergebnissen.
+                Weniger Schritte, bessere Resultate.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. RANDOM SEARCH
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="random-search">
+        <div class="section-head">
+          <h2>4.4 Random Search in sklearn</h2>
+          <p>
+            <code class="key" style="--key-color:var(--color-primary)">RandomizedSearchCV</code>
+            ersetzt den Brute-Force-Ansatz durch
+            <strong>zufälliges Sampling</strong> aus den Parameterverteilungen.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Wichtige Parameter</span></h3>
+            <ul>
+              <li>
+                <code class="key" style="--key-color:var(--color-primary)">estimator</code>
+                – das zu optimierende Modell
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-success)">param_distributions</code>
+                – Parameterintervalle als Dictionary
+                (Verteilungen oder Listen)
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-warning)">n_iter</code>
+                – Anzahl der gezogenen Parameterkombinationen
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-purple)">cv</code>
+                – Cross-Validation Strategie
+                (Integer = Anzahl Splits)
+              </li>
+              <li>
+                <code>scoring</code>, <code>n_jobs=-1</code>
+                (Parallelisierung), <code>random_state</code>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>⚡ Vorteil gegenüber Grid Search</h3>
+            <ul>
+              <li>
+                <strong>Mehr individuelle Werte</strong>
+                auf den einzelnen Parameterachsen –
+                bessere Abdeckung des Raums
+              </li>
+              <li>
+                Bei gleichem <code>n_iter</code>-Budget
+                oft <strong>bessere Ergebnisse</strong>
+                als Grid Search
+              </li>
+              <li>
+                Parameterverteilungen (z.B.
+                <code>scipy.stats.randint</code>) erlauben
+                <strong>kontinuierliches Sampling</strong>
+                statt diskreter Gitterpunkte
+              </li>
+              <li>
+                Einfach skalierbar:
+                <code>n_iter</code> erhöhen = mehr Suche
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Der Code führt einen
+          <code>RandomizedSearchCV</code>
+          über vier wichtige Hyperparameter des
+          <code>RandomForestClassifier</code> durch
+          und visualisiert die besten gefundenen
+          Kombinationen nach Score.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – RandomizedSearchCV
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import (
+    RandomizedSearchCV, train_test_split)
+from scipy.stats import randint
+
+# Datensatz
+X, y = make_classification(
+    n_samples=600, n_features=10,
+    n_informative=6, n_redundant=2,
+    random_state=42)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42)
+
+# Parameterraum
+param_dist = {
+    'n_estimators': randint(50, 300),
+    'max_depth':    randint(2, 20),
+    'max_features': randint(1, 10),
+    'min_samples_split': randint(2, 20)
+}
+
+# Random Search
+rs = RandomizedSearchCV(
+    estimator=RandomForestClassifier(random_state=42),
+    param_distributions=param_dist,
+    n_iter=50,          # 50 zufällige Kombinationen
+    cv=5,
+    scoring='accuracy',
+    n_jobs=-1,
+    random_state=42
+)
+rs.fit(X_train, y_train)
+
+# Ergebnisse
+print("Beste Parameter:")
+for k, v in rs.best_params_.items():
+    print(f"  {k:25s}: {v}")
+print(f"\nBester CV-Score:  {rs.best_score_:.4f}")
+print(f"Test Accuracy:    "
+      f"{rs.best_estimator_.score(X_test, y_test):.4f}")
+
+# Top-20 Ergebnisse visualisieren
+results = rs.cv_results_
+top_idx = np.argsort(
+    results['mean_test_score'])[::-1][:20]
+top_scores = results['mean_test_score'][top_idx]
+top_n = [results['params'][i]['n_estimators']
+         for i in top_idx]
+
+fig, axes = plt.subplots(2, 1, figsize=(8, 8))
+
+# Score der Top-20 Kombinationen
+axes[0].bar(range(20), top_scores,
+            color='steelblue', edgecolor='white',
+            alpha=0.85)
+axes[0].axhline(rs.best_score_, color='red',
+                linestyle='--', linewidth=2,
+                label=f'Best: {rs.best_score_:.4f}')
+axes[0].set_xlabel('Rang (beste Kombination links)')
+axes[0].set_ylabel('CV Accuracy')
+axes[0].set_title('Top-20 Random Search Kombinationen')
+axes[0].legend()
+axes[0].grid(axis='y', alpha=0.3)
+
+# n_estimators der Top-20
+axes[1].scatter(top_n, top_scores,
+                color='darkorange', s=60,
+                edgecolors='k', linewidths=0.5,
+                zorder=3)
+axes[1].set_xlabel('n_estimators (Top-20)')
+axes[1].set_ylabel('CV Accuracy')
+axes[1].set_title('n_estimators vs. Score (Top-20)')
+axes[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was der Code macht:</strong>
+                <ul>
+                  <li>
+                    <strong>50 zufällige Kombinationen</strong>
+                    aus dem Parameterraum werden gezogen
+                  </li>
+                  <li>
+                    Jede Kombination wird mit
+                    <strong>5-Fold CV</strong> bewertet
+                  </li>
+                  <li>
+                    Die beste Kombination wird auf dem
+                    Testset evaluiert
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Interessant:</strong>
+                Im Vergleich zum Grid Search resultiert
+                Random Search in einer
+                <strong>höheren Anzahl individueller Werte</strong>
+                auf den einzelnen Parameterachsen –
+                bei gleichem Rechenbudget.
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Tipp:</strong>
+                <code>scipy.stats.randint(a, b)</code>
+                zieht ganzzahlig aus <code>[a, b)</code>.
+                Für kontinuierliche Parameter:
+                <code>scipy.stats.uniform(loc, scale)</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5. BAYESIAN OPTIMIZATION
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="bayesian-optimization">
+        <div class="section-head">
+          <h2>4.5 Bayesian Optimization</h2>
+          <p>
+            Der intelligenteste Ansatz:
+            statt blind zu suchen, wird iterativ ein
+            <span class="key" style="--key-color:var(--color-purple)">Modell der Kostenfunktion</span>
+            aufgebaut und zur gezielten Suche genutzt.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-purple)">Wie funktioniert es?</span></h3>
+            <ul>
+              <li>
+                Bayesian Optimization erzeugt iterativ ein
+                <span class="key" style="--key-color:var(--color-purple)">Surrogate-Modell</span>
+                der Kostenfunktion (z.B. Gaussian Process)
+              </li>
+              <li>
+                Basierend auf diesem Modell werden
+                <strong>vielversprechende Parameterkombinationen</strong>
+                als nächstes evaluiert
+              </li>
+              <li>
+                Nach jeder Evaluation wird das Surrogate-Modell
+                <strong>aktualisiert</strong>
+              </li>
+              <li>
+                Dadurch werden <strong>intelligent</strong> Schritte
+                in Richtung Optimum gegangen –
+                kein blinder Zufall
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>📊 Vergleich der Methoden</h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">Grid Search</span>:
+                Exhaustive, garantiert Raster-Optimum,
+                teuer
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">Random Search</span>:
+                Zufällig, besser als Grid bei gleichem Budget,
+                keine Intelligenz
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-purple)">Bayesian Opt.</span>:
+                Iterativ intelligent, weniger Schritte,
+                <strong>beste Resultate</strong>
+              </li>
+              <li>
+                Bayesian Optimization führt in
+                <strong>weniger Schritten zu besseren Ergebnissen</strong>
+                als Grid und Random Search
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Der Code simuliert den Vorteil von Bayesian Optimization
+          gegenüber Random Search:
+          Der beste gefundene Score wird über die Anzahl der
+          Evaluationen geplottet –
+          Bayesian Optimization konvergiert schneller zum Optimum.
+          Verwendet wird das Paket
+          <code>scikit-optimize</code> (<code>skopt</code>).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Bayesian Optimization vs. Random Search
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+from skopt import BayesSearchCV
+from skopt.space import Integer
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import randint
+
+# Installation falls nötig:
+# pip install scikit-optimize
+
+X, y = make_classification(
+    n_samples=600, n_features=10,
+    n_informative=6, n_redundant=2,
+    random_state=42)
+
+# ── Bayesian Optimization ──────────────────────────
+search_space = {
+    'n_estimators':      Integer(50, 300),
+    'max_depth':         Integer(2, 20),
+    'max_features':      Integer(1, 10),
+    'min_samples_split': Integer(2, 20)
+}
+
+bayes_search = BayesSearchCV(
+    estimator=RandomForestClassifier(random_state=42),
+    search_spaces=search_space,
+    n_iter=30,
+    cv=5,
+    scoring='accuracy',
+    n_jobs=-1,
+    random_state=42
+)
+bayes_search.fit(X, y)
+
+bayes_scores = [
+    max(bayes_search.cv_results_['mean_test_score'][:i+1])
+    for i in range(
+        len(bayes_search.cv_results_['mean_test_score']))]
+
+# ── Random Search (gleiche Iterationen) ───────────
+param_dist = {
+    'n_estimators':      randint(50, 300),
+    'max_depth':         randint(2, 20),
+    'max_features':      randint(1, 10),
+    'min_samples_split': randint(2, 20)
+}
+
+rand_search = RandomizedSearchCV(
+    estimator=RandomForestClassifier(random_state=42),
+    param_distributions=param_dist,
+    n_iter=30,
+    cv=5,
+    scoring='accuracy',
+    n_jobs=-1,
+    random_state=42
+)
+rand_search.fit(X, y)
+
+rand_scores = [
+    max(rand_search.cv_results_['mean_test_score'][:i+1])
+    for i in range(
+        len(rand_search.cv_results_['mean_test_score']))]
+
+# ── Ergebnisse ausgeben ────────────────────────────
+print(f"Bayesian Best Score: {bayes_search.best_score_:.4f}")
+print(f"Random   Best Score: {rand_search.best_score_:.4f}")
+print("\nBayesian Best Params:")
+for k, v in bayes_search.best_params_.items():
+    print(f"  {k:25s}: {v}")
+
+# ── Konvergenzplot ─────────────────────────────────
+fig, axes = plt.subplots(2, 1, figsize=(7, 8))
+
+# Plot 1: Konvergenz
+iters = range(1, 31)
+axes[0].plot(iters, bayes_scores,
+             color='purple', linewidth=2.5,
+             marker='o', markersize=4,
+             label='Bayesian Optimization')
+axes[0].plot(iters, rand_scores,
+             color='darkorange', linewidth=2.5,
+             linestyle='--', marker='s', markersize=4,
+             label='Random Search')
+axes[0].set_xlabel('Anzahl Evaluationen')
+axes[0].set_ylabel('Bester CV Score (kumulativ)')
+axes[0].set_title('Konvergenz: Bayesian vs. Random Search')
+axes[0].legend()
+axes[0].grid(alpha=0.3)
+
+# Plot 2: Finale Score-Verteilung
+all_bayes = bayes_search.cv_results_['mean_test_score']
+all_rand  = rand_search.cv_results_['mean_test_score']
+
+axes[1].hist(all_rand, bins=15, alpha=0.6,
+             color='darkorange', label='Random Search',
+             edgecolor='white')
+axes[1].hist(all_bayes, bins=15, alpha=0.6,
+             color='purple', label='Bayesian Opt.',
+             edgecolor='white')
+axes[1].axvline(rand_search.best_score_,
+                color='darkorange', linestyle='--',
+                linewidth=2)
+axes[1].axvline(bayes_search.best_score_,
+                color='purple', linestyle='--',
+                linewidth=2)
+axes[1].set_xlabel('CV Score')
+axes[1].set_ylabel('Häufigkeit')
+axes[1].set_title('Verteilung aller evaluierten Scores')
+axes[1].legend()
+axes[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Konvergenzplot (oben):</strong>
+                <ul>
+                  <li>
+                    <span style="color:purple"><strong>Bayesian</strong></span>
+                    erreicht das Optimum
+                    <strong>früher</strong> –
+                    weniger Evaluationen nötig
+                  </li>
+                  <li>
+                    <span style="color:darkorange"><strong>Random</strong></span>
+                    konvergiert langsamer und unregelmäßiger
+                  </li>
+                  <li>
+                    Bei kleinem Evaluationsbudget:
+                    <strong>Bayesian klar überlegen</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Score-Verteilung (unten):</strong>
+                <ul>
+                  <li>
+                    Bayesian wertet mehr Punkte
+                    <strong>nahe am Optimum</strong> aus
+                  </li>
+                  <li>
+                    Random Search verschwendet Evaluationen
+                    in schlechten Regionen
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Hinweis:</strong>
+                <code>skopt</code> installieren via
+                <code>pip install scikit-optimize</code>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vergleichstabelle alle Methoden -->
+        <div style="margin-top:var(--space-8)">
+          <p style="font-size:var(--text-xs); font-weight:700;
+             letter-spacing:.08em; text-transform:uppercase;
+             color:var(--color-text-faint); margin-bottom:var(--space-3)">
+            Beyond Grid Search – Methoden im Vergleich
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Methode</th>
+                <th>Strategie</th>
+                <th>Rechenaufwand</th>
+                <th>Qualität bei kleinem Budget</th>
+                <th>sklearn Klasse</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <span class="key" style="--key-color:var(--color-warning)">Grid Search</span>
+                </td>
+                <td>Brute Force (alle Kombis)</td>
+                <td>❌ Hoch (exponentiell)</td>
+                <td>⚠️ Mittel</td>
+                <td><code>GridSearchCV</code></td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="key" style="--key-color:var(--color-success)">Random Search</span>
+                </td>
+                <td>Zufälliges Sampling</td>
+                <td>✅ Kontrollierbar</td>
+                <td>✅ Gut</td>
+                <td><code>RandomizedSearchCV</code></td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="key" style="--key-color:var(--color-purple)">Bayesian Opt.</span>
+                </td>
+                <td>Surrogate-Modell iterativ</td>
+                <td>✅ Minimal</td>
+                <td>✅✅ Sehr gut</td>
+                <td><code>BayesSearchCV</code> (skopt)</td>
+              </tr>
+              <tr>
+                <td>Gradient-based</td>
+                <td>Gradient des Hyperparameters</td>
+                <td>⚠️ Moderat</td>
+                <td>✅ Gut (differenzierbar)</td>
+                <td>speziell (z.B. Optuna)</td>
+              </tr>
+              <tr>
+                <td>Simulated Annealing</td>
+                <td>Zufallssuche mit Abkühlschema</td>
+                <td>✅ Kontrollierbar</td>
+                <td>⚠️ Variabel</td>
+                <td>speziell</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Schritte:</strong>
+          <br><br>
+          <a href="Page05.html">
+            → Seite 5: Feature Importance &amp; Permutation Importance –
+            Wie interpretiert man den Random Forest?
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 5 · Seite 4 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

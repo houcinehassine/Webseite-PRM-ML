@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Feature-Raum & Visualisierung</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       GEOMETRIE: RAUM-DIMENSIONEN VISUAL
+    ═══════════════════════════════════════════════════════ */
+    .dim-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-6);
+    }
+    .dim-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      text-align: center;
+    }
+    .dim-badge {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .dim-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--color-text-muted);
+    }
+    .dim-example {
+      font-size: var(--text-xs);
+      color: var(--color-text-faint);
+      line-height: 1.4;
+    }
+    .dim-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--color-text-faint);
+      padding-top: var(--space-6);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       3D-BEISPIEL BOX
+    ═══════════════════════════════════════════════════════ */
+    .coord-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      margin-top: var(--space-6);
+      align-items: start;
+    }
+    @media (max-width: 760px) { .coord-box { grid-template-columns: 1fr; } }
+
+    .coord-card {
+      padding: var(--space-6);
+      border-radius: var(--radius-xl);
+      border: 2px solid color-mix(in oklab, var(--color-primary) 25%, var(--color-border));
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface));
+    }
+    .coord-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--color-primary);
+      margin-bottom: var(--space-4);
+    }
+    .coord-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .coord-row:last-child { border-bottom: none; }
+    .coord-axis {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      font-weight: 700;
+      width: 2rem;
+      color: var(--color-primary);
+      flex-shrink: 0;
+    }
+    .coord-name {
+      flex: 1;
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+    .coord-value {
+      font-family: var(--font-mono);
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--color-text);
+      background: var(--color-surface);
+      padding: 0.2rem 0.6rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--color-border);
+    }
+
+    /* Achsen-Illustration (isometrisch-ähnlich mit CSS) */
+    .axis-visual {
+      padding: var(--space-6);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    .axis-visual-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--color-text-faint);
+    }
+    .axis-grid {
+      display: grid;
+      gap: var(--space-2);
+    }
+    .axis-bar-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .axis-bar-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      width: 140px;
+      flex-shrink: 0;
+      text-align: right;
+    }
+    .axis-bar-track {
+      flex: 1;
+      height: 10px;
+      background: var(--color-border);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .axis-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      transition: width 0.4s;
+    }
+    .axis-bar-val {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      width: 2.5rem;
+      text-align: right;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       T-SNE ERKLÄRUNG
+    ═══════════════════════════════════════════════════════ */
+    .tsne-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-6);
+    }
+    .tsne-step {
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .tsne-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: var(--text-xs);
+      font-weight: 800;
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      margin-bottom: var(--space-3);
+    }
+    .tsne-step h4 {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      margin: 0 0 var(--space-2) 0;
+    }
+    .tsne-step p {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       DIGITS PIXEL-GRID VISUAL
+    ═══════════════════════════════════════════════════════ */
+    .digits-layout {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-8);
+      margin-top: var(--space-6);
+      align-items: center;
+    }
+    @media (max-width: 700px) { .digits-layout { grid-template-columns: 1fr; } }
+
+    .digit-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 2px;
+      width: fit-content;
+    }
+    .digit-pixel {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+    }
+    .digit-caption {
+      font-size: var(--text-xs);
+      text-align: center;
+      color: var(--color-text-muted);
+      margin-top: var(--space-2);
+      font-weight: 700;
+    }
+
+    .digits-transform {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-4);
+    }
+    .transform-step {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .transform-step.highlight {
+      border-color: color-mix(in oklab, var(--color-primary) 30%, var(--color-border));
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface));
+    }
+    .transform-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .transform-body { flex: 1; }
+    .transform-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+    .transform-sub {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      line-height: 1.4;
+    }
+    .transform-badge {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: var(--radius-full);
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      white-space: nowrap;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       EXTERNE LINKS (TF Projector, Distill)
+    ═══════════════════════════════════════════════════════ */
+    .ext-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-6);
+    }
+    .ext-link-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      text-decoration: none;
+      color: var(--color-text);
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .ext-link-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .ext-link-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .ext-link-icon {
+      font-size: 1.6rem;
+      flex-shrink: 0;
+    }
+    .ext-link-title {
+      font-weight: 700;
+      font-size: var(--text-base);
+    }
+    .ext-link-url {
+      font-size: var(--text-xs);
+      color: var(--color-primary);
+      font-family: var(--font-mono);
+    }
+    .ext-link-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      line-height: 1.65;
+    }
+    .ext-link-arrow {
+      align-self: flex-end;
+      font-size: var(--text-sm);
+      color: var(--color-primary);
+      transition: transform 0.15s;
+    }
+    .ext-link-card:hover .ext-link-arrow { transform: translateX(4px); }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page1" title="Kapitel 1 · Feature-Raum & Visualisierung"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page3"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 1 · Seite 3</span>
+            <h1>Feature-Raum
+              <span class="key" style="--key-color:var(--color-primary)">&amp; Visualisierung</span>
+            </h1>
+            <p>
+              Eine Feature-Matrix ist mehr als eine Tabelle – sie ist ein geometrischer Raum.
+              Mit t-SNE lassen sich selbst 64-dimensionale Daten auf 2D projizieren,
+              ohne die lokale Struktur zu verlieren.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Feature-Raum</span>
+              <span class="pill">K-dimensionaler Raum</span>
+              <span class="pill">3D-Beispiel</span>
+              <span class="pill">t-SNE</span>
+              <span class="pill">Digits-Datensatz</span>
+              <span class="pill">Dimensionsreduktion</span>
+              <span class="pill">TF Projector</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du verstehst, dass jeder Datenpunkt ein <strong>Punkt im K-dimensionalen
+              Feature-Raum</strong> ist, kennst die Intuition hinter t-SNE und kannst
+              erklären, warum die Digits (8×8&nbsp;Pixel = 64&nbsp;Features) mit t-SNE
+              in 2D sichtbar geclustert werden.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           3.1  GEOMETRISCHE INTERPRETATION
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="geometrie">
+        <div class="section-head">
+          <h2>3.1 Von der Feature-Matrix in den Feature-Raum</h2>
+          <p>
+            Die gleichen Daten – einmal als Matrix, einmal als geometrischer Raum.
+            Beide Darstellungen sind äquivalent.
+          </p>
+        </div>
+
+        <!-- Dim-Progression -->
+        <div class="dim-cards">
+
+          <div class="dim-card">
+            <span class="dim-badge" style="color:var(--color-success)">1D</span>
+            <span class="dim-label">1 Feature</span>
+            <span class="dim-example">→ Zahlenstrahl<br>z.&nbsp;B. Temperatur</span>
+          </div>
+
+          <div class="dim-arrow">→</div>
+
+          <div class="dim-card">
+            <span class="dim-badge" style="color:var(--color-primary)">2D</span>
+            <span class="dim-label">2 Features</span>
+            <span class="dim-example">→ Koordinatensystem<br>z.&nbsp;B. Temp + Druck</span>
+          </div>
+
+          <div class="dim-arrow">→</div>
+
+          <div class="dim-card">
+            <span class="dim-badge" style="color:var(--color-purple)">3D</span>
+            <span class="dim-label">3 Features</span>
+            <span class="dim-example">→ Raum mit 3 Achsen<br>→ Beispiel unten ↓</span>
+          </div>
+
+          <div class="dim-arrow">→</div>
+
+          <div class="dim-card" style="
+            border-color:color-mix(in oklab, var(--color-primary) 25%, var(--color-border));
+            background:color-mix(in oklab, var(--color-primary) 6%, var(--color-surface-2));">
+            <span class="dim-badge" style="color:var(--color-primary)">K-dim</span>
+            <span class="dim-label">K Features</span>
+            <span class="dim-example">→ Nicht mehr visualisierbar<br>→ t-SNE hilft ↓</span>
+          </div>
+
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Datenpunkt = Vektor</span>
+            </h3>
+            <p>
+              Jede Zeile der Feature-Matrix wird zu einem <strong>Punkt (Vektor) im
+              K-dimensionalen Raum</strong>. Die K Feature-Werte sind die Koordinaten
+              dieses Punktes.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Warum ist das nützlich?</span>
+            </h3>
+            <p>
+              Im Feature-Raum sehen wir <strong>Cluster, Abstände und Strukturen</strong>,
+              die in der rohen Tabelle unsichtbar sind.
+              Machine Learning Algorithmen operieren in diesem Raum –
+              z.&nbsp;B. findet k-Means Cluster, SVM trennt Klassen durch Hyperebenen.
+            </p>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Kernidee:</strong> &nbsp;
+          Feature Engineering = den Feature-Raum so formen, dass ähnliche Datenpunkte
+          nahe beieinander liegen und verschiedene Klassen trennbar werden.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           3.2  3D-BEISPIEL
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="3d-beispiel">
+        <div class="section-head">
+          <h2>3.2 Konkretes Beispiel: Datenpunkt im 3D-Raum</h2>
+          <p>
+            Drei Features&nbsp;– drei Achsen. Ein Datenpunkt ist ein Punkt
+            im 3-dimensionalen Feature-Raum.
+          </p>
+        </div>
+
+        <div class="coord-box">
+
+          <!-- Koordinaten-Karte -->
+          <div class="coord-card">
+            <div class="coord-title">Datenpunkt x⃗ = (6,&nbsp;3.5,&nbsp;1)</div>
+            <div class="coord-row">
+              <span class="coord-axis">x₁</span>
+              <span class="coord-name">Temperatur (°C)</span>
+              <span class="coord-value">6.0</span>
+            </div>
+            <div class="coord-row">
+              <span class="coord-axis">x₂</span>
+              <span class="coord-name">Luftdruck (hPa, normiert)</span>
+              <span class="coord-value">3.5</span>
+            </div>
+            <div class="coord-row">
+              <span class="coord-axis">x₃</span>
+              <span class="coord-name">Windgeschwindigkeit (m/s)</span>
+              <span class="coord-value">1.0</span>
+            </div>
+          </div>
+
+          <!-- Balken-Darstellung als "Achsen-Illustration" -->
+          <div class="axis-visual">
+            <div class="axis-visual-label">Relative Ausprägung der Features</div>
+            <div class="axis-grid">
+              <div class="axis-bar-row">
+                <span class="axis-bar-label">x₁ · Temperatur</span>
+                <div class="axis-bar-track">
+                  <div class="axis-bar-fill"
+                       style="width:75%;background:var(--color-primary)"></div>
+                </div>
+                <span class="axis-bar-val"
+                      style="color:var(--color-primary)">6.0</span>
+              </div>
+              <div class="axis-bar-row">
+                <span class="axis-bar-label">x₂ · Luftdruck</span>
+                <div class="axis-bar-track">
+                  <div class="axis-bar-fill"
+                       style="width:44%;background:var(--color-success)"></div>
+                </div>
+                <span class="axis-bar-val"
+                      style="color:var(--color-success)">3.5</span>
+              </div>
+              <div class="axis-bar-row">
+                <span class="axis-bar-label">x₃ · Windgeschw.</span>
+                <div class="axis-bar-track">
+                  <div class="axis-bar-fill"
+                       style="width:12%;background:var(--color-purple)"></div>
+                </div>
+                <span class="axis-bar-val"
+                      style="color:var(--color-purple)">1.0</span>
+              </div>
+            </div>
+            <p style="font-size:var(--text-xs);color:var(--color-text-faint);margin:0;margin-top:var(--space-3)">
+              Ein zweiter Datenpunkt (Messung) hätte andere Koordinaten
+              und würde an einem anderen Ort im 3D-Raum liegen.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="note" style="margin-top:var(--space-5)">
+          <strong>Verallgemeinerung:</strong> &nbsp;
+          Mit K Features hat man einen K-dimensionalen Raum. Bei K&nbsp;&gt;&nbsp;3
+          ist er nicht mehr direkt visualisierbar – aber geometrische Konzepte
+          wie Abstände, Cluster und Hyperebenen gelten weiterhin.
+          Genau hier hilft <strong>t-SNE</strong> ↓
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           3.3  t-SNE
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="tsne">
+        <div class="section-head">
+          <h2>3.3 t-SNE – Hochdimensional sichtbar machen</h2>
+          <p>
+            <strong>t-distributed Stochastic Neighbor Embedding</strong> –
+            eine nicht-lineare Methode, die hochdimensionale Daten auf 2D oder 3D
+            projiziert, ohne die lokale Nachbarschaftsstruktur zu zerstören.
+          </p>
+        </div>
+
+        <div class="tsne-steps">
+
+          <div class="tsne-step">
+            <div class="tsne-step-num">1</div>
+            <h4>Ähnlichkeiten im Hochdim.</h4>
+            <p>
+              t-SNE berechnet für jedes Paar von Datenpunkten im
+              hochdimensionalen Raum eine <strong>Ähnlichkeitswahrscheinlichkeit</strong>
+              (Gaußsche Verteilung der Abstände).
+            </p>
+          </div>
+
+          <div class="tsne-step">
+            <div class="tsne-step-num">2</div>
+            <h4>Projektion in 2D / 3D</h4>
+            <p>
+              Im niedrigdimensionalen Zielraum werden die Punkte zufällig
+              platziert und iterativ so verschoben, dass die
+              <strong>Ähnlichkeitsstruktur erhalten bleibt</strong>
+              (t-Verteilung für Abstände im Zielraum).
+            </p>
+          </div>
+
+          <div class="tsne-step">
+            <div class="tsne-step-num">3</div>
+            <h4>Lokale Struktur ≫ globale</h4>
+            <p>
+              Nahe Nachbarn im hochdim. Raum bleiben nahe Nachbarn in 2D.
+              Globale Abstände zwischen Clustern sind in der t-SNE-Visualisierung
+              <strong>nicht direkt interpretierbar</strong>.
+            </p>
+          </div>
+
+          <div class="tsne-step">
+            <div class="tsne-step-num">4</div>
+            <h4>Nur für Visualisierung</h4>
+            <p>
+              t-SNE ist ein <strong>Visualisierungswerkzeug</strong>, keine Feature
+              Extraction für Modelle. Die projizierten 2D-Koordinaten sind nicht
+              für Training geeignet.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Hyperparameter: Perplexity</span>
+            </h3>
+            <p>
+              Der wichtigste Parameter in t-SNE. Er steuert, wie viele
+              Nachbarn pro Punkt berücksichtigt werden.
+              Typischer Bereich: <code>5 – 50</code>.
+              Kleinere Werte → feine lokale Struktur,
+              größere Werte → grobe globale Struktur.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">Achtung: Nicht-deterministisch</span>
+            </h3>
+            <p>
+              Verschiedene Läufe erzeugen verschiedene Visualisierungen
+              (deshalb <code>random_state</code> setzen). Cluster-Formen und
+              -Größen in t-SNE sind bedeutungslos – nur die
+              <strong>Gruppierung</strong> zählt.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           3.4  DIGITS-BEISPIEL  +  CODE AUS NOTEBOOK
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="digits">
+        <div class="section-head">
+          <h2>3.4 Beispiel: Embedding Digits (64-dim → 2D)</h2>
+          <p>
+            Der Digits-Datensatz aus sklearn enthält handgeschriebene Ziffern
+            (0–9) als 8×8&nbsp;Pixel-Bilder – jedes Bild hat <strong>64&nbsp;Features</strong>.
+          </p>
+        </div>
+
+        <!-- Pixel-Grid + Transformations-Schritte -->
+        <div class="digits-layout">
+
+          <!-- 8×8 Pixel-Grid (stilisiert) -->
+          <div>
+            <div class="digit-grid" aria-label="Stilisiertes 8×8 Pixel-Bild der Ziffer 3">
+              <!-- Zeile 1 -->
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#c8c5bf"></div>
+              <div class="digit-pixel" style="background:#2d2d2b"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#2d2d2b"></div>
+              <div class="digit-pixel" style="background:#c8c5bf"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <!-- Zeile 2 -->
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#c8c5bf"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#6b6b68"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <!-- Zeile 3 -->
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#6b6b68"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#2d2d2b"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <!-- Zeile 4 -->
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#6b6b68"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#6b6b68"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <!-- Zeile 5 -->
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#6b6b68"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#c8c5bf"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <!-- Zeile 6 -->
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#c8c5bf"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <!-- Zeile 7 -->
+              <div class="digit-pixel" style="background:#c8c5bf"></div>
+              <div class="digit-pixel" style="background:#2d2d2b"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#6b6b68"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <!-- Zeile 8 -->
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#c8c5bf"></div>
+              <div class="digit-pixel" style="background:#2d2d2b"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#1a1a18"></div>
+              <div class="digit-pixel" style="background:#c8c5bf"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+              <div class="digit-pixel" style="background:#f0f0ee"></div>
+            </div>
+            <div class="digit-caption">8 × 8 Pixel = 64 Features</div>
+          </div>
+
+          <!-- Transformations-Schritte -->
+          <div class="digits-transform">
+            <div class="transform-step">
+              <span class="transform-icon">🖼️</span>
+              <div class="transform-body">
+                <div class="transform-title">Eingabe: 8 × 8 Pixel-Bild</div>
+                <div class="transform-sub">Jedes Bild = eine Ziffer (0–9). Graustufenwerte von 0–16.</div>
+              </div>
+              <span class="transform-badge">8 × 8</span>
+            </div>
+            <div class="transform-step">
+              <span class="transform-icon">➡️</span>
+              <div class="transform-body">
+                <div class="transform-title">Flatten: Matrix → Vektor</div>
+                <div class="transform-sub">8 × 8 Pixel-Matrix wird zu einem 64-dimensionalen Vektor.</div>
+              </div>
+              <span class="transform-badge">= 64 dim</span>
+            </div>
+            <div class="transform-step highlight">
+              <span class="transform-icon">🧭</span>
+              <div class="transform-body">
+                <div class="transform-title">t-SNE: 64-dim → 2D</div>
+                <div class="transform-sub">t-SNE projiziert alle 1797 Vektoren in 2D. Gleiche Ziffern clustern zusammen.</div>
+              </div>
+              <span class="transform-badge">→ 2D</span>
+            </div>
+            <div class="transform-step">
+              <span class="transform-icon">📍</span>
+              <div class="transform-body">
+                <div class="transform-title">Ergebnis: 10 sichtbare Cluster</div>
+                <div class="transform-sub">Jede Ziffer (0–9) bildet im 2D-Raum eine eigene Gruppe. Strukturen werden sichtbar.</div>
+              </div>
+              <span class="transform-badge">10 Cluster</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code aus 01_data_preparation_core.ipynb -->
+        <p style="margin-top:var(--space-8);font-size:var(--text-xs);font-weight:700;
+                  letter-spacing:.08em;text-transform:uppercase;
+                  color:var(--color-text-faint)">
+          Code aus <code>01_data_preparation_core.ipynb</code>
+        </p>
+
+        <!-- Datensatz laden -->
+        <div class="code-cell-split">
+          <div class="code-cell-split-code">
+            <div class="code-cell-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Digits laden
+              </span>
+            </div>
+            <pre><code>from sklearn.datasets import load_digits
+
+# Datensatz laden
+X, y = load_digits(return_X_y=True)
+
+# Dimensionen prüfen
+print(X.shape)   # (N_samples, N_features)
+print(y.shape)   # Labels: Ziffern 0–9</code></pre>
+          </div>
+          <div class="code-cell-split-output">
+            <div class="code-cell-header">
+              <span class="cell-lang">Output</span>
+            </div>
+            <pre><code>(1797, 64)
+(1797,)</code></pre>
+          </div>
+        </div>
+
+        <!-- t-SNE anwenden -->
+        <div class="code-cell" style="margin-top:var(--space-4)">
+          <div class="code-cell-header">
+            <span class="cell-lang">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+              </svg>
+              Python – t-SNE anwenden &amp; visualisieren
+            </span>
+          </div>
+          <pre><code>from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+
+# t-SNE: 64-dim → 2D
+tsne  = TSNE(n_components=2, random_state=42, perplexity=30)
+X_2d  = tsne.fit_transform(X)
+
+print(X_2d.shape)   # (1797, 2) – jetzt 2D
+
+# Visualisierung: Jede Ziffer bekommt eine Farbe
+plt.figure(figsize=(8, 6))
+scatter = plt.scatter(X_2d[:, 0], X_2d[:, 1],
+                      c=y, cmap='tab10', alpha=0.7, s=10)
+plt.colorbar(scatter, label='Ziffer (0–9)')
+plt.title('t-SNE der Digits – 64-dim → 2D')
+plt.xlabel('t-SNE Achse 1')
+plt.ylabel('t-SNE Achse 2')
+plt.show()</code></pre>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Ergebnis:</strong> &nbsp;
+          Im 2D-Plot bildet jede Ziffer einen eigenen Cluster – obwohl das Modell
+          nur 64 Graustufenwerte sieht. Das zeigt: Die Feature-Matrix enthält
+          bereits genug Struktur, um die 10 Klassen zu trennen.<br><br>
+          <strong>Verbindung zu Seite 7:</strong> Mit SelectKBest lässt sich die
+          Dimension von <strong>64 auf 20 Features</strong> reduzieren, ohne
+          viel Klasseninformation zu verlieren.
+          <a href="Page07.html">→ Seite 7: Feature Selection</a>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           3.5  EXTERNE LINKS
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="links">
+        <div class="section-head">
+          <h2>3.5 Weiterführende Tools &amp; Ressourcen</h2>
+          <p>
+            Zwei empfohlene externe Ressourcen aus dem Skript – direkt im Browser nutzbar.
+          </p>
+        </div>
+
+        <div class="ext-links">
+
+          <a href="https://projector.tensorflow.org"
+             target="_blank" rel="noopener"
+             class="ext-link-card">
+            <div class="ext-link-header">
+              <span class="ext-link-icon">🔭</span>
+              <div>
+                <div class="ext-link-title">TensorFlow Projector</div>
+                <div class="ext-link-url">projector.tensorflow.org</div>
+              </div>
+            </div>
+            <p class="ext-link-desc">
+              Interaktives Tool zum Visualisieren von Embeddings im Browser.
+              Unterstützt t-SNE, PCA und UMAP. Eigene Datensätze hochladbar.
+              Ideal um 3D Feature-Räume zu explorieren.
+            </p>
+            <span class="ext-link-arrow">→ Tool öffnen</span>
+          </a>
+
+          <a href="https://distill.pub/2016/misread-tsne/"
+             target="_blank" rel="noopener"
+             class="ext-link-card">
+            <div class="ext-link-header">
+              <span class="ext-link-icon">📖</span>
+              <div>
+                <div class="ext-link-title">How to Use t-SNE Effectively</div>
+                <div class="ext-link-url">distill.pub</div>
+              </div>
+            </div>
+            <p class="ext-link-desc">
+              Interaktiver Artikel von distill.pub mit Live-Visualisierungen.
+              Erklärt den Einfluss von Perplexity, Iterationen und Initialisierung –
+              und welche Interpretationsfehler man vermeiden sollte.
+            </p>
+            <span class="ext-link-arrow">→ Artikel lesen</span>
+          </a>
+
+        </div>
+
+        <!-- Weiter-Link -->
+        <div class="note" style="margin-top:var(--space-8)">
+          <strong>Nächste Seite:</strong> &nbsp;
+          Feature Extraction aus Zeitserien – wie man aus einem Stromsignal
+          oder Audio-Recording informative Skalare erzeugt.
+          <br><br>
+          <a href="Page04.html">→ Seite 4: Feature Extraction aus Zeitserien</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 1 · Seite 3 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

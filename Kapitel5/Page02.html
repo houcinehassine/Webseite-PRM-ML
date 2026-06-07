@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Entscheidungsbäume verstehen</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page5" title="Kapitel 5 · Entscheidungsbäume"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page2"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Seite 2</span>
+            <h1>Entscheidungsbäume
+              <span class="key" style="--key-color:var(--color-success)">verstehen</span>
+            </h1>
+            <p>
+              Entscheidungsbäume sind das <strong>Fundament</strong> eines Random Forests.
+              Hier lernst du, wie sie Daten durch achsenparallele Splits aufteilen,
+              was Gini Impurity bedeutet – und warum sie zum Overfitting neigen.
+            </p>
+            <div class="pill-row">
+              <span class="pill">🌳 Basismodell</span>
+              <span class="pill">✂️ Splits im Feature-Raum</span>
+              <span class="pill">📐 Gini Impurity</span>
+              <span class="pill">⚠️ Overfitting</span>
+              <span class="pill">🎲 Ensemble-Idee</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Wie stellen Entscheidungsbäume <strong>„Fragen"</strong> an die Daten?</li>
+              <li>Wie wird der beste Split gewählt → <strong>Gini Impurity</strong></li>
+              <li>Warum overfittet ein einzelner Baum und was folgt daraus?</li>
+              <li>Warum brauchen wir ein <strong>Ensemble</strong>?</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. ENTSCHEIDUNGSBÄUME – GRUNDLAGEN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="entscheidungsbaeume-grundlagen">
+        <div class="section-head">
+          <h2>2.1 Entscheidungsbäume – Grundlagen</h2>
+          <p>
+            Entscheidungsbäume sind die <strong>Grundlage eines Random Forest</strong>
+            und eine sehr intuitive Methode für Klassifikationen.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Ensemble Learner</span></h3>
+            <ul>
+              <li>
+                Random Forests sind sogenannte
+                <span class="key" style="--key-color:var(--color-primary)">Ensemble Learner</span>
+              </li>
+              <li>
+                Sie setzen sich aus mehreren
+                <strong>schwachen Lernern</strong> (Weak Learner)
+                zusammen – den einzelnen Entscheidungsbäumen
+              </li>
+              <li>
+                <strong>„Das Ganze ist mehr als die Summe seiner Teile!"</strong>
+              </li>
+              <li>
+                Die Klassifikation des gesamten Ensembles ist oft
+                <strong>besser</strong> als die eines einzelnen Klassifikators
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Kern-Idee: Fragen stellen</span></h3>
+            <ul>
+              <li>
+                Entscheidungsbäume sind eine <strong>intuitive Methode</strong>
+                für Klassifikationen
+              </li>
+              <li>
+                Der Kern: <span class="key" style="--key-color:var(--color-success)">geschickte Fragen stellen</span>
+              </li>
+              <li>
+                Im Feature-Raum = Daten durch eine
+                <strong>achsenparallele Linie</strong> aufteilen
+              </li>
+              <li>
+                Jeder <strong>Knoten</strong> teilt Daten in zwei Gruppen
+                via eines <strong>Cut-off-Wertes</strong> entlang einer
+                Feature-Achse auf
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Code 1: Datenpunkte visualisieren -->
+        <div class="section-head" style="margin-top:var(--space-8)">
+          <h3>💡 Daten generieren &amp; visualisieren</h3>
+          <p>
+            Zuerst erzeugen wir einen Beispieldatensatz mit
+            <code>make_blobs</code> und schauen, wie die Datenpunkte
+            im Feature-Raum verteilt sind.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_blobs
+
+# 300 Datenpunkte, 4 Cluster
+X, y = make_blobs(n_samples=300, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+plt.figure(figsize=(5, 4))
+plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='viridis')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('4 Klassen im Feature-Raum')
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>❓ Was denken Sie?</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Denkaufgabe:</strong>
+                Was entspricht „Fragen stellen" im Feature-Raum?
+                <ul style="margin-top:var(--space-2)">
+                  <li>Versuche die Daten anhand von <strong>Feature 1</strong> zu trennen</li>
+                  <li>Dann anhand von <strong>Feature 2</strong></li>
+                  <li>
+                    → Eine Linie <strong>parallel zur Achse</strong> ist ein Split!
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Erkenntnis:</strong>
+                Jeder Knoten = eine Frage der Form
+                <code>Feature_i ≤ Schwellenwert?</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. SPLITS IM FEATURE-RAUM
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="splits-feature-raum">
+        <div class="section-head">
+          <h2>2.2 Splits im Feature-Raum</h2>
+          <p>
+            Wie werden die Entscheidungsgrenzen mit wachsender Tiefe des Baumes komplexer?
+            Und wie beantwortet der Baum die drei zentralen Fragen?
+          </p>
+        </div>
+
+        <div class="card-grid" style="margin-bottom:var(--space-6)">
+          <article class="card">
+            <h3>❓ Drei zentrale Fragen</h3>
+            <ul>
+              <li>
+                <strong>Welche Features werden für den Split gewählt?</strong>
+                <br>→ <span class="key" style="--key-color:var(--color-primary)">Quantitatives Qualitätskriterium</span>
+                (Gini Impurity)
+              </li>
+              <li>
+                <strong>Welcher Cut-off-Wert wird gewählt?</strong>
+                <br>→ <span class="key" style="--key-color:var(--color-primary)">Quantitatives Qualitätskriterium</span>
+                (minimiert Gini)
+              </li>
+              <li>
+                <strong>Woher kommt die Färbung der Bereiche?</strong>
+                <br>→ <span class="key" style="--key-color:var(--color-success)">Majoritätsvotum</span>
+                der Datenpunkte im Bereich
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>📏 Was passiert mit zunehmender Tiefe?</h3>
+            <ul>
+              <li><code>depth=1</code> → 1 Schnitt, sehr grobe Trennung</li>
+              <li><code>depth=2</code> → 2 Schnitte, besser</li>
+              <li><code>depth=3</code> → 4 Regionen, sinnvoll</li>
+              <li><code>depth=4</code> → Grenzen werden feiner</li>
+              <li>
+                <strong>Ab depth ≥ 5:</strong>
+                <span class="key" style="--key-color:var(--color-warning)">Overfitting-Gefahr!</span>
+                Der Baum lernt Rauschen auswendig
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Code 2: Decision Tree Tiefe 1-4 -->
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.tree import DecisionTreeClassifier
+
+def visualize_tree(estimator, X, y, boundaries=True,
+                   xlim=None, ylim=None, ax=None):
+    ax = ax or plt.gca()
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=30,
+               cmap='viridis', clim=(y.min(), y.max()),
+               zorder=3)
+    ax.axis('tight')
+    ax.axis('off')
+    if xlim is None:
+        xlim = ax.get_xlim()
+    if ylim is None:
+        ylim = ax.get_ylim()
+    estimator.fit(X, y)
+    xx, yy = np.meshgrid(
+        np.linspace(*xlim, num=200),
+        np.linspace(*ylim, num=200))
+    Z = estimator.predict(
+        np.c_[xx.ravel(), yy.ravel()])
+    n_classes = len(np.unique(y))
+    Z = Z.reshape(xx.shape)
+    ax.contourf(xx, yy, Z, alpha=0.3,
+                levels=np.arange(n_classes + 1) - 0.5,
+                cmap='viridis',
+                clim=(y.min(), y.max()), zorder=1)
+    ax.set(xlim=xlim, ylim=ylim)
+
+# Datensatz
+X, y = make_blobs(n_samples=300, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+# Tiefen 1-4 visualisieren
+fig, ax = plt.subplots(4, 1, figsize=(4, 9))
+fig.subplots_adjust(left=0.02, right=0.98, wspace=0.1)
+
+for axi, depth in zip(ax, range(1, 5)):
+    model = DecisionTreeClassifier(max_depth=depth)
+    visualize_tree(model, X, y, ax=axi)
+    axi.set_title(f'depth = {depth}')
+
+plt.suptitle('Decision Tree – Entscheidungsgrenzen',
+             y=1.02, fontsize=12)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    <code>depth=1</code>: Nur <strong>1 achsenparallele Linie</strong>
+                    → grobe Trennung
+                  </li>
+                  <li>
+                    <code>depth=2</code>: Erste sinnvolle Clusteraufteilung
+                  </li>
+                  <li>
+                    <code>depth=3–4</code>: Grenzen werden
+                    <strong>feiner und passender</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Merksatz:</strong>
+                Jeder Split = eine <strong>achsenparallele Linie</strong>.
+                Feature und Schwellenwert werden durch
+                <span class="key" style="--key-color:var(--color-warning)">Minimierung der Gini Impurity</span>
+                gewählt.
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Majoritätsvotum:</strong>
+                Die Farbe eines Bereichs = die
+                <strong>häufigste Klasse</strong>
+                der Datenpunkte in diesem Bereich.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. GINI IMPURITY
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="gini-impurity">
+        <div class="section-head">
+          <h2>2.3 Gini Impurity</h2>
+          <p>
+            Um zu bewerten, ob ein Split „gut" oder „schlecht" ist,
+            brauchen wir ein
+            <span class="key" style="--key-color:var(--color-primary)">quantitatives Gütekriterium</span>
+            – die Gini Impurity.
+          </p>
+        </div>
+
+        <!-- Ausgangscode: 2 Splits zeigen -->
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Ausgangsbeispiel: 2 Splits
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_blobs
+
+# 10 Datenpunkte, 2 Klassen
+X, y = make_blobs(n_samples=10, centers=2,
+                  random_state=42, cluster_std=2.)
+
+fig, axes = plt.subplots(2, 1, figsize=(3, 4))
+
+# Split bei x = 0.9 (schlechter Split)
+axes[0].scatter(X[:, 0], X[:, 1], c=y, cmap='viridis',
+                s=80, edgecolors='k')
+axes[0].axvline(0.9, color='red', linestyle='--',
+                linewidth=2, label='Split x=0.9')
+axes[0].set_title('Split bei x = 0.9\n(eher unrein)')
+axes[0].legend(fontsize=8)
+
+# Split bei x = 3.1 (besserer Split)
+axes[1].scatter(X[:, 0], X[:, 1], c=y, cmap='viridis',
+                s=80, edgecolors='k')
+axes[1].axvline(3.1, color='green', linestyle='--',
+                linewidth=2, label='Split x=3.1')
+axes[1].set_title('Split bei x = 3.1\n(reiner)')
+axes[1].legend(fontsize=8)
+
+plt.suptitle('Welcher Split ist besser?', y=1.02)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>❓ Was denken Sie?</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Denkaufgabe: Was ist „more impure"?</strong>
+                <ul style="margin-top:var(--space-2)">
+                  <li>
+                    <strong>Split x=0.9:</strong> Beide Seiten enthalten
+                    gemischte Klassen → <em>hohe Impurity</em>
+                  </li>
+                  <li>
+                    <strong>Split x=3.1:</strong> Eine Seite ist relativ rein
+                    → <em>niedrigere Impurity</em>
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Sobald die Zusammensetzung komplizierter wird,</strong>
+                verlässt uns die Intuition –
+                wir brauchen ein <strong>objektives Maß</strong>:
+                die <span class="key" style="--key-color:var(--color-warning)">Gini Impurity</span>.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Definition & Herleitung -->
+        <div class="card-grid" style="margin-top:var(--space-8)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Definition</span></h3>
+            <p>
+              Die <strong>Gini Impurity</strong> ist die Wahrscheinlichkeit,
+              einen zufällig gezogenen Datenpunkt
+              <strong>falsch zu klassifizieren</strong>,
+              falls man die Klassifizierung anhand der
+              <em>Verteilung der Klassen</em> im Datensatz durchführt.
+            </p>
+            <div class="note note-primary" style="margin-top:var(--space-3)">
+              <strong>Formel:</strong><br>
+              Wenn <strong>C</strong> Klassen vorliegen und
+              <strong>p(i)</strong> die Wahrscheinlichkeit ist,
+              einen Datenpunkt der Klasse <em>i ∈ C</em> zu ziehen:
+              <br><br>
+              \[ G = \sum_{i \in C} p(i)\,(1 - p(i)) \]
+            </div>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Herleitung am Beispiel</span></h3>
+            <p>Ausgangslage: <strong>2 Klassen</strong>, je 50% Anteil</p>
+            <ul>
+              <li>Ziehe violett, klassifiziere violett: 25% ✅</li>
+              <li>Ziehe violett, klassifiziere gelb: 25% ❌</li>
+              <li>Ziehe gelb, klassifiziere violett: 25% ❌</li>
+              <li>Ziehe gelb, klassifiziere gelb: 25% ✅</li>
+            </ul>
+            <div class="note note-warning" style="margin-top:var(--space-3)">
+              → <strong>25% + 25% = 50%</strong>
+              → <span class="key" style="--key-color:var(--color-warning)">Gini Impurity = 0.5</span>
+              (maximale Unreinheit bei 2 Klassen)
+            </div>
+            <p style="margin-top:var(--space-3); font-size:var(--text-xs); color:var(--color-text-muted)">
+              Gewichten nach Anzahl/Anteil der Datenpunkte,
+              aufsummieren → Gütemaß zur Bewertung eines Splits.
+            </p>
+          </article>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-5)">
+          <strong>So what?</strong>
+          Qualitäts- bzw. Gütekriterien sind
+          <strong>zentraler Bestandteil des Machine Learnings</strong>.
+          Grundgedanke: Falsche Zuordnung ist wahrscheinlicher,
+          je <em>„durchmischter"</em> die Daten sind –
+          ein reiner Knoten hat Gini = <strong>0</strong>,
+          maximale Unreinheit = <strong>0.5</strong> (binär).
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. OVERFITTING BEI DECISION TREES
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="overfitting-decision-trees">
+        <div class="section-head">
+          <h2>2.4 Overfitting bei Decision Trees</h2>
+          <p>
+            Mit steigender Tiefe passt sich der Baum immer mehr den
+            Trainingsdaten an –
+            <span class="key" style="--key-color:var(--color-warning)">Overfitting</span>
+            ist eine generelle Eigenschaft von Decision Trees.
+          </p>
+        </div>
+
+        <!-- Code 3: Tiefe 5-8 zeigen -->
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Overfitting: depth 5–8
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.tree import DecisionTreeClassifier
+
+def visualize_tree(estimator, X, y,
+                   xlim=None, ylim=None, ax=None):
+    ax = ax or plt.gca()
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=30,
+               cmap='viridis', clim=(y.min(), y.max()),
+               zorder=3)
+    ax.axis('tight')
+    ax.axis('off')
+    if xlim is None: xlim = ax.get_xlim()
+    if ylim is None: ylim = ax.get_ylim()
+    estimator.fit(X, y)
+    xx, yy = np.meshgrid(
+        np.linspace(*xlim, num=200),
+        np.linspace(*ylim, num=200))
+    Z = estimator.predict(
+        np.c_[xx.ravel(), yy.ravel()])
+    n_classes = len(np.unique(y))
+    Z = Z.reshape(xx.shape)
+    ax.contourf(xx, yy, Z, alpha=0.3,
+                levels=np.arange(n_classes + 1) - 0.5,
+                cmap='viridis',
+                clim=(y.min(), y.max()), zorder=1)
+    ax.set(xlim=xlim, ylim=ylim)
+
+X, y = make_blobs(n_samples=300, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+fig, ax = plt.subplots(4, 1, figsize=(3, 16))
+fig.subplots_adjust(left=0.02, right=0.98, wspace=0.1)
+
+for axi, depth in zip(ax, range(5, 9)):
+    model = DecisionTreeClassifier(max_depth=depth)
+    visualize_tree(model, X, y, ax=axi)
+    axi.set_title(f'depth = {depth}')
+
+plt.suptitle('Overfitting: depth 5–8', y=1.02)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>❓ Was ist hier passiert?</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-warning">
+                <strong>Beobachtung:</strong>
+                <ul>
+                  <li>
+                    Ab <code>depth=6</code> entstehen
+                    <strong>schmale, isolierte Bereiche</strong>
+                  </li>
+                  <li>
+                    Diese entsprechen
+                    <em>nicht</em> einer intrinsischen Eigenschaft der Daten
+                  </li>
+                  <li>
+                    Der Baum hat einzelne <strong>Ausreißer auswendig gelernt</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Fazit:</strong>
+                <span class="key" style="--key-color:var(--color-warning)">Overfitting</span>
+                ist eine <strong>generelle Eigenschaft</strong>
+                von Decision Trees –
+                schon nach wenigen Splits!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code 4: Verschiedene Teilmengen -->
+        <div class="section-head" style="margin-top:var(--space-8)">
+          <h3>🔬 Overfitting auf verschiedenen Teilmengen</h3>
+          <p>
+            Dasselbe Modell, trainiert auf verschiedenen Hälften
+            des Datensatzes – zeigt die <strong>Instabilität</strong>
+            einzelner Decision Trees.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Instabilität von Decision Trees
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.tree import DecisionTreeClassifier
+
+def visualize_tree(estimator, X, y,
+                   xlim=None, ylim=None, ax=None):
+    ax = ax or plt.gca()
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=30,
+               cmap='viridis', clim=(y.min(), y.max()),
+               zorder=3)
+    ax.axis('tight')
+    ax.axis('off')
+    if xlim is None: xlim = ax.get_xlim()
+    if ylim is None: ylim = ax.get_ylim()
+    estimator.fit(X, y)
+    xx, yy = np.meshgrid(
+        np.linspace(*xlim, num=200),
+        np.linspace(*ylim, num=200))
+    Z = estimator.predict(
+        np.c_[xx.ravel(), yy.ravel()])
+    n_classes = len(np.unique(y))
+    Z = Z.reshape(xx.shape)
+    ax.contourf(xx, yy, Z, alpha=0.3,
+                levels=np.arange(n_classes + 1) - 0.5,
+                cmap='viridis',
+                clim=(y.min(), y.max()), zorder=1)
+    ax.set(xlim=xlim, ylim=ylim)
+
+X, y = make_blobs(n_samples=300, centers=4,
+                  random_state=0, cluster_std=1.0)
+
+fig, ax = plt.subplots(1, 2, figsize=(7, 3))
+fig.subplots_adjust(left=0.02, right=0.98, wspace=0.1)
+
+model = DecisionTreeClassifier(max_depth=5)
+
+# Geradzahlige Indizes (erste Hälfte)
+visualize_tree(model, X[::2], y[::2], ax=ax[0])
+ax[0].set_title('Trainiert auf X[::2]  (depth=5)')
+
+# Ungeradzahlige Indizes (zweite Hälfte)
+visualize_tree(model, X[1::2], y[1::2], ax=ax[1])
+ax[1].set_title('Trainiert auf X[1::2]  (depth=5)')
+
+plt.suptitle('Gleiche Architektur – andere Trainingsdaten',
+             y=1.04, fontsize=11)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>❓ Was also tun?</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-warning">
+                <strong>Beobachtung:</strong>
+                <ul>
+                  <li>
+                    Gleiche Modellarchitektur,
+                    <strong>unterschiedliche Trainingsdaten</strong>
+                    → sehr unterschiedliche Grenzen
+                  </li>
+                  <li>
+                    In sicheren Bereichen: <strong>konsistente</strong> Ergebnisse
+                  </li>
+                  <li>
+                    In unsicheren Bereichen:
+                    <strong>inkonsistente</strong> Ergebnisse
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-primary" style="margin-top:var(--space-3)">
+                <strong>So what? → Die Lösung:</strong>
+                <ul>
+                  <li>
+                    Viele solcher instabilen Bäume
+                    <strong>kombinieren</strong>
+                  </li>
+                  <li>
+                    Durch <span class="key" style="--key-color:var(--color-primary)">Randomisierung</span>
+                    dekorrelieren sie
+                  </li>
+                  <li>
+                    Kombination →
+                    <span class="key" style="--key-color:var(--color-primary)">Random Forest!</span>
+                  </li>
+                  <li>
+                    Wo sicher: konsistente Votes –
+                    Unsicherheit <em>mittelt sich heraus</em>
+                  </li>
+                </ul>
+              </div>
+              <a href="Page03.html"
+                 style="display:inline-block; margin-top:var(--space-3);
+                        font-size:var(--text-xs); font-weight:700;
+                        color:var(--color-primary)">
+                → Seite 3: Vom Baum zum Random Forest
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zusammenfassung -->
+        <div class="card-grid" style="margin-top:var(--space-8)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Warum overfittet ein Decision Tree?</span></h3>
+            <ul>
+              <li>
+                Kein <strong>internes Stoppkriterium</strong> –
+                der Baum wächst bis jeder Datenpunkt korrekt klassifiziert ist
+              </li>
+              <li>
+                Bei großer Tiefe: <strong>schmale Bereiche</strong>
+                für einzelne Ausreißer → kein Generalisierungsvermögen
+              </li>
+              <li>
+                Verschiedene Trainingsmengen → <strong>sehr unterschiedliche Bäume</strong>
+                → hohe Varianz
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Die Ensemble-Lösung</span></h3>
+            <ul>
+              <li>
+                <strong>Viele Weak Learner</strong> kombinieren statt einem
+                starken (überfittenden) Modell
+              </li>
+              <li>
+                Durch <span class="key" style="--key-color:var(--color-primary)">Bagging</span>:
+                jeder Baum auf einem anderen Subset trainiert
+              </li>
+              <li>
+                Durch <span class="key" style="--key-color:var(--color-primary)">Feature Bagging</span>:
+                Bäume werden dekorreliert
+              </li>
+              <li>
+                <strong>Majoritätsvotum</strong> über alle Bäume →
+                stabile, generalisierbare Vorhersage
+              </li>
+              <li>
+                Wo Klassifizierung sicher: <strong>konsistente Votes</strong>
+                – Unsicherheit mittelt sich heraus
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-5)">
+          <strong>Nächste Schritte:</strong>
+          <br><br>
+          <a href="Page03.html">→ Seite 3: Bagging, Feature Bagging &amp; Out-of-Bag Error</a>
+          &nbsp;·&nbsp;
+          <a href="Page04.html">→ Seite 4: RandomForestClassifier in sklearn</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 5 · Seite 2 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Precision-Recall Curve &amp; F1-Score</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page7" title="Kapitel 7 · Precision-Recall &amp; F1"></site-header>
+  <div class="layout">
+    <site-sidebar active="page6"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 7 · Seite 6</span>
+            <h1>Precision-Recall <span class="key" style="--key-color:var(--color-primary)">&amp; F1-Score</span></h1>
+            <p>
+              Wenn True Negatives fehlen – wie bei Object Detection –
+              brauchen wir eine Alternative zur ROC-Kurve.
+              Die Precision-Recall-Kurve und der F1-Score lösen dieses Problem.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Precision (PPV)</span>
+              <span class="pill">Recall (TPR)</span>
+              <span class="pill">precision_recall_curve</span>
+              <span class="pill">F1-Score</span>
+              <span class="pill">Object Detection</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du weißt, wann die Precision-Recall-Kurve der ROC-Kurve vorzuziehen ist,
+              kannst Precision berechnen und den F1-Score als harmonisches Mittel erklären.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. WARUM NICHT IMMER ROC?
+           ════════════════════════════════════════════ -->
+      <section class="section" id="warum-nicht-roc">
+        <div class="section-head">
+          <h2>6.1 Wann ist die ROC-Kurve ungeeignet?</h2>
+          <p>
+            Die ROC-Kurve setzt voraus, dass True Negatives existieren und zählbar sind.
+            Bei manchen Use Cases ist das nicht der Fall.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Das Problem: Fehlende True Negatives</span></h3>
+            <p>
+              In der <strong>Object Detection</strong> zum Beispiel:
+              Das Modell soll erkennen, ob und wo Objekte (z.B. Autos, Fußgänger) im Bild sind.
+            </p>
+            <ul>
+              <li>
+                Ein Nicht-Objekt = alles, was <em>kein</em> Auto / Fußgänger ist –
+                das sind potentiell <strong>Millionen von Regionen</strong> im Bild
+              </li>
+              <li>True Negatives wären astronomisch groß und nicht sinnvoll zählbar</li>
+              <li>Der FPR wird damit zu einem nichtssagenden Wert</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Die Lösung: Precision statt FPR</span></h3>
+            <p>
+              Statt dem FPR (der True Negatives braucht) verwenden wir
+              <strong>Precision</strong> (auch PPV = Positive Predictive Value).
+            </p>
+            <p>
+              Precision beantwortet: „Wie viele meiner Erkennungen waren tatsächlich richtig?" –
+              ohne True Negatives im Nenner.
+            </p>
+            <div class="math-display">
+              \[\text{Precision} = \text{PPV} = \frac{TP}{TP + FP}\]
+            </div>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Prüfungs-Merksatz:</strong>
+          Bei stark unbalancierten Klassen (sehr viele Negative) oder wenn True Negatives
+          nicht sinnvoll definiert sind (Object Detection, Information Retrieval):
+          → <strong>Precision-Recall-Kurve</strong> statt ROC-Kurve verwenden.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. PRECISION UND RECALL
+           ════════════════════════════════════════════ -->
+      <section class="section" id="precision-recall">
+        <div class="section-head">
+          <h2>6.2 Precision und Recall im Detail</h2>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Precision (PPV)</span></h3>
+            <div class="math-display">
+              \[\text{Precision} = \frac{TP}{TP + FP}\]
+            </div>
+            <p>
+              <strong>Frage:</strong> Welcher Anteil meiner positiven Vorhersagen war korrekt?
+            </p>
+            <ul>
+              <li>Fokus auf die Qualität der Erkennungen</li>
+              <li>Hohe Precision → wenige Fehlalarme</li>
+              <li>Niedrige Precision → viele Fehlalarme unter den Erkennungen</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Recall (TPR)</span></h3>
+            <div class="math-display">
+              \[\text{Recall} = \text{TPR} = \frac{TP}{P} = \frac{TP}{TP + FN}\]
+            </div>
+            <p>
+              <strong>Frage:</strong> Welcher Anteil der echten Positiven wurde erkannt?
+            </p>
+            <ul>
+              <li>Fokus auf die Vollständigkeit der Erkennung</li>
+              <li>Hoher Recall → wenige verpasste Positive</li>
+              <li>Niedriger Recall → viele Positive werden übersehen</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Vergleichstabelle -->
+        <div style="margin-top:var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>Maß</th>
+                <th>Formel</th>
+                <th>Nenner enthält</th>
+                <th>Messung</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Precision (PPV)</strong></td>
+                <td>TP / (TP + FP)</td>
+                <td>Alle positiven Vorhersagen</td>
+                <td>Präzision der Erkennungen</td>
+              </tr>
+              <tr>
+                <td><strong>Recall (TPR)</strong></td>
+                <td>TP / (TP + FN)</td>
+                <td>Alle echten Positiven (P)</td>
+                <td>Vollständigkeit der Erkennung</td>
+              </tr>
+              <tr>
+                <td><strong>FPR</strong></td>
+                <td>FP / (FP + TN)</td>
+                <td>Alle echten Negativen (N)</td>
+                <td>Fehlerrate bei Negativen – braucht TN!</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Trade-off erklären -->
+        <div class="overview" style="margin-top:var(--space-6)">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">!</div>
+            <div>
+              <h3>Precision-Recall Trade-off</h3>
+              <p>
+                Genau wie bei TPR und FPR gibt es einen Trade-off:
+                Erhöht man die Precision (weniger Fehlalarme), sinkt der Recall (mehr Misses).
+                Die Precision-Recall-Kurve zeigt alle Kompromisse.
+                Ein guter Klassifikator bleibt bei hohem Recall auch mit hoher Precision
+                oben rechts in der Kurve.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. PRECISION-RECALL-KURVE IN SKLEARN
+           ════════════════════════════════════════════ -->
+      <section class="section" id="pr-kurve">
+        <div class="section-head">
+          <h2>6.3 Precision-Recall-Kurve in sklearn</h2>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Einzelne Kurve
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.metrics import precision_recall_curve
+import matplotlib.pyplot as plt
+
+# Precisions und Recalls für alle Thresholds
+precisions, recalls, thresholds = precision_recall_curve(y_test, y_score)
+
+# Plot
+plt.plot(recalls, precisions)
+plt.xlabel('Recall')
+plt.ylabel('Precision')
+plt.title('Precision-Recall-Kurve')
+plt.grid(True, alpha=0.3)
+plt.xlim([0, 1])
+plt.ylim([0, 1])</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Interpretation
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>X-Achse: Recall (= TPR) – von 0 bis 1</li>
+                <li>Y-Achse: Precision – von 0 bis 1</li>
+                <li><strong>Bessere Klassifikatoren</strong> → Kurve rechts oben</li>
+                <li><strong>Große Fläche</strong> unter der Kurve = gute Klassifikation</li>
+                <li>Vergleiche mit ROC: Achsen anders, aber ähnliche Logik</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="code-cell-split" style="margin-top:var(--space-5)">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Variation der Streuung
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+
+for std in np.linspace(0.2, 2, 5):
+    X, y = make_blobs(n_samples=400, centers=2,
+                      cluster_std=std, random_state=0)
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+    model = SVC(kernel='linear').fit(X_train, y_train)
+    y_score = model.decision_function(X_test)
+
+    # Precision-Recall-Kurve berechnen
+    precisions, recalls, thresholds = precision_recall_curve(y_test, y_score)
+
+    # Plot
+    plt.figure()
+    plt.plot(recalls, precisions, label=f'std={std:.2f}')
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+    plt.title(f'Precision-Recall-Kurve – std={std:.2f}')</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Beobachtung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>std klein → Kurve hoch rechts oben (hohe Precision bei hohem Recall)</li>
+                <li>std groß → Kurve sinkt (muss bei Recall erhöhen viel Precision opfern)</li>
+                <li>Verhalten analog zur ROC: mehr Überlappung = schlechtere Kurve</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. F1-SCORE
+           ════════════════════════════════════════════ -->
+      <section class="section" id="f1-score">
+        <div class="section-head">
+          <h2>6.4 F1-Score – Precision und Recall in einem Wert</h2>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Definition</span></h3>
+            <p>
+              Der F1-Score ist das <strong>harmonische Mittel</strong> aus Precision und Recall –
+              er fasst beide in einer einzigen Zahl zusammen.
+            </p>
+            <div class="math-display">
+              \[F_1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}\]
+            </div>
+            <ul>
+              <li>Wertebereich: 0 (schlechtester) bis 1 (bester Wert)</li>
+              <li>Harmonisches (nicht arithmetisches) Mittel → bestraft extreme Werte</li>
+              <li>Nur hoch, wenn <em>beide</em> Maße hoch sind</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">F1 in sklearn</span></h3>
+            <div class="code-block">
+              <div class="code-block-title">Binäre Klassifikation</div>
+              <pre><code>from sklearn.metrics import f1_score
+
+f1 = f1_score(y_test, y_predicted)
+print(f"F1-Score: {f1:.3f}")</code></pre>
+            </div>
+            <div class="code-block">
+              <div class="code-block-title">Multi-Class Klassifikation</div>
+              <pre><code># average='macro': ungewichteter Durchschnitt
+f1_macro = f1_score(y_test, y_pred, average='macro')
+
+# average='weighted': gewichtet nach Klassengröße
+f1_weighted = f1_score(y_test, y_pred, average='weighted')</code></pre>
+            </div>
+          </article>
+        </div>
+
+        <div class="note note-warning" style="margin-top:var(--space-5)">
+          <strong>Warum harmonisches Mittel?</strong>
+          Das arithmetische Mittel (P+R)/2 würde auch dann hoch sein,
+          wenn eine der Größen perfekt und die andere miserabel ist.
+          Das harmonische Mittel 2·P·R/(P+R) ist hingegen klein,
+          sobald <em>eines</em> der beiden Maße niedrig ist.
+          Beispiel: Precision=1.0, Recall=0.01 → arithm. Mittel = 0.505, F1 = 0.02.
+        </div>
+
+        <!-- Zusammenfassung aller Maße -->
+        <div style="margin-top:var(--space-6)">
+          <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+            text-transform:uppercase; color:var(--color-text-faint); margin-bottom:var(--space-3)">
+            Alle Evaluierungsmaße im Vergleich
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Maß</th>
+                <th>Formel</th>
+                <th>Braucht TN?</th>
+                <th>sklearn-Funktion</th>
+                <th>Verwendung</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>TPR / Recall</strong></td>
+                <td>TP / P</td>
+                <td>Nein</td>
+                <td><code>recall_score()</code></td>
+                <td>Wie viele Positive erkannt?</td>
+              </tr>
+              <tr>
+                <td><strong>FPR</strong></td>
+                <td>FP / N</td>
+                <td>Ja (für N)</td>
+                <td>via <code>roc_curve()</code></td>
+                <td>Wie viele Fehlalarme bei Negativen?</td>
+              </tr>
+              <tr>
+                <td><strong>Precision</strong></td>
+                <td>TP / (TP+FP)</td>
+                <td>Nein</td>
+                <td><code>precision_score()</code></td>
+                <td>Wie präzise sind meine Erkennungen?</td>
+              </tr>
+              <tr>
+                <td><strong>F1-Score</strong></td>
+                <td>2·P·R/(P+R)</td>
+                <td>Nein</td>
+                <td><code>f1_score()</code></td>
+                <td>Balance Precision+Recall</td>
+              </tr>
+              <tr>
+                <td><strong>AUC</strong></td>
+                <td>Fläche unter ROC</td>
+                <td>Ja (für FPR)</td>
+                <td><code>roc_auc_score()</code></td>
+                <td>Gesamtgüte eines Klassifikators</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <section class="section" id="navigation">
+        <div class="card-grid">
+          <a href="Page05.html" class="card" style="text-decoration:none">
+            <h3>← Seite 5</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              Confusion Matrix sklearn, AUC, Youden-Index
+            </p>
+          </a>
+          <a href="Page07.html" class="card"
+            style="text-decoration:none; border-color:var(--color-primary);
+              background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))">
+            <h3 style="color:var(--color-primary)">→ Seite 7: Multi-Class ROC Curves</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              OvO / OvR, Micro/Macro-Avg, vollständiges Code-Beispiel mit Iris
+            </p>
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 7 · Seite 6 · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

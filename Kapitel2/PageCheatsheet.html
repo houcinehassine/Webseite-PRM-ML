@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Cheatsheet &amp; Prüfungshilfe</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ══════════════════════════════════════════════════
+       CHEATSHEET LAYOUT
+    ══════════════════════════════════════════════════ */
+    .cs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+    }
+    @media (max-width: 1100px) { .cs-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 640px)  { .cs-grid { grid-template-columns: 1fr; } }
+
+    /* 2-col stretch */
+    .cs-span2 { grid-column: span 2; }
+    .cs-span3 { grid-column: span 3; }
+    @media (max-width: 1100px) { .cs-span2,.cs-span3 { grid-column: span 2; } }
+    @media (max-width: 640px)  { .cs-span2,.cs-span3 { grid-column: span 1; } }
+
+    /* Individual Cheatsheet Block */
+    .cs-block {
+      padding: var(--space-3) var(--space-4);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-top: 3px solid var(--cs-c, var(--color-primary));
+      border-radius: var(--radius-xl);
+      font-size: var(--text-xs);
+      line-height: 1.55;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .cs-title {
+      font-size: var(--text-xs);
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--cs-c, var(--color-primary));
+      margin-bottom: var(--space-1);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .cs-block table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.68rem;
+    }
+    .cs-block th {
+      background: var(--color-surface-offset);
+      padding: 3px 6px;
+      font-weight: 700;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .cs-block td {
+      padding: 3px 6px;
+      border-bottom: 1px solid var(--color-divider);
+      vertical-align: top;
+    }
+    .cs-block tr:last-child td { border-bottom: none; }
+    .cs-block pre {
+      background: var(--color-surface-offset);
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-3);
+      font-size: 0.67rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: var(--space-1) 0;
+      border: 1px solid var(--color-border);
+    }
+    .cs-block ul {
+      padding-left: 1rem;
+      margin: 0;
+    }
+    .cs-block li { margin-bottom: 2px; font-size: 0.68rem; }
+    .cs-block code {
+      background: var(--color-surface-offset);
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-size: 0.65rem;
+    }
+    .cs-sep {
+      border: none;
+      border-top: 1px solid var(--color-divider);
+      margin: var(--space-2) 0;
+    }
+
+    /* Badge labels within blocks */
+    .cs-badge {
+      display: inline-block;
+      padding: 0 6px;
+      border-radius: var(--radius-full);
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+    .cs-badge.ok   { background: color-mix(in oklab,var(--color-success) 15%,var(--color-surface)); color:var(--color-success); }
+    .cs-badge.fail { background: color-mix(in oklab,#ef4444 15%,var(--color-surface)); color:#ef4444; }
+    .cs-badge.warn { background: color-mix(in oklab,var(--color-warning) 15%,var(--color-surface)); color:color-mix(in oklab,var(--color-warning) 80%,#000); }
+
+    /* Top quick-nav */
+    .quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-4);
+    }
+    .qn-btn {
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      border: 1.5px solid;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background .12s;
+      white-space: nowrap;
+    }
+    .qn-btn:hover { color: #fff; background: var(--qn-c, var(--color-primary)); }
+
+    /* Decision Guide */
+    .decision-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid var(--color-divider);
+      font-size: 0.68rem;
+    }
+    .decision-row:last-child { border-bottom: none; }
+    .decision-symptom {
+      font-weight: 700;
+      color: #ef4444;
+      min-width: 160px;
+      flex-shrink: 0;
+    }
+    .decision-action {
+      color: var(--color-text-muted);
+    }
+    .decision-action strong { color: var(--color-success); }
+
+    /* Validation curve mini SVG */
+    .mini-curve { border-radius: var(--radius-md); overflow: hidden;
+      border: 1px solid var(--color-border); background: var(--color-surface-2); }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Cheatsheet"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="cheatsheet"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HEADER ═══════════════════════════════════════ -->
+      <section class="hero" style="padding-bottom:var(--space-5)">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Prüfungshilfe · Alle 49 Folien komprimiert</span>
+            <h1>📋
+              <span class="key" style="--key-color:var(--color-primary)">Cheatsheet</span>
+              &amp; Prüfungshilfe
+            </h1>
+            <p style="font-size:var(--text-sm)">
+              Alle wichtigen Konzepte, Code-Snippets, Entscheidungshilfen
+              und Definitionen auf einer Seite.
+              Farbkodiert nach Thema · kopierfähige Code-Blöcke · direkte Seitenverweise.
+            </p>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-sm)">🗺️ Farbsystem</h2>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:var(--text-xs)">
+              <div><span style="display:inline-block;width:10px;height:10px;background:var(--color-primary);border-radius:2px;margin-right:6px"></span>Grundkonzepte ML / sklearn</div>
+              <div><span style="display:inline-block;width:10px;height:10px;background:var(--color-success);border-radius:2px;margin-right:6px"></span>Model Validation / Holdout</div>
+              <div><span style="display:inline-block;width:10px;height:10px;background:#8b5cf6;border-radius:2px;margin-right:6px"></span>Cross-Validation</div>
+              <div><span style="display:inline-block;width:10px;height:10px;background:#f97316;border-radius:2px;margin-right:6px"></span>Bias-Variance Trade-off</div>
+              <div><span style="display:inline-block;width:10px;height:10px;background:#ef4444;border-radius:2px;margin-right:6px"></span>Grid Search / Hyperparameter</div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ══ QUICK NAV ══════════════════════════════════════ -->
+      <div class="quick-nav">
+        <a class="qn-btn" href="#notation"       style="--qn-c:var(--color-primary); color:var(--color-primary); border-color:var(--color-primary)">📐 Notation</a>
+        <a class="qn-btn" href="#kategorien"     style="--qn-c:var(--color-primary); color:var(--color-primary); border-color:var(--color-primary)">🗂️ Kategorien</a>
+        <a class="qn-btn" href="#sklearn-api"    style="--qn-c:var(--color-primary); color:var(--color-primary); border-color:var(--color-primary)">🐍 sklearn API</a>
+        <a class="qn-btn" href="#validation"     style="--qn-c:var(--color-success); color:var(--color-success); border-color:var(--color-success)">✅ Validation</a>
+        <a class="qn-btn" href="#cross-val"      style="--qn-c:#8b5cf6; color:#7c3aed; border-color:#8b5cf6">🔀 Cross-Val</a>
+        <a class="qn-btn" href="#bias-variance"  style="--qn-c:#f97316; color:#c2410c; border-color:#f97316">⚖️ Bias-Variance</a>
+        <a class="qn-btn" href="#kurven-code"    style="--qn-c:var(--color-primary); color:var(--color-primary); border-color:var(--color-primary)">📈 Kurven-Code</a>
+        <a class="qn-btn" href="#gridsearch"     style="--qn-c:#ef4444; color:#ef4444; border-color:#ef4444">🔧 Grid Search</a>
+        <a class="qn-btn" href="#decision-guide" style="--qn-c:var(--color-success); color:var(--color-success); border-color:var(--color-success)">🎯 Entscheidung</a>
+        <a class="qn-btn" href="#zitate"         style="--qn-c:var(--color-text-muted); color:var(--color-text-muted); border-color:var(--color-text-muted)">💬 Zitate</a>
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════
+           REIHE 1: NOTATION + KATEGORIEN + SCORING
+      ══════════════════════════════════════════════════ -->
+      <div class="cs-grid" id="notation">
+
+        <!-- BLOCK: Notation -->
+        <div class="cs-block" style="--cs-c:var(--color-primary)">
+          <div class="cs-title">📐 Notation &amp; Datenformat</div>
+          <table>
+            <thead><tr><th>Symbol</th><th>Bedeutung</th><th>Shape</th></tr></thead>
+            <tbody>
+              <tr><td><strong style="color:var(--color-primary)">X</strong></td><td>Feature-Matrix</td><td><code>(N, T)</code></td></tr>
+              <tr><td><strong style="color:var(--color-success)">y</strong></td><td>Label-Vektor</td><td><code>(N,)</code></td></tr>
+              <tr><td><strong>N</strong></td><td>Anzahl Samples</td><td>Zeilen von X</td></tr>
+              <tr><td><strong>T</strong></td><td>Anzahl Features</td><td>Spalten von X</td></tr>
+              <tr><td><strong>(xᵢ, yᵢ)</strong></td><td>Eine Beobachtung</td><td>Zeile i + Label</td></tr>
+              <tr><td><strong>D</strong></td><td>Trainingsdatensatz</td><td>{(x₁,y₁),…,(xN,yN)}</td></tr>
+              <tr><td><strong>ŷ</strong></td><td>Vorhersage</td><td>predicted labels</td></tr>
+            </tbody>
+          </table>
+          <hr class="cs-sep">
+          <div style="font-size:0.65rem; color:var(--color-text-faint)">
+            X als NumPy-Array oder Pandas DataFrame<br>
+            y als NumPy-Array oder Pandas Series<br>
+            Bei 1 Feature: <code>X.reshape(-1, 1)</code> (sklearn braucht 2D!)
+          </div>
+        </div>
+
+        <!-- BLOCK: ML Kategorien -->
+        <div class="cs-block" id="kategorien" style="--cs-c:var(--color-primary)">
+          <div class="cs-title">🗂️ ML Kategorien</div>
+          <table>
+            <thead><tr><th>Typ</th><th>Input</th><th>Ziel</th><th>sklearn</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--color-primary)">Supervised</strong><br>Klassifikation</td>
+                <td>X + y (diskret)</td>
+                <td>Trennlinie finden</td>
+                <td><code>.fit(X,y)</code><br><code>.predict(X)</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--color-primary)">Supervised</strong><br>Regression</td>
+                <td>X + y (kont.)</td>
+                <td>Ebene fitten</td>
+                <td><code>.fit(X,y)</code><br><code>.predict(X)</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--color-success)">Unsupervised</strong><br>Clustering</td>
+                <td>Nur X</td>
+                <td>Gruppen finden</td>
+                <td><code>.fit(X)</code><br><code>.predict(X)</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--color-success)">Unsupervised</strong><br>Dim.Red.</td>
+                <td>Nur X</td>
+                <td>Latente Struktur</td>
+                <td><code>.fit(X)</code><br><code>.transform(X)</code></td>
+              </tr>
+            </tbody>
+          </table>
+          <hr class="cs-sep">
+          <div style="font-size:0.65rem">
+            <strong>Scoring/Prediction</strong> = gelerntes Wissen auf neue Daten anwenden<br>
+            → <code>y_pred = model.predict(X_new)</code>
+          </div>
+        </div>
+
+        <!-- BLOCK: sklearn 4 Schritte -->
+        <div class="cs-block" id="sklearn-api" style="--cs-c:var(--color-primary)">
+          <div class="cs-title">🐍 sklearn – Generischer 4-Schritte Prozess</div>
+          <pre># 1) Modell importieren
+from sklearn.MODULE import MODEL
+
+# 2) Hyperparameter wählen &amp; instanziieren
+model = MODEL(hyperparam=wert)
+
+# 3) Training
+model.fit(X_train, y_train)          # Supervised
+model.fit(X)                          # Unsupervised
+
+# 4a) Supervised: Vorhersage
+y_pred = model.predict(X_new)
+
+# 4b) Unsupervised: Transformieren
+X_low  = model.transform(X_new)
+labels = model.predict(X_new)        # Clustering</pre>
+          <hr class="cs-sep">
+          <div style="font-size:0.65rem; color:var(--color-text-muted)">
+            💬 <em>„Wenn Sie ein Modell anwenden können – können Sie jedes anwenden."</em>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════
+           REIHE 2: SKLEARN 6 BEREICHE + DATENFORMAT + IMPORTS
+      ══════════════════════════════════════════════════ -->
+      <div class="cs-grid" style="margin-top:var(--space-3)">
+
+        <!-- BLOCK: sklearn 6 Bereiche -->
+        <div class="cs-block" style="--cs-c:var(--color-primary)">
+          <div class="cs-title">🏗️ sklearn – 6 Bereiche</div>
+          <table>
+            <thead><tr><th>Bereich</th><th>Import Beispiel</th></tr></thead>
+            <tbody>
+              <tr><td><strong style="color:#3b82f6">Classification</strong></td><td><code>sklearn.neighbors · sklearn.svm</code></td></tr>
+              <tr><td><strong style="color:#10b981">Regression</strong></td><td><code>sklearn.linear_model · sklearn.svm</code></td></tr>
+              <tr><td><strong style="color:#f59e0b">Clustering</strong></td><td><code>sklearn.cluster</code></td></tr>
+              <tr><td><strong style="color:#8b5cf6">Dim. Red.</strong></td><td><code>sklearn.decomposition</code></td></tr>
+              <tr><td><strong style="color:#ec4899">Model Sel.</strong></td><td><code>sklearn.model_selection</code></td></tr>
+              <tr><td><strong style="color:#0ea5e9">Preprocessing</strong></td><td><code>sklearn.preprocessing</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- BLOCK: Wichtige Imports -->
+        <div class="cs-block" style="--cs-c:var(--color-primary)">
+          <div class="cs-title">📦 Wichtige Imports – Alle auf einen Blick</div>
+          <pre>from sklearn.datasets         import load_iris
+from sklearn.neighbors        import KNeighborsClassifier
+from sklearn.linear_model     import LinearRegression
+from sklearn.preprocessing    import PolynomialFeatures
+from sklearn.pipeline         import make_pipeline, Pipeline
+from sklearn.model_selection  import (
+    train_test_split,
+    cross_val_score,
+    validation_curve,
+    learning_curve,
+    GridSearchCV,
+    LeaveOneOut,
+    RepeatedKFold)
+from sklearn.metrics          import accuracy_score
+import numpy as np
+import matplotlib.pyplot as plt</pre>
+        </div>
+
+        <!-- BLOCK: Accuracy / Score -->
+        <div class="cs-block" id="validation" style="--cs-c:var(--color-success)">
+          <div class="cs-title">📏 Accuracy berechnen – 2 Varianten</div>
+          <pre># Variante 1: accuracy_score()
+from sklearn.metrics import accuracy_score
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+acc = accuracy_score(y_test, y_pred)
+# → 0.96
+
+# Variante 2: model.score() (kompakter)
+acc = model.score(X_test, y_test)
+# → 0.96 (äquivalent!)</pre>
+          <hr class="cs-sep">
+          <div style="font-size:0.65rem; color:var(--color-text-muted)">
+            <strong>Unterschied:</strong> <code>accuracy_score</code> braucht y_pred,
+            <code>.score()</code> ruft intern predict auf.<br>
+            Beide geben dasselbe Ergebnis!
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════
+           REIHE 3: MODEL VALIDATION + CROSS-VAL
+      ══════════════════════════════════════════════════ -->
+      <div class="cs-grid" style="margin-top:var(--space-3)">
+
+        <!-- BLOCK: Validation Strategien -->
+        <div class="cs-block" id="cross-val" style="--cs-c:var(--color-success)">
+          <div class="cs-title">✅ Model Validation – Strategien</div>
+          <table>
+            <thead><tr><th>Strategie</th><th>Vor</th><th>Nach</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="cs-badge fail">FAIL</span><br>Train=Test</td>
+                <td>Einfach</td>
+                <td>Accuracy=1.0, nichts gelernt!</td>
+              </tr>
+              <tr>
+                <td><span class="cs-badge warn">OK</span><br>Holdout 50/50</td>
+                <td>Einfach</td>
+                <td>Datenverlust beim Training</td>
+              </tr>
+              <tr>
+                <td><span class="cs-badge ok">GUT</span><br>K-Fold CV</td>
+                <td>Kein Verlust</td>
+                <td>k × Training, k Scores</td>
+              </tr>
+              <tr>
+                <td><span class="cs-badge ok">BEST</span><br>3-Way Split</td>
+                <td>Robust</td>
+                <td>Val=HP, Test=finale Eval</td>
+              </tr>
+            </tbody>
+          </table>
+          <hr class="cs-sep">
+          <pre># Holdout (The Right Way)
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X, y, train_size=0.5,
+    random_state=42)
+model.fit(X_tr, y_tr)
+print(model.score(X_te, y_te))  # 0.96</pre>
+        </div>
+
+        <!-- BLOCK: Cross-Validation Code -->
+        <div class="cs-block" style="--cs-c:#8b5cf6">
+          <div class="cs-title">🔀 Cross-Validation – Code</div>
+          <pre># ── K-Fold (Standard) ─────────────────────
+scores = cross_val_score(model, X, y, cv=5)
+# → array([0.9667, 0.9667, 0.9333, 0.9333, 1.0])
+print(scores.mean())  # → 0.96
+
+# ── Leave-One-Out ──────────────────────────
+loo = LeaveOneOut()
+scores = cross_val_score(
+    model, X, y, cv=loo)
+# → 150 Werte, mean ≈ 0.96
+
+# ── Two-Fold (manuell) ─────────────────────
+X1, X2, y1, y2 = train_test_split(
+    X, y, train_size=0.5)
+y2_model = model.fit(X1,y1).predict(X2)
+y1_model = model.fit(X2,y2).predict(X1)
+acc = (accuracy_score(y2,y2_model) +
+       accuracy_score(y1,y1_model)) / 2
+
+# ── Repeated K-Fold ────────────────────────
+rkf = RepeatedKFold(
+    n_splits=5, n_repeats=3, random_state=42)
+scores = cross_val_score(model, X, y, cv=rkf)
+# → 15 Scores</pre>
+        </div>
+
+        <!-- BLOCK: 3-Way Split Workflow -->
+        <div class="cs-block" style="--cs-c:#8b5cf6">
+          <div class="cs-title">🔀 3-Way Split &amp; Workflow (State-of-the-Art)</div>
+          <div style="font-size:0.65rem; background:var(--color-surface-offset); border-radius:var(--radius-md); padding:var(--space-2) var(--space-3); margin-bottom:var(--space-2)">
+            <div style="display:flex; justify-content:space-between; margin-bottom:4px">
+              <span style="font-weight:700">All Data</span>
+            </div>
+            <div style="display:flex; height:16px; border-radius:4px; overflow:hidden; gap:2px; margin-bottom:6px">
+              <div style="flex:4; background:var(--color-success)"></div>
+              <div style="flex:1; background:#f97316"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:.6rem; color:var(--color-text-faint); margin-bottom:6px">
+              <span>Training Data (80%)</span>
+              <span>Test Data (20%) → Tabu!</span>
+            </div>
+            <div style="font-size:.6rem; font-weight:700; margin-bottom:4px; color:#8b5cf6">Finding Hyperparameters (CV auf Training Data):</div>
+            <div style="display:flex; flex-direction:column; gap:2px; margin-bottom:6px">
+              <div style="display:flex; height:10px; border-radius:2px; overflow:hidden; gap:1px">
+                <div style="flex:1;background:#3b82f6"></div><div style="flex:4;background:var(--color-success)"></div>
+              </div>
+              <div style="display:flex; height:10px; border-radius:2px; overflow:hidden; gap:1px">
+                <div style="flex:1;background:var(--color-success)"></div><div style="flex:1;background:#3b82f6"></div><div style="flex:3;background:var(--color-success)"></div>
+              </div>
+              <div style="display:flex; height:10px; border-radius:2px; overflow:hidden; gap:1px">
+                <div style="flex:4;background:var(--color-success)"></div><div style="flex:1;background:#3b82f6"></div>
+              </div>
+            </div>
+            <div style="font-size:.6rem; font-weight:700; color:#f97316">Final Evaluation: Test Data → nur einmal!</div>
+          </div>
+          <div style="font-size:0.65rem; color:var(--color-text-muted)">
+            → <strong>Parameters</strong> + Dataset → Cross-Validation → Best HP<br>
+            → Training data → Retrained model + Test data → Final evaluation
+          </div>
+          <hr class="cs-sep">
+          <div style="font-size:0.65rem; color:var(--color-text-faint)">
+            <strong>training_score ≥ validation_score</strong> (immer)<br>
+            <strong>val_score nie > train_score</strong> (außer Zufall)
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════
+           REIHE 4: BIAS-VARIANCE
+      ══════════════════════════════════════════════════ -->
+      <div class="cs-grid" style="margin-top:var(--space-3)" id="bias-variance">
+
+        <!-- BLOCK: Parameter vs Hyperparameter -->
+        <div class="cs-block" style="--cs-c:#f97316">
+          <div class="cs-title">⚙️ Parameter vs. Hyperparameter</div>
+          <table>
+            <thead><tr><th></th><th>Parameter</th><th>Hyperparameter</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Wann?</strong></td><td>Durch Training gelernt</td><td>Vor Training festgelegt</td></tr>
+              <tr><td><strong>Beispiel</strong></td><td>Koeffizient w₀, w₁</td><td>degree=3, n_neighbors=5</td></tr>
+              <tr><td><strong>Wie?</strong></td><td><code>.fit(X,y)</code></td><td>Im Konstruktor</td></tr>
+              <tr><td><strong>sklearn</strong></td><td><code>model.coef_</code></td><td><code>model.n_neighbors</code></td></tr>
+            </tbody>
+          </table>
+          <hr class="cs-sep">
+          <div style="font-size:0.65rem">
+            <strong>Optionen bei schlechter Accuracy:</strong><br>
+            ① Komplexität ↑ (Hyperparameter tunen)<br>
+            ② Komplexität ↓ (Overfitting bekämpfen)<br>
+            ③ Mehr Trainingsdaten<br>
+            ④ Andere/mehr Features
+          </div>
+        </div>
+
+        <!-- BLOCK: High-Bias / High-Variance -->
+        <div class="cs-block" style="--cs-c:#f97316">
+          <div class="cs-title">⚖️ Bias-Variance – Schnellreferenz</div>
+          <table>
+            <thead><tr><th></th><th style="color:#3b82f6">High-Bias (Underfit)</th><th style="color:#ef4444">High-Variance (Overfit)</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Train-Score</strong></td>
+                <td>Niedrig</td>
+                <td>Hoch (nahe 1.0)</td>
+              </tr>
+              <tr>
+                <td><strong>Val-Score</strong></td>
+                <td>Niedrig (≈ Train)</td>
+                <td>Deutlich niedriger als Train!</td>
+              </tr>
+              <tr>
+                <td><strong>Gap</strong></td>
+                <td>Klein</td>
+                <td>Groß</td>
+              </tr>
+              <tr>
+                <td><strong>Lösung</strong></td>
+                <td>Komplexität ↑</td>
+                <td>Komplexität ↓ oder mehr Daten</td>
+              </tr>
+            </tbody>
+          </table>
+          <hr class="cs-sep">
+          <!-- Mini Validation Curve SVG -->
+          <div class="mini-curve">
+            <svg viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg">
+              <!-- Zones -->
+              <rect x="0"   y="0" width="80"  height="90" fill="color-mix(in oklab,#3b82f6 8%,transparent)"/>
+              <rect x="80"  y="0" width="140" height="90" fill="color-mix(in oklab,var(--color-success) 8%,transparent)"/>
+              <rect x="220" y="0" width="80"  height="90" fill="color-mix(in oklab,#ef4444 8%,transparent)"/>
+              <!-- Axes -->
+              <line x1="10" y1="80" x2="290" y2="80" stroke="var(--color-border)" stroke-width="1"/>
+              <line x1="10" y1="80" x2="10"  y2="5"  stroke="var(--color-border)" stroke-width="1"/>
+              <!-- Training score -->
+              <path d="M15,70 C40,50 80,25 130,18 S200,15 285,13" fill="none" stroke="#3b82f6" stroke-width="2"/>
+              <!-- Validation score -->
+              <path d="M15,78 C35,65 70,40 110,28 S145,18 160,18 C180,20 215,35 255,55 S275,68 285,72" fill="none" stroke="#ef4444" stroke-width="2"/>
+              <!-- Best model -->
+              <circle cx="160" cy="18" r="4" fill="var(--color-success)"/>
+              <!-- Labels -->
+              <text x="40"  y="10" font-size="7" fill="#3b82f6" font-family="sans-serif" font-weight="bold">High Bias</text>
+              <text x="150" y="8"  text-anchor="middle" font-size="7" fill="var(--color-success)" font-family="sans-serif" font-weight="bold">Best</text>
+              <text x="250" y="10" font-size="7" fill="#ef4444" font-family="sans-serif" font-weight="bold">High Var.</text>
+              <text x="10" y="12" font-size="6" fill="#3b82f6" font-family="sans-serif">train</text>
+              <text x="10" y="22" font-size="6" fill="#ef4444" font-family="sans-serif">val</text>
+              <text x="150" y="87" text-anchor="middle" font-size="6" fill="var(--color-text-faint)" font-family="sans-serif">model complexity →</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- BLOCK: Dartscheibe Quick Ref -->
+        <div class="cs-block" style="--cs-c:#f97316">
+          <div class="cs-title">🎯 Dartscheiben-Metapher</div>
+          <table>
+            <thead><tr><th></th><th>Low Variance</th><th>High Variance</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>Low Bias</strong></td>
+                <td>✅ Ideal<br><small>Eng + am Zentrum</small></td>
+                <td>⚠️<br><small>Weit verteilt, zentriert</small></td>
+              </tr>
+              <tr>
+                <td><strong>High Bias</strong></td>
+                <td>⚠️<br><small>Eng + weg vom Zentrum</small></td>
+                <td>❌ Worst Case<br><small>Weit verteilt + weg</small></td>
+              </tr>
+            </tbody>
+          </table>
+          <hr class="cs-sep">
+          <div style="font-size:0.65rem">
+            <strong style="color:#3b82f6">Bias</strong> = Abstand vom Mittelpunkt =
+            <strong>Validität</strong><br>
+            <strong style="color:#ef4444">Varianz</strong> = Streuung der Punkte =
+            <strong>Reliabilität</strong>
+          </div>
+          <hr class="cs-sep">
+          <!-- Learning Curve Mini SVG -->
+          <div class="mini-curve">
+            <svg viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0"   y="0" width="150" height="80" fill="color-mix(in oklab,#ef4444 8%,transparent)"/>
+              <rect x="150" y="0" width="150" height="80" fill="color-mix(in oklab,var(--color-success) 8%,transparent)"/>
+              <line x1="10" y1="70" x2="290" y2="70" stroke="var(--color-border)" stroke-width="1"/>
+              <line x1="10" y1="70" x2="10"  y2="5"  stroke="var(--color-border)" stroke-width="1"/>
+              <!-- Training score: starts high, falls -->
+              <path d="M15,12 C50,13 100,18 150,25 S220,32 285,35" fill="none" stroke="#3b82f6" stroke-width="2"/>
+              <!-- Validation score: starts low, rises -->
+              <path d="M15,68 C40,55 80,40 130,32 S200,32 285,33" fill="none" stroke="#ef4444" stroke-width="2"/>
+              <text x="75"  y="10" text-anchor="middle" font-size="7" fill="#ef4444" font-family="sans-serif" font-weight="bold">High Variance</text>
+              <text x="220" y="10" text-anchor="middle" font-size="7" fill="var(--color-success)" font-family="sans-serif" font-weight="bold">Good Fit</text>
+              <text x="150" y="78" text-anchor="middle" font-size="6" fill="var(--color-text-faint)" font-family="sans-serif">training set size →</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════
+           REIHE 5: KURVEN-CODE
+      ══════════════════════════════════════════════════ -->
+      <div class="cs-grid" style="margin-top:var(--space-3)" id="kurven-code">
+
+        <!-- BLOCK: validation_curve Code -->
+        <div class="cs-block" style="--cs-c:var(--color-primary)">
+          <div class="cs-title">📈 validation_curve – Vollständiger Code</div>
+          <pre>from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import validation_curve
+import numpy as np, matplotlib.pyplot as plt
+
+# Helper
+def PolynomialRegression(degree=2, **kw):
+    return make_pipeline(
+        PolynomialFeatures(degree),
+        LinearRegression(**kw))
+
+# validation_curve
+degree = np.arange(0, 21)
+train_s, val_s = validation_curve(
+    PolynomialRegression(), X, y,
+    param_name='polynomialfeatures__degree',
+    param_range=degree, cv=7)
+
+plt.plot(degree, np.median(train_s,1),
+         color='blue', label='training score')
+plt.plot(degree, np.median(val_s,1),
+         color='red',  label='validation score')
+plt.legend(loc='lower center')
+plt.ylim(0,1); plt.xlabel('degree')
+plt.show()
+# → Optimum bei degree ≈ 3-4</pre>
+        </div>
+
+        <!-- BLOCK: learning_curve Code -->
+        <div class="cs-block" style="--cs-c:var(--color-success)">
+          <div class="cs-title">📉 learning_curve – Vollständiger Code</div>
+          <pre>from sklearn.model_selection import learning_curve
+
+# Vertikal: (2,1) statt (1,2)!
+fig, axes = plt.subplots(2, 1, figsize=(6,8))
+
+for i, degree in enumerate([2, 9]):
+    N, train_lc, val_lc = learning_curve(
+        PolynomialRegression(degree),
+        X, y,
+        cv=7,
+        train_sizes=np.linspace(0.3, 1, 25))
+
+    axes[i].plot(N, np.mean(train_lc,1),
+                 color='blue',
+                 label='training score')
+    axes[i].plot(N, np.mean(val_lc,1),
+                 color='red',
+                 label='validation score')
+    axes[i].set_ylim(0, 1)
+    axes[i].set_title(f'degree = {degree}')
+    axes[i].legend(loc='lower right')
+
+plt.tight_layout(); plt.show()
+# degree=2: Konvergenz → gut
+# degree=9: Gap bleibt → Overfitting</pre>
+        </div>
+
+        <!-- BLOCK: GridSearchCV Code -->
+        <div class="cs-block" id="gridsearch" style="--cs-c:#ef4444">
+          <div class="cs-title">🔧 GridSearchCV – Vollständiger Code</div>
+          <pre>from sklearn.model_selection import GridSearchCV
+
+# 1) param_grid definieren
+param_grid = {
+    'polynomialfeatures__degree':
+        np.arange(21),
+    'linearregression__fit_intercept':
+        [True, False],
+}
+
+# 2) GridSearchCV instanziieren
+grid = GridSearchCV(
+    PolynomialRegression(),
+    param_grid,
+    cv=7)
+
+# 3) Fit (alle Kombinationen!)
+grid.fit(X, y)
+
+# 4) Ergebnisse ausgeben
+print(grid.best_params_)
+# {'polynomialfeatures__degree': 4,
+#  'linearregression__fit_intercept': False}
+print(grid.best_score_)
+
+# 5) Best Model nutzen
+model = grid.best_estimator_
+y_pred = model.predict(X_new)
+
+# Alternativ: vollständige Pipeline
+from sklearn.pipeline import Pipeline
+grid2 = GridSearchCV(
+    estimator=Pipeline([
+        ('polynomialfeatures', PolynomialFeatures()),
+        ('linearregression',   LinearRegression())
+    ]),
+    param_grid=param_grid, cv=7)</pre>
+        </div>
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════
+           REIHE 6: ENTSCHEIDUNGSLEITFADEN + ZITATE
+      ══════════════════════════════════════════════════ -->
+      <div class="cs-grid" style="margin-top:var(--space-3)" id="decision-guide">
+
+        <!-- BLOCK: Decision Guide (span 2) -->
+        <div class="cs-block cs-span2" style="--cs-c:var(--color-success)">
+          <div class="cs-title">🎯 Entscheidungsleitfaden – Was tun wenn...?</div>
+          <div class="decision-row">
+            <span class="decision-symptom">❌ accuracy_score = 1.0 auf Trainingsdaten</span>
+            <span class="decision-action"><strong>FAIL!</strong> Training und Validation auf denselben Daten! → <strong>train_test_split</strong> verwenden (Seite 6)</span>
+          </div>
+          <div class="decision-row">
+            <span class="decision-symptom">⚠️ Training-Score ≈ Validation-Score (beide schlecht)</span>
+            <span class="decision-action"><strong>High-Bias / Underfitting</strong> → Modellkomplexität erhöhen (z.B. höherer Polynomgrad) oder bessere Features</span>
+          </div>
+          <div class="decision-row">
+            <span class="decision-symptom">⚠️ Training-Score hoch, Validation-Score viel niedriger</span>
+            <span class="decision-action"><strong>High-Variance / Overfitting</strong> → Komplexität reduzieren ODER mehr Trainingsdaten (learning_curve prüfen)</span>
+          </div>
+          <div class="decision-row">
+            <span class="decision-symptom">🤔 Welcher Hyperparameter ist optimal?</span>
+            <span class="decision-action">→ <strong>validation_curve()</strong> verwenden · X-Achse = Hyperparameter · <strong>Optimum = Maximum des Validation-Scores</strong></span>
+          </div>
+          <div class="decision-row">
+            <span class="decision-symptom">🤔 Hilft mehr Daten bei diesem Modell?</span>
+            <span class="decision-action">→ <strong>learning_curve()</strong> verwenden · Wenn Kurven konvergieren bereits = mehr Daten bringen KEINEN Mehrwert mehr</span>
+          </div>
+          <div class="decision-row">
+            <span class="decision-symptom">🤔 Welche Hyperparameter-Kombination ist optimal?</span>
+            <span class="decision-action">→ <strong>GridSearchCV</strong> · param_grid definieren · .fit() · .best_params_ lesen</span>
+          </div>
+          <div class="decision-row">
+            <span class="decision-symptom">🤔 1 Holdout reicht mir nicht (zu wenig Daten)</span>
+            <span class="decision-action">→ <strong>cross_val_score(model, X, y, cv=5)</strong> · kein Datenverlust · mittlere Performance</span>
+          </div>
+          <div class="decision-row" style="border-bottom:none">
+            <span class="decision-symptom">🤔 CV-Ergebnisse variieren stark zwischen Runs</span>
+            <span class="decision-action">→ <strong>RepeatedKFold</strong> verwenden · Artefakte durch zufällige Aufteilung vermeiden</span>
+          </div>
+        </div>
+
+        <!-- BLOCK: Wichtige Zitate & Formeln -->
+        <div class="cs-block" id="zitate" style="--cs-c:var(--color-text-muted)">
+          <div class="cs-title">💬 Kernaussagen für die Prüfung</div>
+          <div style="font-size:0.68rem; display:flex; flex-direction:column; gap:var(--space-3)">
+            <div style="padding:var(--space-2) var(--space-3); background:color-mix(in oklab,var(--color-success) 8%,var(--color-surface-offset)); border-radius:var(--radius-md); border-left:2px solid var(--color-success)">
+              <em>„Learning is finding parameters."</em><br>
+              <span style="color:var(--color-text-faint); font-size:.6rem">→ Training = Optimierung der Modellparameter</span>
+            </div>
+            <div style="padding:var(--space-2) var(--space-3); background:color-mix(in oklab,var(--color-primary) 8%,var(--color-surface-offset)); border-radius:var(--radius-md); border-left:2px solid var(--color-primary)">
+              <em>„Wenn Sie ein Modell anwenden können – können Sie jedes anwenden."</em><br>
+              <span style="color:var(--color-text-faint); font-size:.6rem">→ sklearn API ist für alle Modelle gleich</span>
+            </div>
+            <div style="padding:var(--space-2) var(--space-3); background:color-mix(in oklab,#f97316 8%,var(--color-surface-offset)); border-radius:var(--radius-md); border-left:2px solid #f97316">
+              <em>„Bias und Varianz haben einen Bezug zu Validität und Reliabilität."</em><br>
+              <span style="color:var(--color-text-faint); font-size:.6rem">→ Bias=Abstand vom Zentrum, Varianz=Streuung</span>
+            </div>
+            <div style="padding:var(--space-2) var(--space-3); background:color-mix(in oklab,#8b5cf6 8%,var(--color-surface-offset)); border-radius:var(--radius-md); border-left:2px solid #8b5cf6">
+              <em>„Sehen Sie das hier als Referenz – wir kommen immer wieder zurück."</em><br>
+              <span style="color:var(--color-text-faint); font-size:.6rem">→ Kapitel 2 = Werkzeugkasten für alle späteren Algorithmen</span>
+            </div>
+          </div>
+          <hr class="cs-sep">
+          <div style="font-size:0.65rem; color:var(--color-text-muted)">
+            <strong>Schlüssel-Formeln:</strong><br>
+            <code>f(x) = aₙxⁿ + ... + a₁x + a₀</code> (Polynomiale Regression)<br>
+            <code>D = {(x₁,y₁), ..., (xN,yN)}</code> (Trainingsdatensatz)<br>
+            <code>X ∈ ℝᴺˣᵀ &nbsp; y ∈ ℝᴺ</code>
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════
+           REIHE 7: ALLE FUNKTIONS-SIGNATUREN + SEITEN-INDEX
+      ══════════════════════════════════════════════════ -->
+      <div class="cs-grid" style="margin-top:var(--space-3)">
+
+        <!-- BLOCK: Funktions-Signaturen -->
+        <div class="cs-block cs-span2" style="--cs-c:var(--color-primary)">
+          <div class="cs-title">📚 Alle Funktions-Signaturen – Schnellreferenz</div>
+          <table>
+            <thead><tr><th style="min-width:140px">Funktion</th><th>Signatur</th><th>Wichtigste Rückgabe</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong style="color:var(--color-success)">train_test_split</strong></td>
+                <td><code>train_test_split(X, y, train_size=0.8, random_state=42)</code></td>
+                <td><code>X_tr, X_te, y_tr, y_te</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:#8b5cf6">cross_val_score</strong></td>
+                <td><code>cross_val_score(model, X, y, cv=5)</code></td>
+                <td><code>array([score1, ..., score_k])</code> → .mean()</td>
+              </tr>
+              <tr>
+                <td><strong style="color:#8b5cf6">LeaveOneOut</strong></td>
+                <td><code>cv=LeaveOneOut()</code> in cross_val_score</td>
+                <td>N Scores (N = Anzahl Datenpunkte)</td>
+              </tr>
+              <tr>
+                <td><strong style="color:#8b5cf6">RepeatedKFold</strong></td>
+                <td><code>RepeatedKFold(n_splits=5, n_repeats=3)</code></td>
+                <td>n_splits × n_repeats Scores</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--color-primary)">validation_curve</strong></td>
+                <td><code>validation_curve(model, X, y, param_name='…', param_range=arr, cv=7)</code></td>
+                <td><code>train_scores, val_scores</code> (shape: n_params × cv)</td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--color-success)">learning_curve</strong></td>
+                <td><code>learning_curve(model, X, y, cv=7, train_sizes=np.linspace(0.3,1,25))</code></td>
+                <td><code>N, train_scores, val_scores</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:#ef4444">GridSearchCV</strong></td>
+                <td><code>GridSearchCV(model, param_grid, cv=7).fit(X,y)</code></td>
+                <td><code>.best_params_ · .best_score_ · .best_estimator_</code></td>
+              </tr>
+              <tr>
+                <td><strong style="color:var(--color-success)">accuracy_score</strong></td>
+                <td><code>accuracy_score(y_test, y_pred)</code></td>
+                <td>Float 0–1 (= model.score(X_test, y_test))</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- BLOCK: Seitenindex -->
+        <div class="cs-block" style="--cs-c:var(--color-text-muted)">
+          <div class="cs-title">🗺️ Seitenindex – Wo steht was?</div>
+          <table>
+            <thead><tr><th>Thema</th><th>Seite</th></tr></thead>
+            <tbody>
+              <tr><td>ML Kategorien, Notation</td><td><a href="Page02.html">Seite 2</a></td></tr>
+              <tr><td>Klassifikation, Scoring, Regression</td><td><a href="Page03.html">Seite 3</a></td></tr>
+              <tr><td>Clustering, Dim.Red.</td><td><a href="Page04.html">Seite 4</a></td></tr>
+              <tr><td>sklearn API, 4-Schritte, LR-Beispiel</td><td><a href="Page05.html">Seite 5</a></td></tr>
+              <tr><td>Holdout, accuracy_score, NOT-SO-RIGHT</td><td><a href="Page06.html">Seite 6</a></td></tr>
+              <tr><td>K-Fold, LOO, 3-Way, Workflow</td><td><a href="Page07.html">Seite 7</a></td></tr>
+              <tr><td>Bias-Variance, Dartscheibe, Val.Kurven Schema</td><td><a href="Page08.html">Seite 8</a></td></tr>
+              <tr><td>validation_curve, learning_curve Code</td><td><a href="Page09.html">Seite 9</a></td></tr>
+              <tr><td>GridSearchCV, param_grid, best_estimator_</td><td><a href="Page10.html">Seite 10</a></td></tr>
+            </tbody>
+          </table>
+          <hr class="cs-sep">
+          <div style="font-size:0.65rem; color:var(--color-text-muted)">
+            <strong>Folie → Seite Mapping:</strong><br>
+            1–2 = S01 · 3–5 = S01 · 6–10 = S02 · 11–15 = S03<br>
+            16–17 = S04 · 18–22 = S05 · 23–27 = S06 · 28–32 = S07<br>
+            33–37 = S08 · 38–45 = S09 · 46–49 = S10
+          </div>
+        </div>
+
+      </div>
+
+
+      <!-- ══════════════════════════════════════════════════
+           REIHE 8: PRÜFUNGS-AUFGABEN MUSTER
+      ══════════════════════════════════════════════════ -->
+      <div class="cs-grid" style="margin-top:var(--space-3)">
+
+        <!-- BLOCK: Typische Aufgaben Muster -->
+        <div class="cs-block cs-span3" style="--cs-c:var(--color-warning)">
+          <div class="cs-title">🎓 Typische Prüfungs-Aufgaben &amp; Lösungsansätze</div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-4)">
+
+            <div>
+              <div style="font-size:0.65rem; font-weight:800; color:var(--color-warning); margin-bottom:var(--space-2)">AUFGABE TYP 1: Modell trainieren &amp; evaluieren</div>
+              <pre style="font-size:.62rem">from sklearn.datasets import load_iris
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+
+iris = load_iris()
+X, y = iris.data, iris.target
+
+# RICHTIG: Holdout
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X, y, train_size=0.5, random_state=42)
+
+model = KNeighborsClassifier(n_neighbors=1)
+model.fit(X_tr, y_tr)
+print(model.score(X_te, y_te))  # 0.96</pre>
+            </div>
+
+            <div>
+              <div style="font-size:0.65rem; font-weight:800; color:var(--color-warning); margin-bottom:var(--space-2)">AUFGABE TYP 2: Cross-Validation</div>
+              <pre style="font-size:.62rem">from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+
+model = KNeighborsClassifier(n_neighbors=1)
+
+# Standard K-Fold
+scores = cross_val_score(
+    model, X, y, cv=5)
+print(scores.mean().round(4))  # 0.96
+
+# Interpretation:
+# Mittelwert = globale Performance
+# Std = Stabilität des Modells</pre>
+            </div>
+
+            <div>
+              <div style="font-size:0.65rem; font-weight:800; color:var(--color-warning); margin-bottom:var(--space-2)">AUFGABE TYP 3: Hyperparameter-Tuning</div>
+              <pre style="font-size:.62rem">from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+
+param_grid = {
+    'n_neighbors': [1, 3, 5, 10, 20]
+}
+
+grid = GridSearchCV(
+    KNeighborsClassifier(),
+    param_grid, cv=5)
+
+grid.fit(X, y)
+print(grid.best_params_)
+# {'n_neighbors': 5}
+print(grid.best_score_)
+
+# Best model nutzen:
+model = grid.best_estimator_</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungshilfe · Kapitel 2 · Alle 49 Folien · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

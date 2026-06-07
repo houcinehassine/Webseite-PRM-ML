@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Boosting als Gegenkonzept</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page5" title="Kapitel 5 · Boosting als Gegenkonzept"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page7"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Seite 7</span>
+            <h1>Boosting als
+              <span class="key" style="--key-color:var(--color-primary)">Gegenkonzept</span>
+            </h1>
+            <p>
+              Während Bagging Weak Learner
+              <strong>parallel</strong> trainiert,
+              geht Boosting einen anderen Weg:
+              <strong>seriell, gewichtet, fokussiert</strong>.
+              Schwierige Datenpunkte werden mit jedem Schritt
+              wichtiger – bis ein starker Klassifikator entsteht.
+            </p>
+            <div class="pill-row">
+              <span class="pill">⛓️ Serielles Training</span>
+              <span class="pill">⚖️ Gewichtete Samples</span>
+              <span class="pill">🎯 AdaBoost</span>
+              <span class="pill">📐 Fehlergewichtung</span>
+              <span class="pill">🆚 Bagging vs. Boosting</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Was ist der
+                <strong>Kernunterschied</strong>
+                zwischen Bagging und Boosting?
+              </li>
+              <li>Wie funktioniert
+                <span class="key" style="--key-color:var(--color-primary)">AdaBoost</span>
+                Schritt für Schritt?
+              </li>
+              <li>Was bedeuten die Formeln für
+                \(\varepsilon_m\), \(\alpha_m\)
+                und die Gewichtsaktualisierung?
+              </li>
+              <li>Wie visualisiert man die
+                <strong>Lernfortschritte</strong>
+                von AdaBoost?
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. BAGGING vs. BOOSTING
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="bagging-vs-boosting">
+        <div class="section-head">
+          <h2>7.1 Bagging vs. Boosting</h2>
+          <p>
+            Beide sind Ensemble-Methoden –
+            aber ihr grundlegender
+            <strong>Trainingsansatz</strong>
+            ist gegensätzlich.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Bagging</span>
+              (Random Forest)
+            </h3>
+            <ul>
+              <li>
+                Weak Learner werden
+                <span class="key" style="--key-color:var(--color-primary)">parallel</span>
+                trainiert – unabhängig voneinander
+              </li>
+              <li>
+                Jeder Baum sieht ein
+                <strong>zufälliges Bootstrap-Sample</strong>
+              </li>
+              <li>
+                Alle Samples gleich gewichtet –
+                <strong>keine Anpassung</strong>
+                an schwierige Punkte
+              </li>
+              <li>
+                Aggregation:
+                <strong>Majoritätsvotum / Mittelwert</strong>
+              </li>
+              <li>
+                Reduziert
+                <span class="key" style="--key-color:var(--color-warning)">Varianz</span>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Boosting</span>
+              (AdaBoost, Gradient Boosting)
+            </h3>
+            <ul>
+              <li>
+                Weak Learner werden
+                <span class="key" style="--key-color:var(--color-success)">seriell</span>
+                trainiert – jeder lernt aus den
+                Fehlern des vorherigen
+              </li>
+              <li>
+                Jeder Baum wird mit
+                <strong>gewichteten Trainingsdaten</strong>
+                trainiert
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-danger)">Missklassifizierte Punkte</span>
+                erhalten höhere Gewichte →
+                nächster Learner fokussiert sich darauf
+              </li>
+              <li>
+                Aggregation:
+                <strong>gewichtete Summe</strong>
+                der Einzelvorhersagen
+              </li>
+              <li>
+                Reduziert
+                <span class="key" style="--key-color:var(--color-warning)">Bias</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Wichtigster Unterschied:</strong>
+          Bei Bagging entsteht Diversität durch
+          <span class="key" style="--key-color:var(--color-primary)">Zufälligkeit</span>
+          (Bootstrap + Feature Bagging).
+          Bei Boosting entsteht sie durch
+          <span class="key" style="--key-color:var(--color-success)">gezielte Fokussierung</span>
+          auf schwer lernbare Datenpunkte –
+          jeder nächste Learner kompensiert die Schwächen des vorherigen.
+        </div>
+
+        <!-- Vergleichstabelle -->
+        <div style="margin-top:var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>Eigenschaft</th>
+                <th>Bagging (Random Forest)</th>
+                <th>Boosting (AdaBoost)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Trainingsreihenfolge</td>
+                <td>
+                  <span class="key" style="--key-color:var(--color-primary)">Parallel</span>
+                </td>
+                <td>
+                  <span class="key" style="--key-color:var(--color-success)">Seriell</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Datengewichtung</td>
+                <td>Gleichgewichtet</td>
+                <td>Adaptiv (fehlerbasiert)</td>
+              </tr>
+              <tr>
+                <td>Aggregation</td>
+                <td>Mittelwert / Majority Vote</td>
+                <td>Gewichtete Summe</td>
+              </tr>
+              <tr>
+                <td>Reduziert</td>
+                <td>Varianz</td>
+                <td>Bias</td>
+              </tr>
+              <tr>
+                <td>Overfitting-Risiko</td>
+                <td>Niedrig</td>
+                <td>Höher (bei vielen Runden)</td>
+              </tr>
+              <tr>
+                <td>Parallelisierbar</td>
+                <td>✅ Ja</td>
+                <td>❌ Nein</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. ADABOOST ALGORITHMUS
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="adaboost-algorithmus">
+        <div class="section-head">
+          <h2>7.2 Deep Dive: AdaBoost-Algorithmus</h2>
+          <p>
+            AdaBoost
+            (<span class="key" style="--key-color:var(--color-primary)">Adaptive Boosting</span>)
+            ist der klassische Boosting-Algorithmus –
+            einfach zu verstehen, mathematisch elegant.
+          </p>
+        </div>
+
+        <div class="note note-primary" style="margin-bottom:var(--space-5)">
+          <strong>Setting:</strong>
+          Binäre Klassifikation mit Trainingsdaten
+          \((x_n, t_n)\) für \(n = 1, \dots, N\),
+          mit Labels \(t_n \in \{-1, +1\}\).
+        </div>
+
+        <div class="timeline">
+
+          <div class="timeline-step">
+            <div class="step-no">1</div>
+            <div>
+              <h3>Initialisierung der Gewichte</h3>
+              <p>
+                Alle Datenpunkte erhalten zu Beginn
+                <strong>gleiche Gewichte</strong>:
+              </p>
+              \[ w_n^{(1)} = \frac{1}{N} \]
+              <p>
+                Kein Punkt ist zu Beginn wichtiger als ein anderer –
+                das ändert sich mit jedem Schritt.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no">2</div>
+            <div>
+              <h3>Schleife über \(M\) schwache Lerner</h3>
+              <p>
+                Für \(m = 1, \dots, M\):
+              </p>
+              <p>
+                <strong>a) Schwachen Klassifikator trainieren:</strong>
+                Trainiere \(y_m(x)\) auf den Trainingsdaten
+                mit den aktuellen Gewichten
+                <span class="key" style="--key-color:var(--color-primary)">\(w_n^{(m)}\)</span>
+                in der Fehlerfunktion.
+              </p>
+              <p>
+                <strong>b) Gewichteten Fehler berechnen:</strong>
+              </p>
+              \[
+                \varepsilon_m =
+                \frac{
+                  \sum_{n=1}^{N} w_n^{(m)} \,
+                  \mathbb{I}\big(y_m(x_n) \neq t_n\big)
+                }{
+                  \sum_{n=1}^{N} w_n^{(m)}
+                }
+              \]
+              <div class="note note-warning" style="margin:var(--space-3) 0">
+                <span class="key" style="--key-color:var(--color-warning)">\(\varepsilon_m\)</span>:
+                Anteil der <strong>gewichtet falsch</strong>
+                klassifizierten Datenpunkte.
+                Liegt zwischen 0 (perfekt) und 0.5 (Zufall).
+              </div>
+              <p>
+                <strong>c) Klassifikator-Gewicht bestimmen:</strong>
+              </p>
+              \[
+                \alpha_m = \ln\left(
+                  \frac{1 - \varepsilon_m}{\varepsilon_m}
+                \right)
+              \]
+              <div class="note" style="margin:var(--space-3) 0">
+                <span class="key" style="--key-color:var(--color-success)">\(\alpha_m\)</span>:
+                Je kleiner \(\varepsilon_m\),
+                desto größer \(\alpha_m\) –
+                <strong>bessere Klassifikatoren zählen mehr</strong>.
+                Bei \(\varepsilon_m = 0.5\) ist \(\alpha_m = 0\)
+                (Zufallsklassifikator trägt nichts bei).
+              </div>
+              <p>
+                <strong>d) Datengewichte aktualisieren:</strong>
+              </p>
+              \[
+                w_n^{(m+1)} =
+                w_n^{(m)} \,
+                \exp\!\Big(
+                  \alpha_m \,
+                  \mathbb{I}\big(y_m(x_n) \neq t_n\big)
+                \Big)
+              \]
+              <div class="note note-primary" style="margin:var(--space-3) 0">
+                <span class="key" style="--key-color:var(--color-danger)">Fehlklassifizierte Punkte</span>
+                (\(\mathbb{I} = 1\)):
+                Gewicht wird mit \(e^{\alpha_m} > 1\)
+                multipliziert → <strong>höheres Gewicht</strong>.
+                <br>
+                Korrekt klassifizierte Punkte
+                (\(\mathbb{I} = 0\)):
+                Gewicht bleibt unverändert.
+              </div>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no">3</div>
+            <div>
+              <h3>Finale Vorhersage – Strong Learner</h3>
+              <p>
+                Der finale starke Klassifikator ist die
+                <span class="key" style="--key-color:var(--color-primary)">gewichtete Summe</span>
+                aller Weak Learner:
+              </p>
+              \[
+                Y_M(x) = \operatorname{sign}\!\left(
+                  \sum_{m=1}^{M} \alpha_m \, y_m(x)
+                \right)
+              \]
+              <div class="note note-success" style="margin-top:var(--space-3)">
+                <strong>So what:</strong>
+                Gute Klassifikatoren (kleines \(\varepsilon_m\))
+                erhalten großes \(\alpha_m\)
+                und dominieren das Endurteil –
+                schlechte tragen kaum bei.
+                Das Vorzeichen entscheidet
+                die finale Klasse: \(+1\) oder \(-1\).
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="note note-warning" style="margin-top:var(--space-5)">
+          <strong>❓ Reflexionsfrage:</strong>
+          Wo wird im Falle des Random Forest
+          die Gewichtung der Datenpunkte eingehen?
+          <br><br>
+          → Beim Random Forest gibt es
+          <strong>keine explizite Datenpunkt-Gewichtung</strong>!
+          Die Diversität entsteht durch
+          <span class="key" style="--key-color:var(--color-primary)">Bootstrap Sampling</span>
+          (Samples können mehrfach vorkommen)
+          und
+          <span class="key" style="--key-color:var(--color-primary)">Feature Bagging</span>
+          – nicht durch adaptive Fehlerkorrektur.
+          Das ist der fundamentale Unterschied zu Boosting.
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. ADABOOST IN SKLEARN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="adaboost-sklearn">
+        <div class="section-head">
+          <h2>7.3 AdaBoost in sklearn</h2>
+          <p>
+            sklearn stellt mit
+            <code class="key" style="--key-color:var(--color-primary)">AdaBoostClassifier()</code>
+            eine fertige Implementierung bereit –
+            einfach zu verwenden, direkt vergleichbar
+            mit dem Random Forest.
+          </p>
+        </div>
+
+        <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+          <strong>Schritt 1:</strong>
+          Datensatz erzeugen und
+          AdaBoost mit Decision Stumps (max_depth=1)
+          trainieren – die klassische Konfiguration.
+          Die Trainingsgenauigkeit und der Fehler
+          werden für jede Boost-Runde ausgegeben.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – AdaBoost trainieren
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+
+np.random.seed(42)
+
+X, y = make_classification(
+    n_samples=200, n_features=2,
+    n_informative=2, n_redundant=0,
+    n_clusters_per_class=1,
+    random_state=42)
+
+# Labels auf {-1, +1} mappen (AdaBoost-Konvention)
+y_ab = np.where(y == 0, -1, 1)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y_ab, test_size=0.25, random_state=42)
+
+# AdaBoost mit Decision Stumps (max_depth=1)
+ada = AdaBoostClassifier(
+    estimator=DecisionTreeClassifier(max_depth=1),
+    n_estimators=50,
+    learning_rate=1.0,
+    random_state=42,
+    algorithm='SAMME')
+ada.fit(X_train, y_train)
+
+print(f"Test Accuracy: {ada.score(X_test, y_test):.4f}")
+print(f"Anzahl Weak Learner: {ada.n_estimators}")
+print(f"\nErste 5 α_m (Klassifikator-Gewichte):")
+for i, a in enumerate(ada.estimator_weights_[:5]):
+    print(f"  m={i+1}: α = {a:.4f}  "
+          f"ε = {ada.estimator_errors_[i]:.4f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    <code>estimator_weights_</code>
+                    = die \(\alpha_m\)-Werte
+                    für jeden Weak Learner
+                  </li>
+                  <li>
+                    <code>estimator_errors_</code>
+                    = die \(\varepsilon_m\)-Werte
+                  </li>
+                  <li>
+                    Frühe Learner haben oft
+                    <strong>niedrigeres \(\varepsilon\)</strong>
+                    (leichtere Fälle) →
+                    höheres \(\alpha\)
+                  </li>
+                  <li>
+                    Spätere Learner fokussieren auf
+                    <span class="key" style="--key-color:var(--color-danger)">schwierige Punkte</span>
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>algorithm='SAMME':</strong>
+                Diskrete Version von AdaBoost –
+                für Klassifikatoren ohne
+                <code>predict_proba()</code>.
+                <code>'SAMME.R'</code> nutzt
+                Wahrscheinlichkeiten (Default).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          <strong>Schritt 2:</strong>
+          Der Verlauf von \(\varepsilon_m\) und \(\alpha_m\)
+          über alle Boost-Runden –
+          so wird der Lernfortschritt des Algorithmus sichtbar.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Fehler &amp; Gewichte über Boost-Runden
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+
+rounds = range(1, len(ada.estimator_weights_) + 1)
+errors = ada.estimator_errors_
+alphas = ada.estimator_weights_
+
+fig, axes = plt.subplots(2, 1, figsize=(7, 8))
+
+# Plot 1: Gewichteter Fehler ε_m
+axes[0].plot(rounds, errors,
+             color='red', linewidth=2,
+             marker='o', markersize=4)
+axes[0].axhline(0.5, color='gray',
+                linestyle='--', linewidth=1.5,
+                label='Zufallsgrenze (ε=0.5)')
+axes[0].set_xlabel('Boost-Runde m')
+axes[0].set_ylabel(r'$\varepsilon_m$')
+axes[0].set_title(
+    r'Gewichteter Fehler $\varepsilon_m$ pro Runde'
+    '\n(unter 0.5 = besser als Zufall)')
+axes[0].legend()
+axes[0].grid(alpha=0.3)
+
+# Plot 2: Klassifikator-Gewicht α_m
+axes[1].plot(rounds, alphas,
+             color='steelblue', linewidth=2,
+             marker='s', markersize=4)
+axes[1].axhline(0, color='gray',
+                linestyle='--', linewidth=1.5,
+                label='α=0 (kein Beitrag)')
+axes[1].set_xlabel('Boost-Runde m')
+axes[1].set_ylabel(r'$\alpha_m$')
+axes[1].set_title(
+    r'Klassifikator-Gewicht $\alpha_m$ pro Runde'
+    '\n(höher = Learner trägt mehr bei)')
+axes[1].legend()
+axes[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Fehler \(\varepsilon_m\) (oben):</strong>
+                <ul>
+                  <li>
+                    Steigt typischerweise mit
+                    den Boost-Runden an –
+                    spätere Learner sehen
+                    <strong>schwierigere Gewichtungen</strong>
+                  </li>
+                  <li>
+                    Solange unter 0.5:
+                    Learner ist besser als Zufall
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Gewicht \(\alpha_m\) (unten):</strong>
+                <ul>
+                  <li>
+                    Sinkt mit steigendem \(\varepsilon_m\)
+                    (invertierter Zusammenhang)
+                  </li>
+                  <li>
+                    Frühe, gute Learner dominieren
+                    die finale Vorhersage
+                  </li>
+                  <li>
+                    Negative \(\alpha\)-Werte möglich:
+                    Learner wird
+                    <strong>invertiert</strong>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. VISUALISIERUNG: ADABOOST SCHRITT FÜR SCHRITT
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="adaboost-visualisierung">
+        <div class="section-head">
+          <h2>7.4 AdaBoost Schritt für Schritt visualisiert</h2>
+          <p>
+            Die folgende Visualisierung zeigt,
+            wie AdaBoost schwache Lerner
+            (Single-Split-Trees =
+            <span class="key" style="--key-color:var(--color-warning)">Decision Stumps</span>)
+            nacheinander trainiert und kombiniert.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>🔍 Was die Visualisierung zeigt</h3>
+            <ul>
+              <li>
+                In jedem Schritt \(m\) wird ein neuer
+                <span class="key" style="--key-color:var(--color-warning)">Basis-Klassifikator</span>
+                mit einfachen achsenparallelen Splits trainiert
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-danger)">Größere Kreise</span>
+                = höheres Gewicht =
+                vorher falsch klassifizierte Punkte
+              </li>
+              <li>
+                Die
+                <span style="color:green"><strong>grüne Linie</strong></span>
+                zeigt die aktuelle Ensemble-Entscheidungsgrenze
+                nach \(m\) Basis-Klassifikatoren
+              </li>
+              <li>
+                Mit jedem Schritt fokussiert sich
+                das Ensemble auf
+                <strong>problematische Bereiche</strong>
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">So what</span>
+            </h3>
+            <ul>
+              <li>
+                Kombination aus
+                <strong>Single-Split-Trees durch Boosting</strong>
+                → Strong Learner
+              </li>
+              <li>
+                Jeder Stump allein: kaum besser als Zufall
+              </li>
+              <li>
+                50 Stumps zusammen: deutlich bessere Grenzen
+                als ein einzelner tiefer Baum
+              </li>
+              <li>
+                <strong>Nicht zufällig</strong>
+                wie beim Random Forest –
+                sondern
+                <span class="key" style="--key-color:var(--color-success)">zielgerichtet adaptiv</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Vier Zeitpunkte des AdaBoost-Trainings werden
+          visualisiert: nach Runde 1, 5, 15 und 50.
+          Die Punktgröße kodiert das aktuelle Gewicht des Samples,
+          die Hintergrundfarbe zeigt die Ensemble-Entscheidungsgrenze.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – AdaBoost Schritt-für-Schritt Visualisierung
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.tree import DecisionTreeClassifier
+
+np.random.seed(42)
+X, y = make_classification(
+    n_samples=200, n_features=2,
+    n_informative=2, n_redundant=0,
+    n_clusters_per_class=1,
+    random_state=42)
+y_ab = np.where(y == 0, -1, 1)
+
+# Grid für Entscheidungsgrenzen
+x_min, x_max = X[:, 0].min()-1, X[:, 0].max()+1
+y_min, y_max = X[:, 1].min()-1, X[:, 1].max()+1
+xx, yy = np.meshgrid(
+    np.linspace(x_min, x_max, 200),
+    np.linspace(y_min, y_max, 200))
+
+rounds_to_show = [1, 5, 15, 50]
+
+# Vertikal: 4 Zeilen, 1 Spalte
+fig, axes = plt.subplots(
+    4, 1, figsize=(7, 22))
+
+for ax, n_est in zip(axes, rounds_to_show):
+    ada_step = AdaBoostClassifier(
+        estimator=DecisionTreeClassifier(
+            max_depth=1),
+        n_estimators=n_est,
+        learning_rate=1.0,
+        random_state=42,
+        algorithm='SAMME')
+    ada_step.fit(X, y_ab)
+
+    # Ensemble-Grenzen
+    Z = ada_step.predict(
+        np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    ax.contourf(xx, yy, Z, alpha=0.25,
+                cmap='RdBu', levels=[-1.5, 0, 1.5])
+    ax.contour(xx, yy, Z, levels=[0],
+               colors='green', linewidths=2)
+
+    # Punkte mit aktuellen Gewichten
+    # (Boosting Gewichte aus letztem Learner)
+    if hasattr(ada_step, 'estimator_weights_'):
+        # Sample-Gewichte nach n_est Runden
+        sample_weight = np.ones(len(X))
+        for m_idx in range(n_est):
+            pred = ada_step.estimators_[
+                m_idx].predict(X)
+            wrong = (pred != y_ab).astype(float)
+            alpha = ada_step.estimator_weights_[m_idx]
+            sample_weight *= np.exp(alpha * wrong)
+        # Normalisieren für Plot-Größe
+        w_norm = (sample_weight
+                  / sample_weight.max() * 120 + 15)
+    else:
+        w_norm = np.full(len(X), 40)
+
+    colors = np.where(y_ab == 1,
+                      'steelblue', 'tomato')
+    ax.scatter(X[:, 0], X[:, 1],
+               c=colors, s=w_norm,
+               edgecolors='k', linewidths=0.4,
+               alpha=0.8, zorder=3)
+
+    acc = ada_step.score(X, y_ab)
+    ax.set_title(
+        f'Nach Runde m = {n_est}  │  '
+        f'Train-Acc = {acc:.3f}\n'
+        f'(Kreisgröße = Gewicht | '
+        f'grün = Ensemble-Grenze)',
+        fontsize=10)
+    ax.set_xlabel('Feature 1')
+    ax.set_ylabel('Feature 2')
+    ax.grid(alpha=0.2)
+
+plt.suptitle(
+    'AdaBoost – Lernfortschritt\n'
+    'Blaue Punkte = Klasse +1 | '
+    'Rote Punkte = Klasse -1',
+    fontsize=12, y=1.005)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst (von oben):</strong>
+                <ul>
+                  <li>
+                    <code>m=1</code>: Ein einziger Stump –
+                    grobe achsenparallele Grenze
+                  </li>
+                  <li>
+                    <code>m=5</code>:
+                    <span class="key" style="--key-color:var(--color-danger)">Größere Kreise</span>
+                    markieren falsch klassifizierte Punkte
+                    der ersten Runden –
+                    nächste Learner fokussieren sich darauf
+                  </li>
+                  <li>
+                    <code>m=15</code>:
+                    Ensemble-Grenze (grün) wird
+                    <strong>komplexer und passender</strong>
+                  </li>
+                  <li>
+                    <code>m=50</code>:
+                    Stabile, deutlich
+                    <strong>nichtlineare Grenze</strong>
+                    aus 50 Stumps
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Kernaussage:</strong>
+                Kombination aus
+                <span class="key" style="--key-color:var(--color-warning)">Single-Split-Trees</span>
+                durch serielles Boosting →
+                <strong>Strong Learner</strong>
+                mit nichtlinearen Grenzen –
+                ohne einen einzigen tiefen Baum.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5. ABSCHLUSS: RF vs. ADABOOST
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="rf-vs-adaboost">
+        <div class="section-head">
+          <h2>7.5 Random Forest vs. AdaBoost – Direkt verglichen</h2>
+          <p>
+            Abschließend beide Methoden auf demselben Datensatz –
+            visuell und metrisch gegenübergestellt.
+          </p>
+        </div>
+
+        <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+          Gleicher Datensatz, gleiche Test-Accuracy-Messung –
+          Random Forest (100 Bäume, max_depth=5)
+          gegen AdaBoost (50 Stumps).
+          Entscheidungsgrenzen und Konfidenz-Heatmaps
+          werden direkt verglichen.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – RF vs. AdaBoost Vergleich
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.ensemble import (RandomForestClassifier,
+                               AdaBoostClassifier)
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+
+np.random.seed(42)
+X, y = make_classification(
+    n_samples=300, n_features=2,
+    n_informative=2, n_redundant=0,
+    n_clusters_per_class=1,
+    random_state=42)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42)
+
+rf  = RandomForestClassifier(
+    n_estimators=100, max_depth=5,
+    random_state=42)
+ada = AdaBoostClassifier(
+    estimator=DecisionTreeClassifier(max_depth=1),
+    n_estimators=50, random_state=42,
+    algorithm='SAMME')
+
+rf.fit(X_train, y_train)
+ada.fit(X_train, y_train)
+
+acc_rf  = rf.score(X_test,  y_test)
+acc_ada = ada.score(X_test, y_test)
+print(f"Random Forest  Accuracy: {acc_rf:.4f}")
+print(f"AdaBoost       Accuracy: {acc_ada:.4f}")
+
+# Grenzen-Grid
+x_min, x_max = X[:, 0].min()-1, X[:, 0].max()+1
+y_min, y_max = X[:, 1].min()-1, X[:, 1].max()+1
+xx, yy = np.meshgrid(
+    np.linspace(x_min, x_max, 250),
+    np.linspace(y_min, y_max, 250))
+
+Z_rf  = rf.predict_proba(
+    np.c_[xx.ravel(), yy.ravel()])[:, 1
+].reshape(xx.shape)
+Z_ada = ada.predict_proba(
+    np.c_[xx.ravel(), yy.ravel()])[:, 1
+].reshape(xx.shape)
+
+# Vertikal: 2 Zeilen, 1 Spalte
+fig, axes = plt.subplots(2, 1, figsize=(7, 10))
+colors = np.where(y_test == 1,
+                  'steelblue', 'tomato')
+
+for ax, Z, model_name, acc in zip(
+        axes,
+        [Z_rf, Z_ada],
+        ['Random Forest (100 Bäume, Bagging)',
+         'AdaBoost (50 Stumps, Boosting)'],
+        [acc_rf, acc_ada]):
+    cp = ax.contourf(xx, yy, Z, alpha=0.35,
+                     cmap='RdBu', levels=20)
+    ax.contour(xx, yy, Z, levels=[0.5],
+               colors='green', linewidths=2)
+    ax.scatter(X_test[:, 0], X_test[:, 1],
+               c=colors, s=35,
+               edgecolors='k', linewidths=0.4,
+               zorder=3)
+    ax.set_title(
+        f'{model_name}\n'
+        f'Test Accuracy = {acc:.4f}  │  '
+        f'grüne Linie = Entscheidungsgrenze',
+        fontsize=10)
+    ax.set_xlabel('Feature 1')
+    ax.set_ylabel('Feature 2')
+    ax.grid(alpha=0.2)
+
+plt.suptitle(
+    'Random Forest vs. AdaBoost\n'
+    'Blau = Klasse 1 | Rot = Klasse 0',
+    fontsize=12, y=1.005)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    <strong>Random Forest</strong>:
+                    weiche, geglättete Grenzen
+                    durch Mittelung
+                  </li>
+                  <li>
+                    <strong>AdaBoost</strong>:
+                    oft ähnlich gute Accuracy –
+                    aber durch seriellen Fokus
+                    auf schwierige Bereiche
+                  </li>
+                  <li>
+                    Konfidenz-Heatmap zeigt,
+                    wo das jeweilige Modell
+                    <strong>unsicher ist</strong>
+                    (heller Bereich nahe Grenze)
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Wann welches Modell?</strong>
+                <ul>
+                  <li>
+                    <span class="key" style="--key-color:var(--color-primary)">Random Forest</span>:
+                    robuster, parallelisierbar,
+                    gut bei verrauschten Daten
+                  </li>
+                  <li>
+                    <span class="key" style="--key-color:var(--color-success)">AdaBoost</span>:
+                    bessere Bias-Reduktion,
+                    empfindlicher gegenüber Ausreißern
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Schritte:</strong>
+          <br><br>
+          <a href="Page08.html">
+            → Seite 8: Gradient Boosting &amp; XGBoost –
+            die modernste Variante des Boostings
+          </a>
+          &nbsp;·&nbsp;
+          <a href="Page06.html">
+            ← Seite 6: RUL Prediction mit NASA-Datensatz
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 5 · Seite 7 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

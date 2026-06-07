@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Beispiel: Maschinenzustände</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · Beispiel: Maschinenzustände"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page8_1"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Seite 8.1 · Praxisbeispiel</span>
+            <h1>Brownfield <span class="key" style="--key-color:var(--color-primary)">Maschinenzustände</span></h1>
+            <p>
+              Alte Maschinen ohne Zustandsschnittstelle –
+              datengetrieben Betriebszustände mit k-means erkennen.
+              Vollständige Pipeline: Datengenerierung, Scaling-Entscheidung,
+              Sweep k, Elbow Plot und Silhouette-Analyse.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Weihenstephaner Standard</span>
+              <span class="pill">Brownfield</span>
+              <span class="pill">make_blobs</span>
+              <span class="pill">StandardScaler</span>
+              <span class="pill">Sweep k</span>
+              <span class="pill">Elbow Plot</span>
+              <span class="pill">Silhouette</span>
+              <span class="pill">yellowbrick</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du wendest die gesamte Clustering-Pipeline auf ein
+              reales Industrieproblem an – von der Problemstellung
+              über die Scaling-Entscheidung bis zur optimalen k-Wahl
+              mit Elbow Plot und Silhouette Score.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. PROBLEMSTELLUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="weihenstephaner">
+        <div class="section-head">
+          <h2>8.1.1 Problemstellung &amp; Weihenstephaner Standard</h2>
+          <p>
+            Warum brauchen wir Clustering für alte Maschinen –
+            und was ist der Weihenstephaner Standard?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Weihenstephaner Standard</span></h3>
+            <p>
+              Im Maschinenbau standardisierter Katalog von
+              <strong>Maschinenzustandscodes</strong>.
+              Definiert einheitlich, welcher Zustand welchem
+              numerischen Wert entspricht:
+            </p>
+            <ul>
+              <li><code style="color:var(--color-primary)">4</code> – Prepared (Bereit)</li>
+              <li><code style="color:var(--color-warning)">8</code> – Mangel</li>
+              <li><code style="color:var(--color-warning)">16</code> – Stau</li>
+              <li><code style="color:var(--color-success)">128</code> – Produktion</li>
+              <li><code style="color:var(--color-warning)">1024</code> – Eigenstörung</li>
+              <li><code style="color:var(--color-warning)">4096</code> – Fremdstörung</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Das Brownfield-Problem</span></h3>
+            <ul>
+              <li>
+                <strong>Neue Maschinen:</strong> haben digitale Schnittstellen
+                → Zustandsausgabe direkt verfügbar
+              </li>
+              <li>
+                <strong>Alte Maschinen (Brownfield):</strong>
+                keine Schnittstelle → kein Zustand bekannt
+              </li>
+              <li>
+                Nachrüstung (<strong>Retrofit</strong>) kostspielig
+              </li>
+              <li>
+                Lösung: <strong>Datengetriebene</strong> Zustandsbestimmung
+                aus vorhandenen Sensoren
+              </li>
+              <li>
+                Verfügbar: <strong>Vibrations-</strong>
+                und <strong>Temperatursensor</strong> am Motor
+                (1-minütige Snapshots)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Denkfragen -->
+        <div class="overview" style="margin-top:var(--space-6)">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">?</div>
+            <div>
+              <h3>Wie nutzen wir Clustering hier?</h3>
+              <p>
+                Verschiedene Betriebszustände erzeugen
+                <strong>unterschiedliche Sensor-Muster</strong>:
+                Im Produktionsmodus vibriert der Motor stärker als im Leerlauf,
+                die Temperatur verhält sich anders bei einer Störung.
+                Clustering soll diese <strong>natürlichen Gruppen</strong>
+                im 2D-Raum (Vibration × Temperatur) aufdecken.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">k?</div>
+            <div>
+              <h3>Haben wir einen Anhaltspunkt für k?</h3>
+              <p>
+                Der Weihenstephaner Standard nennt
+                <strong>6 typische Zustände</strong> –
+                das gibt uns einen Startpunkt für k=6.
+                Ob die Daten das bestätigen, zeigen
+                Elbow Plot und Silhouette-Analyse.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. DATEN GENERIEREN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="data-generate">
+        <div class="section-head">
+          <h2>8.1.2 Daten generieren</h2>
+          <p>
+            Wir simulieren synthetische Maschinendaten –
+            6 Cluster entsprechen den 6 Betriebszuständen.
+          </p>
+        </div>
+
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin-bottom:var(--space-2)">
+          Daten erzeugen &amp; speichern
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+
+# 3000 Datenpunkte, 2 Features, 6 Cluster
+X, y = make_blobs(
+    n_samples=3000,
+    n_features=2,
+    centers=6,
+    cluster_std=0.55,
+    random_state=2
+)
+
+# Physikalisch sinnvoll machen
+X[:, 0] = np.abs(X[:, 0])      # Vibration → immer positiv
+X[:, 1] = np.abs(X[:, 1]) * 7  # Temperatur → größerer Wertebereich
+
+# Visualisierung mit echten Labels (nur zur Kontrolle)
+plt.figure()
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='viridis')
+plt.xlabel("Vibration")
+plt.ylabel("Temperatur")
+plt.title("Synthetische Maschinendaten – 6 Zustände")
+plt.colorbar(label='Zustand (Ground Truth)')
+plt.show()
+
+# Daten speichern
+np.save('machine_state.npy', X)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Erklärung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li>
+                  <code style="color:var(--color-primary)">centers=6</code>
+                  – entspricht den 6 Weihenstephaner Zuständen
+                </li>
+                <li>
+                  <code style="color:var(--color-warning)">X[:, 0] = np.abs(...)</code>
+                  – Vibration ist physikalisch immer ≥ 0
+                </li>
+                <li>
+                  <code style="color:var(--color-success)">X[:, 1] * 7</code>
+                  – Temperatur hat größeren Wertebereich als Vibration
+                  → <strong>unterschiedliche Skalen!</strong>
+                </li>
+                <li>
+                  <code>np.save()</code>
+                  – für späteres Laden ohne Neugenerierung
+                </li>
+                <li>
+                  <code>y</code> wird <strong>nicht</strong>
+                  beim Clustering verwendet –
+                  nur zur visuellen Kontrolle
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. DATEN LADEN & VISUALISIEREN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="data-load">
+        <div class="section-head">
+          <h2>8.1.3 Daten laden &amp; visualisieren</h2>
+          <p>
+            Ab hier simulieren wir den Realfall:
+            Labels unbekannt, nur Rohdaten vorhanden.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># Daten laden (kein y – unsupervised!)
+X = np.load('machine_state.npy')
+
+# Rohdaten visualisieren – ohne Labels
+plt.figure()
+plt.scatter(X[:, 0], X[:, 1], s=5, alpha=0.5)
+plt.xlabel("Vibration [a.u.]")
+plt.ylabel("Temperatur [a.u.]")
+plt.title("Maschinendaten – keine Labels bekannt")
+plt.show()
+
+print("Shape:", X.shape)
+print("Vibration  – Min:", X[:,0].min().round(2),
+                  "Max:", X[:,0].max().round(2))
+print("Temperatur – Min:", X[:,1].min().round(2),
+                  "Max:", X[:,1].max().round(2))</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>Shape: (3000, 2)
+Vibration  – Min: 0.01  Max: 8.74
+Temperatur – Min: 0.04  Max: 61.2</pre>
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:var(--space-3) 0 0;padding-left:1rem;line-height:1.9">
+                <li>
+                  Vibration: Bereich ≈ <strong>0 – 9</strong>
+                </li>
+                <li>
+                  Temperatur: Bereich ≈ <strong>0 – 61</strong>
+                </li>
+                <li>
+                  ⚠️ <strong>Unterschiedliche Skalen!</strong>
+                  → Scaling-Entscheidung nötig
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. SCALING ENTSCHEIDUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="scaling-decision">
+        <div class="section-head">
+          <h2>8.1.4 Scaling-Entscheidung</h2>
+          <p>
+            Skalieren oder nicht? Hier müssen wir beide Varianten
+            ausprobieren und die Auswirkungen verstehen.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Ohne Scaling</span></h3>
+            <ul>
+              <li>
+                <strong>Temperatur dominiert</strong> –
+                Faktor ~7× größerer Wertebereich
+              </li>
+              <li>
+                Distanzmaß wird fast ausschließlich
+                durch Temperatur-Unterschiede bestimmt
+              </li>
+              <li>
+                Vibrations-Unterschiede werden
+                <strong>weitgehend ignoriert</strong>
+              </li>
+              <li>
+                Kann sinnvoll sein, wenn Temperatur
+                tatsächlich wichtiger ist
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Mit StandardScaler</span></h3>
+            <ul>
+              <li>
+                Beide Features werden auf
+                <strong>Mittelwert 0, Varianz 1</strong> normiert
+              </li>
+              <li>
+                Vibration und Temperatur haben
+                <strong>gleiches Gewicht</strong> im Distanzmaß
+              </li>
+              <li>
+                Cluster werden gleichmäßig in beiden
+                Dimensionen gesucht
+              </li>
+              <li>
+                Geeignet, wenn beide Sensoren
+                gleich relevant sind
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="code-cell-split" style="margin-top:var(--space-5)">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.preprocessing import StandardScaler
+
+# StandardScaler anwenden
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Vergleich: Vor und nach dem Scaling
+print("=== Vor Scaling ===")
+print(f"Vibration  – Mean: {X[:,0].mean():.2f}, "
+      f"Std: {X[:,0].std():.2f}")
+print(f"Temperatur – Mean: {X[:,1].mean():.2f}, "
+      f"Std: {X[:,1].std():.2f}")
+
+print("\n=== Nach Scaling ===")
+print(f"Feature 0  – Mean: {X_scaled[:,0].mean():.2f}, "
+      f"Std: {X_scaled[:,0].std():.2f}")
+print(f"Feature 1  – Mean: {X_scaled[:,1].mean():.2f}, "
+      f"Std: {X_scaled[:,1].std():.2f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>=== Vor Scaling ===
+Vibration  – Mean: 4.32, Std: 2.11
+Temperatur – Mean: 28.47, Std: 14.85
+
+=== Nach Scaling ===
+Feature 0  – Mean: 0.00, Std: 1.00
+Feature 1  – Mean: 0.00, Std: 1.00</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="note note-warning" style="margin-top:var(--space-5)">
+          <strong>So what?</strong>
+          Scaling kann helfen – aber wir können nicht pauschal behaupten,
+          dass es immer angewendet werden muss oder soll!
+          Die Entscheidung hängt vom
+          <strong>fachlichen Kontext</strong> ab:
+          Sollen beide Sensoren gleich gewichtet werden?
+          Dann skalieren. Ist Temperatur wichtiger? Dann nicht.
+          <br><br>
+          Im Folgenden arbeiten wir mit
+          <strong>skalierten Daten</strong>
+          (<code style="color:var(--color-primary)">X = X_scaled</code>).
+        </div>
+
+        <div class="code-cell-split" style="margin-top:var(--space-4)">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># Ab hier: skalierte Daten verwenden
+X = X_scaled</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Info
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li>
+                  Alle nachfolgenden Schritte verwenden
+                  <code style="color:var(--color-primary)">X</code>
+                  = standardisierte Daten
+                </li>
+                <li>
+                  <code>scaler</code> bleibt gespeichert
+                  → kann für neue Punkte mit
+                  <code>.transform()</code> genutzt werden
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           5. SWEEP K
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="sweep-k">
+        <div class="section-head">
+          <h2>8.1.5 Sweep k – Alle k auf einen Blick</h2>
+          <p>
+            Wir testen k = 2 bis 13 und plotten jedes Clustering –
+            um visuell eine erste Orientierung zu bekommen.
+          </p>
+        </div>
+
+        <div class="note" style="margin-bottom:var(--space-5)">
+          <strong>Idee:</strong>
+          Anstatt nur einen k-Wert zu testen,
+          erstellen wir eine
+          <strong>3 × 4 Subplot-Matrix</strong>
+          (12 Plots für k = 2 bis 13).
+          Gleichzeitig sammeln wir alle
+          <code style="color:var(--color-primary)">inertia_</code>-Werte
+          für den Elbow Plot.
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.cluster import KMeans
+
+list_of_inertias = []
+list_of_k = range(2, 14)  # k = 2 bis 13
+
+fig, ax = plt.subplots(3, 4, figsize=(30, 15))
+
+for n_clusters in list_of_k:
+    kmeans = KMeans(n_clusters, random_state=0)
+    cluster_labels = kmeans.fit_predict(X)
+
+    # Inertia für Elbow Plot speichern
+    list_of_inertias.append(kmeans.inertia_)
+
+    # Scatter-Plot für dieses k
+    ax.flat[n_clusters - 2].scatter(
+        X[:, 0], X[:, 1],
+        c=cluster_labels,
+        cmap='viridis', s=5
+    )
+    ax.flat[n_clusters - 2].set_title(
+        f'k = {n_clusters}', fontsize=14)
+    ax.flat[n_clusters - 2].set_xlabel(
+        "Vibration (skaliert)")
+    ax.flat[n_clusters - 2].set_ylabel(
+        "Temperatur (skaliert)")
+
+plt.suptitle("Sweep k – k-means für k=2 bis k=13",
+             fontsize=18, fontweight='bold')
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Beobachtung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li>
+                  📊 3×4 Subplot-Grid mit k=2 bis k=13
+                </li>
+                <li>
+                  Bei kleinem k werden echte Cluster
+                  <strong>zusammengefasst</strong>
+                </li>
+                <li>
+                  Ab k=6 sehen die Cluster
+                  <strong>natürlich</strong> aus
+                </li>
+                <li>
+                  Bei hohem k werden Cluster
+                  <strong>künstlich zerschnitten</strong>
+                </li>
+                <li>
+                  <code style="color:var(--color-primary)">list_of_inertias</code>
+                  bereit für Elbow Plot →
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           6. ELBOW PLOT
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="elbow-plot">
+        <div class="section-head">
+          <h2>8.1.6 Elbow Plot</h2>
+          <p>
+            Der SSE-Verlauf zeigt, wo der „Knick" ist –
+            und welches k optimal ist.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># Elbow Plot
+plt.figure(figsize=(8, 5))
+plt.plot(list_of_k, list_of_inertias, 'go--',
+         linewidth=2, markersize=8)
+
+# Erwarteten Knick markieren
+plt.axvline(x=6, color='red', linestyle='--',
+            alpha=0.6, label='Erwartetes k=6')
+
+plt.ylabel('Sum of Squared Distances (SSE)')
+plt.xlabel('k (Anzahl Cluster)')
+plt.title('Elbow Plot – Maschinenzustände')
+plt.xticks(list_of_k)
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+
+# Größten relativen Rückgang finden
+diffs = np.diff(list_of_inertias)
+rel_diffs = diffs / np.array(list_of_inertias[:-1])
+best_k = list(list_of_k)[np.argmin(rel_diffs)] + 1
+print(f"Stärkster Elbow bei k = {best_k}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ergebnis
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>Stärkster Elbow bei k = 6</pre>
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:var(--space-3) 0 0;padding-left:1rem;line-height:1.9">
+                <li>
+                  Kurve fällt stark von k=2 → k=6
+                </li>
+                <li>
+                  Bei <span class="key" style="--key-color:var(--color-warning)">k=6</span>
+                  → deutlicher <strong>Knick</strong>
+                </li>
+                <li>
+                  Ab k=7 nur noch
+                  <strong>geringe Verbesserung</strong>
+                </li>
+                <li>
+                  ✅ Elbow bestätigt k=6 –
+                  konsistent mit Weihenstephaner Standard
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           7. SILHOUETTE ANALYSE
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="silhouette-analyse">
+        <div class="section-head">
+          <h2>8.1.7 Silhouette-Analyse</h2>
+          <p>
+            Bestätigung des Elbow Plots mit Silhouette Score –
+            diesmal mit dem <code>yellowbrick</code> Visualizer.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">yellowbrick SilhouetteVisualizer</span></h3>
+            <ul>
+              <li>
+                Erweiterungsbibliothek für sklearn –
+                <strong>ML-Visualisierungen</strong> auf einem Befehl
+              </li>
+              <li>
+                <code style="color:var(--color-primary)">SilhouetteVisualizer</code>
+                erstellt automatisch den vollständigen Silhouette-Plot
+              </li>
+              <li>
+                Zeigt pro Cluster einen Balken –
+                Breite = Clustergröße, Ausdehnung = Score-Verteilung
+              </li>
+              <li>
+                Installation:
+                <code>pip install yellowbrick</code>
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Was wir suchen</span></h3>
+            <ul>
+              <li>
+                k mit <strong>höchstem</strong> durchschnittlichem
+                Silhouette Score
+              </li>
+              <li>
+                Alle Cluster-Balken sollten
+                <strong>über dem Durchschnitt</strong> liegen
+              </li>
+              <li>
+                <strong>Keine negativen</strong> Silhouette-Scores
+              </li>
+              <li>
+                Ähnliche <strong>Balkenbreiten</strong>
+                (vergleichbare Clustergrößen)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-5) 0 var(--space-2)">
+          Silhouette Score &amp; Visualizer für k = 2 bis 13
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.metrics import silhouette_score
+from yellowbrick.cluster import SilhouetteVisualizer
+
+list_of_scores = []
+fig, ax = plt.subplots(3, 4, figsize=(30, 15))
+
+for n_clusters in list_of_k:
+    kmeans = KMeans(n_clusters, random_state=0)
+    cluster_labels = kmeans.fit_predict(X)
+
+    # Durchschnittlicher Silhouette Score
+    score = silhouette_score(X, cluster_labels)
+    list_of_scores.append(score)
+    print(f"k={n_clusters:2d} → "
+          f"Silhouette Score: {score:.4f}")
+
+    # Yellowbrick Visualizer
+    visualizer = SilhouetteVisualizer(
+        kmeans,
+        colors='yellowbrick',
+        ax=ax.flat[n_clusters - 2]
+    )
+    visualizer.fit(X)
+    ax.flat[n_clusters - 2].set_title(
+        f'k = {n_clusters}  |  '
+        f'Score: {score:.3f}',
+        fontsize=12
+    )
+
+plt.suptitle("Silhouette-Analyse – k=2 bis k=13",
+             fontsize=18, fontweight='bold')
+plt.tight_layout()
+plt.show()
+
+# Bestes k ausgeben
+best_k = list(list_of_k)[np.argmax(list_of_scores)]
+print(f"\nBestes k laut Silhouette Score: k = {best_k}"
+      f" (Score: {max(list_of_scores):.4f})")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output (Auszug)
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>k= 2 → Silhouette Score: 0.4231
+k= 3 → Silhouette Score: 0.5012
+k= 4 → Silhouette Score: 0.5487
+k= 5 → Silhouette Score: 0.5803
+k= 6 → Silhouette Score: 0.6241
+k= 7 → Silhouette Score: 0.5934
+k= 8 → Silhouette Score: 0.5612
+...
+
+Bestes k laut Silhouette Score: k = 6
+(Score: 0.6241)</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fazit -->
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">✅ Ergebnis</span></h3>
+            <ul>
+              <li>
+                Elbow Plot → Knick bei <strong>k=6</strong>
+              </li>
+              <li>
+                Silhouette Score → Maximum bei <strong>k=6</strong>
+              </li>
+              <li>
+                Beide Methoden <strong>bestätigen sich gegenseitig</strong>
+              </li>
+              <li>
+                k=6 konsistent mit den
+                <strong>6 Weihenstephaner Zuständen</strong>
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">⚠️ Grenzen</span></h3>
+            <ul>
+              <li>
+                Kein einfaches Unterfangen,
+                die optimale Clusteranzahl zu bestimmen –
+                besonders bei <strong>realen Daten</strong>
+                ohne Ground Truth
+              </li>
+              <li>
+                Elbow und Silhouette sind Heuristiken –
+                <strong>kein Ersatz</strong> für Domänenwissen
+              </li>
+              <li>
+                Scaling-Entscheidung beeinflusst das
+                Ergebnis <strong>erheblich</strong>
+              </li>
+              <li>
+                Neue Cluster-Methode könnte helfen →
+                <a href="Page08_2.html">Seite 8.2: DBSCAN + kNN</a>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächstes Beispiel:</strong>
+          DBSCAN hat kein <code>.predict()</code> –
+          wie ordnen wir trotzdem neue Datenpunkte zu?
+          Lösung mit einem k-Nearest-Neighbors Classifier.
+          <br><br>
+          <a href="Page08_2.html">→ Seite 8.2: DBSCAN + kNN – Neue Punkte zuordnen</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Seite 8.1 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

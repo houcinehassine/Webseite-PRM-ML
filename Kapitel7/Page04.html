@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Decision Threshold Use Cases</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page7" title="Kapitel 7 · Decision Threshold"></site-header>
+  <div class="layout">
+    <site-sidebar active="page4"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 7 · Seite 4</span>
+            <h1>Decision <span class="key" style="--key-color:var(--color-primary)">Threshold</span></h1>
+            <p>
+              Mit dem Decision Threshold kannst du ein Modell an den spezifischen Use Case anpassen –
+              ohne es neu zu trainieren. Krankheitserkennung vs. Predictive Maintenance,
+              und die vollständige <code>adjusted_predict()</code>-Funktion.
+            </p>
+            <div class="pill-row">
+              <span class="pill">adjusted_predict()</span>
+              <span class="pill">TPR-Ziel</span>
+              <span class="pill">FPR-Ziel</span>
+              <span class="pill">Krankheitserkennung</span>
+              <span class="pill">Predictive Maintenance</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kannst entscheiden, in welche Richtung du den Threshold für einen
+              konkreten Use Case verschieben sollst, und die
+              <code>adjusted_predict()</code>-Funktion aus dem Gedächtnis implementieren.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. WAS IST DER DECISION THRESHOLD?
+           ════════════════════════════════════════════ -->
+      <section class="section" id="was-ist-threshold">
+        <div class="section-head">
+          <h2>4.1 Was ist der Decision Threshold?</h2>
+          <p>
+            Das Kriterium, das bestimmt, ab wann ein kontinuierlicher Score als „positiv" gilt.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Definition</span></h3>
+            <p>
+              Jedes ML-Modell gibt intern einen kontinuierlichen <strong>Score</strong> aus
+              (Abstand zur Entscheidungsgrenze, Wahrscheinlichkeit, etc.).
+              Erst durch das Anlegen eines <strong>Schwellwerts T (Decision Threshold)</strong>
+              wird dieser Score in eine binäre Vorhersage (0 oder 1) umgewandelt.
+            </p>
+            <div class="math-display">
+              \[\hat{y} = \begin{cases} 1 & \text{wenn } \text{score}(x) \geq T \\ 0 & \text{sonst} \end{cases}\]
+            </div>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Standard-Threshold</span></h3>
+            <p>
+              Standardmäßig verwendet sklearn einen Threshold von <strong>0</strong>
+              (für <code>decision_function()</code>) bzw. <strong>0.5</strong>
+              (für <code>predict_proba()</code>).
+              Das ist jedoch nicht immer optimal – der Use Case entscheidet.
+            </p>
+            <p>
+              Mit <code>roc_curve()</code> kannst du alle möglichen Threshold-Werte
+              und die dazugehörigen (FPR, TPR)-Paare berechnen.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. USE CASES
+           ════════════════════════════════════════════ -->
+      <section class="section" id="use-cases">
+        <div class="section-head">
+          <h2>4.2 Use Cases – Wohin verschiebt man den Threshold?</h2>
+          <p>
+            Der optimale Threshold hängt davon ab, welcher Fehler teurer ist:
+            ein verpasster Positiver (FN) oder ein falscher Alarm (FP).
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3 style="color:var(--color-warning)">🏥 Krankheitserkennung</h3>
+            <p><strong>Use Case:</strong> Anhand von Bildgebungsdaten wird klassifiziert,
+              ob ein Patient eine bestimmte Krankheit hat.</p>
+            <ul>
+              <li>
+                <strong>Was ist schlimmer?</strong>
+                Ein kranker Patient wird <em>nicht</em> erkannt (FN) –
+                das kann lebensbedrohlich sein.
+              </li>
+              <li>
+                Ein gesunder Patient wird fälschlich als krank eingestuft (FP) –
+                führt zu weiteren Tests, aber ist beherrschbar.
+              </li>
+            </ul>
+            <div class="note note-warning" style="margin-top:var(--space-3)">
+              → Threshold senken (liberaler) →
+              <strong>TPR maximieren</strong> (hohe Sensitivity)<br>
+              Akzeptiert höheren FPR als Preis für weniger verpasste Fälle.
+            </div>
+          </article>
+          <article class="card">
+            <h3 style="color:var(--color-primary)">⚙️ Predictive Maintenance (Kugellager)</h3>
+            <p><strong>Use Case:</strong> Anhand von Vibrationsdaten wird vorhergesagt,
+              ob ein Lager beschädigt ist. Jeder Alarm wird dem Operator gemeldet.</p>
+            <ul>
+              <li>
+                <strong>Was ist schlimmer?</strong>
+                Zu viele Fehlalarme (FP) – der Operator ignoriert das System irgendwann.
+              </li>
+              <li>
+                Ein beschädigtes Lager wird übersehen (FN) –
+                führt zu Maschinenausfall, aber seltener als Fehlalarme.
+              </li>
+            </ul>
+            <div class="note note-primary" style="margin-top:var(--space-3)">
+              → Threshold erhöhen (konservativer) →
+              <strong>FPR minimieren</strong> (hohe Specificity)<br>
+              Akzeptiert niedrigere TPR für weniger Fehlalarme.
+            </div>
+          </article>
+        </div>
+
+        <div style="margin-top:var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>Situation</th>
+                <th>Teuerster Fehler</th>
+                <th>Threshold-Richtung</th>
+                <th>Ziel</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Krankheit nicht erkennen ist fatal</td>
+                <td>FN (Miss)</td>
+                <td>Threshold <strong>senken</strong></td>
+                <td>TPR maximieren</td>
+              </tr>
+              <tr>
+                <td>Fehlalarme sind teuer / nervig</td>
+                <td>FP (Falscher Alarm)</td>
+                <td>Threshold <strong>erhöhen</strong></td>
+                <td>FPR minimieren</td>
+              </tr>
+              <tr>
+                <td>Ausgewogen</td>
+                <td>TP + FP gleichgewichtig</td>
+                <td>Youden-Index</td>
+                <td>TPR − FPR maximieren</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. adjusted_predict() FUNKTION
+           ════════════════════════════════════════════ -->
+      <section class="section" id="adjusted-predict">
+        <div class="section-head">
+          <h2>4.3 Die <code>adjusted_predict()</code>-Funktion</h2>
+          <p>
+            Implementierung einer Funktion, die Vorhersagen mit einem
+            selbstgewählten TPR- oder FPR-Ziel zurückgibt – und den gewählten Punkt auf der
+            ROC-Kurve markiert.
+          </p>
+        </div>
+
+        <div class="note" style="margin-bottom:var(--space-5)">
+          <strong>Aufgabe (Cheap &amp; Expensive Bearings):</strong>
+          Erstelle eine Funktion <code>adjusted_predict(model, Xtest, ytest, tpfp_value, tp=True)</code>,
+          die:<br>
+          1. Die ROC-Kurve berechnet<br>
+          2. Den Threshold findet, der am nächsten am Ziel-TPR oder Ziel-FPR liegt<br>
+          3. Den Punkt auf der ROC-Kurve markiert<br>
+          4. Die angepassten binären Vorhersagen zurückgibt<br>
+          → Vollständig gelöst auf <a href="PageBeispiel.html">der Beispiel-Seite</a>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Vollständige Lösung
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.metrics import roc_curve
+import matplotlib.pyplot as plt
+import numpy as np
+
+def adjusted_predict(model, Xtest, ytest, tpfp_value, tp=True):
+    """
+    Gibt angepasste Vorhersagen zurück, die einen gewünschten
+    TPR- oder FPR-Wert auf der ROC-Kurve treffen.
+
+    Parameter:
+        model       : trainiertes sklearn-Modell
+        Xtest       : Test-Features
+        ytest       : wahre Testlabels
+        tpfp_value  : Zielwert für TPR (wenn tp=True) oder FPR (wenn tp=False)
+        tp          : True → Ziel ist TPR, False → Ziel ist FPR
+
+    Rückgabe:
+        ypredicted_new : Angepasste binäre Vorhersagen
+    """
+    # Schritt 1: Score-Werte berechnen
+    yscore = model.decision_function(Xtest)
+
+    # Schritt 2: ROC-Kurve berechnen
+    fpr, tpr, thresholds = roc_curve(ytest, yscore)
+
+    # Schritt 3: Wähle TPR oder FPR als Ziel
+    if tp:
+        tpfpr = tpr   # Suche Threshold der nächsten am Ziel-TPR liegt
+    else:
+        tpfpr = fpr   # Suche Threshold der nächsten am Ziel-FPR liegt
+
+    # Schritt 4: Index des nächsten Werts finden
+    index_of_tpfp_value = np.argmin(np.abs(tpfpr - tpfp_value))
+    threshold = thresholds[index_of_tpfp_value]
+
+    # Schritt 5: ROC-Kurve plotten mit markiertem Punkt
+    plt.plot([0, 1], [0, 1], linestyle='--', label='No Skill')
+    plt.plot(fpr, tpr, marker='.', label='Model')
+    plt.scatter(fpr[index_of_tpfp_value],
+                tpr[index_of_tpfp_value],
+                marker='o', color='black', s=100, zorder=5,
+                label=f'Gewählter Punkt')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC-Kurve mit angepasstem Threshold')
+    plt.legend()
+
+    # Schritt 6: Angepasste Vorhersagen zurückgeben
+    return yscore > threshold
+
+
+# Anwendung: FPR-Ziel von ~2.3%
+ypredicted_new = adjusted_predict(model, Xtest, ytest,
+                                  tpfp_value=0.023, tp=False)
+
+# Anwendung: TPR-Ziel von ~97%
+ypredicted_new = adjusted_predict(model, Xtest, ytest,
+                                  tpfp_value=0.97, tp=True)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Erklärung: Schritt für Schritt
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.1">
+                <li><code>decision_function()</code> → kontinuierlicher Score (kein Label)</li>
+                <li><code>roc_curve()</code> → Array aller (fpr, tpr, threshold)-Tripel</li>
+                <li><code>np.argmin(np.abs(...))</code> → Index des nächsten Werts zum Ziel</li>
+                <li><code>thresholds[index]</code> → der konkrete Schwellwert</li>
+                <li><code>yscore > threshold</code> → angepasste binäre Vorhersagen (True/False)</li>
+                <li>Der schwarze Punkt auf der ROC-Kurve markiert die neue Position</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">tp=False → FPR-Ziel</span></h3>
+            <p>
+              <code>adjusted_predict(model, Xtest, ytest, 0.023, tp=False)</code><br>
+              → Sucht den Threshold, bei dem FPR ≈ 0.023 (2.3 % Fehlalarme bei negativen Lagern).
+              Teuer Lager werden selten fälschlich ausgetauscht.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">tp=True → TPR-Ziel</span></h3>
+            <p>
+              <code>adjusted_predict(model, Xtest, ytest, 0.97, tp=True)</code><br>
+              → Sucht den Threshold, bei dem TPR ≈ 0.97 (97 % der beschädigten Lager erkannt).
+              Günstige Lager werden zuverlässig zum richtigen Zeitpunkt ausgetauscht.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. WICHTIGE HINWEISE
+           ════════════════════════════════════════════ -->
+      <section class="section" id="hinweise">
+        <div class="section-head">
+          <h2>4.4 Was darf man anpassen – und was nicht?</h2>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3 style="color:var(--color-success)">✅ Was sich verändert</h3>
+            <ul>
+              <li>Der Threshold-Wert, ab dem der Score als „positiv" gilt</li>
+              <li>Die TPR und FPR in der Vorhersage</li>
+              <li>Die Confusion Matrix der Vorhersagen</li>
+              <li>Die Anzahl der False Positives und False Negatives</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3 style="color:var(--color-warning)">❌ Was sich NICHT verändert</h3>
+            <ul>
+              <li>Die ROC-Kurve selbst – die beschreibt die grundlegende Modellgüte</li>
+              <li>Die AUC – invariant gegenüber Threshold-Wahl</li>
+              <li>Das trainierte Modell und seine Parameter</li>
+              <li>Die Möglichkeiten des Modells – nur Kompromiss-Punkt auf der Kurve</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-warning" style="margin-top:var(--space-5)">
+          <strong>Prüfungs-Falle:</strong>
+          Das Anpassen des Decision Thresholds verbessert <strong>nicht</strong> die AUC!
+          Es verschiebt nur den Kompromiss zwischen TPR und FPR.
+          Wenn die AUC schlecht ist, hilft auch kein Threshold-Tuning –
+          dann muss das Modell selbst verbessert werden.
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <section class="section" id="navigation">
+        <div class="card-grid">
+          <a href="Page03.html" class="card" style="text-decoration:none">
+            <h3>← Seite 3</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              ROC Curves in sklearn – roc_curve, RocCurveDisplay, Integrale
+            </p>
+          </a>
+          <a href="Page05.html" class="card"
+            style="text-decoration:none; border-color:var(--color-primary);
+              background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2))">
+            <h3 style="color:var(--color-primary)">→ Seite 5: Confusion Matrix sklearn &amp; AUC</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              confusion_matrix(), Heatmap, roc_auc_score, Youden-Index
+            </p>
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 7 · Seite 4 · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

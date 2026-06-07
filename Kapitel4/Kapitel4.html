@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Kapitel 4 · Clustering</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · Clustering"></site-header>
+
+  <main id="main-content">
+
+    <!-- ══════════════════════════════════════════════
+         HERO
+    ══════════════════════════════════════════════════ -->
+    <div class="container">
+      <section class="k4-hero">
+        <span class="eyebrow">✦ Kapitel 4 · Unsupervised Learning</span>
+        <h1>Clustering</h1>
+        <p>
+          Datenpunkte ohne Labels gruppieren – von k-means über DBSCAN bis hin zur
+          Validierung und realen Anwendungen.
+        </p>
+        <div class="k4-pills">
+          <span class="pill">k-means</span>
+          <span class="pill">EM-Algorithmus</span>
+          <span class="pill">DBSCAN</span>
+          <span class="pill">Silhouette Score</span>
+          <span class="pill">Elbow Plot</span>
+          <span class="pill">Spectral Clustering</span>
+          <span class="pill">Validierung</span>
+          <span class="pill">Anwendungsbeispiele</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         HAUPTSEITEN
+    ══════════════════════════════════════════════════ -->
+    <p class="section-label">Alle Seiten</p>
+    <div class="pages-grid">
+
+      <!-- Page 01 -->
+      <a class="page-card" href="Page01.html">
+        <div class="card-banner">
+          🗂️
+          <span class="card-num">Seite 1</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Clustering Übersicht</div>
+          <div class="card-desc">
+            Was ist Clustering? Arten des Clusterings: partitionierend,
+            dichtebasiert, hierarchisch. Erste Vor- und Nachteile von k-means
+            und DBSCAN im Vergleich.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Definition</span>
+            <span class="tag">k-means</span>
+            <span class="tag">DBSCAN</span>
+            <span class="tag">Validierung</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 02 -->
+      <a class="page-card" href="Page02.html">
+        <div class="card-banner">
+          🎯
+          <span class="card-num">Seite 2</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">K-means</div>
+          <div class="card-desc">
+            Funktionsweise und Heuristik des k-means Algorithmus.
+            Implementierung in sklearn mit <code>.fit()</code>,
+            <code>.predict()</code> und <code>.cluster_centers_</code>.
+          </div>
+          <div class="card-tags">
+            <span class="tag">sklearn</span>
+            <span class="tag">KMeans</span>
+            <span class="tag">make_blobs</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 03 -->
+      <a class="page-card" href="Page03.html">
+        <div class="card-banner">
+          🔄
+          <span class="card-num">Seite 3</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">EM-Algorithmus in K-means</div>
+          <div class="card-desc">
+            Der Expectation-Maximization-Algorithmus als Grundlage von k-means.
+            Mathematische Herleitung und From-Scratch-Implementierung
+            in Python. Nachteile und Grenzen.
+          </div>
+          <div class="card-tags">
+            <span class="tag">EM</span>
+            <span class="tag">Mathematik</span>
+            <span class="tag">From Scratch</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Mathematik + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 04 -->
+      <a class="page-card" href="Page04.html">
+        <div class="card-banner">
+          📊
+          <span class="card-num">Seite 4</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Validierung von Clustering</div>
+          <div class="card-desc">
+            Dunn-Index, Davies-Bouldin-Index und Silhouette Score im Detail.
+            Silhouette-Plot lesen und interpretieren. SSE und Elbow Plot
+            zur optimalen k-Wahl.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Dunn-Index</span>
+            <span class="tag">Silhouette</span>
+            <span class="tag">Elbow Plot</span>
+            <span class="tag">SSE</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Mathematik + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 05 -->
+      <a class="page-card" href="Page05.html">
+        <div class="card-banner">
+          🌀
+          <span class="card-num">Seite 5</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">K-means Variationen</div>
+          <div class="card-desc">
+            Nichtlineare Probleme und Lösungsansätze: Spectral Clustering,
+            k-means++, k-Median. Wann versagt k-means und wie wird
+            der Kernel-Trick angewendet?
+          </div>
+          <div class="card-tags">
+            <span class="tag">Spectral Clustering</span>
+            <span class="tag">k-means++</span>
+            <span class="tag">k-Median</span>
+            <span class="tag">Kernel</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 06 -->
+      <a class="page-card" href="Page06.html">
+        <div class="card-banner">
+          🔵
+          <span class="card-num">Seite 6</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Skalierung &amp; DBSCAN</div>
+          <div class="card-desc">
+            Wann soll man skalieren? Density-based Clustering mit DBSCAN:
+            Core Region, Border Points, Noise. Hyperparameter
+            <code>eps</code> und <code>min_samples</code>.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Scaling</span>
+            <span class="tag">DBSCAN</span>
+            <span class="tag">eps</span>
+            <span class="tag">min_samples</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 07 -->
+      <a class="page-card" href="Page07.html">
+        <div class="card-banner">
+          ⚖️
+          <span class="card-num">Seite 7</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Vergleich Clustering-Verfahren</div>
+          <div class="card-desc">
+            Alle Algorithmen im direkten Vergleich: MiniBatchKMeans,
+            AffinityPropagation, MeanShift, Spectral, Ward, DBSCAN,
+            HDBSCAN, OPTICS, BIRCH, GaussianMixture – auf 6 Datensätzen.
+          </div>
+          <div class="card-tags">
+            <span class="tag">HDBSCAN</span>
+            <span class="tag">OPTICS</span>
+            <span class="tag">BIRCH</span>
+            <span class="tag">GMM</span>
+            <span class="tag">Vergleich</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Code + Visualisierung</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         ANWENDUNGSBEISPIELE
+    ══════════════════════════════════════════════════ -->
+    <p class="section-label">Anwendungsbeispiele</p>
+    <div class="pages-grid examples-grid">
+
+      <!-- Page 08 (Übersicht) -->
+      <a class="page-card" href="Page08.html">
+        <div class="card-banner"
+             style="background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface-2));">
+          🗺️
+          <span class="card-num"
+                style="color:var(--color-primary);
+                       background:color-mix(in oklab,var(--color-primary) 10%,var(--color-surface))">
+            Übersicht
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Anwendungsbeispiele – Übersicht</div>
+          <div class="card-desc">
+            Gesamtüberblick aller Praxisbeispiele mit Vergleichstabelle,
+            Konzept-Querverweisen und direktem Einstieg in beide Fallstudien.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Übersicht</span>
+            <span class="tag">Vergleich</span>
+            <span class="tag">Einstieg</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Übersicht</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 08_1 -->
+      <a class="page-card" href="Page08_1.html">
+        <div class="card-banner"
+             style="background: color-mix(in oklab, var(--color-success) 12%, var(--color-surface-2));">
+          🏭
+          <span class="card-num"
+                style="color:var(--color-success);
+                       background:color-mix(in oklab,var(--color-success) 10%,var(--color-surface))">
+            Beispiel 1
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Maschinenzustände erkennen</div>
+          <div class="card-desc">
+            Betriebszustände von Brownfield-Maschinen datengetrieben bestimmen.
+            Weihenstephaner Standard, k-means mit Vibrations- und Temperaturdaten,
+            Elbow Plot &amp; Silhouette-Analyse.
+          </div>
+          <div class="card-tags">
+            <span class="tag">k-means</span>
+            <span class="tag">Brownfield</span>
+            <span class="tag">Elbow</span>
+            <span class="tag">Silhouette</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Praxisbeispiel</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 08_2 -->
+      <a class="page-card" href="Page08_2.html">
+        <div class="card-banner"
+             style="background: color-mix(in oklab, var(--color-purple) 12%, var(--color-surface-2));">
+          📍
+          <span class="card-num"
+                style="color:var(--color-purple);
+                       background:color-mix(in oklab,var(--color-purple) 10%,var(--color-surface))">
+            Beispiel 2
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">DBSCAN + kNN: Neue Punkte zuordnen</div>
+          <div class="card-desc">
+            Unbekannte Datenpunkte zu einem bestehenden DBSCAN-Clustering hinzufügen.
+            kNN-Klassifikator als Brücke – da DBSCAN keine
+            <code>.predict()</code> Methode hat.
+          </div>
+          <div class="card-tags">
+            <span class="tag">DBSCAN</span>
+            <span class="tag">kNN</span>
+            <span class="tag">KNeighborsClassifier</span>
+            <span class="tag">make_moons</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Praxisbeispiel</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         PRÜFUNGSVORBEREITUNG
+    ══════════════════════════════════════════════════ -->
+    <p class="section-label">Prüfungsvorbereitung</p>
+    <p class="section-label-desc">
+      Schnellreferenz und Selbsttest – ideal kurz vor der Prüfung.
+    </p>
+    <div class="pages-grid pruefung-grid">
+
+      <!-- Cheatsheet -->
+      <a class="page-card" href="PageCheatsheet.html">
+        <div class="card-banner"
+             style="background: color-mix(in oklab, var(--color-warning) 12%, var(--color-surface-2));">
+          📋
+          <span class="card-num"
+                style="color: color-mix(in oklab, var(--color-warning) 80%, #000);
+                       background: color-mix(in oklab, var(--color-warning) 12%, var(--color-surface))">
+            Referenz
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Cheatsheet – Alle Formeln &amp; Befehle</div>
+          <div class="card-desc">
+            Alle Formeln (Dunn, DB, Silhouette, SSE), die komplette
+            sklearn API, Entscheidungsregeln (welcher Algo wann?),
+            8 Merksätze und typische Prüfungsfallen – kompakt auf einer Seite.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Formeln</span>
+            <span class="tag">sklearn API</span>
+            <span class="tag">Entscheidungsregeln</span>
+            <span class="tag">Merksätze</span>
+            <span class="tag">Fallen</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Schnellreferenz · 5 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Quiz -->
+      <a class="page-card" href="PageQuiz.html">
+        <div class="card-banner"
+             style="background: color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-2));">
+          🧠
+          <span class="card-num"
+                style="color:var(--color-primary);
+                       background:color-mix(in oklab,var(--color-primary) 10%,var(--color-surface))">
+            Selbsttest
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Quiz – 18 Prüfungsfragen</div>
+          <div class="card-desc">
+            18 aufklappbare Fragen in vier Kategorien:
+            Konzeptfragen, Formelfragen, Code-Fragen und typische Prüfungsfallen.
+            Klappe die Antwort auf, nachdem du selbst überlegt hast.
+          </div>
+          <div class="card-tags">
+            <span class="tag">18 Fragen</span>
+            <span class="tag">Konzept</span>
+            <span class="tag">Formeln</span>
+            <span class="tag">Code</span>
+            <span class="tag">🪤 Fallen</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Selbsttest · 4 Kategorien</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Clustering · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Skalierung & DBSCAN</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · Skalierung & DBSCAN"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page6"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Seite 6</span>
+            <h1>Skalierung &amp; <span class="key" style="--key-color:var(--color-primary)">DBSCAN</span></h1>
+            <p>
+              Wann soll man skalieren – und wann nicht?
+              Danach: dichtebasiertes Clustering mit DBSCAN,
+              seine zwei Hyperparameter und warum
+              <code>.predict()</code> absichtlich fehlt.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Scaling</span>
+              <span class="pill">Distanzmaß</span>
+              <span class="pill">DBSCAN</span>
+              <span class="pill">eps</span>
+              <span class="pill">min_samples</span>
+              <span class="pill">Core Region</span>
+              <span class="pill">Noise</span>
+              <span class="pill">Hyperparameter-Tuning</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kannst die Scaling-Entscheidung begründen,
+              verstehst den DBSCAN-Algorithmus von Core über
+              Border bis Noise und kennst die Bedeutung
+              der Hyperparameter <code>eps</code> und
+              <code>min_samples</code>.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. SKALIERUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="skalierung">
+        <div class="section-head">
+          <h2>6.1 Skalierung – Wann und Warum?</h2>
+          <p>
+            Die Frage „Soll ich skalieren?" lässt sich auf eine
+            tiefere Frage zurückführen.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Die eigentliche Frage</span></h3>
+            <ul>
+              <li>
+                Skalieren oder nicht = Frage nach dem
+                <strong>geeigneten Distanzmaß</strong>
+              </li>
+              <li>
+                Clustering basiert auf <strong>Distanzen</strong> –
+                Features mit größeren Wertebereichen
+                dominieren automatisch
+              </li>
+              <li>
+                Umformulierung:
+                <em>„In welcher Situation liegt mir ein
+                geeignetes Distanzmaß vor?"</em>
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Entscheidungsregel</span></h3>
+            <ul>
+              <li>
+                Zwei Features – eines mit großen, eines mit kleinen Differenzen:
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">Größere Differenz = mehr Gewicht gewollt?</span>
+                <br>
+                → <strong>Kein Scaling</strong> durchführen
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">Alle Features gleich gewichten?</span>
+                <br>
+                → <strong>Scaling durchführen</strong>
+                (z. B. <code>StandardScaler</code>, <code>MinMaxScaler</code>)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Merksatz:</strong>
+          Skalieren bedeutet, allen Features das
+          <strong>gleiche Gewicht</strong> im Distanzmaß zu geben.
+          Ob das sinnvoll ist, hängt vom
+          <strong>fachlichen Kontext</strong> ab –
+          nicht von einer pauschalen Regel.
+          Ein Praxisbeispiel folgt auf
+          <a href="Page08_1.html">Seite 8.1</a>.
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. DBSCAN DEFINITION
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="dbscan-definition">
+        <div class="section-head">
+          <h2>6.2 Was ist Density-based Clustering?</h2>
+          <p>
+            Ein fundamental anderer Ansatz –
+            Cluster als <strong>dichte Regionen</strong>,
+            nicht als Gruppen um Centroids.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Grundidee</span></h3>
+            <ul>
+              <li>
+                Anstatt Cluster über ein Abstandsmaß zu Centroids zu definieren:
+                <strong>Abgrenzung dichter von weniger dichten Regionen</strong>
+              </li>
+              <li>
+                Cluster = zusammenhängende dichte Datenwolke,
+                <strong>unabhängig von ihrer Form</strong>
+              </li>
+              <li>
+                Voller Name:
+                <strong>D</strong>ensity-<strong>B</strong>ased
+                <strong>S</strong>patial <strong>C</strong>lustering of
+                <strong>A</strong>pplications with
+                <strong>N</strong>oise
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Großer Vorteil</span></h3>
+            <ul>
+              <li>
+                <strong>Beliebige Cluster-Formen</strong>
+                können erkannt werden
+              </li>
+              <li>
+                <strong>k muss nicht vorab</strong> bestimmt werden
+              </li>
+              <li>
+                Ausreißer werden als
+                <span class="key" style="--key-color:var(--color-warning)">Noise</span>
+                explizit klassifiziert – nicht einem Cluster zugeordnet
+              </li>
+              <li>
+                Nur <strong>zwei Hyperparameter</strong>:
+                <code style="color:var(--color-primary)">eps</code>
+                und
+                <code style="color:var(--color-warning)">min_samples</code>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. DBSCAN ALGORITHMUS
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="dbscan-algorithmus">
+        <div class="section-head">
+          <h2>6.3 DBSCAN Algorithmus</h2>
+          <p>
+            Schritt für Schritt: wie DBSCAN jeden Datenpunkt klassifiziert.
+          </p>
+        </div>
+
+        <div class="timeline">
+
+          <div class="timeline-step">
+            <div class="step-no">1</div>
+            <div>
+              <h3>Epsilon-Nachbarschaft bestimmen</h3>
+              <p>
+                Für jeden Datenpunkt wird gezählt, wie viele andere Punkte sich
+                innerhalb einer kleinen Distanz
+                <code style="color:var(--color-primary)">eps</code>
+                befinden.
+                <br>
+                <code style="color:var(--color-primary)">eps</code>
+                = Hyperparameter <strong>Epsilon-Nachbarschaftsgröße</strong>
+                (Radius des Suchkreises).
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no" style="background:var(--color-primary-highlight);color:var(--color-primary)">A</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-primary)">Core Region (A)</span>
+              </h3>
+              <p>
+                Ein Punkt gilt als <strong>Core Point</strong>,
+                wenn sich mindestens
+                <code style="color:var(--color-warning)">min_samples</code>
+                Datenpunkte in seiner
+                <code style="color:var(--color-primary)">eps</code>-Nachbarschaft befinden.
+              </p>
+              <ul>
+                <li>Bildet das <strong>Herzstück</strong> eines Clusters</li>
+                <li>Verknüpfte Core Points → ein zusammenhängender Cluster</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no" style="background:color-mix(in oklab,var(--color-success) 15%,var(--color-surface-2));color:var(--color-success)">B/C</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-success)">Density-reachable (B &amp; C)</span>
+              </h3>
+              <p>
+                Punkte, die innerhalb der
+                <code style="color:var(--color-primary)">eps</code>-Nachbarschaft
+                eines Core Points liegen,
+                aber selbst <strong>nicht genug Nachbarn</strong> haben –
+                also selbst kein Core Point sind.
+              </p>
+              <ul>
+                <li>Gehören zum Cluster des Core Points</li>
+                <li>
+                  Sind <strong>nicht vollständig deterministisch</strong>
+                  zugeordnet – bei Überlappung zweier Cluster
+                  kann die Zuordnung variieren
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no" style="background:color-mix(in oklab,var(--color-warning) 15%,var(--color-surface-2));color:var(--color-warning)">N</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-warning)">Noise (N) – Label: −1</span>
+              </h3>
+              <p>
+                Alle Punkte, die weder Core noch density-reachable sind,
+                werden als <strong>Rauschen (Noise)</strong> klassifiziert.
+              </p>
+              <ul>
+                <li>Label in sklearn: <code style="color:var(--color-warning)">-1</code></li>
+                <li>Werden <strong>keinem Cluster</strong> zugeordnet</li>
+                <li>Entsprechen <strong>Ausreißern / Anomalien</strong></li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Hyperparameter Tabelle -->
+        <div style="margin-top:var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>Hyperparameter</th>
+                <th>Bedeutung</th>
+                <th>Effekt wenn zu klein</th>
+                <th>Effekt wenn zu groß</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code style="color:var(--color-primary)">eps</code></td>
+                <td>Radius der Epsilon-Nachbarschaft</td>
+                <td>Zu viele Noise-Punkte, viele kleine Cluster</td>
+                <td>Alles wird ein Cluster</td>
+              </tr>
+              <tr>
+                <td><code style="color:var(--color-warning)">min_samples</code></td>
+                <td>Min. Punkte für Core Region</td>
+                <td>Zu viele Core Points, instabil</td>
+                <td>Zu viele Noise-Punkte</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. DBSCAN IN SKLEARN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="dbscan-sklearn">
+        <div class="section-head">
+          <h2>6.4 DBSCAN in sklearn</h2>
+          <p>
+            Wir wenden DBSCAN auf das
+            <code>make_moons</code>-Problem aus Seite 5 an –
+            und sehen, was schlechte Hyperparameter anrichten.
+          </p>
+        </div>
+
+        <!-- Schritt 1: Daten + schlechtes eps -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin-bottom:var(--space-2)">
+          Schritt 1 · DBSCAN mit schlechtem eps=0.05
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_moons
+from sklearn.cluster import DBSCAN
+
+# Daten
+X, y = make_moons(n_samples=1000,
+                  noise=0.05, random_state=42)
+
+# DBSCAN mit eps zu klein
+dbscan = DBSCAN(eps=0.05, min_samples=5)
+dbscan.fit(X)
+
+# Erste Labels ansehen
+print(dbscan.labels_[:10])
+# → [ 0  2 -1 -1  1  0  0  0  2  5]
+
+# Alle einzigartigen Labels
+print(np.unique(dbscan.labels_))
+# → [-1  0  1  2  3  4  5  6]</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>[ 0  2 -1 -1  1  0  0  0  2  5]
+[-1  0  1  2  3  4  5  6]</pre>
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:var(--space-3) 0 0;padding-left:1rem;line-height:1.9">
+                <li>
+                  <code style="color:var(--color-warning)">-1</code>
+                  = <strong>Noise</strong> –
+                  keinem Cluster zugeordnet
+                </li>
+                <li>
+                  <strong>7 Cluster-Labels</strong> (0–6) gefunden –
+                  viel zu viele!
+                </li>
+                <li>
+                  <code style="color:var(--color-warning)">eps=0.05</code>
+                  ist zu klein → Nachbarschaft zu eng →
+                  Punkte werden isoliert
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Plot schlechtes Ergebnis -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-6) 0 var(--space-2)">
+          Schritt 2 · Ergebnis visualisieren (eps=0.05)
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># Clustering mit eps=0.05 plotten
+plt.scatter(X[:, 0], X[:, 1],
+            c=dbscan.labels_, s=50, cmap='viridis')
+plt.title("DBSCAN – eps=0.05 (zu klein!)")
+plt.colorbar(label='Cluster Label')
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Beobachtung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:0;padding-left:1rem;line-height:1.9">
+                <li>
+                  ❌ <strong>7 Farben</strong> statt 2
+                </li>
+                <li>
+                  Die Halbmonde werden in
+                  <strong>viele kleine Fragmente</strong> zerrissen
+                </li>
+                <li>
+                  Viele Punkte als
+                  <span class="key" style="--key-color:var(--color-warning)">Noise (−1)</span>
+                  klassifiziert
+                </li>
+                <li>
+                  <code>eps</code> muss
+                  <strong>größer gewählt werden</strong>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           5. HYPERPARAMETER TUNING
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="dbscan-hyperparameter">
+        <div class="section-head">
+          <h2>6.5 Hyperparameter-Tuning</h2>
+          <p>
+            Die Lösung: <code>eps</code> auf einen geeigneten Wert erhöhen –
+            und verstehen, warum <code>.predict()</code> fehlt.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Das Problem</span></h3>
+            <ul>
+              <li>
+                Hyperparameter-Optimierung in einem
+                <strong>zweidimensionalen Raum</strong>:
+                <code style="color:var(--color-primary)">eps</code>
+                ×
+                <code style="color:var(--color-warning)">min_samples</code>
+              </li>
+              <li>
+                Beide Parameter beeinflussen sich
+                <strong>gegenseitig</strong>
+              </li>
+              <li>
+                Es gibt keine automatische Methode wie den Elbow Plot –
+                Tuning erfordert
+                <strong>Domänenwissen</strong> oder Grid Search
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Warum kein .predict()?</span></h3>
+            <ul>
+              <li>
+                Die DBSCAN-Klasse in sklearn hat
+                <strong>bewusst kein</strong>
+                <code style="color:var(--color-primary)">.predict()</code>
+              </li>
+              <li>
+                Der Nutzer soll
+                <strong>frei wählen können</strong>,
+                wie neue Punkte zugeordnet werden
+              </li>
+              <li>
+                Eine Möglichkeit:
+                <span class="key" style="--key-color:var(--color-success)">k-Nearest-Neighbors Classifier</span>
+                auf den DBSCAN-Labels trainieren
+                <br>
+                <small style="color:var(--color-text-muted)">
+                  → Details auf
+                  <a href="Page08_2.html">Seite 8.2</a>
+                </small>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Schritt 3: Korrektes eps -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-6) 0 var(--space-2)">
+          Lösung · eps=0.20 – korrektes Ergebnis
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># DBSCAN mit korrektem eps
+dbscan = DBSCAN(eps=0.20, min_samples=5)
+dbscan.fit(X)
+
+# Wie viele Cluster jetzt?
+print(np.unique(dbscan.labels_))
+
+# Ergebnis plotten
+plt.scatter(X[:, 0], X[:, 1],
+            c=dbscan.labels_, s=50, cmap='viridis')
+plt.title("DBSCAN – eps=0.20 (korrekt)")
+plt.colorbar(label='Cluster Label')
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ergebnis
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre>[-1  0  1]</pre>
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);
+                  margin:var(--space-3) 0 0;padding-left:1rem;line-height:1.9">
+                <li>
+                  ✅ <strong>2 Cluster</strong>
+                  (Labels 0 und 1) + wenige Noise-Punkte (−1)
+                </li>
+                <li>
+                  Jeder Halbmond ist
+                  <strong>eine Farbe</strong>
+                </li>
+                <li>
+                  DBSCAN erkennt die nicht-lineare Struktur
+                  <strong>korrekt</strong> –
+                  genauso wie Spectral Clustering
+                </li>
+                <li>
+                  <code style="color:var(--color-primary)">eps=0.20</code>
+                  passt zur Punktdichte der Halbmonde
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vergleich eps=0.05 vs eps=0.20 -->
+        <div style="margin-top:var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>Einstellung</th>
+                <th>Gefundene Cluster</th>
+                <th>Noise-Punkte</th>
+                <th>Ergebnis</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <code style="color:var(--color-warning)">eps=0.05</code>,
+                  <code>min_samples=5</code>
+                </td>
+                <td>7 (Labels 0–6)</td>
+                <td>Viele</td>
+                <td>❌ Zu viele Fragmente</td>
+              </tr>
+              <tr>
+                <td>
+                  <code style="color:var(--color-primary)">eps=0.20</code>,
+                  <code>min_samples=5</code>
+                </td>
+                <td>2 (Labels 0, 1)</td>
+                <td>Wenige</td>
+                <td>✅ Korrekt</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Seite:</strong>
+          Einen vollständigen visuellen Vergleich aller Clustering-Algorithmen –
+          MiniBatchKMeans, AffinityPropagation, HDBSCAN, OPTICS, BIRCH,
+          GaussianMixture und mehr – auf 6 verschiedenen Datensätzen.
+          <br><br>
+          <a href="Page07.html">→ Seite 7: Vergleich Clustering-Verfahren</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Seite 6 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

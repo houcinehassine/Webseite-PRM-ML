@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Supervised Learning: Klassifikation &amp; Regression</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    /* ── SCATTER PAIR ─────────────────────────────── */
+    .scatter-pair { display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4); margin-top:var(--space-5); }
+    @media (max-width:640px) { .scatter-pair { grid-template-columns:1fr; } }
+    .scatter-card { background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:var(--radius-xl); overflow:hidden; }
+    .scatter-card-title { padding:var(--space-3) var(--space-4); font-size:var(--text-xs); font-weight:700;
+      letter-spacing:.07em; text-transform:uppercase; background:var(--color-surface-offset);
+      border-bottom:1px solid var(--color-border); text-align:center; color:var(--color-text-muted); }
+    .scatter-card svg { width:100%; height:auto; display:block; padding:var(--space-2); }
+
+    /* ── SCORING CONCEPT FLOW ─────────────────────── */
+    .scoring-flow { display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap;
+      justify-content:center; padding:var(--space-6); background:var(--color-surface-2);
+      border:1px solid var(--color-border); border-radius:var(--radius-xl); margin-top:var(--space-5); }
+    .sf-box { display:flex; flex-direction:column; align-items:center; gap:var(--space-2);
+      padding:var(--space-4) var(--space-5); border-radius:var(--radius-xl);
+      border:1.5px solid var(--color-border); text-align:center; flex-shrink:0;
+      min-width:110px; background:var(--color-surface); }
+    .sf-box.training { border-color:color-mix(in oklab,var(--color-primary) 35%,var(--color-border));
+      background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface)); }
+    .sf-box.model { border-color:color-mix(in oklab,var(--color-warning) 35%,var(--color-border));
+      background:color-mix(in oklab,var(--color-warning) 5%,var(--color-surface)); }
+    .sf-box.output { border-color:color-mix(in oklab,var(--color-success) 35%,var(--color-border));
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface)); }
+    .sf-icon { font-size:1.6rem; line-height:1; }
+    .sf-label { font-size:var(--text-xs); font-weight:700; line-height:1.3; }
+    .sf-sub { font-size:0.65rem; color:var(--color-text-muted); line-height:1.3; }
+    .sf-arrow { font-size:1.4rem; color:var(--color-text-faint); flex-shrink:0; }
+
+    /* ── REGRESSION VISUALS ───────────────────────── */
+    .regression-heatmap { position:relative; height:180px; border-radius:var(--radius-xl);
+      overflow:hidden; border:1px solid var(--color-border); margin-top:var(--space-4);
+      background:linear-gradient(135deg, #fbbf24 0%, #10b981 30%, #3b82f6 65%, #7c3aed 100%); }
+    .heatmap-label-row { position:absolute; bottom:0; left:0; right:0; display:flex;
+      justify-content:space-between; padding:var(--space-2) var(--space-4);
+      background:rgba(0,0,0,0.25); font-size:0.65rem; font-weight:700; color:rgba(255,255,255,0.9); }
+    .heatmap-corner { position:absolute; font-size:0.65rem; font-weight:700; color:rgba(255,255,255,0.85);
+      background:rgba(0,0,0,0.2); padding:2px 6px; border-radius:4px; }
+    .heatmap-corner.tl { top:var(--space-2); left:var(--space-3); }
+    .heatmap-corner.tr { top:var(--space-2); right:var(--space-3); }
+    .regression-gradient-bar { height:24px; border-radius:var(--radius-full);
+      background:linear-gradient(90deg,#fbbf24,#10b981,#3b82f6,#7c3aed); margin:var(--space-3) 0 var(--space-1); }
+    .gradient-labels { display:flex; justify-content:space-between; font-size:0.65rem; color:var(--color-text-faint); }
+
+    /* ── DIM EXPLAIN (3D Hint) ────────────────────── */
+    .dim-explain { display:grid; grid-template-columns:1fr auto 1fr; gap:var(--space-4);
+      align-items:center; margin-top:var(--space-5); }
+    @media (max-width:640px) { .dim-explain { grid-template-columns:1fr; } }
+    .dim-box { padding:var(--space-5); background:var(--color-surface-2);
+      border:1px solid var(--color-border); border-radius:var(--radius-xl); }
+    .dim-box-title { font-size:var(--text-xs); font-weight:700; text-transform:uppercase;
+      letter-spacing:.07em; color:var(--color-text-faint); margin-bottom:var(--space-3); }
+    .dim-explain-arrow { font-size:1.5rem; color:var(--color-text-faint); text-align:center; }
+
+    /* ── SO WHAT BOX ──────────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+
+    /* ── FRAGE BOX ────────────────────────────────── */
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── QUOTE BLOCK ──────────────────────────────── */
+    .quote-block { margin:var(--space-6) 0; padding:var(--space-6); background:var(--color-surface-2);
+      border:1px solid var(--color-border); border-radius:var(--radius-xl); text-align:center; }
+    .quote-block blockquote { font-family:var(--font-display); font-size:var(--text-xl);
+      font-style:italic; color:var(--color-text); margin:0 0 var(--space-3) 0; line-height:1.4; }
+    .quote-block cite { font-size:var(--text-xs); color:var(--color-text-muted); font-style:normal;
+      font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Supervised Learning"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page3"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Seite 3 · Folien 11–15</span>
+            <h1>Supervised Learning:
+              <span class="key" style="--key-color:var(--color-primary)">Klassifikation</span>
+              &amp;
+              <span class="key" style="--key-color:var(--color-success)">Regression</span>
+            </h1>
+            <p>
+              Wie lernt ein Modell eine Trennlinie? Wie wendet es das Gelernte
+              auf neue Daten an – und was ändert sich bei kontinuierlichen Labels?
+              Diese Seite erklärt Klassifikation und Regression konzeptuell,
+              mit dem allgemeinen Scoring-Konzept als rotem Faden.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Trainingsdatensatz</span>
+              <span class="pill">Trennlinie</span>
+              <span class="pill">Modellparameter</span>
+              <span class="pill">Scoring</span>
+              <span class="pill">Prediction</span>
+              <span class="pill">Regression</span>
+              <span class="pill">Kontinuierliche Labels</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kannst den <strong>Trainingsprozess</strong> bei Klassifikation
+              (Trennlinie finden, Koeffizienten als Parameter) von
+              <strong>Scoring/Prediction</strong> klar unterscheiden.
+              Du weißt, wie sich Regression von Klassifikation unterscheidet
+              (kontinuierlich vs. diskrete Labels) und was es bedeutet,
+              eine <strong>Ebene auf Daten zu fitten</strong>.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3.1  KLASSIFIKATION – DAS KONZEPT  (Folie 11)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="klassifikation">
+        <div class="section-head">
+          <h2>3.1 Klassifikation – Das Konzept</h2>
+          <p>
+            Gegeben ein gelabelter Trainingsdatensatz: Das Modell sucht eine
+            <span class="key" style="--key-color:var(--color-primary)">Trennlinie</span>,
+            die die Klassen aufteilt. Die Koeffizienten dieser Geraden sind die
+            <span class="key" style="--key-color:var(--color-warning)">Modellparameter</span>
+            – und diese werden aus den Daten <strong>gelernt</strong>.
+          </p>
+        </div>
+
+        <!-- Scatter Pair: Input | Trained Model -->
+        <div class="scatter-pair">
+          <div class="scatter-card">
+            <div class="scatter-card-title">Input Data — Gelabelter Trainingsdatensatz</div>
+            <svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="205" x2="285" y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="160" y="222" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+              <text x="13"  y="110" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 13 110)">Feature 2</text>
+              <!-- Blue dots -->
+              <circle cx="65"  cy="50"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="100" cy="40"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="78"  cy="80"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="55"  cy="100" r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="115" cy="70"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="90"  cy="115" r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="128" cy="95"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="60"  cy="135" r="7" fill="#3b82f6" opacity="0.85"/>
+              <!-- Red dots -->
+              <circle cx="190" cy="145" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="225" cy="130" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="208" cy="165" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="255" cy="145" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="175" cy="170" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="240" cy="175" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="265" cy="160" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="200" cy="185" r="7" fill="#ef4444" opacity="0.85"/>
+              <!-- Legend -->
+              <circle cx="50" cy="18" r="5" fill="#3b82f6"/>
+              <text x="60" y="22" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif">Klasse A (blau)</text>
+              <circle cx="155" cy="18" r="5" fill="#ef4444"/>
+              <text x="165" y="22" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif">Klasse B (rot)</text>
+            </svg>
+          </div>
+
+          <div class="scatter-card">
+            <div class="scatter-card-title">Trainiertes Modell — Trennlinie gefunden</div>
+            <svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="205" x2="285" y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="160" y="222" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+              <text x="13"  y="110" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 13 110)">Feature 2</text>
+              <!-- Decision boundary -->
+              <line x1="45" y1="195" x2="280" y2="38" stroke="#4b5563" stroke-width="2.5"/>
+              <!-- Blue dots -->
+              <circle cx="65"  cy="50"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="100" cy="40"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="78"  cy="80"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="55"  cy="100" r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="115" cy="70"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="90"  cy="115" r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="128" cy="95"  r="7" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="60"  cy="135" r="7" fill="#3b82f6" opacity="0.85"/>
+              <!-- Red dots -->
+              <circle cx="190" cy="145" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="225" cy="130" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="208" cy="165" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="255" cy="145" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="175" cy="170" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="240" cy="175" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="265" cy="160" r="7" fill="#ef4444" opacity="0.85"/>
+              <circle cx="200" cy="185" r="7" fill="#ef4444" opacity="0.85"/>
+              <!-- Annotation -->
+              <rect x="152" y="46" width="132" height="30" rx="5" fill="var(--color-surface-offset)" stroke="var(--color-border)" stroke-width="1"/>
+              <text x="158" y="59" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif">Modellparameter =</text>
+              <text x="158" y="71" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif">Koeffizienten der Geraden</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Aufgabe bei der Klassifikation</span></h3>
+            <ul>
+              <li>Gelabelter <strong>Trainingsdatensatz</strong> liegt vor (X + y)</li>
+              <li>Daran trainieren wir unser <strong>ML-Modell</strong></li>
+              <li>Modell sucht eine
+                <span class="key" style="--key-color:var(--color-primary)">Trennlinie</span>,
+                die die Klassen aufteilt
+              </li>
+              <li>Neue Daten: anhand der Trennlinie bewerten → blaue oder rote Kategorie</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Modellparameter</span> = Koeffizienten</h3>
+            <ul>
+              <li>Die Trennlinie ist mathematisch eine <strong>Gerade</strong> (2D-Fall)</li>
+              <li>Beschrieben durch
+                <span class="key" style="--key-color:var(--color-warning)">Koeffizienten</span>
+                – Steigung &amp; Achsenabschnitt
+              </li>
+              <li>Diese Koeffizienten = die <strong>Modellparameter</strong></li>
+              <li>Sie werden <strong>aus den Daten gelernt</strong> → Training = Parameter optimieren</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>„Was denken Sie? Worin steckt das Gelernte beim Model Learning – und wie wird ein Modell aussehen?"</p>
+        </div>
+
+        <div class="quote-block">
+          <blockquote>„So what? Learning is finding parameters."</blockquote>
+          <cite>Prof. · Folie 11 · Grüne Box · Kernaussage</cite>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Training beim Supervised Learning bedeutet immer:
+            <strong>Modellparameter werden optimiert</strong>, sodass das Modell die
+            Trainingsdaten möglichst gut beschreibt. Bei der Klassifikation sind das
+            die Koeffizienten der Trennlinie – bei anderen Modellen (SVM, Random Forest)
+            sind es andere Parameter. Das Prinzip bleibt identisch.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3.2  SCORING & PREDICTION – ALLGEMEINES KONZEPT  (Folie 12)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="scoring-prediction">
+        <div class="section-head">
+          <h2>3.2 Scoring &amp; Prediction – Das allgemeine Konzept</h2>
+          <p>
+            Nach dem Training kann das gelernte Wissen auf
+            <strong>neue, vorher ungesehene Daten</strong> angewendet werden.
+            Diese Zuweisung von Labels heißt
+            <span class="key" style="--key-color:var(--color-success)">Scoring</span>
+            bzw.
+            <span class="key" style="--key-color:var(--color-success)">Prediction</span>.
+          </p>
+        </div>
+
+        <!-- Flow Diagram (Folie 12) -->
+        <div class="scoring-flow">
+          <div class="sf-box training">
+            <span class="sf-icon">📊</span>
+            <span class="sf-label">X + y</span>
+            <span class="sf-sub">Feature-Matrix<br>+ Labels (farbig)</span>
+          </div>
+          <div class="sf-arrow">→</div>
+          <div class="sf-box model">
+            <span class="sf-icon">⚙️</span>
+            <span class="sf-label">Model Learning</span>
+            <span class="sf-sub">Training<br>.fit(X, y)</span>
+          </div>
+          <div class="sf-arrow">→</div>
+          <div class="sf-box" style="border-color:color-mix(in oklab,var(--color-primary) 30%,var(--color-border)); background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface))">
+            <span class="sf-icon">🧠</span>
+            <span class="sf-label">Trainiertes Modell</span>
+            <span class="sf-sub">X gefärbt +<br>Parameter gelernt</span>
+          </div>
+          <div class="sf-arrow">→</div>
+          <div class="sf-box">
+            <span class="sf-icon">❓</span>
+            <span class="sf-label">X<sub>N+1</sub></span>
+            <span class="sf-sub">Neue, ungelabelte<br>Beobachtungen</span>
+          </div>
+          <div class="sf-arrow">→</div>
+          <div class="sf-box output">
+            <span class="sf-icon">✅</span>
+            <span class="sf-label">ŷ<sub>N+1</sub></span>
+            <span class="sf-sub">Vorhergesagte<br>Labels</span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:var(--space-4); margin-top:var(--space-3); font-size:var(--text-xs); color:var(--color-text-muted)">
+          <div style="flex:1; padding:var(--space-2) var(--space-3); background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2)); border-radius:var(--radius-md); border:1px solid color-mix(in oklab,var(--color-primary) 20%,var(--color-border))">
+            <strong style="color:var(--color-primary)">← Training Phase</strong>: Modell lernt die Beziehung zwischen X und y
+          </div>
+          <div style="flex:1; padding:var(--space-2) var(--space-3); background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); border-radius:var(--radius-md); border:1px solid color-mix(in oklab,var(--color-success) 20%,var(--color-border))">
+            <strong style="color:var(--color-success)">Scoring Phase →</strong>: Modell weist neuen Beobachtungen Labels zu
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Scoring</span> bzw. <span class="key" style="--key-color:var(--color-success)">Prediction</span> – Definition</h3>
+            <ul>
+              <li>Ziel: gelerntes Wissen auf <strong>neue, vorher ungesehene Daten</strong> anwenden</li>
+              <li>Man führt dem Modell neue Beobachtungen zu</li>
+              <li>Das Modell <strong>bewertet</strong> diese und weist Labels zu</li>
+              <li>Diese Zuweisung nennt man <span class="key" style="--key-color:var(--color-success)">Scoring</span> (auch: <strong>Prediction</strong> / Inferenz)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>In sklearn</h3>
+            <ul>
+              <li>Trainieren: <code class="key" style="--key-color:var(--color-primary)">.fit(X_train, y_train)</code></li>
+              <li>Scoring: <code class="key" style="--key-color:var(--color-success)">y_pred = .predict(X_new)</code></li>
+              <li>Rückgabe: Array mit vorhergesagten Labels ŷ pro Datenpunkt</li>
+              <li>Gilt für Klassifikation (diskret) <em>und</em> Regression (kontinuierlich)</li>
+              <li>Generalisierung = Performance auf <strong>ungesehenen Daten</strong></li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Das Scoring-Konzept ist universell: ob Klassifikation oder Regression –
+            das Schema ist immer dasselbe:
+            <strong>Trainiere auf (X, y) → Wende an auf X_neu → Erhalte ŷ_neu</strong>.
+            In sklearn immer: <code>.fit(X, y)</code> dann <code>.predict(X_new)</code>.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3.3  KLASSIFIKATION SCORING KONKRET  (Folie 13)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="klassifikation-scoring">
+        <div class="section-head">
+          <h2>3.3 Klassifikation Scoring – konkret</h2>
+          <p>
+            Neue, unbekannte Datenpunkte werden mit der gelernten Geraden verglichen.
+            Ihre Position relativ zur Trennlinie entscheidet,
+            welches <strong>diskrete Label</strong> (rot oder blau) sie erhalten.
+          </p>
+        </div>
+
+        <div class="scatter-pair">
+          <div class="scatter-card">
+            <div class="scatter-card-title">Unknown Data — Neue, ungelabelte Punkte</div>
+            <svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="205" x2="285" y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="160" y="222" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+              <text x="13"  y="110" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 13 110)">Feature 2</text>
+              <!-- Gray unknown dots -->
+              <circle cx="70"  cy="55"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="110" cy="45"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="85"  cy="90"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="145" cy="70"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="60"  cy="120" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="165" cy="105" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="195" cy="80"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="220" cy="140" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="180" cy="160" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="95"  cy="155" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="250" cy="125" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="130" cy="140" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="245" cy="170" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="270" cy="150" r="6" fill="#9ca3af" opacity="0.75"/>
+              <rect x="80" y="15" width="140" height="18" rx="4" fill="var(--color-surface-offset)" stroke="var(--color-border)" stroke-width="1"/>
+              <text x="150" y="27" text-anchor="middle" font-size="10" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="bold">? Unknown Data</text>
+            </svg>
+          </div>
+
+          <div class="scatter-card">
+            <div class="scatter-card-title">Predicted Labels — Links / Rechts der Geraden</div>
+            <svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="205" x2="285" y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="160" y="222" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+              <text x="13"  y="110" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 13 110)">Feature 2</text>
+              <!-- Decision boundary dashed -->
+              <line x1="45" y1="195" x2="280" y2="38" stroke="#4b5563" stroke-width="2" stroke-dasharray="6,4"/>
+              <!-- Blue dots (above/left of line) -->
+              <circle cx="70"  cy="55"  r="6" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="110" cy="45"  r="6" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="85"  cy="90"  r="6" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="145" cy="70"  r="6" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="60"  cy="120" r="6" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="95"  cy="155" r="6" fill="#3b82f6" opacity="0.85"/>
+              <circle cx="130" cy="140" r="6" fill="#3b82f6" opacity="0.85"/>
+              <!-- Red dots (below/right of line) -->
+              <circle cx="165" cy="105" r="6" fill="#ef4444" opacity="0.85"/>
+              <circle cx="195" cy="80"  r="6" fill="#ef4444" opacity="0.85"/>
+              <circle cx="220" cy="140" r="6" fill="#ef4444" opacity="0.85"/>
+              <circle cx="180" cy="160" r="6" fill="#ef4444" opacity="0.85"/>
+              <circle cx="250" cy="125" r="6" fill="#ef4444" opacity="0.85"/>
+              <circle cx="245" cy="170" r="6" fill="#ef4444" opacity="0.85"/>
+              <circle cx="270" cy="150" r="6" fill="#ef4444" opacity="0.85"/>
+              <text x="52"  cy="45"  y="45"  font-size="9" fill="#3b82f6" font-family="sans-serif" font-weight="bold">Klasse A</text>
+              <text x="215" cy="195" y="198" font-size="9" fill="#ef4444" font-family="sans-serif" font-weight="bold">Klasse B</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3>Scoring: <span class="key" style="--key-color:var(--color-primary)">Links</span> vs. <span class="key" style="--key-color:var(--color-primary)">Rechts</span> der Geraden</h3>
+            <ul>
+              <li>Neue Daten werden mit dem Modell (der <strong>gelernten Geraden</strong>) verglichen</li>
+              <li>Je nachdem auf welcher <strong>Seite der Geraden</strong> ein Punkt liegt → entsprechendes Label</li>
+              <li>
+                <span class="key" style="--key-color:#3b82f6">Blau</span> = Links/Oben der Grenze &nbsp;|&nbsp;
+                <span class="key" style="--key-color:#ef4444">Rot</span> = Rechts/Unten der Grenze
+              </li>
+              <li>Gestrichelte Linien = <strong>Klassengrenzen</strong> (Entscheidungsregionen)</li>
+              <li>Ergebnis: <strong>diskrete Labels</strong> – jeder Punkt bekommt genau eine Klasse</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>In sklearn: <code>.predict()</code></h3>
+            <ul>
+              <li>Trainieren: <code class="key" style="--key-color:var(--color-primary)">model.fit(X_train, y_train)</code></li>
+              <li>Scoring: <code class="key" style="--key-color:var(--color-success)">y_pred = model.predict(X_new)</code></li>
+              <li>Rückgabe: Array diskrete Labels z.B. <code>[0, 1, 0, 1, 1, ...]</code></li>
+              <li>Klassengrenze = gelernte Trennlinie (Hyperebene im allgemeinen Fall)</li>
+              <li>Optional: <code>.predict_proba(X)</code> liefert Wahrscheinlichkeiten je Klasse</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3.4  REGRESSION – DAS KONZEPT  (Folie 14)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="regression">
+        <div class="section-head">
+          <h2>3.4 Regression – Das Konzept</h2>
+          <p>
+            Im Gegensatz zur Klassifikation haben wir bei der Regression
+            <span class="key" style="--key-color:var(--color-success)">kontinuierliche Labels</span>
+            – also einen fließenden Farbverlauf statt diskreter Klassen.
+            Das Label wird als <strong>dritte Dimension</strong> im 2D Feature-Raum vorgestellt.
+          </p>
+        </div>
+
+        <!-- 2D → 3D → Heatmap Erklärung -->
+        <div class="dim-explain">
+          <div class="dim-box">
+            <div class="dim-box-title">Schritt 1 — Labelled Data (continuous)</div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+              Datenpunkte verteilt mit <strong>kontinuierlichem Farbverlauf</strong>
+              (kein Sprung zwischen Klassen):
+            </p>
+            <svg viewBox="0 0 200 120" style="width:100%; height:auto; display:block; border-radius:var(--radius-lg); overflow:hidden">
+              <defs>
+                <linearGradient id="regGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%"   stop-color="#fbbf24"/>
+                  <stop offset="33%"  stop-color="#10b981"/>
+                  <stop offset="66%"  stop-color="#3b82f6"/>
+                  <stop offset="100%" stop-color="#7c3aed"/>
+                </linearGradient>
+              </defs>
+              <rect width="200" height="120" fill="url(#regGrad)" opacity="0.15"/>
+              <rect width="200" height="120" fill="var(--color-surface-2)" opacity="0.6"/>
+              <circle cx="25"  cy="95"  r="5" fill="#fbbf24" opacity="0.9"/>
+              <circle cx="45"  cy="85"  r="5" fill="#f59e0b" opacity="0.9"/>
+              <circle cx="65"  cy="72"  r="5" fill="#10b981" opacity="0.9"/>
+              <circle cx="85"  cy="60"  r="5" fill="#3b82f6" opacity="0.9"/>
+              <circle cx="110" cy="50"  r="5" fill="#6366f1" opacity="0.9"/>
+              <circle cx="135" cy="38"  r="5" fill="#7c3aed" opacity="0.9"/>
+              <circle cx="160" cy="28"  r="5" fill="#6d28d9" opacity="0.9"/>
+              <circle cx="180" cy="20"  r="5" fill="#4c1d95" opacity="0.9"/>
+              <circle cx="35"  cy="78"  r="4" fill="#f59e0b" opacity="0.75"/>
+              <circle cx="95"  cy="55"  r="4" fill="#3b82f6" opacity="0.75"/>
+              <circle cx="145" cy="35"  r="4" fill="#7c3aed" opacity="0.75"/>
+            </svg>
+            <div class="regression-gradient-bar"></div>
+            <div class="gradient-labels">
+              <span>Kleiner Label-Wert (Gelb)</span>
+              <span>Großer Label-Wert (Violett)</span>
+            </div>
+          </div>
+
+          <div class="dim-explain-arrow">→</div>
+
+          <div class="dim-box">
+            <div class="dim-box-title">Schritt 2 — Label als 3. Dimension vorstellen</div>
+            <ul style="font-size:var(--text-xs); color:var(--color-text-muted); padding-left:1rem; margin:0; line-height:1.9">
+              <li>Im 2D Feature-Raum (Feature 1, Feature 2) stellen wir uns das
+                <span class="key" style="--key-color:var(--color-success)">Label</span>
+                als <strong>dritte Dimension (Z-Achse = Höhe)</strong> vor
+              </li>
+              <li>3D-Koordinatensystem:<br>
+                X-Achse = Feature 1 · Y-Achse = Feature 2 ·
+                <span class="key" style="--key-color:var(--color-success)">Z-Achse = label</span>
+              </li>
+              <li>Datenpunkte in 3D: ihre <strong>Höhe entspricht ihrem Label-Wert</strong></li>
+              <li>Einfache Regression: versuche eine
+                <span class="key" style="--key-color:var(--color-warning)">Ebene</span>
+                auf diese 3D-Daten zu <strong>fitten</strong>
+              </li>
+              <li>Parameter der Ebene (a₀, a₁, a₂, ...) werden gelernt</li>
+            </ul>
+            <div style="margin-top:var(--space-3); padding:var(--space-3); background:var(--color-surface-offset); border-radius:var(--radius-md); font-size:var(--text-xs); font-family:var(--font-mono); color:var(--color-text-muted)">
+              3D: (Feature 1, Feature 2, label)<br>
+              Ebene: z = a₀ + a₁·x₁ + a₂·x₂
+            </div>
+          </div>
+        </div>
+
+        <!-- Heatmap Visual (Input Data with Linear Fit) -->
+        <div style="margin-top:var(--space-6)">
+          <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+            Schritt 3 —
+            <span class="key" style="--key-color:var(--color-warning)">Input Data with Linear Fit</span>
+            (Folie 14 · Heatmap rechts)
+          </h3>
+          <div class="regression-heatmap">
+            <div class="heatmap-corner tl">Feature 2 ↑</div>
+            <div class="heatmap-corner tr">Hoher Label-Wert (Violett)</div>
+            <div class="heatmap-label-row">
+              <span>Feature 1 →</span>
+              <span>Niedriger Label-Wert (Gelb)</span>
+            </div>
+          </div>
+          <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-3)">
+            Die gefittete 3D-Ebene wird als <strong>2D-Heatmap</strong> dargestellt.
+            Datenpunkte sind farblich gemäß ihrem tatsächlichen Label-Wert eingefärbt
+            und auf die Heatmap überlagert – man sieht, wie gut die Ebene die Daten beschreibt.
+          </p>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>Klassifikation vs. <span class="key" style="--key-color:var(--color-success)">Regression</span></h3>
+            <ul>
+              <li><strong>Klassifikation:</strong> diskrete Labels (0, 1, 2, ...) → Trennlinie finden</li>
+              <li><strong>Regression:</strong>
+                <span class="key" style="--key-color:var(--color-success)">kontinuierliche Labels</span>
+                (15.7, 23.4, ...) → Ebene fitten
+              </li>
+              <li>Feature-Raum ist identisch – nur der Label-Typ unterscheidet sich</li>
+              <li>In sklearn: gleiche API – <code>.fit(X, y)</code> und <code>.predict(X_new)</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Ebene auf Daten fitten</span></h3>
+            <ul>
+              <li>Die <strong>Ebene</strong> ist das Regressionsmodell im 3D-Raum</li>
+              <li>Parameter (a₀, a₁, a₂, ...) werden aus den Daten gelernt</li>
+              <li>Ziel: Ebene passt sich so an, dass sie Daten <strong>optimal beschreibt</strong></li>
+              <li>Im 2D-Fall (1 Feature): eine <strong>Gerade</strong> statt einer Ebene</li>
+              <li>In sklearn: <code class="key" style="--key-color:var(--color-primary)">LinearRegression()</code></li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Regression und Klassifikation unterscheiden sich nur in der Art des Labels.
+            Bei der Regression lernt das Modell eine <strong>Funktion</strong>
+            (Gerade/Ebene), die kontinuierliche Werte vorhersagt –
+            statt Klassen durch eine Trennlinie zu separieren.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3.5  REGRESSION SCORING  (Folie 15)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="regression-scoring">
+        <div class="section-head">
+          <h2>3.5 Regression Scoring – Projektion auf die Ebene</h2>
+          <p>
+            Beim Scoring im Regressionsfall werden neue, unbekannte Daten auf die
+            <span class="key" style="--key-color:var(--color-success)">geschätzte Ebene projiziert</span>
+            – das liefert die vorhergesagten, kontinuierlichen Labels.
+          </p>
+        </div>
+
+        <div class="scatter-pair">
+          <div class="scatter-card">
+            <div class="scatter-card-title">Unknown Data — Neue, ungelabelte Punkte</div>
+            <svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="205" x2="285" y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="160" y="222" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+              <text x="13"  y="110" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 13 110)">Feature 2</text>
+              <!-- Gray unknown dots -->
+              <circle cx="60"  cy="155" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="85"  cy="170" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="110" cy="145" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="75"  cy="120" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="130" cy="110" r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="160" cy="90"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="140" cy="60"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="185" cy="75"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="210" cy="55"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="195" cy="40"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="240" cy="45"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <circle cx="260" cy="35"  r="6" fill="#9ca3af" opacity="0.75"/>
+              <text x="105" y="28" text-anchor="middle" font-size="10" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="bold">Unknown Data</text>
+            </svg>
+          </div>
+
+          <div class="scatter-card">
+            <div class="scatter-card-title">Predicted Labels — Kontinuierlicher Farbverlauf</div>
+            <svg viewBox="0 0 300 230" xmlns="http://www.w3.org/2000/svg">
+              <line x1="35" y1="205" x2="285" y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <line x1="35" y1="15"  x2="35"  y2="205" stroke="var(--color-border)" stroke-width="1.5"/>
+              <text x="160" y="222" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">Feature 1</text>
+              <text x="13"  y="110" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif" transform="rotate(-90 13 110)">Feature 2</text>
+              <!-- Colored dots with continuous gradient (low-left = yellow, high-right = violet) -->
+              <circle cx="60"  cy="155" r="6" fill="#fbbf24" opacity="0.9"/>
+              <circle cx="85"  cy="170" r="6" fill="#f59e0b" opacity="0.9"/>
+              <circle cx="110" cy="145" r="6" fill="#d97706" opacity="0.9"/>
+              <circle cx="75"  cy="120" r="6" fill="#10b981" opacity="0.9"/>
+              <circle cx="130" cy="110" r="6" fill="#3b82f6" opacity="0.9"/>
+              <circle cx="160" cy="90"  r="6" fill="#6366f1" opacity="0.9"/>
+              <circle cx="140" cy="60"  r="6" fill="#4f46e5" opacity="0.9"/>
+              <circle cx="185" cy="75"  r="6" fill="#7c3aed" opacity="0.9"/>
+              <circle cx="210" cy="55"  r="6" fill="#7c3aed" opacity="0.9"/>
+              <circle cx="195" cy="40"  r="6" fill="#6d28d9" opacity="0.9"/>
+              <circle cx="240" cy="45"  r="6" fill="#5b21b6" opacity="0.9"/>
+              <circle cx="260" cy="35"  r="6" fill="#4c1d95" opacity="0.9"/>
+              <text x="110" y="28" text-anchor="middle" font-size="10" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="bold">Predicted Labels</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3>Regression Scoring: <span class="key" style="--key-color:var(--color-success)">Projektion auf die Ebene</span></h3>
+            <ul>
+              <li>Unbekannte Daten werden
+                <span class="key" style="--key-color:var(--color-success)">auf die geschätzte Ebene projiziert</span>
+              </li>
+              <li>Dies liefert die <strong>neuen, kontinuierlichen Labels</strong></li>
+              <li>Keine diskrete Entscheidung (links/rechts) – sondern ein
+                <strong>kontinuierlicher Wert</strong> (die Höhe der Ebene an diesem Punkt)
+              </li>
+              <li>Farbverlauf: Gelb (niedriger Wert) → Violett (hoher Wert)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Vergleich: Klassifikation vs. Regression beim Scoring</h3>
+            <table style="font-size:var(--text-xs); width:100%; border-collapse:collapse; margin-top:var(--space-2)">
+              <thead>
+                <tr>
+                  <th style="text-align:left; padding:var(--space-2); border-bottom:1px solid var(--color-border); background:var(--color-surface-offset)">Aspekt</th>
+                  <th style="text-align:left; padding:var(--space-2); border-bottom:1px solid var(--color-border); background:var(--color-surface-offset)">Klassifikation</th>
+                  <th style="text-align:left; padding:var(--space-2); border-bottom:1px solid var(--color-border); background:var(--color-surface-offset)">Regression</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">Methode</td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">Links/Rechts der Geraden</td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">Projektion auf Ebene</td>
+                </tr>
+                <tr>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">Ausgabe ŷ</td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">Diskret (0, 1, ...)</td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">Kontinuierlich (15.7, ...)</td>
+                </tr>
+                <tr>
+                  <td style="padding:var(--space-2)">sklearn</td>
+                  <td style="padding:var(--space-2)"><code>.predict(X)</code></td>
+                  <td style="padding:var(--space-2)"><code>.predict(X)</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? – Zusammenfassung Seite 3</div>
+          <p>
+            Klassifikation und Regression folgen dem gleichen Ablauf:
+            <strong>Training auf (X, y) → Modell lernt Parameter → Scoring auf X_neu → ŷ_neu</strong>.
+            Der Unterschied liegt nur im Typ der Labels – diskret vs. kontinuierlich.
+            Die sklearn-API ist in beiden Fällen identisch:
+            <code>.fit(X, y)</code> dann <code>.predict(X_new)</code>.
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Seite 3 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

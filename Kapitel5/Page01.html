@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Random Forest Überblick</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page5" title="Kapitel 5 · Random Forest Überblick"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page1"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Seite 1</span>
+            <h1>Random Forest
+              <span class="key" style="--key-color:var(--color-primary)">Überblick</span>
+            </h1>
+            <p>
+              Ensemble-Methoden kombinieren viele schwache Lerner zu einem
+              starken Klassifikator. Diese Seite gibt einen strukturierten
+              Überblick über alle Konzepte des Kapitels – von
+              Entscheidungsbäumen bis Boosting.
+            </p>
+            <div class="pill-row">
+              <span class="pill">🌳 Entscheidungsbäume</span>
+              <span class="pill">📐 Gini Impurity</span>
+              <span class="pill">🌲 Random Forest</span>
+              <span class="pill">🔍 Feature Importance</span>
+              <span class="pill">⚡ Boosting</span>
+              <span class="pill">📈 RF Regression</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du bekommst einen strukturierten Überblick über alle
+              Themen des Kapitels, lernst Random Forests einzuordnen
+              und kennst ihre Stärken und Schwächen – als Grundlage
+              für die Detailseiten.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. EINORDNUNG
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="wo-befinden-wir-uns">
+        <div class="section-head">
+          <h2>1.1 Wo befinden wir uns?</h2>
+          <p>
+            Random Forests sind sogenannte
+            <strong>Ensemble-Methoden</strong> – eine generische
+            Klasse von ML-Verfahren, die mehrere Modelle kombinieren.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Einordnung im ML-Kontext</span></h3>
+            <ul>
+              <li><strong>Supervised Learning</strong> – es gibt Labels</li>
+              <li><strong>Klassifikation &amp; Regression</strong> – beides möglich</li>
+              <li>Grundlage: <strong>Entscheidungsbäume</strong> als Weak Learner</li>
+              <li>Verbesserung durch <strong>Randomisierung</strong> und <strong>Aggregation</strong></li>
+              <li>Zugehörigkeit zum <strong>„klassischen" Machine Learning</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Was ist eine Ensemble-Methode?</span></h3>
+            <ul>
+              <li>Kombination mehrerer <strong>Weak Learner</strong> → <strong>Strong Learner</strong></li>
+              <li>
+                Das Ganze ist mehr als die Summe seiner Teile –
+                Ensemble übertrifft einzelne Modelle
+              </li>
+              <li>Zwei Hauptstrategien:
+                <strong>Bagging</strong> (parallel) und
+                <strong>Boosting</strong> (seriell)
+              </li>
+              <li>Random Forest = Bagging auf Entscheidungsbäumen</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Merksatz:</strong>
+          Clustering-Algorithmen erzeugen <em>diskrete Labels ohne Vorgabe</em> –
+          Random Forests hingegen <em>lernen aus vorgegebenen Labels</em>
+          (Supervised Learning). Wir wechseln hier von Unsupervised zu
+          Supervised Learning.
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. THEMEN-ÜBERBLICK
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="themen-uebersicht">
+        <div class="section-head">
+          <h2>1.2 Themen-Überblick</h2>
+          <p>
+            Ein erster Blick auf alle Konzepte, die in diesem
+            Kapitel behandelt werden – mit Querverweisen zu
+            den jeweiligen Detailseiten.
+          </p>
+        </div>
+
+        <div class="overview">
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">🌳</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-success)">Entscheidungsbäume</span>
+                <a href="Page02.html" style="font-size:var(--text-xs); margin-left:var(--space-2)">→ Seite 2</a>
+              </h3>
+              <p>
+                Das <strong>Basismodell</strong> eines Random Forests.
+                Teilen Daten durch achsenparallele Splits im Feature-Raum auf.
+                Tendenz zum <strong>Overfitting</strong> –
+                genau deshalb brauchen wir Ensembles.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">📐</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-primary)">Gini Impurity</span>
+                <a href="Page02.html#gini-impurity" style="font-size:var(--text-xs); margin-left:var(--space-2)">→ Seite 2</a>
+              </h3>
+              <p>
+                Das quantitative <strong>Gütekriterium</strong> für Splits.
+                Misst die Wahrscheinlichkeit, einen zufällig gezogenen Datenpunkt
+                <strong>falsch zu klassifizieren</strong>.
+                Wert zwischen <code>0</code> (rein) und <code>0.5</code> (maximal unrein, binär).
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">🌲</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-primary)">Random Forest</span>
+                <a href="Page03.html" style="font-size:var(--text-xs); margin-left:var(--space-2)">→ Seite 3</a>
+              </h3>
+              <p>
+                Kombination vieler randomisierter Entscheidungsbäume via
+                <strong>Bagging</strong> und <strong>Feature Bagging</strong>.
+                Reduktion von Overfitting durch Dekorrelation der Bäume.
+                Vorhersage durch <strong>Majoritätsvotum</strong>.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-purple)">🔍</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-purple)">Feature Importance</span>
+                <a href="Page05.html" style="font-size:var(--text-xs); margin-left:var(--space-2)">→ Seite 5</a>
+              </h3>
+              <p>
+                Welche Features haben den <strong>größten Impact</strong>
+                auf die Vorhersage?
+                <strong>Permutation Importance</strong>: Randomisierung eines
+                Features → messbarer Performance-Rückgang = Wichtigkeit.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">⚡</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-warning)">Boosting</span>
+                <a href="Page07.html" style="font-size:var(--text-xs); margin-left:var(--space-2)">→ Seite 7</a>
+              </h3>
+              <p>
+                Alternative zu Bagging: Weak Learner werden
+                <strong>seriell</strong> trainiert.
+                Jeder neue Lerner konzentriert sich auf die
+                <strong>Fehler des vorherigen</strong>.
+                Wichtigster Vertreter: <strong>AdaBoost</strong>.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-purple)">📈</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-purple)">RF Regression</span>
+                <a href="Page06_2.html" style="font-size:var(--text-xs); margin-left:var(--space-2)">→ Seite 6.2</a>
+              </h3>
+              <p>
+                Random Forests können auch <strong>kontinuierliche Werte</strong>
+                vorhersagen. Split-Kriterium: <strong>MSE</strong> statt Gini Impurity.
+                Vorhersage = <strong>Mittelwert</strong> aller Samples im Blatt.
+              </p>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. PROS
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="rf-pros">
+        <div class="section-head">
+          <h2>1.3 Vorteile von Random Forest</h2>
+          <p>
+            Random Forests gehören zu den stärksten Verfahren im
+            klassischen Machine Learning – aus gutem Grund.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3 style="color:var(--color-success)">⚡ Performance</h3>
+            <ul>
+              <li>
+                <strong>Schnelles Training:</strong> einzelne Decision Trees –
+                Trainingszeit wächst <em>linear</em> mit der Anzahl der Bäume
+              </li>
+              <li>
+                <strong>Schnelle Evaluierung:</strong> jeder Baum
+                wird einzeln ausgewertet →
+                <span class="key" style="--key-color:var(--color-success)">gut parallelisierbar</span>
+              </li>
+              <li>
+                <strong>Sehr effizient</strong> bei großen Datenmengen –
+                viele Klassen, viele Samples, viele Features
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3 style="color:var(--color-success)">🛠️ Praktische Stärken</h3>
+            <ul>
+              <li>
+                <code class="key" style="--key-color:var(--color-primary)">.predict_proba()</code>
+                möglich – Klassenwahrscheinlichkeiten statt nur Vorhersagen
+              </li>
+              <li>
+                Kann mit <strong>numerischen und kategorialen Variablen</strong>
+                umgehen
+              </li>
+              <li>
+                <strong>Standardisierung der Features ist nicht nötig</strong>
+                – im Gegensatz zu SVM oder kNN
+              </li>
+              <li>
+                Eines der
+                <span class="key" style="--key-color:var(--color-success)">mächtigsten Verfahren</span>
+                aus dem „klassischen" Machine Learning
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. CONS
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="rf-cons">
+        <div class="section-head">
+          <h2>1.4 Nachteile &amp; Grenzen</h2>
+          <p>
+            Kein Verfahren ist perfekt – ein ehrlicher Blick auf
+            die Schwächen hilft bei der richtigen Modellwahl.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3 style="color:var(--color-warning)">🔲 Black Box</h3>
+            <ul>
+              <li>
+                Im Vergleich zu einem einzelnen Decision Tree →
+                <span class="key" style="--key-color:var(--color-warning)">eher Black-Box</span>
+              </li>
+              <li>
+                Hunderte von Bäumen sind schwer zu interpretieren –
+                Lösung: <strong>Feature Importance</strong> &amp;
+                <strong>Permutation Importance</strong>
+                <a href="Page05.html">(→ Seite 5)</a>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3 style="color:var(--color-warning)">⚠️ Grenzen der Methode</h3>
+            <ul>
+              <li>
+                Besteht <strong>nur eine lineare Abhängigkeit</strong>
+                zwischen Features und Label → RF liefert
+                <em>eventuell keinen Genauigkeitsgewinn</em>
+                gegenüber einem einzelnen Decision Tree
+              </li>
+              <li>
+                Bei <strong>mehreren kategorialen Features</strong>
+                im Datensatz führt ein Ensemble eventuell auch
+                zu <em>keinem Zugewinn</em>
+              </li>
+              <li>
+                <strong>Höherer Speicherbedarf</strong> als ein
+                einzelner Baum – viele Bäume müssen gespeichert werden
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Vergleichstabelle -->
+        <div style="margin-top:var(--space-8)">
+          <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+             text-transform:uppercase; color:var(--color-text-faint);
+             margin-bottom:var(--space-3)">
+            Direktvergleich: Decision Tree vs. Random Forest
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Kriterium</th>
+                <th>Decision Tree</th>
+                <th>Random Forest</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Interpretierbarkeit</td>
+                <td>✅ White-Box</td>
+                <td>⚠️ Black-Box</td>
+              </tr>
+              <tr>
+                <td>Overfitting-Tendenz</td>
+                <td>❌ Hoch</td>
+                <td>✅ Gering (durch Bagging)</td>
+              </tr>
+              <tr>
+                <td>Trainingsgeschwindigkeit</td>
+                <td>✅ Sehr schnell</td>
+                <td>⚠️ Langsamer (viele Bäume)</td>
+              </tr>
+              <tr>
+                <td>Vorhersagegenauigkeit</td>
+                <td>⚠️ Mittel</td>
+                <td>✅ Hoch</td>
+              </tr>
+              <tr>
+                <td><code>.predict_proba()</code></td>
+                <td>✅ Möglich</td>
+                <td>✅ Möglich (robuster)</td>
+              </tr>
+              <tr>
+                <td>Skalierung nötig?</td>
+                <td>❌ Nein</td>
+                <td>❌ Nein</td>
+              </tr>
+              <tr>
+                <td>Speicherbedarf</td>
+                <td>✅ Gering</td>
+                <td>⚠️ Höher</td>
+              </tr>
+              <tr>
+                <td>Lineare Abhängigkeiten</td>
+                <td>⚠️ Kein Vorteil</td>
+                <td>⚠️ Kein Vorteil gegenüber Tree</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Schritte:</strong>
+          Auf den folgenden Seiten werden alle hier vorgestellten
+          Konzepte Schritt für Schritt vertieft –
+          mit Mathematik, Code und Visualisierungen.
+          <br><br>
+          <a href="Page02.html">→ Seite 2: Entscheidungsbäume &amp; Gini Impurity</a>
+          &nbsp;·&nbsp;
+          <a href="Page03.html">→ Seite 3: Bagging &amp; Random Forest</a>
+          &nbsp;·&nbsp;
+          <a href="Page04.html">→ Seite 4: sklearn-Praxis</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 5 · Seite 1 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

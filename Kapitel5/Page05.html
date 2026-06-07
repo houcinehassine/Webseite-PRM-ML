@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Interpretation & Vertrauen ins Modell</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page5" title="Kapitel 5 · Interpretation & Vertrauen"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page5"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Seite 5</span>
+            <h1>Interpretation &amp;
+              <span class="key" style="--key-color:var(--color-primary)">Vertrauen</span>
+            </h1>
+            <p>
+              Ein Random Forest ist keine absolute Black Box –
+              mit <strong>Feature Importance</strong> und
+              <strong>Permutation Importance</strong>
+              lässt sich verstehen, welche Features das Modell
+              wirklich nutzt und wie sicher seine Entscheidungen sind.
+            </p>
+            <div class="pill-row">
+              <span class="pill">🔍 Feature Importance</span>
+              <span class="pill">🔀 Permutation Importance</span>
+              <span class="pill">📊 Bar Plot</span>
+              <span class="pill">🌳 White-Box Beispiel</span>
+              <span class="pill">🎓 Eignungstest</span>
+              <span class="pill">📡 Sensoren auswählen</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Was ist
+                <span class="key" style="--key-color:var(--color-primary)">Feature Importance</span>
+                und wie wird sie berechnet?
+              </li>
+              <li>Was ist der Unterschied zwischen
+                <strong>Tree-based Importance</strong>
+                und <strong>Permutation Importance</strong>?
+              </li>
+              <li>Wie interpretiert man einen
+                <strong>einzelnen Entscheidungsbaum</strong>
+                aus dem Forest?
+              </li>
+              <li>Praxisanwendung:
+                <strong>Sensoren auswählen</strong>
+                auf Basis von Feature Importance
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. FEATURE IMPORTANCE
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="feature-importance">
+        <div class="section-head">
+          <h2>5.1 Feature Importance</h2>
+          <p>
+            Eine zentrale Frage in jedem ML-Projekt:
+            <strong>Welche Features haben den größten Impact
+            auf die Vorhersage?</strong>
+            Das Konzept zur Beantwortung heißt
+            <span class="key" style="--key-color:var(--color-primary)">Feature Importance</span>.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Tree-based Importance</span>
+              <br><small style="font-weight:400; color:var(--color-text-muted)">
+                <code>model.feature_importances_</code>
+              </small>
+            </h3>
+            <ul>
+              <li>
+                Direkt aus dem Random Forest ablesbar –
+                <strong>nach dem Training</strong> verfügbar
+              </li>
+              <li>
+                Misst, wie oft ein Feature für einen Split
+                verwendet wurde und wie stark es die
+                <span class="key" style="--key-color:var(--color-primary)">Gini Impurity</span>
+                reduziert hat
+              </li>
+              <li>
+                Summiert über alle Bäume im Forest →
+                <strong>normalisiert auf Summe = 1</strong>
+              </li>
+              <li>
+                Schnell zu berechnen – aber kann bei
+                <strong>korrelierten Features</strong>
+                irreführend sein
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Permutation Importance</span>
+              <br><small style="font-weight:400; color:var(--color-text-muted)">
+                <code>permutation_importance()</code>
+              </small>
+            </h3>
+            <ul>
+              <li>
+                Wird <strong>nach dem Training</strong>
+                auf dem Testdatensatz berechnet –
+                modellunabhängig
+              </li>
+              <li>
+                Ein Feature wird
+                <span class="key" style="--key-color:var(--color-warning)">randomisiert (permutiert)</span>
+                → Vorhersagegenauigkeit sinkt
+              </li>
+              <li>
+                <strong>Stärke des Rückgangs</strong>
+                = Importance des Features
+              </li>
+              <li>
+                Robuster gegenüber korrelierten Features
+                als Tree-based Importance
+              </li>
+              <li>
+                <code>n_repeats</code>: Jede Spalte wird
+                mehrfach permutiert → Standardabweichung
+                als Unsicherheitsmaß
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Zentrale Frage der Permutation Importance:</strong>
+          Falls die Werte eines Features in den Testdaten
+          <strong>randomisiert</strong> werden –
+          wie stark würde die Vorhersagegenauigkeit sinken?
+          Die Modellgenauigkeit nimmt natürlich ab –
+          jedoch <strong>stärker für wichtigere Features</strong>.
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. ABLAUF PERMUTATION IMPORTANCE
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="permutation-importance">
+        <div class="section-head">
+          <h2>5.2 Ablauf der Permutation Importance</h2>
+          <p>
+            Ein klarer, schrittweiser Prozess –
+            anwendbar auf <strong>jedes trainierte Modell</strong>.
+          </p>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="step-no">1</div>
+            <div>
+              <h3>Modell trainieren</h3>
+              <p>
+                Normales Training auf Trainingsdaten –
+                kein Unterschied zur Standardprozedur.
+                Die Baseline-Accuracy auf dem Testset
+                wird als <strong>Referenz</strong> gespeichert.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">2</div>
+            <div>
+              <h3>Eine Feature-Spalte permutieren</h3>
+              <p>
+                Die Werte einer Feature-Spalte werden
+                <span class="key" style="--key-color:var(--color-warning)">zufällig durchgemischt</span>
+                – alle anderen Spalten bleiben unverändert.
+                Neue Predictions werden berechnet.
+                Der <strong>Performance-Rückgang</strong>
+                ist das Importance-Maß.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">3</div>
+            <div>
+              <h3>Für alle Spalten wiederholen</h3>
+              <p>
+                Schritt 2 wird für
+                <strong>jede Feature-Spalte</strong>
+                einzeln durchgeführt –
+                und das <code>n_repeats</code>-mal pro Spalte,
+                um eine
+                <span class="key" style="--key-color:var(--color-success)">stabile Schätzung</span>
+                mit Standardabweichung zu erhalten.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">4</div>
+            <div>
+              <h3>Importance auslesen &amp; visualisieren</h3>
+              <p>
+                <code>result.importances_mean</code>:
+                mittlerer Accuracy-Rückgang pro Feature.
+                <code>result.importances_std</code>:
+                Streuung über die Wiederholungen.
+                Darstellung als
+                <strong>Bar Plot mit Fehlerbalken</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. PERMUTATION IMPORTANCE IN SKLEARN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="permutation-sklearn">
+        <div class="section-head">
+          <h2>5.3 Permutation Importance in sklearn</h2>
+          <p>
+            sklearn stellt mit
+            <code class="key" style="--key-color:var(--color-primary)">permutation_importance()</code>
+            eine fertige Funktion bereit –
+            direkt auf jedem trainierten Modell anwendbar.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">API</span>
+            </h3>
+            <ul>
+              <li>
+                <code>permutation_importance(model, X_test, y_test, n_repeats)</code>
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-primary)">model</code>:
+                trainiertes sklearn-Modell
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-success)">X_test, y_test</code>:
+                Testdatensatz – <strong>nicht</strong> Trainingsdaten!
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-warning)">n_repeats</code>:
+                Anzahl der Permutationen pro Feature
+              </li>
+              <li>
+                Rückgabe:
+                <code>result.importances_mean</code>,
+                <code>result.importances_std</code>,
+                <code>result.importances</code>
+                (alle Einzelwerte)
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Tree-based vs. Permutation</span>
+            </h3>
+            <ul>
+              <li>
+                <code>model.feature_importances_</code>:
+                <strong>schnell</strong>, aus dem Modell direkt,
+                aber anfällig für
+                <span class="key" style="--key-color:var(--color-warning)">Bias bei hochkardinalen Features</span>
+              </li>
+              <li>
+                <code>permutation_importance()</code>:
+                <strong>robuster</strong>, modellunabhängig,
+                aber langsamer (mehrere Predictions nötig)
+              </li>
+              <li>
+                Für verlässliche Aussagen:
+                <strong>Permutation bevorzugen</strong>
+              </li>
+              <li>
+                Standardabweichung gibt an, wie
+                <strong>stabil</strong> die Importance-Schätzung ist
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Der folgende Code trainiert einen
+          <code>RandomForestClassifier</code>
+          auf einem synthetischen Datensatz mit 10 Features,
+          von denen nur 3 wirklich informativ sind.
+          Anschließend werden sowohl
+          <code>feature_importances_</code>
+          als auch
+          <code>permutation_importance()</code>
+          berechnet und als Bar Plots gegenübergestellt –
+          inklusive Standardabweichung als Fehlerbalken.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Feature Importance &amp; Permutation Importance
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.inspection import permutation_importance
+
+# Datensatz: 10 Features, nur 3 wirklich informativ
+X, y = make_classification(
+    n_samples=1000, n_features=10,
+    n_informative=3, n_redundant=0,
+    n_repeated=0, n_classes=2,
+    random_state=0, shuffle=False)
+
+feature_names = [f'Feature {i}' for i in range(10)]
+
+# Train-Test-Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, stratify=y, random_state=42)
+
+# Modell trainieren
+model = RandomForestClassifier(
+    n_estimators=100, random_state=0)
+model.fit(X_train, y_train)
+
+print(f"Test Accuracy: {model.score(X_test, y_test):.4f}")
+
+# ── Tree-based Importance ──────────────────────────
+tree_imp  = model.feature_importances_
+tree_std  = np.array([
+    tree.feature_importances_
+    for tree in model.estimators_]).std(axis=0)
+
+# ── Permutation Importance ─────────────────────────
+result = permutation_importance(
+    model, X_test, y_test,
+    n_repeats=10, random_state=42, n_jobs=2)
+perm_imp = pd.Series(
+    result.importances_mean,
+    index=feature_names)
+perm_std = result.importances_std
+
+print("\nPermutation Importance (mean ± std):")
+for i, (mean, std) in enumerate(
+        zip(result.importances_mean, perm_std)):
+    print(f"  Feature {i}: {mean:.4f} ± {std:.4f}")
+
+# ── Visualisierung: vertikal (2 × 1) ─────────────
+fig, axes = plt.subplots(2, 1, figsize=(8, 9))
+
+# Plot 1: Tree-based Importance
+x = np.arange(10)
+axes[0].bar(x, tree_imp, yerr=tree_std,
+            color='steelblue', edgecolor='white',
+            alpha=0.85, capsize=4)
+axes[0].set_xticks(x)
+axes[0].set_xticklabels(feature_names, rotation=45,
+                         ha='right', fontsize=9)
+axes[0].set_ylabel('Mean Gini Impurity Decrease')
+axes[0].set_title(
+    'Tree-based Feature Importance\n'
+    '(model.feature_importances_)')
+axes[0].grid(axis='y', alpha=0.3)
+
+# Plot 2: Permutation Importance
+perm_imp_sorted = perm_imp.sort_values(ascending=False)
+std_sorted = perm_std[perm_imp.argsort()[::-1]]
+axes[1].bar(range(10), perm_imp_sorted.values,
+            yerr=std_sorted,
+            color='darkorange', edgecolor='white',
+            alpha=0.85, capsize=4)
+axes[1].set_xticks(range(10))
+axes[1].set_xticklabels(perm_imp_sorted.index,
+                         rotation=45, ha='right',
+                         fontsize=9)
+axes[1].set_ylabel('Mean Accuracy Decrease')
+axes[1].set_title(
+    'Permutation Importance (n_repeats=10)\n'
+    '(sortiert nach Importance)')
+axes[1].grid(axis='y', alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    <strong>Feature 0, 1, 2</strong>
+                    haben klar höhere Importance –
+                    das sind die 3 informativen Features
+                  </li>
+                  <li>
+                    <strong>Feature 3–9</strong>: nahe 0 –
+                    kein echter Impact auf Vorhersage
+                  </li>
+                  <li>
+                    <span class="key" style="--key-color:steelblue">Tree-based</span>
+                    (oben) und
+                    <span class="key" style="--key-color:darkorange">Permutation</span>
+                    (unten) zeigen ähnliches Ranking –
+                    aber Permutation ist robuster
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Fehlerbalken:</strong>
+                Kleine Standardabweichung = stabile Schätzung.
+                Große Std = das Feature hat
+                <strong>inkonsistenten Einfluss</strong>
+                auf verschiedene Testsamples.
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Praxis-Tipp:</strong>
+                Features mit Importance ≈ 0 können
+                <strong>weggelassen werden</strong>
+                → Modell schlanker, schneller, oft gleich gut.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Hier wird die
+          <code>result</code>-Struktur direkt untersucht:
+          alle Einzelwerte pro Repeat werden als Boxplot
+          dargestellt – so wird die Verteilung der
+          Importance-Schätzung sichtbar, nicht nur Mittelwert und Std.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Permutation Importance als Boxplot
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.inspection import permutation_importance
+
+X, y = make_classification(
+    n_samples=1000, n_features=10,
+    n_informative=3, n_redundant=0,
+    n_repeated=0, n_classes=2,
+    random_state=0, shuffle=False)
+
+feature_names = [f'Feature {i}' for i in range(10)]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, stratify=y, random_state=42)
+
+model = RandomForestClassifier(
+    n_estimators=100, random_state=0)
+model.fit(X_train, y_train)
+
+result = permutation_importance(
+    model, X_test, y_test,
+    n_repeats=30, random_state=42, n_jobs=2)
+
+# Nach Median sortieren
+sorted_idx = result.importances_mean.argsort()[::-1]
+
+fig, ax = plt.subplots(figsize=(8, 5))
+ax.boxplot(
+    result.importances[sorted_idx].T,
+    vert=True,
+    labels=[feature_names[i] for i in sorted_idx],
+    patch_artist=True,
+    boxprops=dict(facecolor='steelblue', alpha=0.6),
+    medianprops=dict(color='red', linewidth=2)
+)
+ax.axhline(0, color='gray', linestyle='--',
+           linewidth=1, alpha=0.7)
+ax.set_ylabel('Accuracy Decrease (n_repeats=30)')
+ax.set_title(
+    'Permutation Importance – Verteilung\n'
+    '(Boxplot, 30 Wiederholungen pro Feature)')
+plt.xticks(rotation=45, ha='right')
+ax.grid(axis='y', alpha=0.3)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Boxplot lesen:</strong>
+                <ul>
+                  <li>
+                    <strong>Box</strong> = 25%–75% Quantil
+                    der Importance über alle Repeats
+                  </li>
+                  <li>
+                    <span style="color:red"><strong>Rote Linie</strong></span>
+                    = Median
+                  </li>
+                  <li>
+                    <strong>Whisker</strong> = Gesamtstreuung
+                  </li>
+                  <li>
+                    Features nahe oder unter 0:
+                    <strong>irrelevant oder rauschend</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>30 Repeats:</strong>
+                Mehr Wiederholungen =
+                stabilere Schätzung,
+                aber mehr Rechenzeit.
+                Faustregel: <code>n_repeats=10</code>
+                ist für die meisten Fälle ausreichend.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. WHITE-BOX BEISPIEL: EIGNUNGSTEST
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="white-box-eignungstest">
+        <div class="section-head">
+          <h2>5.4 White-Box Beispiel: Eignungstest</h2>
+          <p>
+            Manchmal will man nicht nur Importances –
+            man will den <strong>einzelnen Baum</strong>
+            direkt lesen und verstehen.
+            Das ist ein
+            <span class="key" style="--key-color:var(--color-success)">White-Box-Modell</span>.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Szenario</span></h3>
+            <ul>
+              <li>
+                Aufgabe: Ergebnisse von
+                <strong>Eignungstests</strong>
+                anhand dreier Merkmale klassifizieren –
+                <code>math</code>, <code>language</code>,
+                <code>creativity</code>
+              </li>
+              <li>
+                3 Studienfelder als Zielklassen
+              </li>
+              <li>
+                Wir trainieren einen kleinen Random Forest
+                mit <code>n_estimators=5</code>
+                und visualisieren
+                <strong>einen einzelnen Baum daraus</strong>
+              </li>
+              <li>
+                <code>plot_tree()</code> aus sklearn macht
+                die Entscheidungsstruktur
+                <strong>vollständig lesbar</strong>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Warum White-Box?</span></h3>
+            <ul>
+              <li>
+                Man kann <strong>nachvollziehen</strong>,
+                welches Feature für welchen Split
+                verwendet wurde
+              </li>
+              <li>
+                Möglichkeit zur <strong>Validierung</strong>:
+                stimmt der Baum mit dem Domänenwissen überein?
+              </li>
+              <li>
+                Nützlich für <strong>Compliance und Erklärbarkeit</strong>
+                in regulierten Bereichen
+              </li>
+              <li>
+                Einzelbaum-Insight als Ergänzung zur
+                Feature Importance – nicht als Ersatz
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Der Datensatz umfasst 6 Studenten mit je drei Testergebnissen
+          und einem zugewiesenen Studienfeld.
+          Der Code trainiert einen
+          <code>RandomForestClassifier(n_estimators=5)</code>
+          direkt in der <code>plot_tree()</code>-Funktion als One-Liner –
+          und gibt den zweiten Baum des Forests
+          (Index <code>[1]</code>) vollständig visualisiert aus.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – White-Box: Einzelbaum visualisieren
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import plot_tree
+
+# Studentendaten: (math, language, creativity) → Studienfeld
+X_y = np.array([
+    [9, 5, 6, 'study field 1'],
+    [10, 1, 2, 'study field 1'],
+    [1, 8, 1, 'study field 2'],
+    [4, 9, 3, 'study field 2'],
+    [0, 1, 10, 'study field 3'],
+    [5, 7, 9, 'study field 3'],
+])
+
+feature_names = ['math', 'language', 'creativity']
+class_names   = ['study field 1',
+                  'study field 2',
+                  'study field 3']
+
+# One-Liner: Modell trainieren UND Baum [1] visualisieren
+fig, ax = plt.subplots(figsize=(10, 5))
+plot_tree(
+    RandomForestClassifier(
+        n_estimators=5, random_state=42
+    ).fit(X_y[:, :-1], X_y[:, -1])[1],
+    feature_names=feature_names,
+    class_names=class_names,
+    filled=True,
+    rounded=True,
+    ax=ax
+)
+ax.set_title(
+    'Baum #2 aus Random Forest (n_estimators=5)\n'
+    'Eignungstest: Studienfeld-Klassifikation',
+    fontsize=11)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    Jeder Knoten zeigt:
+                    <strong>Feature, Schwellenwert, Gini, Samples, Klassen</strong>
+                  </li>
+                  <li>
+                    <strong>Farbe</strong> = Mehrheitsklasse
+                    im Knoten (je dunkler = reiner)
+                  </li>
+                  <li>
+                    Blätter = finale Klassifikation
+                    des Pfades
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>One-Liner Trick:</strong>
+                <code>.fit(...)[1]</code>
+                greift direkt auf den zweiten Baum
+                (<code>estimators_[1]</code>)
+                des trainierten Forests zu –
+                ohne Zwischenvariable.
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Wichtig:</strong>
+                Dieser eine Baum repräsentiert
+                <strong>nicht das gesamte Modell</strong>.
+                Er ist ein Weak Learner – der Forest
+                kombiniert 5 solcher Bäume.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Zur Vertiefung: Alle 5 Bäume des Forests
+          werden nebeneinander ausgegeben –
+          so wird die Diversität der Weak Learner
+          durch Bagging und Feature Bagging direkt sichtbar.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Alle 5 Bäume visualisieren (vertikal)
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import plot_tree
+
+X_y = np.array([
+    [9, 5, 6, 'study field 1'],
+    [10, 1, 2, 'study field 1'],
+    [1, 8, 1, 'study field 2'],
+    [4, 9, 3, 'study field 2'],
+    [0, 1, 10, 'study field 3'],
+    [5, 7, 9, 'study field 3'],
+])
+
+feature_names = ['math', 'language', 'creativity']
+class_names   = ['study field 1',
+                  'study field 2',
+                  'study field 3']
+
+# Forest trainieren
+forest = RandomForestClassifier(
+    n_estimators=5, random_state=42)
+forest.fit(X_y[:, :-1], X_y[:, -1])
+
+# Alle 5 Bäume vertikal ausgeben (5 Zeilen, 1 Spalte)
+fig, axes = plt.subplots(5, 1, figsize=(10, 28))
+fig.subplots_adjust(hspace=0.4)
+
+for i, (ax, tree) in enumerate(
+        zip(axes, forest.estimators_)):
+    plot_tree(tree,
+              feature_names=feature_names,
+              class_names=class_names,
+              filled=True,
+              rounded=True,
+              ax=ax)
+    ax.set_title(f'Baum #{i+1}  (estimators_[{i}])',
+                 fontsize=10, pad=8)
+
+plt.suptitle(
+    'Random Forest – alle 5 Weak Learner\n'
+    'Jeder Baum hat leicht andere Splits!',
+    fontsize=12, y=1.005)
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    5 verschiedene Bäume –
+                    <strong>jeder hat leicht andere Splits</strong>
+                  </li>
+                  <li>
+                    Verschiedene Features werden als
+                    erster Split gewählt →
+                    <span class="key" style="--key-color:var(--color-primary)">Dekorrelation</span>
+                    durch Feature Bagging
+                  </li>
+                  <li>
+                    Trotz kleinem Datensatz (6 Samples)
+                    entstehen unterschiedliche Perspektiven
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Ensemble-Prinzip bestätigt:</strong>
+                Keiner dieser 5 Bäume allein wäre
+                ein starkes Modell –
+                ihre <strong>Kombination</strong> ist es.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5. SENSOREN AUSWÄHLEN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="sensoren-auswaehlen">
+        <div class="section-head">
+          <h2>5.5 Praxisanwendung: Sensoren auswählen</h2>
+          <p>
+            Feature Importance hat einen direkten industriellen Nutzen:
+            Welche <strong>Sensoren sind wirklich nötig</strong>?
+            Unwichtige Features (= teure Sensoren) können eingespart werden.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Motivation</span></h3>
+            <ul>
+              <li>
+                In industriellen Anlagen kosten
+                <strong>Sensoren Geld</strong> –
+                Wartung, Installation, Datenübertragung
+              </li>
+              <li>
+                Feature Importance zeigt:
+                <strong>Welche Sensoren tragen wirklich zur Vorhersage bei?</strong>
+              </li>
+              <li>
+                Sensoren mit Importance ≈ 0 können
+                <strong>eingespart werden</strong>
+                ohne Genauigkeitsverlust
+              </li>
+              <li>
+                Iteratives Vorgehen:
+                unwichtige Sensoren entfernen →
+                Modell neu trainieren →
+                Importance neu bewerten
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Ablauf in der Praxis</span></h3>
+            <ul>
+              <li>
+                <strong>1.</strong> Modell mit allen Sensoren trainieren
+              </li>
+              <li>
+                <strong>2.</strong> Permutation Importance berechnen
+              </li>
+              <li>
+                <strong>3.</strong> Schwellenwert festlegen
+                (z.B. Importance &lt; 0.01 → irrelevant)
+              </li>
+              <li>
+                <strong>4.</strong> Modell ohne irrelevante Sensoren
+                neu trainieren und Genauigkeit vergleichen
+              </li>
+              <li>
+                <strong>5.</strong> Iterieren bis optimales
+                <span class="key" style="--key-color:var(--color-success)">Kosten-Nutzen-Verhältnis</span>
+                erreicht
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Der Code simuliert einen industriellen Use Case:
+          12 Sensor-Features, von denen nur 4 wirklich informativ sind.
+          Permutation Importance wird berechnet, ein Schwellenwert
+          angewendet und das reduzierte Modell mit dem Vollmodell verglichen.
+          Der Accuracy-Unterschied zeigt, wie viel durch
+          Sensor-Reduktion verloren geht.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Sensor-Auswahl via Permutation Importance
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.inspection import permutation_importance
+
+# 12 Sensoren, nur 4 wirklich informativ
+n_sensors = 12
+X, y = make_classification(
+    n_samples=800, n_features=n_sensors,
+    n_informative=4, n_redundant=2,
+    n_repeated=0, n_classes=3,
+    random_state=7, shuffle=False)
+
+sensor_names = [f'Sensor {i+1:02d}'
+                for i in range(n_sensors)]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, stratify=y, random_state=42)
+
+# Vollmodell
+model_full = RandomForestClassifier(
+    n_estimators=100, random_state=0)
+model_full.fit(X_train, y_train)
+acc_full = model_full.score(X_test, y_test)
+
+# Permutation Importance
+result = permutation_importance(
+    model_full, X_test, y_test,
+    n_repeats=15, random_state=42, n_jobs=2)
+
+perm_mean = result.importances_mean
+perm_std  = result.importances_std
+
+# Schwellenwert: Importance > 0.01 → relevant
+threshold    = 0.01
+selected_idx = np.where(perm_mean > threshold)[0]
+dropped_idx  = np.where(perm_mean <= threshold)[0]
+
+print(f"Vollmodell Accuracy:   {acc_full:.4f}")
+print(f"Ausgewählte Sensoren:  "
+      f"{[sensor_names[i] for i in selected_idx]}")
+print(f"Abgewählte Sensoren:   "
+      f"{[sensor_names[i] for i in dropped_idx]}")
+
+# Reduziertes Modell
+model_red = RandomForestClassifier(
+    n_estimators=100, random_state=0)
+model_red.fit(X_train[:, selected_idx],
+              y_train)
+acc_red = model_red.score(
+    X_test[:, selected_idx], y_test)
+print(f"\nReduziertes Modell Accuracy: {acc_red:.4f}")
+print(f"Accuracy-Verlust: "
+      f"{acc_full - acc_red:.4f}")
+print(f"Sensor-Einsparung: "
+      f"{len(dropped_idx)}/{n_sensors}")
+
+# Visualisierung (2 × 1)
+fig, axes = plt.subplots(2, 1, figsize=(9, 9))
+
+# Plot 1: Importance Bar Chart
+sorted_idx = perm_mean.argsort()[::-1]
+colors = ['steelblue' if i in selected_idx
+          else 'lightcoral'
+          for i in sorted_idx]
+axes[0].bar(range(n_sensors),
+            perm_mean[sorted_idx],
+            yerr=perm_std[sorted_idx],
+            color=colors, edgecolor='white',
+            alpha=0.85, capsize=4)
+axes[0].axhline(threshold, color='red',
+                linestyle='--', linewidth=2,
+                label=f'Threshold = {threshold}')
+axes[0].set_xticks(range(n_sensors))
+axes[0].set_xticklabels(
+    [sensor_names[i] for i in sorted_idx],
+    rotation=45, ha='right', fontsize=8)
+axes[0].set_ylabel('Mean Accuracy Decrease')
+axes[0].set_title(
+    'Sensor-Wichtigkeit (Permutation Importance)\n'
+    'Blau = ausgewählt · Rot = abgewählt')
+axes[0].legend()
+axes[0].grid(axis='y', alpha=0.3)
+
+# Plot 2: Vollmodell vs. Reduziertes Modell
+bars = axes[1].bar(['Vollmodell\n'
+                     f'({n_sensors} Sensoren)',
+                     'Reduziertes Modell\n'
+                     f'({len(selected_idx)} Sensoren)'],
+                   [acc_full, acc_red],
+                   color=['steelblue', 'darkorange'],
+                   edgecolor='white', alpha=0.85,
+                   width=0.4)
+for bar, acc in zip(bars, [acc_full, acc_red]):
+    axes[1].text(bar.get_x() + bar.get_width()/2,
+                 bar.get_height() + 0.003,
+                 f'{acc:.4f}', ha='center',
+                 fontsize=11, fontweight='bold')
+axes[1].set_ylim(0, 1.1)
+axes[1].set_ylabel('Test Accuracy')
+axes[1].set_title(
+    'Accuracy: Vollmodell vs. Reduziertes Modell')
+axes[1].grid(axis='y', alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    <span style="color:steelblue"><strong>Blaue Balken</strong></span>
+                    = ausgewählte Sensoren (Importance &gt; Threshold)
+                  </li>
+                  <li>
+                    <span style="color:lightcoral"><strong>Rote Balken</strong></span>
+                    = abgewählte Sensoren
+                  </li>
+                  <li>
+                    Modell mit nur
+                    <strong>4 Sensoren</strong>
+                    erzielt fast dieselbe Accuracy
+                    wie das Vollmodell mit 12 Sensoren
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Praxis-Erkenntnis:</strong>
+                <span class="key" style="--key-color:var(--color-warning)">Sensor-Reduktion</span>
+                spart Kosten ohne wesentlichen
+                Genauigkeitsverlust –
+                Feature Importance ist ein direktes
+                <strong>Werkzeug für Engineering-Entscheidungen</strong>.
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Threshold-Wahl:</strong>
+                Der Schwellenwert
+                <code>0.01</code> ist ein Startpunkt –
+                in der Praxis sollte er
+                <strong>domänengetrieben</strong> gewählt
+                und validiert werden.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Schritte:</strong>
+          <br><br>
+          <a href="Page06.html">
+            → Seite 6: Anwendungen im PRM-Kontext –
+            RUL-Vorhersage mit NASA Turbofan-Datensatz
+          </a>
+          &nbsp;·&nbsp;
+          <a href="Page07.html">
+            → Seite 7: Boosting als Gegenkonzept – AdaBoost
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 5 · Seite 5 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

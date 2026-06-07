@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K6 · GMM Mathematisch / Deep Dive</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    /* ── Formel-Box: neue Klasse, bitte in components.css ergänzen ── */
+    .formula-block {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 18%, var(--color-border));
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-6);
+      margin: var(--space-4) 0;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .formula-block.secondary {
+      background: color-mix(in oklab, #f59e0b 5%, var(--color-surface-2));
+      border-color: color-mix(in oklab, #f59e0b 22%, var(--color-border));
+    }
+    .formula-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-2);
+    }
+  </style>
+</head>
+<body>
+
+  <site-header active="page6" title="Kapitel 6 · Gaussian Mixture Models"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page3"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ══════════════════════════════════════════════════════ -->
+      <section class="hero" id="gmm-mathematik">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 6 · Seite 03</span>
+            <h1>GMM –
+              <span class="key" style="--key-color:var(--color-primary)">Mathematisch</span>
+              / Deep Dive
+            </h1>
+            <p>
+              Formale Herleitung von Grund auf:
+              von der
+              <span class="key" style="--key-color:var(--color-primary)">allgemeinen Formulierung</span>
+              über
+              <span class="key" style="--key-color:var(--color-primary)">Maximum Likelihood</span>
+              bis zu den vollständigen
+              <span class="key" style="--key-color:var(--color-primary)">EM-Updateformeln</span>
+              für \(\boldsymbol{\mu}_k\), \(\boldsymbol{\Sigma}_k\) und \(w_k\).
+            </p>
+            <div class="pill-row">
+              <span class="pill">Allgemeine Formulierung</span>
+              <span class="pill">1D-Beispiel</span>
+              <span class="pill">Satz von Bayes</span>
+              <span class="pill">Likelihood & i.i.d.</span>
+              <span class="pill">Log-Likelihood</span>
+              <span class="pill">MLE</span>
+              <span class="pill">Responsibilities r_nk</span>
+              <span class="pill">EM-Updateformeln</span>
+              <span class="pill">Konvergenzverhalten</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>
+                Die GMM-Gleichung als
+                <span class="key" style="--key-color:var(--color-primary)">gewichtete Linearkombination</span>
+                von Dichtefunktionen verstehen
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">Likelihood</span>
+                und
+                <span class="key" style="--key-color:var(--color-primary)">Log-Likelihood</span>
+                formal aufschreiben und unterscheiden können
+              </li>
+              <li>
+                Warum sich MLE <strong>nicht analytisch lösen</strong> lässt
+                und der EM-Algorithmus nötig ist
+              </li>
+              <li>
+                Alle drei Updateformeln:
+                \(\boldsymbol{\mu}_k^{\text{new}}\),
+                \(\boldsymbol{\Sigma}_k^{\text{new}}\),
+                \(w_k^{\text{new}}\) – kennen und herleiten können
+              </li>
+              <li>
+                Das
+                <span class="key" style="--key-color:var(--color-primary)">Konvergenzverhalten</span>
+                des EM-Algorithmus interpretieren
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. ALLGEMEINE FORMULIERUNG
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="gmm-mathematik">
+        <div class="section-head">
+          <h2>GMM – Allgemeine Formulierung</h2>
+          <p>
+            Die Mechanik von GMMs kennen wir bereits – jetzt kommt
+            die <strong>formale mathematische Beschreibung</strong>.
+            Ein Gaussian Mixture Model beschreibt die Dichte als
+            <span class="key" style="--key-color:var(--color-primary)">gewichtete Summe von K Komponenten</span>.
+          </p>
+        </div>
+
+        <!-- Allgemeine Formel -->
+        <p class="formula-label">Allgemeine Formulierung</p>
+        <div class="formula-block">
+          \[
+            p(\mathbf{x} \mid \boldsymbol{\theta})
+            = \sum_{k=1}^{K} w_k \, p_k(\mathbf{x} \mid \boldsymbol{\theta})
+          \]
+        </div>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted);
+                  margin: var(--space-2) 0 var(--space-4)">
+          Ersetzt man die allgemeinen Dichten \(p_k\) durch
+          <span class="key" style="--key-color:var(--color-primary)">multivariate Normalverteilungen</span>,
+          erhält man die konkrete GMM-Gleichung:
+        </p>
+
+        <!-- GMM-Kernformel -->
+        <p class="formula-label">GMM mit Gauß-Komponenten</p>
+        <div class="formula-block">
+          \[
+            p(\mathbf{x} \mid \boldsymbol{\theta})
+            = \sum_{k=1}^{K} w_k \,
+              \mathcal{N}\!\left(\mathbf{x} \mid \boldsymbol{\mu}_k,\, \boldsymbol{\Sigma}_k\right)
+          \]
+        </div>
+
+        <!-- Kernaussagen -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Mechanik bekannt, Mathematik folgt
+              </span>
+            </h3>
+            <ul>
+              <li>Die Funktionsweise von GMMs ist intuitiv verständlich – jetzt kommt die
+                <strong>formale Beschreibung</strong></li>
+              <li>Wir gehen von der Mechanik (Page 02) zur Mathematik über</li>
+              <li>Alle Konzepte (EM, Wahrscheinlichkeiten, Cluster) bekommen jetzt
+                <strong>exakte Formeln</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Mischung = Linearkombination
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Eine Mischung aus Modellen ist eine
+                <span class="key" style="--key-color:var(--color-primary)">gewichtete Linearkombination</span>
+                von Wahrscheinlichkeitsdichten
+              </li>
+              <li>
+                Die Gewichte \(w_k\) erfüllen:
+                \(\sum_{k=1}^{K} w_k = 1\) und \(w_k \geq 0\)
+              </li>
+              <li>
+                Die allgemeinen Dichten \(p_k\) werden durch
+                <span class="key" style="--key-color:var(--color-primary)">multivariate Normalverteilungen</span>
+                \(\mathcal{N}\) ersetzt
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- 1D-Beispiel -->
+        <h3 style="margin-top:var(--space-7); margin-bottom:var(--space-3)">
+          1D-Beispiel – drei Komponenten
+        </h3>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Im eindimensionalen Fall lässt sich die Mischung anschaulich darstellen.
+          Die
+          <span class="key" style="--key-color:var(--color-text)">schwarze Kurve</span>
+          ist die <strong>resultierende GMM-Dichte</strong> –
+          die gewichtete Summe der drei farbigen Einzelkomponenten:
+        </p>
+
+        <div class="formula-block">
+          \[
+            p(x \mid \boldsymbol{\theta})
+            = 0.5\,\mathcal{N}(x \mid {-2},\; 0.5)
+            + 0.2\,\mathcal{N}(x \mid 1,\; 2)
+            + 0.3\,\mathcal{N}(x \mid 4,\; 1)
+          \]
+        </div>
+
+        <table style="margin-top:var(--space-4)">
+          <thead>
+            <tr>
+              <th>Komponente</th>
+              <th>Gewicht \(w_k\)</th>
+              <th>Mittelwert \(\mu_k\)</th>
+              <th>Varianz \(\sigma^2_k\)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1</strong></td>
+              <td><code>0.5</code> – dominante Komponente</td>
+              <td>\(-2\)</td>
+              <td>\(0.5\) – eng</td>
+            </tr>
+            <tr>
+              <td><strong>2</strong></td>
+              <td><code>0.2</code> – kleinste Gewichtung</td>
+              <td>\(1\)</td>
+              <td>\(2\) – breit gestreut</td>
+            </tr>
+            <tr>
+              <td><strong>3</strong></td>
+              <td><code>0.3</code></td>
+              <td>\(4\)</td>
+              <td>\(1\) – mittel</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Takeaway Note -->
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <p>
+            <strong>💡 Takeaway:</strong>
+            Eine
+            <span class="key" style="--key-color:var(--color-primary)">Kombination bzw. Mischung</span>
+            von Gauß'schen Modellen bedeutet:
+            Jede Komponente erklärt einen <em>Teil</em> der Daten –
+            gewichtet nach ihrer Relevanz.
+            Die Gesamtdichte entsteht durch die
+            <strong>gewichtete Addition aller Einzeldichten</strong>.
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. MAXIMUM LIKELIHOOD
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="maximum-likelihood">
+        <div class="section-head">
+          <h2>Deep Dive: Maximum Likelihood</h2>
+          <p>
+            Wie findet man die optimalen Parameter
+            \(\boldsymbol{\theta} = \{w_k, \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k\}\)?
+            Die Antwort liegt in der
+            <span class="key" style="--key-color:var(--color-primary)">Maximum Likelihood Estimation (MLE)</span>.
+          </p>
+        </div>
+
+        <!-- Satz von Bayes -->
+        <h3 style="margin-bottom:var(--space-3)">
+          Satz von Bayes – Erinnerung
+        </h3>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          \(\boldsymbol{\theta}\) sind die
+          <span class="key" style="--key-color:var(--color-primary)">Parameter</span>
+          des Modells, \(\mathbf{x}\) sind die
+          <span class="key" style="--key-color:var(--color-primary)">Features</span>.
+          Der Satz von Bayes verknüpft beide:
+        </p>
+
+        <div class="formula-block">
+          \[
+            p(\boldsymbol{\theta} \mid \mathbf{x})
+            = \frac{p(\boldsymbol{\theta}) \;\; p(\mathbf{x} \mid \boldsymbol{\theta})}{p(\mathbf{x})}
+          \]
+        </div>
+
+        <table style="margin-top:var(--space-4)">
+          <thead>
+            <tr>
+              <th>Term</th>
+              <th>Name</th>
+              <th>Bedeutung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>\(p(\boldsymbol{\theta} \mid \mathbf{x})\)</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">
+                  A posteriori
+                </span>
+              </td>
+              <td>Wahrscheinlichkeit der Parameter
+                <strong>nach</strong> Beobachtung der Daten</td>
+            </tr>
+            <tr>
+              <td>\(p(\boldsymbol{\theta})\)</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-warning)">
+                  A priori
+                </span>
+              </td>
+              <td><strong>Vorwissen</strong> über die Parameter
+                (vor Beobachtung der Daten)</td>
+            </tr>
+            <tr>
+              <td>\(p(\mathbf{x} \mid \boldsymbol{\theta})\)</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">
+                  Likelihood
+                </span>
+              </td>
+              <td>Wie wahrscheinlich sind die Daten,
+                <strong>gegeben</strong> die Parameter?</td>
+            </tr>
+            <tr>
+              <td>\(p(\mathbf{x})\)</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-text-muted)">
+                  Evidence
+                </span>
+              </td>
+              <td><strong>Normierungskonstante</strong> –
+                unabhängig von \(\boldsymbol{\theta}\)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Likelihood -->
+        <h3 style="margin-top:var(--space-7); margin-bottom:var(--space-3)">
+          Was ist die Likelihood?
+        </h3>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Likelihood – Definition
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Wir sind daran interessiert, wie sich unsere
+                <strong>Daten im Feature-Raum verteilen</strong>,
+                abhängig von den Parametern eines (unbekannten) Modells
+              </li>
+              <li>→ das ist die
+                <span class="key" style="--key-color:var(--color-primary)">Likelihood</span>
+              </li>
+              <li>
+                <em>„Die Wahrscheinlichkeit dafür, dass unsere Features auftreten
+                bzw. dass wir unsere Features so beobachten,
+                gegeben die Parameter meines Modells bzw. meiner Verteilung."</em>
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                i.i.d.-Annahme
+              </span>
+            </h3>
+            <ul>
+              <li>
+                <strong>Trick:</strong> Die Likelihood lässt sich
+                <span class="key" style="--key-color:var(--color-primary)">faktorisieren</span>,
+                wenn man annimmt, dass jeder Datenpunkt
+                <em>unabhängig und identisch verteilt</em> ist
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">i.i.d.</span>
+                = <em>independent and identically distributed</em>
+              </li>
+              <li>
+                → aufeinanderfolgende Beobachtungen beeinflussen sich
+                <strong>nicht</strong> gegenseitig
+              </li>
+              <li>
+                → die Gesamtwahrscheinlichkeit ist das
+                <span class="key" style="--key-color:var(--color-primary)">Produkt der Einzeldichten</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- i.i.d. Faktorisierung -->
+        <h3 style="margin-top:var(--space-6); margin-bottom:var(--space-2)">
+          i.i.d.-Faktorisierung der Likelihood
+        </h3>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Für \(N\) Datenpunkte und \(K\) Komponenten gilt damit:
+        </p>
+
+        <div class="formula-block">
+          \[
+            p(\mathbf{x} \mid \boldsymbol{\theta})
+            = \prod_{n=1}^{N} p(\mathbf{x}_n \mid \boldsymbol{\theta})
+            = \prod_{n=1}^{N} \sum_{k=1}^{K} w_k \, \mathcal{N}(\mathbf{x}_n \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)
+          \]
+        </div>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-top:var(--space-2)">
+          Jeder Datenpunkt wird durch die
+          <span class="key" style="--key-color:var(--color-primary)">gewichtete Summe aller K Gauß-Komponenten</span>
+          bewertet. Die Gesamtlikelihood ist das Produkt dieser Einzelbewertungen.
+        </p>
+
+        <!-- Takeaway -->
+        <div class="note note-primary" style="margin-top:var(--space-4)">
+          <p>
+            <strong>💡 Was kann man mit der Likelihood machen?</strong>
+            Sie erlaubt es, die
+            <span class="key" style="--key-color:var(--color-primary)">optimalen Parameter</span>
+            \(\boldsymbol{\theta} = \{w_k, \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k\}\)
+            so zu wählen, dass die beobachteten Daten
+            <strong>maximal wahrscheinlich</strong> sind →
+            <span class="key" style="--key-color:var(--color-primary)">Maximum Likelihood Estimation (MLE)</span>.
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. LOG-LIKELIHOOD & MLE
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="log-likelihood">
+        <div class="section-head">
+          <h2>Log-Likelihood &amp; MLE</h2>
+          <p>
+            Direkt mit der Likelihood zu rechnen ist numerisch problematisch –
+            <strong>sehr kleine Zahlen</strong> multiplizieren führt zu
+            <span class="key" style="--key-color:var(--color-warning)">numerischem Underflow</span>.
+            Die Lösung: Logarithmieren.
+          </p>
+        </div>
+
+        <!-- Übergang zu Log-Likelihood -->
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">
+                Problem: Multiplikation vieler kleiner Zahlen
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Wahrscheinlichkeiten sind klein: \(p < 1\)
+              </li>
+              <li>
+                Produkt von N kleinen Zahlen → sehr schnell
+                <span class="key" style="--key-color:var(--color-warning)">numerisch Null</span>
+              </li>
+              <li>
+                → Computer kann das nicht mehr sauber darstellen
+                (<em>floating point underflow</em>)
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Lösung: Logarithmieren
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Statt kleine Wahrscheinlichkeiten zu
+                <strong>multiplizieren</strong> →
+                <span class="key" style="--key-color:var(--color-primary)">logarithmieren</span>
+              </li>
+              <li>
+                Dann können wir stattdessen
+                <strong>summieren</strong>:
+                \(\log(a \cdot b) = \log a + \log b\)
+              </li>
+              <li>
+                Das Optimum bleibt dasselbe –
+                \(\log\) ist eine <strong>monotone Funktion</strong>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Log-Likelihood Formel -->
+        <p class="formula-label" style="margin-top:var(--space-5)">Log-Likelihood</p>
+        <div class="formula-block">
+          \[
+            \log p(\mathbf{x} \mid \boldsymbol{\theta})
+            = \sum_{n=1}^{N} \log \sum_{k=1}^{K}
+              w_k \, \mathcal{N}(\mathbf{x}_n \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)
+          \]
+        </div>
+
+        <!-- MLE Formel -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted);
+                  margin: var(--space-3) 0">
+          Das Ziel der
+          <span class="key" style="--key-color:var(--color-primary)">Maximum Likelihood Schätzung (MLE)</span>:
+          die Log-Likelihood
+          <strong>maximieren</strong> – also die Parameter
+          \(\boldsymbol{\theta} = \{w_k, \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k\}\)
+          finden, die den Ausdruck maximieren:
+        </p>
+
+        <p class="formula-label">MLE – Optimierungsziel</p>
+        <div class="formula-block secondary">
+          \[
+            \boldsymbol{\theta}_{\text{ML}}
+            = \underset{\boldsymbol{\theta} = \{w_k,\, \boldsymbol{\mu}_k,\, \boldsymbol{\Sigma}_k\}}
+              {\arg\max}
+              \sum_{n=1}^{N} \log \sum_{k=1}^{K}
+              w_k \, \mathcal{N}(\mathbf{x}_n \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)
+          \]
+        </div>
+
+        <!-- Ungewohnt Callout -->
+        <div class="note note-warning" style="margin-top:var(--space-4)">
+          <p>
+            <strong>⚠️ Was ist hier „ungewohnt"?</strong>
+            Im Gegensatz zu einfachen Modellen steht hier ein
+            <span class="key" style="--key-color:var(--color-warning)">log</span>
+            vor einer
+            <span class="key" style="--key-color:var(--color-warning)">Summe</span>
+            – das lässt sich <strong>nicht analytisch vereinfachen</strong>.
+          </p>
+          <p style="margin-top:var(--space-2)">
+            → Deshalb wird diese Kostenfunktion durch den
+            <span class="key" style="--key-color:var(--color-primary)">EM-Algorithmus</span>
+            <em>iterativ</em> maximiert.
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. EM-ALGORITHMUS – ITERATIVE OPTIMIERUNG
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="em-algorithmus">
+        <div class="section-head">
+          <h2>Iterative Optimierung mit dem EM-Algorithmus</h2>
+          <p>
+            Die Optimierung findet
+            <span class="key" style="--key-color:var(--color-warning)">nicht instantan</span>
+            statt – die Parameter werden
+            <span class="key" style="--key-color:var(--color-primary)">sukzessive</span>
+            aktualisiert. Nach einer zufälligen
+            <strong>Initialisierung 🎲</strong>
+            läuft der Algorithmus in klar definierten Schritten.
+          </p>
+        </div>
+
+        <!-- EM-Schritte als Timeline -->
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="step-no">1</div>
+            <div>
+              <strong>Initialisierung</strong>
+              <p>
+                Zufällige Initialisierung aller Parameter:
+                Orte \(\boldsymbol{\mu}_k\), Formen \(\boldsymbol{\Sigma}_k\)
+                und Gewichtungen \(w_k = 1/K\).
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no"
+                 style="background:color-mix(in oklab,var(--color-primary) 15%,var(--color-surface)); color:var(--color-primary)">E</div>
+            <div>
+              <strong>(E-Schritt) – Berechnung der Clusterzugehörigkeitswahrscheinlichkeiten</strong>
+              <p>
+                Berechne für jeden Punkt \(\mathbf{x}_n\) die
+                <span class="key" style="--key-color:var(--color-primary)">Responsibilities</span>
+                \(r_{nk}\) – die Wahrscheinlichkeit, dass Punkt \(n\)
+                zur Komponente \(k\) gehört.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no"
+                 style="background:color-mix(in oklab,#f59e0b 15%,var(--color-surface)); color:#d97706">M</div>
+            <div>
+              <strong>(M-Schritt) – Aktualisierung der Mittelwerte \(\boldsymbol{\mu}_k\)</strong>
+              <p>
+                Neuer Mittelwert = gewichteter Schwerpunkt aller Datenpunkte,
+                gewichtet mit den Responsibilities \(r_{nk}\).
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no"
+                 style="background:color-mix(in oklab,#f59e0b 15%,var(--color-surface)); color:#d97706">M</div>
+            <div>
+              <strong>(M-Schritt) – Aktualisierung der (Ko-)Varianzen \(\boldsymbol{\Sigma}_k\)</strong>
+              <p>
+                Neue Kovarianzmatrix = gewichtete empirische Kovarianz
+                um den neuen Mittelwert.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no"
+                 style="background:color-mix(in oklab,#f59e0b 15%,var(--color-surface)); color:#d97706">M</div>
+            <div>
+              <strong>(M-Schritt) – Aktualisierung der Gewichtungen \(w_k\)</strong>
+              <p>
+                Neues Gewicht = durchschnittlicher Anteil der Responsibility
+                über alle \(N\) Datenpunkte.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">↻</div>
+            <div>
+              <strong>Schritte 2–5 wiederholen bis zur Konvergenz</strong>
+              <p>
+                Genau wie beim k-means-Algorithmus –
+                <span class="key" style="--key-color:var(--color-success)">stoppen</span>,
+                wenn die Parameter sich kaum noch verändern.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weiche statt harte Zuweisung -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">
+                k-means – harte Zuweisung
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Jeder Datenpunkt wird
+                <span class="key" style="--key-color:var(--color-warning)">hart</span>
+                einem Cluster zugewiesen
+              </li>
+              <li>→ <code>labels[n] ∈ {0, 1, ..., K-1}</code></li>
+              <li>Kein Maß für Unsicherheit</li>
+              <li>
+                Centroid-Update: einfacher Durchschnitt
+                aller <em>zugewiesenen</em> Punkte
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                GMM – weiche Zuweisung
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Jeder Datenpunkt erhält
+                <span class="key" style="--key-color:var(--color-primary)">weiche Wahrscheinlichkeiten</span>
+                für alle Cluster
+              </li>
+              <li>→ <code>r_n = [0.02, 0.95, 0.01, 0.02]</code></li>
+              <li>
+                Unsichere Punkte haben verteilte Responsibilities
+              </li>
+              <li>
+                Diese Werte fließen direkt in die
+                <strong>Aktualisierungsschritte</strong> ein
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Aktualisierungsschritte mit Formeln -->
+        <h3 style="margin-top:var(--space-7); margin-bottom:var(--space-2)">
+          Responsibilities (E-Schritt)
+        </h3>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Die
+          <span class="key" style="--key-color:var(--color-primary)">Clusterzugehörigkeitswahrscheinlichkeit</span>
+          \(r_{nk}\) (auch:
+          <span class="key" style="--key-color:var(--color-primary)">Responsibility</span>)
+          gibt an, wie wahrscheinlich es ist, dass Datenpunkt \(\mathbf{x}_n\)
+          durch den \(k\)-ten Gaussian erzeugt wurde.
+          Es ist ein klassischer
+          <span class="key" style="--key-color:var(--color-primary)">Bayes'scher Ausdruck</span>:
+          Likelihood mal Prior, normiert auf 1.
+        </p>
+
+        <p class="formula-label">Responsibility – E-Schritt</p>
+        <div class="formula-block">
+          \[
+            r_{nk}
+            = \frac{w_k \,\mathcal{N}(\mathbf{x}_n \mid \boldsymbol{\mu}_k, \boldsymbol{\Sigma}_k)}
+                   {\displaystyle\sum_{j=1}^{K}
+                    w_j \,\mathcal{N}(\mathbf{x}_n \mid \boldsymbol{\mu}_j, \boldsymbol{\Sigma}_j)}
+          \]
+        </div>
+
+        <!-- M-Schritt Updates -->
+        <h3 style="margin-top:var(--space-7); margin-bottom:var(--space-2)">
+          Updates der Parameter (M-Schritt)
+        </h3>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-4)">
+          Mit den berechneten Responsibilities werden die Parameter aktualisiert.
+          Alle drei Formeln folgen aus der Ableitung der Log-Likelihood
+          (mehr dazu in der Note unten).
+        </p>
+
+        <div class="overview-3">
+
+          <div>
+            <p class="formula-label">Neuer Mittelwert \(\boldsymbol{\mu}_k^{\text{new}}\)</p>
+            <div class="formula-block">
+              \[
+                \boldsymbol{\mu}_k^{\text{new}}
+                = \frac{\displaystyle\sum_{n=1}^{N} r_{nk}\, \mathbf{x}_n}
+                       {\displaystyle\sum_{n=1}^{N} r_{nk}}
+              \]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-2)">
+              Gewichteter Schwerpunkt aller Datenpunkte – ähnlich wie
+              beim k-means Centroid-Update, aber mit
+              <strong>weichen Gewichten</strong>
+            </p>
+          </div>
+
+          <div>
+            <p class="formula-label">Neue Kovarianz \(\boldsymbol{\Sigma}_k^{\text{new}}\)</p>
+            <div class="formula-block">
+              \[
+                \boldsymbol{\Sigma}_k^{\text{new}}
+                = \frac{\displaystyle\sum_{n=1}^{N} r_{nk}
+                         (\mathbf{x}_n - \boldsymbol{\mu}_k)^2}
+                       {\displaystyle\sum_{n=1}^{N} r_{nk}}
+              \]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-2)">
+              Gewichtete empirische Kovarianz um den neuen Mittelwert –
+              bestimmt Form und Ausrichtung der Ellipse
+            </p>
+          </div>
+
+          <div>
+            <p class="formula-label">Neues Gewicht \(w_k^{\text{new}}\)</p>
+            <div class="formula-block">
+              \[
+                w_k^{\text{new}}
+                = \frac{1}{N} \sum_{n=1}^{N} r_{nk}
+              \]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-2)">
+              Durchschnittliche Responsibility über alle Datenpunkte –
+              wie „wichtig" ist Komponente \(k\) insgesamt?
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Herkunft der Formeln -->
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <p>
+            <strong>📐 Woher kommen diese Formeln?</strong>
+            Alle drei Updateregeln lassen sich herleiten, indem man die
+            <span class="key" style="--key-color:var(--color-primary)">Log-Likelihood
+            nach den jeweiligen Parametern ableitet und gleich 0 setzt</span>
+            – man sucht ja das Optimum (Maximum).
+          </p>
+          <ul style="margin-top:var(--space-2)">
+            <li>\(\partial \log p / \partial \boldsymbol{\mu}_k = 0\) → Formel für \(\boldsymbol{\mu}_k^{\text{new}}\)</li>
+            <li>\(\partial \log p / \partial \boldsymbol{\Sigma}_k = 0\) → Formel für \(\boldsymbol{\Sigma}_k^{\text{new}}\)</li>
+            <li>\(\partial \log p / \partial w_k = 0\) (mit Lagrange-Multiplikator) → Formel für \(w_k^{\text{new}}\)</li>
+          </ul>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5. KONVERGENZVERHALTEN
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="konvergenz">
+        <div class="section-head">
+          <h2>Konvergenzverhalten</h2>
+          <p>
+            Den Fortschritt des EM-Algorithmus kann man – ähnlich wie bei k-means –
+            in einem Plot verfolgen:
+            <span class="key" style="--key-color:var(--color-primary)">negative Log-Likelihood</span>
+            über die Iterationen.
+            Je kleiner der Wert, desto besser passt das Modell zu den Daten.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Was wird geplottet?
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Y-Achse:
+                <span class="key" style="--key-color:var(--color-primary)">Negative Log-Likelihood</span>
+                \(-\log p(\mathbf{x} \mid \boldsymbol{\theta})\)
+              </li>
+              <li>X-Achse: Iterationsnummer des EM-Algorithmus</li>
+              <li>
+                → Kurve fällt monoton → konvergiert gegen einen
+                <strong>stabilen, niedrigen Wert</strong>
+              </li>
+              <li>
+                Sobald die Kurve flach wird → Modell hat
+                <span class="key" style="--key-color:var(--color-success)">konvergiert</span>
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Konvergenz prüfen mit sklearn
+              </span>
+            </h3>
+            <ul>
+              <li>
+                <code>gmm.converged_</code> – Boolean, ob EM konvergiert ist
+              </li>
+              <li>
+                <code>gmm.n_iter_</code> – Anzahl der benötigten Iterationen
+              </li>
+              <li>
+                <code>gmm.lower_bound_</code> – untere Schranke der Log-Likelihood
+                am Ende
+              </li>
+              <li>
+                Wenn <code>converged_ = False</code> →
+                <span class="key" style="--key-color:var(--color-warning)">max_iter erhöhen!</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Konvergenzstufen Tabelle -->
+        <h3 style="margin-top:var(--space-6); margin-bottom:var(--space-3)">
+          Von der Initialisierung zur Konvergenz
+        </h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Schritt</th>
+              <th>Beschreibung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="key" style="--key-color:var(--color-warning)">① Start</span>
+              </td>
+              <td>
+                Zufällige Initialisierung –
+                negative Log-Likelihood ist sehr hoch
+                (\(\sim 10^4\) bis \(10^5\))
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">② nach wenigen Iterationen</span>
+              </td>
+              <td>
+                <strong>Starker Abfall</strong> –
+                Komponenten passen sich schnell an die Datenwolken an;
+                die erste grobe Struktur ist erkannt
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">③ ca. Iteration 20</span>
+              </td>
+              <td>
+                <strong>Weitgehende Stabilisierung</strong> –
+                Modell ist fast konvergiert;
+                Parameter ändern sich nur noch minimal
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="key" style="--key-color:var(--color-success)">④ ca. Iteration 60</span>
+              </td>
+              <td>
+                <strong>Vollständige Konvergenz</strong> –
+                alle Gauß-Komponenten decken die Cluster gut ab;
+                negative Log-Likelihood hat stabilen, niedrigen Wert erreicht
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Abschluss-Note -->
+        <div class="note note-success" style="margin-top:var(--space-5)">
+          <p>
+            <strong>✅ Fazit – Konvergenz:</strong>
+            Sobald die negative Log-Likelihood einen
+            <span class="key" style="--key-color:var(--color-success)">genügend stabilen, niedrigen Wert</span>
+            erreicht hat, kann man entscheiden, dass eine gute Repräsentation der Daten
+            gefunden wurde – und den Algorithmus stoppen.
+          </p>
+          <p style="margin-top:var(--space-2)">
+            → Weiter geht es auf Seite 04 mit
+            <strong>Dichteschätzung, generativen Modellen und BIC/AIC</strong> –
+            dem praktischen Nutzen des fertig trainierten GMMs.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 6 – Gaussian Mixture Models · Seite 03</small>
+    </div>
+  </footer>
+
+</body>
+</html>

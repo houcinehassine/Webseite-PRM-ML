@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Feature Selection</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       GRÜNDE-GRID (Warum Selection?)
+    ═══════════════════════════════════════════════════════ */
+    .reasons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-6);
+    }
+    .reason-card {
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    .reason-icon { font-size: 1.8rem; }
+    .reason-title { font-size: var(--text-base); font-weight: 700; }
+    .reason-desc { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.65; margin: 0; }
+
+    /* ═══════════════════════════════════════════════════════
+       CURSE OF DIMENSIONALITY VISUAL
+    ═══════════════════════════════════════════════════════ */
+    .curse-visual {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      margin-top: var(--space-6);
+      align-items: start;
+    }
+    @media (max-width: 640px) { .curse-visual { grid-template-columns: 1fr; } }
+
+    .curse-chart {
+      padding: var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+    }
+    .curse-chart-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--color-text-faint);
+      margin-bottom: var(--space-4);
+    }
+    .curse-bars { display: flex; flex-direction: column; gap: var(--space-3); }
+    .curse-bar-row {
+      display: grid;
+      grid-template-columns: 4.5rem 1fr 4rem;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .curse-bar-dim {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-align: right;
+    }
+    .curse-bar-track {
+      height: 14px;
+      background: var(--color-border);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .curse-bar-fill {
+      height: 100%;
+      border-radius: var(--radius-full);
+      background: linear-gradient(to right, var(--color-success), var(--color-warning));
+    }
+    .curse-bar-val {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+
+    /* Sparsity dots visual */
+    .sparsity-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+    }
+    .sparsity-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+    }
+    .sparsity-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--color-text-faint);
+    }
+    .sparsity-area {
+      position: relative;
+      border: 1px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      background: color-mix(in oklab, var(--color-primary) 3%, var(--color-surface));
+    }
+    .sparsity-dot {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--color-primary);
+    }
+    .sparsity-density {
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       VARIANCETHRESHOLD – MATRIX VISUAL
+    ═══════════════════════════════════════════════════════ */
+    .vt-layout {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      gap: var(--space-5);
+      align-items: center;
+      margin-top: var(--space-6);
+      overflow-x: auto;
+    }
+    @media (max-width: 700px) { .vt-layout { grid-template-columns: 1fr; } }
+    .vt-arrow { font-size: 1.4rem; color: var(--color-text-faint); text-align: center; }
+
+    .matrix-block { display: flex; flex-direction: column; gap: var(--space-1); }
+    .matrix-block-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--color-text-faint);
+      margin-bottom: var(--space-2);
+    }
+    .mx-table {
+      display: inline-grid;
+      gap: 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .mx-cell {
+      padding: var(--space-2) var(--space-3);
+      border-right: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      text-align: center;
+      min-width: 2.5rem;
+    }
+    .mx-cell:last-child { border-right: none; }
+    .mx-cell.head {
+      font-weight: 700;
+      background: var(--color-surface-2);
+      color: var(--color-text-muted);
+      font-family: inherit;
+    }
+    .mx-cell.removed {
+      background: color-mix(in oklab,var(--color-warning) 10%,var(--color-surface));
+      color: color-mix(in oklab,var(--color-warning) 60%,var(--color-text));
+      text-decoration: line-through;
+    }
+    .mx-cell.kept {
+      background: color-mix(in oklab,var(--color-success) 7%,var(--color-surface));
+      color: var(--color-text);
+    }
+    .mx-cell.var-low {
+      background: color-mix(in oklab,var(--color-warning) 15%,var(--color-surface));
+      color: color-mix(in oklab,var(--color-warning) 80%,#000);
+      font-weight: 700;
+    }
+    .mx-cell.var-ok {
+      background: color-mix(in oklab,var(--color-success) 10%,var(--color-surface));
+      color: var(--color-success);
+      font-weight: 700;
+    }
+
+    /* 3 Varianten Karten */
+    .vt-variants {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin-top: var(--space-6);
+    }
+    @media (max-width: 700px) { .vt-variants { grid-template-columns: 1fr; } }
+    .vt-variant {
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+    .vt-num {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-size: var(--text-xs);
+      font-weight: 800;
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+    }
+    .vt-variant h4 { font-size: var(--text-sm); font-weight: 700; margin: 0; }
+    .vt-variant p  { font-size: var(--text-xs); color: var(--color-text-muted); margin: 0; line-height: 1.6; }
+    .vt-threshold  { font-family: var(--font-mono); font-size: var(--text-xs); padding: 0.15rem 0.5rem;
+                     border-radius: var(--radius-full); display: inline-block; margin-top: var(--space-2); }
+
+    /* ═══════════════════════════════════════════════════════
+       KORRELATION HEATMAP VISUAL
+    ═══════════════════════════════════════════════════════ */
+    .corr-layout {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-6);
+      margin-top: var(--space-6);
+      align-items: start;
+    }
+    @media (max-width: 640px) { .corr-layout { grid-template-columns: 1fr; } }
+
+    .corr-matrix {
+      display: inline-grid;
+      gap: 2px;
+      padding: var(--space-3);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+    }
+    .corr-row { display: contents; }
+    .corr-cell {
+      width: 36px; height: 36px;
+      border-radius: 6px;
+      display: grid; place-items: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .corr-label-cell {
+      width: 36px; height: 36px;
+      display: grid; place-items: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--color-text-muted);
+    }
+
+    /* Heatmap Farben via data-val */
+    .corr-cell[data-val="1.0"]  { background: #01696f; color: #fff; }
+    .corr-cell[data-val="0.9"]  { background: #1d8a8f; color: #fff; }
+    .corr-cell[data-val="0.85"] { background: color-mix(in oklab,var(--color-warning) 60%,var(--color-surface)); color: #fff; }
+    .corr-cell[data-val="0.8"]  { background: color-mix(in oklab,var(--color-warning) 50%,var(--color-surface)); color: #fff; }
+    .corr-cell[data-val="0.5"]  { background: color-mix(in oklab,var(--color-primary) 20%,var(--color-surface-2)); color: var(--color-text-muted); }
+    .corr-cell[data-val="0.3"]  { background: color-mix(in oklab,var(--color-primary) 10%,var(--color-surface-2)); color: var(--color-text-faint); }
+    .corr-cell[data-val="0.1"]  { background: var(--color-surface-2); color: var(--color-text-faint); }
+    .corr-cell[data-val="0.0"]  { background: var(--color-surface); color: var(--color-text-faint); }
+
+    .corr-legend {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
+    .corr-legend-bar {
+      flex: 1;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(to right, var(--color-surface-2), #1d8a8f, #01696f);
+    }
+    .corr-legend-label {
+      font-size: 0.65rem;
+      color: var(--color-text-faint);
+      font-weight: 700;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SELECTKBEST – SCORING FUNCTIONS TABLE
+    ═══════════════════════════════════════════════════════ */
+    .scoring-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-5);
+      margin-top: var(--space-6);
+    }
+    @media (max-width: 640px) { .scoring-grid { grid-template-columns: 1fr; } }
+    .scoring-group {
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .scoring-group-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: var(--space-4);
+      padding-bottom: var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+    .scoring-fn {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: var(--space-3) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .scoring-fn:last-child { border-bottom: none; padding-bottom: 0; }
+    .scoring-fn-name {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    .scoring-fn-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      line-height: 1.5;
+    }
+    .scoring-fn-note {
+      font-size: 0.65rem;
+      font-style: italic;
+      color: var(--color-text-faint);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       DIGITS TRANSFORM VISUAL (SelectKBest 64→20)
+    ═══════════════════════════════════════════════════════ */
+    .digits-select-visual {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+      flex-wrap: wrap;
+    }
+    .dsv-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-6);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      text-align: center;
+    }
+    .dsv-box.highlight {
+      border-color: color-mix(in oklab,var(--color-primary) 30%,var(--color-border));
+      background: color-mix(in oklab,var(--color-primary) 6%,var(--color-surface));
+    }
+    .dsv-num {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      font-weight: 700;
+      line-height: 1;
+    }
+    .dsv-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; }
+    .dsv-arrow { font-size: 1.5rem; color: var(--color-text-faint); }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page1" title="Kapitel 1 · Feature Selection"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page7"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 1 · Seite 7</span>
+            <h1>Feature
+              <span class="key" style="--key-color:color-mix(in oklab,var(--color-warning) 80%,#000)">Selection</span>
+            </h1>
+            <p>
+              Nicht alle Features sind nützlich. Feature Selection entscheidet,
+              welche Features in das Modell eingehen – mit drei Methodenfamilien:
+              Varianz, Korrelation und statistischen Tests.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Curse of Dimensionality</span>
+              <span class="pill">Occam's Razor</span>
+              <span class="pill">VarianceThreshold</span>
+              <span class="pill">Korrelation</span>
+              <span class="pill">Clustermap</span>
+              <span class="pill">SelectKBest</span>
+              <span class="pill">mutual_info_classif</span>
+              <span class="pill">64 → 20</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du verstehst den Curse of Dimensionality, kannst
+              VarianceThreshold anwenden (3 Varianten), weißt
+              wann man korrelationsbasiert selektiert und kannst
+              <strong>SelectKBest mit allen 5 Scoring-Funktionen</strong>
+              korrekt einsetzen.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           7.1  WARUM ÜBERHAUPT?
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="warum-selection">
+        <div class="section-head">
+          <h2>7.1 Warum Feature Selection?</h2>
+          <p>Drei Gründe, warum mehr Features nicht automatisch besser ist.</p>
+        </div>
+
+        <div class="reasons-grid">
+          <div class="reason-card">
+            <span class="reason-icon">🌌</span>
+            <span class="reason-title"
+                  style="color:color-mix(in oklab,var(--color-primary) 80%,#000)">
+              Curse of Dimensionality
+            </span>
+            <p class="reason-desc">
+              Mit steigender Anzahl Features wächst der Feature-Raum exponentiell.
+              Gleich viele Datenpunkte werden immer spärlicher verteilt –
+              das Modell kann keine verlässlichen Muster lernen.
+            </p>
+          </div>
+          <div class="reason-card">
+            <span class="reason-icon">🗑️</span>
+            <span class="reason-title" style="color:color-mix(in oklab,var(--color-warning) 80%,#000)">
+              Garbage In / Garbage Out
+            </span>
+            <p class="reason-desc">
+              Irrelevante oder rauschbehaftete Features schaden dem Modell aktiv.
+              Das Modell lernt Muster in Zufallsdaten – es passt sich an das
+              Rauschen an (Overfitting).
+            </p>
+          </div>
+          <div class="reason-card">
+            <span class="reason-icon">🪒</span>
+            <span class="reason-title" style="color:var(--color-success)">
+              Occam's Razor
+            </span>
+            <p class="reason-desc">
+              So wenige Features wie nötig, so viele wie erforderlich.
+              Einfachere Modelle generalisieren besser auf ungesehene Daten
+              und sind interpretierbarer.
+            </p>
+          </div>
+          <div class="reason-card">
+            <span class="reason-icon">⚡</span>
+            <span class="reason-title" style="color:var(--color-text-muted)">
+              Effizienz
+            </span>
+            <p class="reason-desc">
+              Weniger Features = kürzere Trainingszeiten, geringerer Speicherbedarf
+              und schnellere Inferenz. Besonders wichtig bei großen Datensätzen.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           7.2  CURSE OF DIMENSIONALITY
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="curse-dimensionality">
+        <div class="section-head">
+          <h2>7.2 Curse of Dimensionality</h2>
+          <p>
+            Mehr Features bedeuten einen exponentiell größeren Raum –
+            und dieselben N Datenpunkte werden darin immer spärlicher.
+          </p>
+        </div>
+
+        <div class="curse-visual">
+
+          <!-- Exponentielles Wachstum des Feature-Raums -->
+          <div class="curse-chart">
+            <div class="curse-chart-label">Benötigte Samples für gleiche Datendichte</div>
+            <div class="curse-bars">
+              <div class="curse-bar-row">
+                <span class="curse-bar-dim">1 Feature</span>
+                <div class="curse-bar-track">
+                  <div class="curse-bar-fill" style="width:3%"></div>
+                </div>
+                <span class="curse-bar-val">10</span>
+              </div>
+              <div class="curse-bar-row">
+                <span class="curse-bar-dim">2 Features</span>
+                <div class="curse-bar-track">
+                  <div class="curse-bar-fill" style="width:5%"></div>
+                </div>
+                <span class="curse-bar-val">100</span>
+              </div>
+              <div class="curse-bar-row">
+                <span class="curse-bar-dim">3 Features</span>
+                <div class="curse-bar-track">
+                  <div class="curse-bar-fill" style="width:10%"></div>
+                </div>
+                <span class="curse-bar-val">1.000</span>
+              </div>
+              <div class="curse-bar-row">
+                <span class="curse-bar-dim">5 Features</span>
+                <div class="curse-bar-track">
+                  <div class="curse-bar-fill" style="width:30%"></div>
+                </div>
+                <span class="curse-bar-val">100.000</span>
+              </div>
+              <div class="curse-bar-row">
+                <span class="curse-bar-dim">10 Features</span>
+                <div class="curse-bar-track">
+                  <div class="curse-bar-fill" style="width:70%"></div>
+                </div>
+                <span class="curse-bar-val">10¹⁰</span>
+              </div>
+              <div class="curse-bar-row">
+                <span class="curse-bar-dim">K Features</span>
+                <div class="curse-bar-track">
+                  <div class="curse-bar-fill" style="width:100%"></div>
+                </div>
+                <span class="curse-bar-val">10ᴷ</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sparsity Visual -->
+          <div class="sparsity-grid">
+            <div class="sparsity-box">
+              <span class="sparsity-label">1D</span>
+              <div class="sparsity-area" style="width:80px;height:20px">
+                <div class="sparsity-dot" style="width:6px;height:6px;top:7px;left:5px"></div>
+                <div class="sparsity-dot" style="width:6px;height:6px;top:7px;left:18px"></div>
+                <div class="sparsity-dot" style="width:6px;height:6px;top:7px;left:32px"></div>
+                <div class="sparsity-dot" style="width:6px;height:6px;top:7px;left:46px"></div>
+                <div class="sparsity-dot" style="width:6px;height:6px;top:7px;left:60px"></div>
+              </div>
+              <div class="sparsity-density">5 Punkte<br>dicht</div>
+            </div>
+            <div class="sparsity-box">
+              <span class="sparsity-label">2D</span>
+              <div class="sparsity-area" style="width:80px;height:80px">
+                <div class="sparsity-dot" style="width:6px;height:6px;top:8px; left:12px"></div>
+                <div class="sparsity-dot" style="width:6px;height:6px;top:30px;left:50px"></div>
+                <div class="sparsity-dot" style="width:6px;height:6px;top:55px;left:20px"></div>
+                <div class="sparsity-dot" style="width:6px;height:6px;top:15px;left:62px"></div>
+                <div class="sparsity-dot" style="width:6px;height:6px;top:65px;left:60px"></div>
+              </div>
+              <div class="sparsity-density">5 Punkte<br>verteilt</div>
+            </div>
+            <div class="sparsity-box">
+              <span class="sparsity-label">K-dim</span>
+              <div class="sparsity-area" style="width:80px;height:80px">
+                <div class="sparsity-dot" style="width:4px;height:4px;top:5px; left:5px;opacity:.4"></div>
+                <div class="sparsity-dot" style="width:4px;height:4px;top:68px;left:66px;opacity:.4"></div>
+                <div class="sparsity-dot" style="width:4px;height:4px;top:35px;left:70px;opacity:.4"></div>
+                <div class="sparsity-dot" style="width:4px;height:4px;top:10px;left:38px;opacity:.4"></div>
+                <div class="sparsity-dot" style="width:4px;height:4px;top:72px;left:8px; opacity:.4"></div>
+              </div>
+              <div class="sparsity-density">5 Punkte<br>isoliert</div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Konsequenz:</strong> &nbsp;
+          Abstandsbasierte Algorithmen (k-NN, SVM, k-Means) leiden besonders stark –
+          in hohen Dimensionen werden alle Abstände fast gleich groß, sodass
+          „nächster Nachbar" bedeutungslos wird. Feature Selection ist die Lösung.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           7.3  OCCAM'S RAZOR
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="occam">
+        <div class="section-head">
+          <h2>7.3 Occam's Razor &amp; Garbage In / Garbage Out</h2>
+          <p>Zwei Prinzipien, die Feature Selection begründen.</p>
+        </div>
+
+        <div class="card-grid three">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">🪒 Occam's Razor</span>
+            </h3>
+            <p>
+              „Wenn zwei Modelle gleich gut erklären, bevorzuge das einfachere."
+              In ML: das Modell mit den <strong>wenigsten relevanten Features</strong>
+              generalisiert besser auf neue Daten und ist weniger anfällig für Overfitting.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">🗑️ Garbage In / Garbage Out</span>
+            </h3>
+            <p>
+              Kein Algorithmus kann aus schlechten Features gute Vorhersagen machen.
+              Irrelevante Features erzeugen <strong>Rauschen</strong> –
+              das Modell lernt falsche Korrelationen und überanpasst sich an den Trainingssatz.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Ziel der Selection</span>
+            </h3>
+            <p>
+              Die <strong>minimale Menge von Features</strong>, die maximalen
+              Informationsgehalt über das Zielmerkmal (Label) trägt,
+              ohne redundante oder irrelevante Features zu enthalten.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           7.4  VARIANCETHRESHOLD
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="einfache-methoden">
+        <div class="section-head">
+          <h2>7.4 Einfache Feature Selection: VarianceThreshold</h2>
+          <p>
+            Entfernt Features, deren Varianz unter einem Schwellwert liegt –
+            ohne das Label zu berücksichtigen.
+          </p>
+        </div>
+
+        <!-- 3 Varianten -->
+        <div class="vt-variants">
+          <div class="vt-variant">
+            <div class="vt-num">1</div>
+            <h4>Missing Values</h4>
+            <p>
+              Features mit sehr vielen fehlenden Werten tragen kaum Information.
+              Vor VarianceThreshold: fehlende Werte auffüllen oder Feature direkt entfernen.
+            </p>
+            <code class="vt-threshold"
+                  style="background:color-mix(in oklab,var(--color-primary) 8%,var(--color-surface-2));
+                         color:var(--color-primary)">
+              NaN-Anteil ≥ Schwelle → entfernen
+            </code>
+          </div>
+          <div class="vt-variant">
+            <div class="vt-num">2</div>
+            <h4>Constant Values</h4>
+            <p>
+              Features, die immer denselben Wert haben (Varianz = 0), enthalten
+              keinerlei Information und können ohne Informationsverlust entfernt werden.
+            </p>
+            <code class="vt-threshold"
+                  style="background:color-mix(in oklab,var(--color-warning) 8%,var(--color-surface-2));
+                         color:color-mix(in oklab,var(--color-warning) 80%,#000)">
+              threshold = 0.0
+            </code>
+          </div>
+          <div class="vt-variant">
+            <div class="vt-num">3</div>
+            <h4>Low Variance</h4>
+            <p>
+              Features mit sehr geringer, aber nicht-null Varianz sind fast konstant
+              und tragen wenig Diskriminationskraft. Threshold nach Datenlage wählen.
+            </p>
+            <code class="vt-threshold"
+                  style="background:color-mix(in oklab,var(--color-success) 8%,var(--color-surface-2));
+                         color:var(--color-success)">
+              threshold = 0.15 (Beispiel)
+            </code>
+          </div>
+        </div>
+
+        <!-- Matrix Visual: Input → Varianz → Output -->
+        <div class="vt-layout" style="margin-top:var(--space-6)">
+
+          <!-- Eingabe-Matrix -->
+          <div class="matrix-block">
+            <div class="matrix-block-title">Eingabe X (6×3)</div>
+            <div class="mx-table" style="grid-template-columns: repeat(3,1fr)">
+              <div class="mx-cell head removed">F₁</div>
+              <div class="mx-cell head kept">F₂</div>
+              <div class="mx-cell head kept">F₃</div>
+              <div class="mx-cell removed">0</div><div class="mx-cell kept">0</div><div class="mx-cell kept">1</div>
+              <div class="mx-cell removed">0</div><div class="mx-cell kept">1</div><div class="mx-cell kept">0</div>
+              <div class="mx-cell removed">1</div><div class="mx-cell kept">0</div><div class="mx-cell kept">0</div>
+              <div class="mx-cell removed">0</div><div class="mx-cell kept">1</div><div class="mx-cell kept">1</div>
+              <div class="mx-cell removed">0</div><div class="mx-cell kept">1</div><div class="mx-cell kept">0</div>
+              <div class="mx-cell removed" style="border-bottom:none">0</div>
+              <div class="mx-cell kept" style="border-bottom:none">1</div>
+              <div class="mx-cell kept" style="border-bottom:none">1</div>
+            </div>
+            <!-- Varianz-Zeile -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:var(--space-2)">
+              <div class="mx-cell var-low" style="border:1px solid;font-size:.65rem">var: 0.139</div>
+              <div class="mx-cell var-ok"  style="border:1px solid;font-size:.65rem">var: 0.222</div>
+              <div class="mx-cell var-ok"  style="border:1px solid;font-size:.65rem">var: 0.250</div>
+            </div>
+            <div style="font-size:.65rem;color:var(--color-text-faint);margin-top:var(--space-1)">
+              ⚠️ F₁ &lt; threshold=0.15 → wird entfernt
+            </div>
+          </div>
+
+          <div class="vt-arrow">→<br><span style="font-size:var(--text-xs);color:var(--color-text-faint)">threshold=.15</span></div>
+
+          <!-- Ausgabe-Matrix -->
+          <div class="matrix-block">
+            <div class="matrix-block-title">Ausgabe (6×2) – F₁ entfernt</div>
+            <div class="mx-table" style="grid-template-columns: repeat(2,1fr)">
+              <div class="mx-cell head kept">F₂</div>
+              <div class="mx-cell head kept">F₃</div>
+              <div class="mx-cell kept">0</div><div class="mx-cell kept">1</div>
+              <div class="mx-cell kept">1</div><div class="mx-cell kept">0</div>
+              <div class="mx-cell kept">0</div><div class="mx-cell kept">0</div>
+              <div class="mx-cell kept">1</div><div class="mx-cell kept">1</div>
+              <div class="mx-cell kept">1</div><div class="mx-cell kept">0</div>
+              <div class="mx-cell kept" style="border-bottom:none">1</div>
+              <div class="mx-cell kept" style="border-bottom:none">1</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Code aus dem Notebook (komplett) -->
+        <div class="code-cell-split" style="margin-top:var(--space-6)">
+          <div class="code-cell-split-code">
+            <div class="code-cell-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – VarianceThreshold (aus Notebook)
+              </span>
+            </div>
+            <pre><code>import numpy as np
+from sklearn.feature_selection import VarianceThreshold
+
+# Eingabe-Daten (6 Samples, 3 Features)
+X = np.array([[0, 0, 1],
+              [0, 1, 0],
+              [1, 0, 0],
+              [0, 1, 1],
+              [0, 1, 0],
+              [0, 1, 1]])
+
+# Schritt 1: Varianz prüfen
+X.var(axis=0)
+
+# Schritt 2: Threshold anwenden
+sel = VarianceThreshold(threshold=.15)
+sel.fit_transform(X)</code></pre>
+          </div>
+          <div class="code-cell-split-output">
+            <div class="code-cell-header">
+              <span class="cell-lang">Output</span>
+            </div>
+            <pre><code># Varianzen der 3 Features:
+array([0.13888889, 0.22222222, 0.25])
+#      ↑ &lt; 0.15       ↑ OK        ↑ OK
+#      wird entfernt
+
+# Nach VarianceThreshold:
+array([[0, 1],
+       [1, 0],
+       [0, 0],
+       [1, 1],
+       [1, 0],
+       [1, 1]])
+# Feature 1 entfernt (var=0.139 &lt; 0.15)</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           7.5  KORRELATION
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="korrelation">
+        <div class="section-head">
+          <h2>7.5 Korrelations-basierte Feature Selection</h2>
+          <p>
+            Stark korrelierende Features liefern dieselbe Information doppelt –
+            eines davon kann entfernt werden.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Features untereinander</span>
+            </h3>
+            <p>
+              Wenn zwei Features hoch miteinander korrelieren (z.&nbsp;B. r&nbsp;&gt;&nbsp;0.9),
+              sind sie <strong>redundant</strong>. Eines der beiden kann ohne
+              Informationsverlust entfernt werden.
+            </p>
+            <p style="margin-top:var(--space-3)">
+              Methode: <strong>Paarweise Korrelationsmatrix</strong> berechnen,
+              dann Paare mit Korrelation &gt; Schwelle identifizieren und
+              das Feature mit geringerer Target-Korrelation entfernen.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Features mit Target</span>
+            </h3>
+            <p>
+              Features, die kaum mit dem Target-Label korrelieren, tragen
+              wenig Vorhersagekraft. Methode: <strong>Korrelation Feature&nbsp;↔&nbsp;Target</strong>
+              berechnen und Top-N Features auswählen.
+            </p>
+            <p style="margin-top:var(--space-3)">
+              Aber Vorsicht: Korrelation misst nur <em>lineare</em> Zusammenhänge.
+              Für nicht-lineare: <strong>mutual_info</strong> (→ SelectKBest).
+            </p>
+          </article>
+        </div>
+
+        <!-- Korrelations-Heatmap -->
+        <div class="corr-layout">
+          <div>
+            <p style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;
+                      letter-spacing:.08em;color:var(--color-text-faint);margin-bottom:var(--space-4)">
+              Beispiel: 5×5 Korrelationsmatrix
+            </p>
+            <div class="corr-matrix" style="grid-template-columns: repeat(6, 1fr)">
+              <!-- Header-Zeile -->
+              <div class="corr-label-cell"></div>
+              <div class="corr-label-cell">F₁</div>
+              <div class="corr-label-cell">F₂</div>
+              <div class="corr-label-cell">F₃</div>
+              <div class="corr-label-cell">F₄</div>
+              <div class="corr-label-cell">F₅</div>
+              <!-- Zeile F₁ -->
+              <div class="corr-label-cell">F₁</div>
+              <div class="corr-cell" data-val="1.0">1.0</div>
+              <div class="corr-cell" data-val="0.85">0.85</div>
+              <div class="corr-cell" data-val="0.3">0.3</div>
+              <div class="corr-cell" data-val="0.1">0.1</div>
+              <div class="corr-cell" data-val="0.5">0.5</div>
+              <!-- Zeile F₂ -->
+              <div class="corr-label-cell">F₂</div>
+              <div class="corr-cell" data-val="0.85">0.85</div>
+              <div class="corr-cell" data-val="1.0">1.0</div>
+              <div class="corr-cell" data-val="0.1">0.1</div>
+              <div class="corr-cell" data-val="0.3">0.3</div>
+              <div class="corr-cell" data-val="0.5">0.5</div>
+              <!-- Zeile F₃ -->
+              <div class="corr-label-cell">F₃</div>
+              <div class="corr-cell" data-val="0.3">0.3</div>
+              <div class="corr-cell" data-val="0.1">0.1</div>
+              <div class="corr-cell" data-val="1.0">1.0</div>
+              <div class="corr-cell" data-val="0.9">0.9</div>
+              <div class="corr-cell" data-val="0.1">0.1</div>
+              <!-- Zeile F₄ -->
+              <div class="corr-label-cell">F₄</div>
+              <div class="corr-cell" data-val="0.1">0.1</div>
+              <div class="corr-cell" data-val="0.3">0.3</div>
+              <div class="corr-cell" data-val="0.9">0.9</div>
+              <div class="corr-cell" data-val="1.0">1.0</div>
+              <div class="corr-cell" data-val="0.0">0.0</div>
+              <!-- Zeile F₅ -->
+              <div class="corr-label-cell">F₅</div>
+              <div class="corr-cell" data-val="0.5">0.5</div>
+              <div class="corr-cell" data-val="0.5">0.5</div>
+              <div class="corr-cell" data-val="0.1">0.1</div>
+              <div class="corr-cell" data-val="0.0">0.0</div>
+              <div class="corr-cell" data-val="1.0">1.0</div>
+            </div>
+            <div class="corr-legend">
+              <span class="corr-legend-label">0</span>
+              <div class="corr-legend-bar"></div>
+              <span class="corr-legend-label">1</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:var(--space-4)">
+            <div class="note"
+                 style="border-color:color-mix(in oklab,var(--color-warning) 30%,var(--color-border));
+                        background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2))">
+              <strong>⚠️ Hohe Korrelation F₁↔F₂ (0.85) und F₃↔F₄ (0.90):</strong><br>
+              Zwei Paare redundanter Features. Jeweils eines kann entfernt werden.
+              Welches? Das mit geringerer Korrelation zum Target-Label.
+            </div>
+            <article class="card" style="margin:0">
+              <h3><span class="key" style="--key-color:var(--color-primary)">Clustermap</span></h3>
+              <p>
+                Eine Heatmap + hierarchisches Clustering der Features.
+                Gruppen ähnlicher Features werden sichtbar –
+                aus jeder Gruppe behält man typischerweise nur ein Feature.
+              </p>
+              <pre style="margin-top:var(--space-3);font-size:.72rem"><code>import seaborn as sns
+corr = pd.DataFrame(X).corr()
+sns.clustermap(corr, cmap='coolwarm')</code></pre>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           7.6  SELECTKBEST
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="selectkbest">
+        <div class="section-head">
+          <h2>7.6 SelectKBest</h2>
+          <p>
+            Wählt automatisch die <strong>K besten Features</strong>
+            nach einem statistischen Test aus – unter Berücksichtigung des Labels.
+          </p>
+        </div>
+
+        <!-- Digits 64→20 Visual -->
+        <div class="digits-select-visual">
+          <div class="dsv-box">
+            <span class="dsv-num" style="color:var(--color-text-muted)">1797</span>
+            <span class="dsv-label">Samples</span>
+          </div>
+          <span style="font-size:.8rem;color:var(--color-text-faint)">×</span>
+          <div class="dsv-box">
+            <span class="dsv-num" style="color:color-mix(in oklab,var(--color-warning) 70%,#000)">64</span>
+            <span class="dsv-label">Features (8×8 px)</span>
+          </div>
+          <span class="dsv-arrow">→</span>
+          <div class="dsv-box" style="border:2px solid var(--color-primary);background:color-mix(in oklab,var(--color-primary) 6%,var(--color-surface))">
+            <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+                         color:var(--color-primary);margin-bottom:.2rem">SelectKBest</span>
+            <span style="font-family:var(--font-mono);font-size:.8rem;color:var(--color-text-muted)">k=20</span>
+          </div>
+          <span class="dsv-arrow">→</span>
+          <div class="dsv-box highlight">
+            <span class="dsv-num" style="color:var(--color-primary)">1797</span>
+            <span class="dsv-label">Samples</span>
+          </div>
+          <span style="font-size:.8rem;color:var(--color-text-faint)">×</span>
+          <div class="dsv-box highlight">
+            <span class="dsv-num" style="color:var(--color-primary)">20</span>
+            <span class="dsv-label">beste Features</span>
+          </div>
+        </div>
+
+        <!-- Code aus dem Notebook -->
+        <div class="code-cell-split" style="margin-top:var(--space-6)">
+          <div class="code-cell-split-code">
+            <div class="code-cell-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – SelectKBest (aus Notebook)
+              </span>
+            </div>
+            <pre><code>from sklearn.datasets import load_digits
+from sklearn.feature_selection import SelectKBest, mutual_info_classif
+
+# Digits laden: 1797 Samples × 64 Features
+X, y = load_digits(return_X_y=True)
+print(X.shape)        # (1797, 64)
+
+# Die 20 besten Features nach mutual information wählen
+sel   = SelectKBest(mutual_info_classif, k=20)
+X_new = sel.fit_transform(X, y)
+
+print(X_new.shape)    # (1797, 20)</code></pre>
+          </div>
+          <div class="code-cell-split-output">
+            <div class="code-cell-header">
+              <span class="cell-lang">Output</span>
+            </div>
+            <pre><code>(1797, 64)
+(1797, 20)
+
+# 64 → 20 Features:
+# Die 20 informativsten Pixel-Positionen
+# für die Unterscheidung der 10 Ziffern
+# wurden automatisch ausgewählt.</code></pre>
+          </div>
+        </div>
+
+        <!-- Alle Scoring-Funktionen -->
+        <p style="font-size:var(--text-sm);font-weight:700;margin-top:var(--space-8);
+                  margin-bottom:var(--space-4)">
+          Alle Scoring-Funktionen für SelectKBest
+        </p>
+        <div class="scoring-grid">
+
+          <!-- Klassifikation -->
+          <div class="scoring-group">
+            <div class="scoring-group-title"
+                 style="color:var(--color-primary)">
+              🏷️ Klassifikation
+            </div>
+            <div class="scoring-fn">
+              <span class="scoring-fn-name">mutual_info_classif</span>
+              <span class="scoring-fn-desc">
+                Misst die gegenseitige Information zwischen Feature und Zielvariable.
+                Erkennt auch <strong>nicht-lineare</strong> Abhängigkeiten.
+              </span>
+              <span class="scoring-fn-note">→ Standard-Wahl für Klassifikation</span>
+            </div>
+            <div class="scoring-fn">
+              <span class="scoring-fn-name">f_classif</span>
+              <span class="scoring-fn-desc">
+                ANOVA F-Test. Misst die Varianz zwischen den Klassen
+                relativ zur Varianz innerhalb der Klassen.
+                Nur für <strong>lineare</strong> Abhängigkeiten.
+              </span>
+              <span class="scoring-fn-note">→ Gut wenn lineare Trennbarkeit bekannt ist</span>
+            </div>
+            <div class="scoring-fn">
+              <span class="scoring-fn-name">chi2</span>
+              <span class="scoring-fn-desc">
+                Chi-Quadrat-Test. Nur für <strong>nicht-negative</strong> Features
+                (z.&nbsp;B. Häufigkeiten, Bag-of-Words). Testet Unabhängigkeit von Feature und Label.
+              </span>
+              <span class="scoring-fn-note">→ Nur für ganzzahlige, nicht-negative Features</span>
+            </div>
+          </div>
+
+          <!-- Regression -->
+          <div class="scoring-group">
+            <div class="scoring-group-title"
+                 style="color:var(--color-success)">
+              📈 Regression
+            </div>
+            <div class="scoring-fn">
+              <span class="scoring-fn-name">mutual_info_regression</span>
+              <span class="scoring-fn-desc">
+                Misst die gegenseitige Information für kontinuierliche Zielvariablen.
+                Erkennt auch <strong>nicht-lineare</strong> Abhängigkeiten.
+              </span>
+              <span class="scoring-fn-note">→ Standard-Wahl für Regression</span>
+            </div>
+            <div class="scoring-fn">
+              <span class="scoring-fn-name">f_regression</span>
+              <span class="scoring-fn-desc">
+                Pearson-Korrelationskoeffizient zwischen jedem Feature und
+                dem kontinuierlichen Zielmerkmal. Nur für <strong>lineare</strong>
+                Zusammenhänge geeignet.
+              </span>
+              <span class="scoring-fn-note">→ Gut wenn linearer Zusammenhang erwartet</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Merksatz:</strong> &nbsp;
+          <code>mutual_info_*</code> ist fast immer die sicherste Wahl – es erkennt
+          auch nicht-lineare Abhängigkeiten. <code>f_classif</code> / <code>f_regression</code>
+          sind schneller, aber nur für lineare Zusammenhänge geeignet.
+          <code>chi2</code> nur wenn Features garantiert nicht-negativ sind.
+        </div>
+
+        <!-- Weiter-Link -->
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Seite:</strong> &nbsp;
+          Nachdem Features selektiert wurden, müssen sie skaliert werden –
+          MinMaxScaler, StandardScaler und Power Transformations.
+          <br><br>
+          <a href="Page08.html">→ Seite 8: Feature Scaling &amp; Normalisierung</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 1 · Seite 7 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

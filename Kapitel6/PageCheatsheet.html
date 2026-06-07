@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K6 · Cheatsheet GMM</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    /* ── formula-block (aus Seite 03 – falls noch nicht in components.css) */
+    .formula-block {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 18%, var(--color-border));
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-6);
+      margin: var(--space-4) 0;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .formula-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    /* ── NEU: Kompaktes Code-Block für Cheatsheet ─────────
+       → bitte in components.css ergänzen              */
+    .code-mini {
+      background: var(--color-surface-offset);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-3) var(--space-4);
+      margin: var(--space-3) 0;
+      overflow-x: auto;
+    }
+    .code-mini pre {
+      margin: 0;
+      font-size: var(--text-xs);
+      line-height: 1.7;
+    }
+    .code-mini-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--color-text-faint);
+      margin-bottom: var(--space-2);
+    }
+
+    /* ── NEU: Q&A Accordion ──────────────────────────────
+       → bitte in components.css ergänzen              */
+    details.qa-item {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      margin-bottom: var(--space-3);
+      overflow: hidden;
+    }
+    details.qa-item summary {
+      cursor: pointer;
+      padding: var(--space-4) var(--space-5);
+      font-weight: 700;
+      font-size: var(--text-sm);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      list-style: none;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    details.qa-item summary::-webkit-details-marker { display: none; }
+    details.qa-item summary::before {
+      content: '▶';
+      font-size: .7rem;
+      color: var(--color-primary);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+    details.qa-item[open] summary::before { transform: rotate(90deg); }
+    details.qa-item summary:hover {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+    }
+    details.qa-item .qa-answer {
+      padding: var(--space-1) var(--space-5) var(--space-4);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      line-height: 1.7;
+    }
+    details.qa-item .qa-answer ul {
+      margin-top: var(--space-2);
+      padding-left: var(--space-5);
+    }
+    details.qa-item .qa-answer code {
+      font-size: var(--text-xs);
+    }
+    details.qa-item[open] {
+      border-color: color-mix(in oklab, var(--color-primary) 30%, var(--color-border));
+    }
+
+    /* ── NEU: Fallen-Item ────────────────────────────────
+       → bitte in components.css ergänzen              */
+    .fallen-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-4);
+      align-items: start;
+      padding: var(--space-4) var(--space-5);
+      background: color-mix(in oklab, #ef4444 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, #ef4444 20%, var(--color-border));
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-3);
+    }
+    .fallen-icon {
+      font-size: 1.2rem;
+      padding-top: 2px;
+    }
+    .fallen-item p { margin: 0; font-size: var(--text-sm); }
+    .fallen-item strong { color: var(--color-text); }
+    .fallen-fix {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      margin-top: var(--space-1);
+    }
+  </style>
+</head>
+<body>
+
+  <site-header active="page6" title="Kapitel 6 · Gaussian Mixture Models"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="cheatsheet_gmm"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ══════════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 6 · Prüfungsvorbereitung</span>
+            <h1>📋 Cheatsheet
+              <span class="key" style="--key-color:var(--color-primary)">GMM</span>
+            </h1>
+            <p>
+              Alle Formeln, die vollständige sklearn-API,
+              Vergleichstabellen, Code-Vorlagen,
+              typische Fallen und Prüfungsfragen –
+              <strong>alles auf einen Blick für die Prüfung</strong>.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Formeln</span>
+              <span class="pill">EM-Schritte</span>
+              <span class="pill">sklearn API</span>
+              <span class="pill">Vergleiche</span>
+              <span class="pill">Code-Vorlagen</span>
+              <span class="pill">Fallen</span>
+              <span class="pill">Merksätze</span>
+              <span class="pill">10 Prüfungsfragen</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Was steht wo?</h2>
+            <ul>
+              <li>
+                <strong><a href="#formeln" style="color:var(--color-primary)">Formeln</a></strong>
+                – alle 7 Kern-Gleichungen
+              </li>
+              <li>
+                <strong><a href="#api" style="color:var(--color-primary)">sklearn API</a></strong>
+                – jede Methode mit Rückgabe
+              </li>
+              <li>
+                <strong><a href="#vergleich" style="color:var(--color-primary)">Vergleiche</a></strong>
+                – k-means vs GMM, BIC vs AIC
+              </li>
+              <li>
+                <strong><a href="#code" style="color:var(--color-primary)">Code-Vorlagen</a></strong>
+                – 5 fertige Muster
+              </li>
+              <li>
+                <strong><a href="#fallen" style="color:var(--color-primary)">🪤 Fallen</a></strong>
+                – 8 klassische Prüfungsfehler
+              </li>
+              <li>
+                <strong><a href="#fragen" style="color:var(--color-primary)">Prüfungsfragen</a></strong>
+                – 10 Fragen mit Antworten
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. ALLE FORMELN
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="formeln">
+        <div class="section-head">
+          <h2>Alle Formeln</h2>
+          <p>Die 7 Gleichungen, die man auswendig können muss.</p>
+        </div>
+
+        <div class="overview-3" style="align-items:start">
+
+          <!-- Spalte 1 -->
+          <div>
+            <p class="formula-label">① GMM-Kernformel</p>
+            <div class="formula-block">
+              \[p(\mathbf{x}|\boldsymbol{\theta}) = \sum_{k=1}^{K} w_k\,\mathcal{N}(\mathbf{x}|\boldsymbol{\mu}_k,\boldsymbol{\Sigma}_k)\]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted)">
+              <span class="key" style="--key-color:var(--color-primary)">\(w_k\)</span> Gewicht,
+              <span class="key" style="--key-color:var(--color-primary)">\(\boldsymbol{\mu}_k\)</span> Mittelwert,
+              <span class="key" style="--key-color:var(--color-primary)">\(\boldsymbol{\Sigma}_k\)</span> Kovarianz
+              · \(\sum w_k = 1\), \(w_k \geq 0\)
+            </p>
+
+            <p class="formula-label" style="margin-top:var(--space-5)">② Log-Likelihood</p>
+            <div class="formula-block">
+              \[\log p(\mathbf{x}|\boldsymbol{\theta}) = \sum_{n=1}^{N} \log \sum_{k=1}^{K} w_k\,\mathcal{N}(\mathbf{x}_n|\boldsymbol{\mu}_k,\boldsymbol{\Sigma}_k)\]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted)">
+              <span class="key" style="--key-color:var(--color-warning)">log vor Summe</span>
+              → nicht analytisch vereinfachbar → EM nötig
+            </p>
+          </div>
+
+          <!-- Spalte 2 -->
+          <div>
+            <p class="formula-label">③ Responsibility – E-Schritt</p>
+            <div class="formula-block">
+              \[r_{nk} = \frac{w_k\,\mathcal{N}(\mathbf{x}_n|\boldsymbol{\mu}_k,\boldsymbol{\Sigma}_k)}{\sum_{j=1}^{K} w_j\,\mathcal{N}(\mathbf{x}_n|\boldsymbol{\mu}_j,\boldsymbol{\Sigma}_j)}\]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted)">
+              Wie wahrscheinlich erzeugte Gaussian <em>k</em> den Punkt <em>n</em>?
+              · \(\sum_k r_{nk} = 1\)
+            </p>
+
+            <p class="formula-label" style="margin-top:var(--space-5)">④ BIC</p>
+            <div class="formula-block">
+              \[\text{BIC} = m\ln(n) - 2\ln(\hat{L})\]
+            </div>
+            <p class="formula-label" style="margin-top:var(--space-3)">⑤ AIC</p>
+            <div class="formula-block">
+              \[\text{AIC} = 2m - 2\ln(\hat{L})\]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted)">
+              \(m\) = Parameter-Anzahl · \(\hat{L}\) = Likelihood-Maximum · \(n\) = Datenpunkte
+              <br>
+              <span class="key" style="--key-color:var(--color-primary)">Optimum = Minimum!</span>
+            </p>
+          </div>
+
+          <!-- Spalte 3: M-Schritt Updates -->
+          <div>
+            <p class="formula-label">⑥ M-Schritt – Updates</p>
+            <div class="formula-block">
+              \[\boldsymbol{\mu}_k^{\text{new}} = \frac{\sum_n r_{nk}\,\mathbf{x}_n}{\sum_n r_{nk}}\]
+            </div>
+            <div class="formula-block" style="margin-top:var(--space-2)">
+              \[\boldsymbol{\Sigma}_k^{\text{new}} = \frac{\sum_n r_{nk}(\mathbf{x}_n - \boldsymbol{\mu}_k)^2}{\sum_n r_{nk}}\]
+            </div>
+            <div class="formula-block" style="margin-top:var(--space-2)">
+              \[w_k^{\text{new}} = \frac{1}{N}\sum_{n=1}^{N} r_{nk}\]
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted)">
+              Herleitung: ∂ Log-Likelihood / ∂ Parameter = 0
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. EM-SCHRITTE
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="em-schritte">
+        <div class="section-head">
+          <h2>EM-Algorithmus – Ablauf</h2>
+          <p>5 Schritte, die man in der Prüfung aufzählen können muss.</p>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="step-no">1</div>
+            <div>
+              <strong>Initialisierung</strong>
+              <p>Zufällige Werte für \(\boldsymbol{\mu}_k\), \(\boldsymbol{\Sigma}_k\), \(w_k = 1/K\)</p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no"
+                 style="background:color-mix(in oklab,var(--color-primary) 15%,var(--color-surface)); color:var(--color-primary)">E</div>
+            <div>
+              <strong>E-Schritt – Responsibilities berechnen</strong>
+              <p>
+                Für jeden Punkt \(\mathbf{x}_n\) und jede Komponente \(k\):
+                <span class="key" style="--key-color:var(--color-primary)">\(r_{nk}\)</span>
+                berechnen (Formel ③).
+                Das ist was <code>.predict_proba()</code> zurückgibt.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no"
+                 style="background:color-mix(in oklab,#f59e0b 15%,var(--color-surface)); color:#d97706">M</div>
+            <div>
+              <strong>M-Schritt – Parameter aktualisieren</strong>
+              <p>
+                \(\boldsymbol{\mu}_k^{\text{new}}\),
+                \(\boldsymbol{\Sigma}_k^{\text{new}}\),
+                \(w_k^{\text{new}}\) mit Formeln ⑥ berechnen.
+                Weiche Gewichte \(r_{nk}\) statt harter Zuweisung.
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">↻</div>
+            <div>
+              <strong>E → M wiederholen bis Konvergenz</strong>
+              <p>
+                Stopp-Kriterium: Parameter ändern sich kaum noch.
+                Prüfen via <code>gmm.converged_</code>.
+                Falls <code>False</code>: <code>max_iter</code> erhöhen.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="note note-warning" style="margin-top:var(--space-4)">
+          <p>
+            <strong>⚠️ Hart vs. Weich:</strong>
+            k-means → harte Zuweisung (0 oder 1) ·
+            GMM → weiche Zuweisung (\(r_{nk} \in [0,1]\)) ·
+            beide nutzen EM, aber GMM mit
+            <span class="key" style="--key-color:var(--color-warning)">Wahrscheinlichkeiten</span>
+            statt binären Labels
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. SKLEARN API
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="api">
+        <div class="section-head">
+          <h2>sklearn API – vollständige Referenz</h2>
+          <p>Jede Methode und jedes Attribut mit Rückgabewert und Verwendung.</p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:35%">Methode / Attribut</th>
+              <th style="width:25%">Rückgabe</th>
+              <th>Wann verwenden?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <code>GaussianMixture(<br>
+                  &nbsp;n_components=K,<br>
+                  &nbsp;covariance_type='full',<br>
+                  &nbsp;random_state=0<br>
+                )</code>
+              </td>
+              <td>GMM-Objekt</td>
+              <td>
+                Modell erstellen.
+                <span class="key" style="--key-color:var(--color-primary)">n_components</span>
+                = Anzahl Gaussians (über AIC/BIC wählen)
+              </td>
+            </tr>
+            <tr>
+              <td><code>.fit(X)</code></td>
+              <td><code>self</code> (fitted GMM)</td>
+              <td>EM-Algorithmus ausführen und Parameter lernen</td>
+            </tr>
+            <tr>
+              <td><code>.predict(X)</code></td>
+              <td><code>array (n,)</code> – Labels 0..K-1</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-warning)">Harte</span>
+                Cluster-Zuweisung (argmax von predict_proba)
+              </td>
+            </tr>
+            <tr>
+              <td><code>.predict_proba(X)</code></td>
+              <td><code>array (n, K)</code> – Wahrscheinlichkeiten</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">Weiche</span>
+                Zugehörigkeitswahrscheinlichkeiten.
+                Jede Zeile summiert zu 1.0
+              </td>
+            </tr>
+            <tr>
+              <td><code>.score(X)</code></td>
+              <td><code>float</code> – mittlere Log-Likelihood</td>
+              <td>Wie gut passt das Modell zu X? Höher = besser</td>
+            </tr>
+            <tr>
+              <td><code>.bic(X)</code></td>
+              <td><code>float</code> – BIC-Wert</td>
+              <td>
+                Modellauswahl. Niedrigerer BIC = besseres Modell.
+                Konservativerer Strafterm als AIC
+              </td>
+            </tr>
+            <tr>
+              <td><code>.aic(X)</code></td>
+              <td><code>float</code> – AIC-Wert</td>
+              <td>
+                Modellauswahl. Niedrigerer AIC = besseres Modell.
+                Liberaler als BIC bei großen Datensätzen
+              </td>
+            </tr>
+            <tr>
+              <td><code>.sample(n)</code></td>
+              <td><code>(X_new, labels)</code> – Tupel</td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">Neue Daten generieren</span>
+                aus der gelernten Verteilung.
+                <code>_</code> ignoriert Labels
+              </td>
+            </tr>
+            <tr>
+              <td><code>.converged_</code></td>
+              <td><code>bool</code></td>
+              <td>
+                <code>True</code> = EM konvergiert ·
+                <code>False</code> = max_iter erhöhen!
+              </td>
+            </tr>
+            <tr>
+              <td><code>.n_iter_</code></td>
+              <td><code>int</code> – Iterationszahl</td>
+              <td>Wie viele EM-Schritte wurden benötigt?</td>
+            </tr>
+            <tr>
+              <td><code>.means_</code></td>
+              <td><code>array (K, d)</code></td>
+              <td>Mittelwekte \(\boldsymbol{\mu}_k\) aller K Komponenten</td>
+            </tr>
+            <tr>
+              <td><code>.covariances_</code></td>
+              <td><code>array (K, d, d)</code></td>
+              <td>Kovarianzen \(\boldsymbol{\Sigma}_k\) aller K Komponenten</td>
+            </tr>
+            <tr>
+              <td><code>.weights_</code></td>
+              <td><code>array (K,)</code></td>
+              <td>Mischungsgewichte \(w_k\) aller K Komponenten. Summe = 1.0</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           4. HYPERPARAMETER
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="hyperparameter">
+        <div class="section-head">
+          <h2>Hyperparameter</h2>
+          <p>Was bedeuten die wichtigsten Parameter von <code>GaussianMixture()</code>?</p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th><code>covariance_type</code></th>
+              <th>Bedeutung</th>
+              <th>Ellipsen-Form</th>
+              <th>Wann?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <span class="key" style="--key-color:var(--color-warning)"><code>spherical</code></span>
+              </td>
+              <td>
+                Gleiche Streuung in allen Dimensionen –
+                ein Parameter \(\sigma^2\) für alle
+              </td>
+              <td>
+                Kreis / Sphäre
+                <br>
+                <strong>≈ k-means!</strong>
+              </td>
+              <td>Baseline, einfachste Struktur</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)"><code>diag</code></span>
+              </td>
+              <td>
+                Pro Dimension unabhängige Streuung –
+                Kovarianzmatrix diagonal
+              </td>
+              <td>Achsen-ausgerichtete Ellipse</td>
+              <td>Unkorrelierte Features</td>
+            </tr>
+            <tr>
+              <td>
+                <span class="key" style="--key-color:var(--color-success)"><code>full</code></span>
+              </td>
+              <td>
+                Alle Freiheitsgrade frei –
+                volle Kovarianzmatrix
+              </td>
+              <td>Beliebig rotierte Ellipse</td>
+              <td>
+                <strong>Standard</strong> –
+                reale Daten, korrelierte Features
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           5. VERGLEICHE
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="vergleich">
+        <div class="section-head">
+          <h2>Vergleichstabellen</h2>
+          <p>k-means vs. GMM, BIC vs. AIC und Generativ vs. Diskriminativ.</p>
+        </div>
+
+        <!-- k-means vs GMM -->
+        <h3 style="margin-bottom:var(--space-3)">k-means vs. GMM</h3>
+        <table style="margin-bottom:var(--space-6)">
+          <thead>
+            <tr>
+              <th>Kriterium</th>
+              <th>
+                <span class="key" style="--key-color:var(--color-warning)">k-means</span>
+              </th>
+              <th>
+                <span class="key" style="--key-color:var(--color-primary)">GMM</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Zuweisung</strong></td>
+              <td>Hart (0 oder 1)</td>
+              <td>Weich (Wahrscheinlichkeiten)</td>
+            </tr>
+            <tr>
+              <td><strong>Cluster-Form</strong></td>
+              <td>Sphärisch (Kreise)</td>
+              <td>Elliptisch (beliebig)</td>
+            </tr>
+            <tr>
+              <td><strong>Probabilistisch</strong></td>
+              <td>❌ Nein</td>
+              <td>✅ Ja</td>
+            </tr>
+            <tr>
+              <td><strong>Generativ</strong></td>
+              <td>❌ Nein</td>
+              <td>✅ Ja – <code>.sample()</code></td>
+            </tr>
+            <tr>
+              <td><strong>Modell-Typ</strong></td>
+              <td>Diskriminativ</td>
+              <td>Generativ</td>
+            </tr>
+            <tr>
+              <td><strong>Modellauswahl</strong></td>
+              <td>Elbow-Methode, Silhouette</td>
+              <td>BIC, AIC</td>
+            </tr>
+            <tr>
+              <td><strong>EM-Algorithmus</strong></td>
+              <td>Ja (hart)</td>
+              <td>Ja (weich)</td>
+            </tr>
+            <tr>
+              <td><strong>Äquivalent</strong></td>
+              <td>
+                GMM mit <code>covariance_type='spherical'</code>
+              </td>
+              <td>–</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- BIC vs AIC -->
+        <h3 style="margin-bottom:var(--space-3)">BIC vs. AIC</h3>
+        <table style="margin-bottom:var(--space-6)">
+          <thead>
+            <tr>
+              <th>Kriterium</th>
+              <th>
+                <span class="key" style="--key-color:var(--color-primary)">BIC</span>
+              </th>
+              <th>
+                <span class="key" style="--key-color:var(--color-primary)">AIC</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Formel</strong></td>
+              <td>\(m\ln(n) - 2\ln(\hat{L})\)</td>
+              <td>\(2m - 2\ln(\hat{L})\)</td>
+            </tr>
+            <tr>
+              <td><strong>Strafterm</strong></td>
+              <td>\(m\ln(n)\) – wächst mit \(n\)</td>
+              <td>\(2m\) – konstant</td>
+            </tr>
+            <tr>
+              <td><strong>Konservativität</strong></td>
+              <td>Konservativer (einfachere Modelle)</td>
+              <td>Liberaler (mehr Komponenten)</td>
+            </tr>
+            <tr>
+              <td><strong>Optimum</strong></td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">Minimum!</span>
+              </td>
+              <td>
+                <span class="key" style="--key-color:var(--color-primary)">Minimum!</span>
+              </td>
+            </tr>
+            <tr>
+              <td><strong>sklearn</strong></td>
+              <td><code>gmm.bic(X)</code></td>
+              <td><code>gmm.aic(X)</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Generativ vs Diskriminativ -->
+        <h3 style="margin-bottom:var(--space-3)">Generativ vs. Diskriminativ</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Kriterium</th>
+              <th>
+                <span class="key" style="--key-color:var(--color-primary)">Generativ</span>
+              </th>
+              <th>
+                <span class="key" style="--key-color:var(--color-warning)">Diskriminativ</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Modelliert</strong></td>
+              <td>Vollständige Verteilung \(p(\mathbf{x})\)</td>
+              <td>Entscheidungsgrenze \(p(y|\mathbf{x})\)</td>
+            </tr>
+            <tr>
+              <td><strong>Neue Daten</strong></td>
+              <td>✅ Kann neue Daten generieren</td>
+              <td>❌ Nur Klassifikation/Clustering</td>
+            </tr>
+            <tr>
+              <td><strong>Beispiele</strong></td>
+              <td>GMM, Naive Bayes, VAE, GAN</td>
+              <td>SVM, k-means, Logistic Regression</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           6. CODE-VORLAGEN
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="code">
+        <div class="section-head">
+          <h2>Code-Vorlagen</h2>
+          <p>5 fertige Muster – direkt in der Prüfung verwendbar.</p>
+        </div>
+
+        <div class="card-grid">
+
+          <!-- Vorlage 1 -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                1 · GMM Basis-Pipeline
+              </span>
+            </h3>
+            <p>Trainieren, clustern und Wahrscheinlichkeiten ausgeben.</p>
+            <div class="code-mini">
+              <pre><code>from sklearn.mixture import GaussianMixture
+
+gmm = GaussianMixture(n_components=4,
+                      covariance_type='full',
+                      random_state=0)
+gmm.fit(X)
+
+labels = gmm.predict(X)          # harte Zuweisung
+probs  = gmm.predict_proba(X)    # weiche Wahrscheinlichkeiten
+print(probs[:5].round(3))        # erste 5 Zeilen</code></pre>
+            </div>
+          </article>
+
+          <!-- Vorlage 2 -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                2 · Konfidenz als Punktgröße
+              </span>
+            </h3>
+            <p>Unsichere Punkte klein, sichere Punkte groß.</p>
+            <div class="code-mini">
+              <pre><code>probs  = gmm.predict_proba(X)
+labels = gmm.predict(X)
+
+# max-Konfidenz ∝ Punktgröße (^4 verstärkt Unterschiede)
+size = 50 * probs.max(1) ** 4
+
+plt.scatter(X[:, 0], X[:, 1],
+            c=labels, cmap='viridis',
+            s=size, edgecolors='gray')</code></pre>
+            </div>
+          </article>
+
+          <!-- Vorlage 3 -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                3 · BIC/AIC Modellauswahl
+              </span>
+            </h3>
+            <p>Optimale Komponentenanzahl systematisch finden.</p>
+            <div class="code-mini">
+              <pre><code>n_components = np.arange(1, 21)
+models = [GaussianMixture(n, covariance_type='full',
+          random_state=0).fit(X) for n in n_components]
+
+bics = [m.bic(X) for m in models]
+aics = [m.aic(X) for m in models]
+
+plt.plot(n_components, bics, label='BIC')
+plt.plot(n_components, aics, label='AIC')
+plt.axvline(n_components[np.argmin(bics)],
+            color='red', ls='--', label='BIC Min')
+plt.legend(); plt.xlabel('n_components')</code></pre>
+            </div>
+          </article>
+
+          <!-- Vorlage 4 -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                4 · Neue Daten generieren
+              </span>
+            </h3>
+            <p>Aus gelernter Verteilung sampeln.</p>
+            <div class="code-mini">
+              <pre><code>gmm = GaussianMixture(120, covariance_type='full',
+                      random_state=0)
+gmm.fit(X_train)
+
+# Konvergenz prüfen
+print(gmm.converged_, gmm.n_iter_)
+
+# Neue Daten generieren
+X_new, _ = gmm.sample(100)
+print(X_new.shape)   # (100, n_features)</code></pre>
+            </div>
+          </article>
+
+          <!-- Vorlage 5 -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                5 · Ziffern generieren (load_digits)
+              </span>
+            </h3>
+            <p>Vollständige Pipeline für das Anwendungsbeispiel.</p>
+            <div class="code-mini">
+              <pre><code>from sklearn.datasets import load_digits
+data = load_digits().data          # (1797, 64)
+
+# AIC-Modellauswahl
+n_range = np.arange(50, 210, 10)
+aics = [GaussianMixture(n, covariance_type='full',
+        random_state=0).fit(data).aic(data)
+        for n in n_range]
+best_k = n_range[np.argmin(aics)]  # ≈ 110-120
+
+# Finales Modell + Sampling
+gmm = GaussianMixture(best_k, covariance_type='full',
+                      random_state=0).fit(data)
+data_new, _ = gmm.sample(100)</code></pre>
+            </div>
+          </article>
+
+          <!-- Vorlage 6 -->
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                6 · Konvergenzplot (neg. Log-Likelihood)
+              </span>
+            </h3>
+            <p>EM-Fortschritt über Iterationen verfolgen.</p>
+            <div class="code-mini">
+              <pre><code>gmm = GaussianMixture(n_components=4,
+                      covariance_type='full',
+                      random_state=0,
+                      verbose=2,        # Ausgabe pro Iteration
+                      max_iter=100)
+gmm.fit(X)
+
+# Nachher: lower_bound_ = finale Log-Likelihood
+print("Konvergiert:", gmm.converged_)
+print("Iterationen:", gmm.n_iter_)
+print("Log-Lik.:", gmm.lower_bound_)</code></pre>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           7. TYPISCHE FALLEN
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="fallen">
+        <div class="section-head">
+          <h2>🪤 Typische Fallen</h2>
+          <p>Diese Fehler kommen in jeder Prüfung vor.</p>
+        </div>
+
+        <div class="fallen-item">
+          <span class="fallen-icon">🪤</span>
+          <div>
+            <p><strong>Optimum von BIC/AIC ist das Minimum – nicht das Maximum!</strong></p>
+            <p class="fallen-fix">→ Beide Kriterien bestrafen Komplexität: je kleiner, desto besser.</p>
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <span class="fallen-icon">🪤</span>
+          <div>
+            <p><strong><code>covariance_type='spherical'</code> – nicht <code>'full'</code> – entspricht k-means</strong></p>
+            <p class="fallen-fix">→ Spherical = alle Dimensionen gleiche Streuung = Kreis = wie k-means-Hypersphären.</p>
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <span class="fallen-icon">🪤</span>
+          <div>
+            <p><strong>MLE für GMM lässt sich NICHT analytisch lösen</strong></p>
+            <p class="fallen-fix">→ log vor Summe lässt sich nicht vereinfachen → deshalb EM-Algorithmus nötig.</p>
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <span class="fallen-icon">🪤</span>
+          <div>
+            <p><strong>GMM ist primär ein Dichteschätzer – kein Clustering-Algorithmus</strong></p>
+            <p class="fallen-fix">→ BIC/AIC messen Güte als Dichteschätzer, nicht als Clusterer. Die Komponentenanzahl ≠ Clusteranzahl.</p>
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <span class="fallen-icon">🪤</span>
+          <div>
+            <p><strong><code>gmm.converged_ = False</code> bedeutet: das Modell hat nicht konvergiert</strong></p>
+            <p class="fallen-fix">→ Lösung: <code>max_iter</code> erhöhen (Standard: 100). Nie ignorieren!</p>
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <span class="fallen-icon">🪤</span>
+          <div>
+            <p><strong><code>.predict()</code> ≠ <code>.predict_proba()</code></strong></p>
+            <p class="fallen-fix">→ <code>.predict()</code> = argmax → harte Labels. <code>.predict_proba()</code> = kompletter Wahrscheinlichkeitsvektor pro Punkt.</p>
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <span class="fallen-icon">🪤</span>
+          <div>
+            <p><strong>Die Gewichte \(w_k\) sind Parameter – keine Hyperparameter</strong></p>
+            <p class="fallen-fix">→ Sie werden durch MLE (M-Schritt) gelernt. Hyperparameter ist z. B. \(K\).</p>
+          </div>
+        </div>
+
+        <div class="fallen-item">
+          <span class="fallen-icon">🪤</span>
+          <div>
+            <p><strong>Jede Zeile von <code>predict_proba(X)</code> summiert zu 1.0 – nicht jede Spalte</strong></p>
+            <p class="fallen-fix">→ Zeilenweise: Zugehörigkeitswahrscheinlichkeiten für einen Punkt über alle K Cluster. Nicht spaltenweise normiert.</p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           8. MERKSÄTZE
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="merksaetze">
+        <div class="section-head">
+          <h2>Merksätze</h2>
+          <p>5 Sätze, die den Kern von GMM auf den Punkt bringen.</p>
+        </div>
+
+        <div class="note-row">
+          <div class="note note-primary">
+            <p>
+              <strong>„GMM = probabilistisches k-means mit Ellipsen"</strong><br>
+              <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                Statt Hypersphären (k-means) nutzt GMM Gaußsche Ellipsen –
+                mit Wahrscheinlichkeiten statt harter Zuweisung.
+              </span>
+            </p>
+          </div>
+          <div class="note note-primary">
+            <p>
+              <strong>„E → Wahrscheinlichkeiten, M → Parameter"</strong><br>
+              <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                E-Schritt berechnet \(r_{nk}\), M-Schritt aktualisiert
+                \(\boldsymbol{\mu}_k\), \(\boldsymbol{\Sigma}_k\), \(w_k\).
+              </span>
+            </p>
+          </div>
+          <div class="note note-primary">
+            <p>
+              <strong>„Mehr Komponenten = bessere Dichte, aber Overfitting"</strong><br>
+              <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                BIC/AIC regeln das Gleichgewicht.
+                Optimum = Minimum der Kurve.
+              </span>
+            </p>
+          </div>
+        </div>
+        <div class="note-row" style="margin-top:var(--space-3)">
+          <div class="note note-primary">
+            <p>
+              <strong>„BIC konservativer als AIC bei großen n"</strong><br>
+              <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                BIC-Strafe wächst mit \(\ln(n)\);
+                AIC-Strafe ist konstant \(2m\).
+                Bei großen Datensätzen empfiehlt BIC weniger Komponenten.
+              </span>
+            </p>
+          </div>
+          <div class="note note-primary">
+            <p>
+              <strong>„Generativ = kann neue Daten erzeugen"</strong><br>
+              <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                GMM modelliert \(p(\mathbf{x})\) vollständig →
+                <code>.sample(n)</code> zieht neue Punkte aus dieser Verteilung.
+                k-means / SVM können das nicht.
+              </span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           9. PRÜFUNGSFRAGEN MIT ANTWORTEN
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="fragen">
+        <div class="section-head">
+          <h2>Prüfungsfragen &amp; Antworten</h2>
+          <p>10 typische Fragen – auf
+            <strong>▶ klicken</strong> um die Antwort aufzuklappen.
+          </p>
+        </div>
+
+        <h3 style="margin-bottom:var(--space-3)">
+          <span class="key" style="--key-color:var(--color-primary)">Konzeptfragen</span>
+        </h3>
+
+        <details class="qa-item">
+          <summary>Was ist der Unterschied zwischen <code>.predict()</code> und <code>.predict_proba()</code> bei GMM?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li><code>.predict(X)</code> gibt für jeden Datenpunkt ein <strong>hartes Label</strong> (0..K-1) zurück – das argmax von predict_proba</li>
+              <li><code>.predict_proba(X)</code> gibt einen <strong>Wahrscheinlichkeitsvektor</strong> der Länge K zurück – die Zugehörigkeitswahrscheinlichkeit zu jedem Cluster</li>
+              <li>Jede Zeile von predict_proba summiert zu 1.0</li>
+              <li>predict_proba ist das, was der E-Schritt des EM-Algorithmus berechnet (Responsibilities \(r_{nk}\))</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="qa-item">
+          <summary>Welche <code>covariance_type</code>-Einstellung ähnelt k-means am meisten und warum?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li><code>covariance_type='spherical'</code></li>
+              <li>Weil k-means <strong>kugelförmige, gleichmäßige Cluster</strong> annimmt – genau wie spherical bei GMM</li>
+              <li>spherical = ein Streuungsparameter \(\sigma^2\) für alle Dimensionen = Kreis/Sphäre</li>
+              <li>k-means ist damit äquivalent zu GMM mit spherical + harter Zuweisung</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="qa-item">
+          <summary>Was ist der Unterschied zwischen einem generativen und einem diskriminativen Modell?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li><strong>Generativ:</strong> modelliert die vollständige Datenverteilung \(p(\mathbf{x})\) – kann neue Daten generieren (<code>.sample()</code>). Beispiele: GMM, VAE, GAN</li>
+              <li><strong>Diskriminativ:</strong> modelliert nur die Entscheidungsgrenze \(p(y|\mathbf{x})\) – kann nur klassifizieren/clustern. Beispiele: SVM, k-means, Logistic Regression</li>
+              <li>GMM ist generativ → Dichteschätzung ist das primäre Ziel, Clustering ein Nebenprodukt</li>
+            </ul>
+          </div>
+        </details>
+
+        <h3 style="margin:var(--space-6) 0 var(--space-3)">
+          <span class="key" style="--key-color:var(--color-primary)">Formelfragen</span>
+        </h3>
+
+        <details class="qa-item">
+          <summary>Warum kann man MLE für GMM nicht analytisch lösen?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li>Die Log-Likelihood lautet: \(\log p(\mathbf{x}|\boldsymbol{\theta}) = \sum_n \log \sum_k w_k \mathcal{N}(\mathbf{x}_n|\boldsymbol{\mu}_k,\boldsymbol{\Sigma}_k)\)</li>
+              <li>Das Problem: <strong>log vor einer Summe</strong> – das lässt sich nicht analytisch vereinfachen</li>
+              <li>Bei einfachen Modellen steht log vor einem Produkt (dank i.i.d.) → analytisch lösbar</li>
+              <li>→ Deshalb wird EM-Algorithmus benötigt: iterative, sukzessive Optimierung</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="qa-item">
+          <summary>Was berechnet der E-Schritt des EM-Algorithmus genau?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li>Die <strong>Responsibilities</strong> \(r_{nk}\) – Clusterzugehörigkeitswahrscheinlichkeiten</li>
+              <li>Formel: \(r_{nk} = \frac{w_k \mathcal{N}(\mathbf{x}_n|\boldsymbol{\mu}_k,\boldsymbol{\Sigma}_k)}{\sum_j w_j \mathcal{N}(\mathbf{x}_n|\boldsymbol{\mu}_j,\boldsymbol{\Sigma}_j)}\)</li>
+              <li>Das ist ein Bayes'scher Ausdruck: Likelihood mal Prior, normiert über alle K Komponenten</li>
+              <li>Entspricht was <code>.predict_proba(X)</code> zurückgibt</li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="qa-item">
+          <summary>Wo liegt das Optimum bei BIC und AIC – und warum?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li>Das Optimum liegt bei beiden Kriterien beim <strong>Minimum</strong></li>
+              <li>Warum: beide Kriterien bestrafen Modellkomplexität (Parameter-Anzahl \(m\)) mit einem Penalty-Term</li>
+              <li>Mit mehr Komponenten steigt die Likelihood (besser) – aber auch die Strafe (schlechter)</li>
+              <li>Das Minimum = optimaler Trade-off zwischen Modellgüte und Einfachheit</li>
+              <li>BIC-Strafterm: \(m\ln(n)\) · AIC-Strafterm: \(2m\) → BIC konservativer bei großen \(n\)</li>
+            </ul>
+          </div>
+        </details>
+
+        <h3 style="margin:var(--space-6) 0 var(--space-3)">
+          <span class="key" style="--key-color:var(--color-primary)">Code-Fragen</span>
+        </h3>
+
+        <details class="qa-item">
+          <summary>Was gibt <code>gmm.sample(100)</code> zurück und wie verwendet man es?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li>Rückgabe: Tupel <code>(X_new, labels)</code></li>
+              <li><code>X_new</code>: Array der Form <code>(100, n_features)</code> – 100 neue Datenpunkte</li>
+              <li><code>labels</code>: Array der Form <code>(100,)</code> – welche Komponente den jeweiligen Punkt erzeugt hat</li>
+              <li>Typische Verwendung: <code>X_new, _ = gmm.sample(100)</code> – labels ignorieren</li>
+              <li>Funktioniert nur nach <code>.fit(X)</code></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="qa-item">
+          <summary>Was bedeutet <code>gmm.converged_ = False</code> und was tut man dagegen?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li>EM-Algorithmus hat nach <code>max_iter</code> Iterationen <strong>nicht konvergiert</strong></li>
+              <li>Das Modell ist möglicherweise unvollständig/suboptimal trainiert</li>
+              <li><strong>Lösung:</strong> <code>max_iter</code> erhöhen: <code>GaussianMixture(..., max_iter=200)</code></li>
+              <li>Auch prüfen: <code>gmm.n_iter_</code> – wenn gleich <code>max_iter</code>, wurde abgebrochen</li>
+              <li>Alternative: anderen <code>random_state</code> oder <code>init_params</code> versuchen</li>
+            </ul>
+          </div>
+        </details>
+
+        <h3 style="margin:var(--space-6) 0 var(--space-3)">
+          <span class="key" style="--key-color:var(--color-warning)">🪤 Fallen-Fragen</span>
+        </h3>
+
+        <details class="qa-item">
+          <summary>Ein Student schreibt: „Das beste GMM ist das mit dem höchsten AIC-Wert." Was ist falsch?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li><strong>Falsch:</strong> Das Optimum liegt beim <strong>Minimum</strong>, nicht beim Maximum</li>
+              <li>AIC = 2m − 2ln(L̂) – hoher Wert bedeutet hohe Strafe oder geringe Likelihood</li>
+              <li>Kleines AIC = gutes Gleichgewicht zwischen Modellgüte und Einfachheit</li>
+              <li>Richtig: <code>best_k = n_components[np.argmin(aics)]</code></li>
+            </ul>
+          </div>
+        </details>
+
+        <details class="qa-item">
+          <summary>Warum funktioniert GMM mit 2 Komponenten beim „Zwei Monde"-Datensatz nicht?</summary>
+          <div class="qa-answer">
+            <ul>
+              <li>Jede Gauß-Komponente beschreibt eine <strong>elliptische Region</strong> im Datenraum</li>
+              <li>Eine Halbmondform ist <strong>nicht elliptisch</strong> und kann mit 2 Gauß-Kurven nicht abgebildet werden</li>
+              <li>Das GMM versucht dennoch die Daten zu erklären → falsche, überlappende Ellipsen</li>
+              <li><strong>Lösung:</strong> viele Komponenten (z.B. 16) – diese legen sich wie Pflastersteine entlang der Mondkurven</li>
+              <li>Kernlektion: bei vielen Komponenten = Dichteschätzer, nicht Clustering-Algorithmus</li>
+            </ul>
+          </div>
+        </details>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 6 – Gaussian Mixture Models · Cheatsheet</small>
+    </div>
+  </footer>
+
+</body>
+</html>

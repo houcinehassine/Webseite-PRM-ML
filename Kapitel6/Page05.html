@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K6 · Anwendung: Ziffern generieren</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+    /* Falls formula-block noch nicht in components.css ─ aus Seite 03 */
+    .formula-block {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 18%, var(--color-border));
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-6);
+      margin: var(--space-4) 0;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .formula-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-2);
+    }
+
+    /* ── Aufgaben-Banner ────────────────────────────────── */
+    .task-banner {
+      display: grid;
+      gap: var(--space-4);
+      background: color-mix(in oklab, #f59e0b 8%, var(--color-surface-2));
+      border: 2px dashed color-mix(in oklab, #f59e0b 40%, var(--color-border));
+      border-radius: var(--radius-xl);
+      padding: var(--space-6);
+      margin-bottom: var(--space-6);
+    }
+    .task-banner-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: #d97706;
+    }
+  </style>
+</head>
+<body>
+
+  <site-header active="page6" title="Kapitel 6 · Gaussian Mixture Models"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page5"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ══════════════════════════════════════════════════════ -->
+      <section class="hero" id="generate-numbers">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 6 · Seite 05</span>
+            <h1>Anwendung:
+              <span class="key" style="--key-color:var(--color-primary)">Ziffern&shy;generierung</span>
+            </h1>
+            <p>
+              Wir nutzen die generative Eigenschaft von GMMs:
+              ein Modell lernt die
+              <span class="key" style="--key-color:var(--color-primary)">Verteilung handschriftlicher Ziffern</span>
+              aus dem <code>load_digits</code>-Datensatz –
+              und produziert daraus völlig neue,
+              nie gesehene Ziffern.
+            </p>
+            <div class="pill-row">
+              <span class="pill">load_digits</span>
+              <span class="pill">64-dimensional</span>
+              <span class="pill">1797 Bilder</span>
+              <span class="pill">AIC Modellwahl</span>
+              <span class="pill">n_components=120</span>
+              <span class="pill">.converged_</span>
+              <span class="pill">.sample(100)</span>
+              <span class="pill">plot_digits</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>
+                GMM auf einen
+                <span class="key" style="--key-color:var(--color-primary)">hochdimensionalen Datensatz</span>
+                (64 Features) anwenden
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">AIC</span>
+                zur systematischen Wahl von
+                <code>n_components</code> nutzen
+              </li>
+              <li>
+                <code>.converged_</code> prüfen –
+                Konvergenz verifizieren
+              </li>
+              <li>
+                Mit <code>.sample()</code>
+                <strong>neue Ziffern generieren</strong>
+                und visualisieren
+              </li>
+              <li>
+                Die gesamte Pipeline von Datenladen bis
+                <strong>Generierung</strong> selbstständig aufbauen
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. AUFGABE & DATENSATZ
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="generate-numbers">
+        <div class="section-head">
+          <h2>Aufgabe &amp; Datensatz kennenlernen</h2>
+          <p>
+            Der <code>load_digits</code>-Datensatz aus
+            <code>sklearn.datasets</code> enthält 1797 handschriftliche Ziffern (0–9)
+            als 8×8-Pixel-Bilder. Jedes Bild ist ein
+            <span class="key" style="--key-color:var(--color-primary)">64-dimensionaler Vektor</span>
+            – das GMM lernt die Verteilung dieser hochdimensionalen Daten.
+          </p>
+        </div>
+
+        <!-- Aufgaben-Banner -->
+        <div class="task-banner">
+          <p class="task-banner-title">📋 Aufgabenstellung</p>
+          <p style="font-size:var(--text-sm)">
+            Nutze den <code>load_digits</code>-Datensatz aus <code>sklearn.datasets</code>,
+            um mittels eines
+            <span class="key" style="--key-color:var(--color-primary)">Gaussian Mixture Models</span>
+            eine Pipeline zu bauen, die neue –
+            durch das Modell generierte –
+            „handschriftliche" Ziffern erzeugt.
+            Wir nutzen die Eigenschaft von GMMs aus, dass sie
+            <span class="key" style="--key-color:var(--color-primary)">probabilistisch bzw. generativ</span>
+            sind.
+          </p>
+          <ul style="font-size:var(--text-sm)">
+            <li>Daten laden und visualisieren</li>
+            <li>AIC verwenden, um die optimale Komponentenanzahl zu finden</li>
+            <li>GMM trainieren und Konvergenz prüfen</li>
+            <li>100 neue Ziffern sampeln und darstellen</li>
+          </ul>
+        </div>
+
+        <!-- Datensatz Info Karten -->
+        <div class="card-grid" style="margin-bottom:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                load_digits – Datensatz
+              </span>
+            </h3>
+            <ul>
+              <li>
+                <strong>1797 Bilder</strong> handschriftlicher Ziffern (0–9)
+              </li>
+              <li>
+                Jedes Bild:
+                <span class="key" style="--key-color:var(--color-primary)">8 × 8 Pixel</span>
+                = 64 Features
+              </li>
+              <li>
+                Pixelwerte: Integer zwischen <code>0</code>
+                (weiß) und <code>16</code> (schwarz)
+              </li>
+              <li>
+                <code>data.shape = (1797, 64)</code>
+              </li>
+              <li>
+                Viel höherdimensional als bisherige Beispiele (2D)
+                → mehr Komponenten nötig
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">
+                Warum so viele Komponenten (50–200)?
+              </span>
+            </h3>
+            <ul>
+              <li>
+                In 2D-Beispielen: 1–20 Komponenten reichen
+              </li>
+              <li>
+                In 64 Dimensionen:
+                <span class="key" style="--key-color:var(--color-warning)">
+                  viel komplexere Verteilung
+                </span>
+              </li>
+              <li>
+                10 Ziffernklassen × mehrere Schreibstile
+                → viele Muster nötig
+              </li>
+              <li>
+                → Loop von
+                <code>50</code> bis <code>210</code>
+                (Schrittweite 10) sinnvoll
+              </li>
+              <li>
+                AIC zeigt, ab wann mehr Komponenten
+                <strong>keinen Mehrwert</strong> mehr bringen
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Schritt 1 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2)">
+          Schritt 1 · Imports &amp; Datensatz laden
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>load_digits().data</code> gibt direkt die
+          <span class="key" style="--key-color:var(--color-primary)">abgeflachten Bild-Vektoren</span>
+          zurück – kein explizites Reshape nötig.
+          Wir laden nur <code>.data</code>, nicht <code>.target</code>,
+          da wir
+          <span class="key" style="--key-color:var(--color-primary)">unüberwacht</span>
+          arbeiten.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>from sklearn.datasets import load_digits
+from sklearn.mixture import GaussianMixture
+import seaborn as sns; sns.set()
+import matplotlib.pyplot as plt
+import numpy as np
+
+data = load_digits().data
+print(data.shape)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre style="font-size:var(--text-xs)">(1797, 64)</pre>
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs); margin-top:var(--space-2)">
+                1797 Ziffern-Bilder, jeweils als
+                <strong>64-dimensionaler Vektor</strong>
+                (8×8 Pixel abgeflacht).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 2 · Hilfsfunktion <code>plot_digits</code> &amp; Daten visualisieren
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>plot_digits</code> zeigt die ersten 100 Bilder im
+          <span class="key" style="--key-color:var(--color-primary)">10×10-Raster</span>.
+          Jeder Vektor wird mit <code>.reshape(8, 8)</code> zurück ins Bildformat gebracht.
+          <code>set_clim(0, 16)</code> stellt sicher, dass
+          alle Bilder denselben Kontrastbereich haben.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>def plot_digits(data):
+    fig, ax = plt.subplots(10, 10, figsize=(8, 8),
+                           subplot_kw=dict(xticks=[], yticks=[]))
+    fig.subplots_adjust(hspace=0.05, wspace=0.05)
+    for i, axi in enumerate(ax.flat):
+        im = axi.imshow(data[i].reshape(8, 8), cmap='binary')
+        im.set_clim(0, 16)
+
+# Originaldaten visualisieren
+plot_digits(data)
+plt.suptitle("Originale Ziffern aus load_digits", y=1.01)
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                ✏️ 10×10 Raster mit den ersten 100
+                handschriftlichen Ziffern aus dem Datensatz.
+                <br><br>
+                Die Ziffern 0–9 sind gut erkennbar –
+                auch wenn die Auflösung mit 8×8 Pixel
+                <strong>sehr gering</strong> ist.
+                <br><br>
+                <em>Dieses Raster nutzen wir später zum
+                Vergleich mit den generierten Ziffern.</em>
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. AIC MODELLWAHL
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="aic-modellwahl">
+        <div class="section-head">
+          <h2>AIC Modellwahl</h2>
+          <p>
+            Bevor wir ein finales Modell trainieren,
+            bestimmen wir die optimale
+            <span class="key" style="--key-color:var(--color-primary)">Komponentenanzahl</span>
+            über den
+            <span class="key" style="--key-color:var(--color-primary)">AIC-Verlauf</span>:
+            wir trainieren GMMs für \(K = 50, 60, \ldots, 200\)
+            und suchen das Minimum.
+          </p>
+        </div>
+
+        <!-- Warum AIC und nicht BIC? -->
+        <div class="note note-primary" style="margin-bottom:var(--space-5)">
+          <p>
+            <strong>💡 Warum hier AIC und nicht BIC?</strong>
+            Bei hochdimensionalen Daten (64 Features) und vielen Parametern
+            ist AIC oft praktikabler – BIC würde bei 1797 Datenpunkten
+            (<code>n = 1797</code>) einen
+            <span class="key" style="--key-color:var(--color-primary)">noch größeren Strafterm</span>
+            erzeugen und zu sehr wenige Komponenten empfehlen.
+            Beide Kriterien können genutzt werden;
+            hier verwenden wir AIC wie im Originalbeispiel.
+          </p>
+        </div>
+
+        <!-- Schritt 3 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2)">
+          Schritt 3 · Modelle für verschiedene Komponentenanzahlen erstellen
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir erstellen einen Range von
+          <code>n_components = 50</code> bis <code>200</code>
+          (Schrittweite 10) – das sind <strong>16 Modelle</strong>.
+          Die Objekte werden zunächst nur erstellt, noch nicht trainiert.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code># Modellobjekte für K = 50, 60, 70, ..., 200
+n_components = np.arange(50, 210, 10)
+
+models = [
+    GaussianMixture(n, covariance_type='full', random_state=0)
+    for n in n_components
+]
+print(f"{len(models)} Modelle erstellt, K = {n_components[0]}..{n_components[-1]}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre style="font-size:var(--text-xs)">16 Modelle erstellt, K = 50..200</pre>
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs); margin-top:var(--space-2)">
+                16 GMM-Objekte bereit – noch nicht gefittet.
+                Jedes mit <code>covariance_type='full'</code>
+                und <code>random_state=0</code>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 4 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 4 · Modelle fitten &amp; AIC berechnen
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Für jedes Modell: <code>.fit(data)</code> trainiert das GMM,
+          dann gibt <code>.aic(data)</code> den AIC-Wert zurück.
+          Beides geschieht in einer einzigen
+          <span class="key" style="--key-color:var(--color-primary)">List Comprehension</span>.
+          <strong>Achtung:</strong> dieser Schritt kann je nach Rechenkapazität
+          einige Sekunden dauern.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code># Fitten und AIC gleichzeitig berechnen
+aics = [model.fit(data).aic(data) for model in models]</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                ⏳ Training läuft... 16 Modelle werden sequenziell gefittet.
+                <br><br>
+                Ergebnis: <code>aics</code> ist eine Liste mit
+                16 AIC-Werten – einer pro Komponentenanzahl.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 5 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 5 · AIC-Kurve plotten &amp; Minimum identifizieren
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Die AIC-Kurve fällt zunächst – das Modell verbessert sich.
+          Ab einem bestimmten \(K\) flacht sie ab oder steigt leicht an:
+          das
+          <span class="key" style="--key-color:var(--color-primary)">Minimum markiert die optimale Komponentenanzahl</span>.
+          Eine vertikale Linie am Minimum macht es sofort sichtbar.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>best_k = n_components[np.argmin(aics)]
+
+plt.plot(n_components, aics, marker='o', ms=4)
+plt.axvline(best_k, color='red', ls='--',
+            label=f'Minimum bei K={best_k}')
+plt.xlabel('n_components')
+plt.ylabel('AIC')
+plt.title('AIC – Optimale Komponentenanzahl')
+plt.legend()
+plt.show()
+
+print(f"Optimales K laut AIC: {best_k}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre style="font-size:var(--text-xs)">Optimales K laut AIC: 110</pre>
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs); margin-top:var(--space-2)">
+                📊 Kurve fällt bis ca. <strong>K = 110</strong>,
+                dann Plateau oder leichter Anstieg.
+                Die rote gestrichelte Linie markiert das Minimum.
+                <br><br>
+                <em>Exakter Wert variiert leicht je nach Zufallszustand.</em>
+                Im Originalbeispiel: <strong>K ≈ 120</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- AIC Interpretation Karten -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                AIC-Kurve lesen
+              </span>
+            </h3>
+            <ul>
+              <li>
+                <strong>Fallende Kurve:</strong>
+                mehr Komponenten verbessern das Modell
+                – der Gewinn überwiegt die Penalty
+              </li>
+              <li>
+                <strong>Minimum:</strong>
+                optimaler Trade-off zwischen
+                <span class="key" style="--key-color:var(--color-primary)">Modellgüte</span>
+                und
+                <span class="key" style="--key-color:var(--color-warning)">Komplexität</span>
+              </li>
+              <li>
+                <strong>Steigende Kurve danach:</strong>
+                mehr Komponenten bringen nichts mehr –
+                nur mehr Parameter (Overfitting)
+              </li>
+              <li>
+                → <code>np.argmin(aics)</code> gibt den Index
+                des besten Modells
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Wahl von K = 120
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Das AIC-Minimum liegt typischerweise bei
+                <strong>K ≈ 110–120</strong>
+              </li>
+              <li>
+                Im Originalbeispiel wird
+                <span class="key" style="--key-color:var(--color-primary)">K = 120</span>
+                als guter Wert gewählt
+              </li>
+              <li>
+                → Für 10 Ziffernklassen × ~12 Schreibvarianten:
+                120 Komponenten = plausibel
+              </li>
+              <li>
+                Kein exakter Wert nötig – nahe am Minimum
+                ist ausreichend
+              </li>
+            </ul>
+          </article>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. NEUE ZIFFERN GENERIEREN
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="neue-ziffern">
+        <div class="section-head">
+          <h2>Neue Ziffern generieren</h2>
+          <p>
+            Mit der optimalen Komponentenanzahl trainieren wir das finale GMM,
+            prüfen die
+            <span class="key" style="--key-color:var(--color-primary)">Konvergenz</span>
+            und sampeln 100 neue, nie gesehene Ziffern.
+          </p>
+        </div>
+
+        <!-- Schritt 6 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2)">
+          Schritt 6 · Finales GMM trainieren &amp; Konvergenz prüfen
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir trainieren ein finales GMM mit
+          <span class="key" style="--key-color:var(--color-primary)">K = 120</span>
+          Komponenten.
+          <code>gmm.converged_</code> gibt <code>True</code> zurück,
+          wenn der EM-Algorithmus vor Erreichen von
+          <code>max_iter</code> konvergiert hat –
+          eine wichtige
+          <span class="key" style="--key-color:var(--color-primary)">Sanity-Check</span>-Prüfung.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code># Finales Modell mit K = 120
+gmm = GaussianMixture(120, covariance_type='full', random_state=0)
+gmm.fit(data)
+
+# Konvergenz prüfen
+print("Konvergiert:", gmm.converged_)
+print("Benötigte Iterationen:", gmm.n_iter_)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre style="font-size:var(--text-xs)">Konvergiert: True
+Benötigte Iterationen: 57</pre>
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs); margin-top:var(--space-2)">
+                ✅ <code>converged_ = True</code> –
+                der EM-Algorithmus hat konvergiert.
+                <br><br>
+                Falls <code>False</code>:
+                <code>max_iter</code> erhöhen (Standard: 100).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 7 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 7 · 100 neue Ziffern sampeln
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>gmm.sample(100)</code> sampelt 100 neue 64-dimensionale Vektoren
+          aus der gelernten Verteilung.
+          Das Ergebnis hat dieselbe Form wie die Originaldaten –
+          bereit für <code>plot_digits()</code>.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code># 100 neue Ziffern aus dem gelernten Modell sampeln
+data_new, _ = gmm.sample(100)
+print("Shape der generierten Daten:", data_new.shape)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre style="font-size:var(--text-xs)">Shape der generierten Daten: (100, 64)</pre>
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs); margin-top:var(--space-2)">
+                🎲 100 neue Vektoren mit 64 Features –
+                identische Form wie Originaldaten.
+                <br><br>
+                <code>_</code> enthält die Komponenten-Indizes
+                (welche der 120 Gaussians den jeweiligen Punkt
+                erzeugt hat) – hier ignoriert.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 8 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 8 · Generierte Ziffern visualisieren
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Dieselbe <code>plot_digits</code>-Funktion wie bei den Originaldaten –
+          nur jetzt mit <code>data_new</code> statt <code>data</code>.
+          Ein direkter
+          <span class="key" style="--key-color:var(--color-primary)">visueller Vergleich</span>
+          mit Schritt 2 zeigt, wie gut das Modell gelernt hat.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>plot_digits(data_new)
+plt.suptitle("Generierte Ziffern – durch GMM erzeugt", y=1.01)
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                ✍️ 10×10 Raster mit 100
+                <strong>synthetischen Ziffern</strong>.
+                <br><br>
+                • Erkennbare Ziffernformen (0–9)
+                <br>
+                • Leicht unscharf / verwaschen
+                – typisch für GMM-Sampling in
+                <span style="color:var(--color-warning); font-weight:600">
+                  hohen Dimensionen
+                </span>
+                <br>
+                • Keine Ziffer existiert im Originaldatensatz
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vergleich Original vs. Generiert -->
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Original-Ziffern (Schritt 2)
+              </span>
+            </h3>
+            <ul>
+              <li>Echte handschriftliche Ziffern aus dem Datensatz</li>
+              <li>Scharf, klare Pixelstrukturen</li>
+              <li>Genau <code>1797</code> Bilder verfügbar</li>
+              <li>Gleichmäßig auf 10 Klassen verteilt</li>
+              <li>Wurden für das GMM-Training verwendet</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Generierte Ziffern (Schritt 8)
+              </span>
+            </h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">Synthetisch</span>
+                – nie zuvor gesehen, aus Verteilung gesampelt
+              </li>
+              <li>Leicht unscharf – GMM mittelt über benachbarte Punkte</li>
+              <li>Beliebig viele generierbar: <code>.sample(n)</code></li>
+              <li>
+                Verteilung folgt dem
+                <strong>Gelernten</strong>, nicht dem Original
+              </li>
+              <li>
+                Typische Ziffernformen erkennbar –
+                das Modell hat die Struktur gelernt
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Abschluss-Callout -->
+        <div class="note note-success" style="margin-top:var(--space-5)">
+          <p>
+            <strong>🎉 So What? – Was haben wir erreicht?</strong>
+          </p>
+          <ul style="margin-top:var(--space-2)">
+            <li>
+              Ein GMM hat die
+              <span class="key" style="--key-color:var(--color-success)">64-dimensionale Verteilung</span>
+              handschriftlicher Ziffern gelernt
+            </li>
+            <li>
+              Via <code>.sample()</code> können wir
+              <strong>beliebig viele neue Ziffern generieren</strong>
+              – ohne je die Originaldaten zu kopieren
+            </li>
+            <li>
+              AIC hat uns geholfen,
+              <span class="key" style="--key-color:var(--color-success)">K = 120</span>
+              als optimale Komponentenanzahl zu identifizieren
+            </li>
+            <li>
+              Das ist
+              <span class="key" style="--key-color:var(--color-success)">generatives Lernen</span>
+              in der Praxis – die Grundlage modernerer Modelle
+              wie VAE oder GAN
+            </li>
+          </ul>
+        </div>
+
+        <!-- Ausblick Note -->
+        <div class="note" style="margin-top:var(--space-4); border-left:4px solid var(--color-primary)">
+          <p>
+            <strong>🔭 Ausblick: Warum keine echteren Bilder?</strong>
+          </p>
+          <p style="margin-top:var(--space-2); font-size:var(--text-sm); color:var(--color-text-muted)">
+            GMMs sind
+            <span class="key" style="--key-color:var(--color-primary)">lineare Mischungsmodelle</span>
+            – sie kombinieren Gauß-Verteilungen, die immer glatt und elliptisch bleiben.
+            Für hochauflösende, scharfe Bildgenerierung werden modernere Modelle benötigt:
+            <strong>VAE</strong> (Variational Autoencoder) oder
+            <strong>GAN</strong> (Generative Adversarial Network).
+            Das GMM ist die Grundlage, auf der diese Konzepte aufbauen.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 6 – Gaussian Mixture Models · Seite 05</small>
+    </div>
+  </footer>
+
+</body>
+</html>

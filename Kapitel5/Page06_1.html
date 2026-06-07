@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Servo Fault Classification</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page5" title="Kapitel 5 · Servo Fault Classification"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page6_1"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Seite 6.1</span>
+            <h1>Servo Fault
+              <span class="key" style="--key-color:var(--color-primary)">Classification</span>
+            </h1>
+            <p>
+              Ein realistisches Industriebeispiel:
+              300 Servomotoren, zwei Sensoren –
+              und ein Random Forest, der nicht nur klassifiziert,
+              sondern auch seine eigene
+              <strong>Unsicherheit quantifiziert</strong>.
+            </p>
+            <div class="pill-row">
+              <span class="pill">⚙️ Servomotoren</span>
+              <span class="pill">🌡️ Temperatur &amp; Strom</span>
+              <span class="pill">🎲 predict_proba()</span>
+              <span class="pill">❓ Unsicherheit</span>
+              <span class="pill">🔍 Experten-Review</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Wie modelliert man ein
+                <strong>3-Klassen-Klassifikationsproblem</strong>
+                mit überlappenden Klassen?
+              </li>
+              <li>Was leistet
+                <code class="key" style="--key-color:var(--color-primary)">.predict_proba()</code>
+                bei schwierig trennbaren Klassen?
+              </li>
+              <li>Wie definiert man einen
+                <strong>Unsicherheits-Schwellenwert</strong>
+                und visualisiert ihn?
+              </li>
+              <li>Wie nutzt man ML als
+                <strong>Entscheidungsunterstützung</strong>
+                für Fachexperten?
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           SZENARIO
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="szenario">
+        <div class="section-head">
+          <h2>6.1.0 Szenario: Maschinenbauunternehmen</h2>
+          <p>
+            Das Ziel ist nicht nur eine Klassifikation –
+            sondern eine <strong>quantitative Aussage</strong>
+            darüber, wie sicher diese Klassifikation ist.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>📋 Ausgangslage</h3>
+            <ul>
+              <li>
+                <strong>300 Servomotoren</strong>
+                einer hochautomatisierten Produktionsanlage
+              </li>
+              <li>
+                Features:
+                <span class="key" style="--key-color:var(--color-primary)">Temperatur</span>
+                &amp;
+                <span class="key" style="--key-color:var(--color-primary)">Strom</span>
+                – Wochenmittelwerte (keine Zeitreihendaten)
+              </li>
+              <li>
+                3 bekannte Zustände:
+                <span class="key" style="--key-color:var(--color-success)">healthy</span>,
+                <span class="key" style="--key-color:var(--color-warning)">do_inspection</span>,
+                <span class="key" style="--key-color:var(--color-error, #e55)">bad</span>
+              </li>
+              <li>
+                Aus Erfahrung: Zustände sind oft
+                <strong>schwierig voneinander zu unterscheiden</strong>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>🎯 Aufgabe</h3>
+            <ul>
+              <li>
+                Random Forest auf den Datensatz trainieren
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-primary)">.predict_proba()</code>
+                nutzen, um
+                <strong>Klassenwahrscheinlichkeiten</strong>
+                zu berechnen
+              </li>
+              <li>
+                Unsicherheit quantifizieren:
+                Punkte mit
+                <span class="key" style="--key-color:var(--color-warning)">max. Konfidenz &lt; 75%</span>
+                hervorheben
+              </li>
+              <li>
+                Unsichere Punkte →
+                <strong>Fachexperten zur Nachbeurteilung</strong>
+                weiterleiten
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Warum predict_proba() hier besonders wertvoll ist:</strong>
+          <ul>
+            <li>
+              Ein normales
+              <code>.predict()</code>
+              liefert immer <strong>eine</strong> Klasse –
+              auch wenn der Classifier nur 51% Konfidenz hat
+            </li>
+            <li>
+              <code>.predict_proba()</code>
+              macht die <strong>Unsicherheit sichtbar</strong>:
+              ein Punkt mit <code>[0.34, 0.33, 0.33]</code>
+              ist faktisch unentschieden
+            </li>
+            <li>
+              Nur möglich, weil ein
+              <span class="key" style="--key-color:var(--color-primary)">Ensemble</span>
+              aus vielen Bäumen
+              natürlicherweise eine Stimmverteilung liefert
+            </li>
+          </ul>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           SCHRITT 1: DATEN ERSTELLEN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="daten-erstellen">
+        <div class="section-head">
+          <h2>Schritt 1 – Datensatz erstellen &amp; speichern</h2>
+          <p>
+            Der Datensatz wird mit
+            <code class="key" style="--key-color:var(--color-primary)">make_blobs()</code>
+            synthetisch erzeugt –
+            mit bewusst <strong>großen, überlappenden Clustern</strong>
+            (<code>cluster_std</code> skaliert mit Faktor 1.7),
+            um die realistische Schwierigkeit der Trennung zu simulieren.
+            Die erste Spalte wird als Temperatursensor skaliert.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Datensatz generieren &amp; speichern
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+
+# Überlappende Cluster simulieren
+cluster_std = np.array([1, 1.5, 2.5]) * 1.7
+X, y = make_blobs(
+    n_samples=300,
+    n_features=2,
+    centers=[[3, 3], [7, 5], [13, 15]],
+    cluster_std=cluster_std,
+    random_state=22)
+
+# Feature-Skalierung: Spalte 0 = Temperatur
+X[:, 0] = np.abs(X[:, 0]) * 5  # Temperatur (°C)
+
+# Rohdaten visualisieren
+fig, ax = plt.subplots(figsize=(6, 4))
+scatter = ax.scatter(X[:, 0], X[:, 1],
+                     c=y, cmap='viridis',
+                     edgecolors='k',
+                     linewidths=0.4, s=40)
+plt.colorbar(scatter, ax=ax,
+             label='Klasse (0=healthy, '
+                   '1=do_inspection, 2=bad)')
+ax.set_xlabel('Temperatur (skaliert)')
+ax.set_ylabel('Strom (skaliert)')
+ax.set_title('Servo-Motoren: Rohdaten\n'
+             '(Überlappende Klassen sichtbar)')
+ax.grid(alpha=0.3)
+plt.tight_layout()
+plt.show()
+
+# Datensatz speichern
+np.save('servo_engines.npy',
+        np.concatenate(
+            (X, y.reshape(-1, 1)), axis=1))
+print("Datensatz gespeichert: servo_engines.npy")
+print(f"Shape: {X.shape}, Klassen: {np.unique(y)}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Was du siehst:</strong>
+                <ul>
+                  <li>
+                    3 Cluster –
+                    <span class="key" style="--key-color:var(--color-success)">healthy</span>,
+                    <span class="key" style="--key-color:var(--color-warning)">do_inspection</span>,
+                    <span class="key" style="--key-color:#e55">bad</span>
+                  </li>
+                  <li>
+                    Cluster überlappen stark –
+                    besonders zwischen
+                    <em>healthy</em> und <em>do_inspection</em>
+                  </li>
+                  <li>
+                    <code>cluster_std × 1.7</code>
+                    erzeugt bewusst
+                    <strong>unscharf trennbare Bereiche</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Praxisbezug:</strong>
+                Reale Sensordaten zeigen genau dieses Bild –
+                Grenzfälle sind häufig und
+                <strong>schwierig eindeutig zuzuordnen</strong>.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           SCHRITT 2: MODELL TRAINIEREN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="modell-trainieren">
+        <div class="section-head">
+          <h2>Schritt 2 – Laden, Splitten &amp; Trainieren</h2>
+          <p>
+            Der gespeicherte Datensatz wird geladen,
+            in Trainings- und Testset aufgeteilt und ein
+            <code class="key" style="--key-color:var(--color-primary)">RandomForestClassifier</code>
+            trainiert. Anschließend werden die
+            <strong>Klassenwahrscheinlichkeiten</strong>
+            mit <code>.predict_proba()</code> berechnet.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Laden, Splitten &amp; Modell trainieren
+              </span>
+            </div>
+            <pre><code>import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+# Datensatz laden
+X_y = np.load('servo_engines.npy')
+
+# Aufteilen
+X_train, X_test, y_train, y_test = train_test_split(
+    X_y[:, :-1], X_y[:, -1],
+    test_size=0.25, random_state=42)
+
+# Modell trainieren
+model = RandomForestClassifier(
+    n_estimators=100, random_state=0)
+model.fit(X_train, y_train)
+
+acc = model.score(X_test, y_test)
+print(f"Test Accuracy: {acc:.4f}")
+print(f"Klassen: {model.classes_}")
+
+# Klassenwahrscheinlichkeiten
+prediction_probabilities = model.predict_proba(X_test)
+print(f"\nShape predict_proba: "
+      f"{prediction_probabilities.shape}")
+print("\nErste 5 Zeilen (Wahrscheinlichkeiten):")
+for i in range(5):
+    p = prediction_probabilities[i]
+    print(f"  {['healthy','do_insp','bad'][int(y_test[i])]:<12}"
+          f" → h:{p[0]:.2f}  d:{p[1]:.2f}  b:{p[2]:.2f}"
+          f"  max={p.max():.2f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>predict_proba() Ausgabe:</strong>
+                <ul>
+                  <li>
+                    Matrix: <code>[75 × 3]</code>
+                    (75 Testsamples, 3 Klassen)
+                  </li>
+                  <li>
+                    Jede Zeile summiert zu <strong>1.0</strong>
+                  </li>
+                  <li>
+                    <code>max(axis=1)</code>
+                    = maximale Konfidenz des Modells
+                    für diesen Punkt
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Beispiel:</strong>
+                <code>[0.40, 0.38, 0.22]</code> →
+                Modell tendiert zu <em>healthy</em>,
+                aber mit nur
+                <span class="key" style="--key-color:var(--color-warning)">40% Konfidenz</span>
+                → unsicherer Punkt!
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           SCHRITT 3: UNSICHERHEIT VISUALISIEREN
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="unsicherheit-visualisieren">
+        <div class="section-head">
+          <h2>Schritt 3 – Unsicherheit analysieren &amp; visualisieren</h2>
+          <p>
+            Die maximale Klassenwahrscheinlichkeit pro Datenpunkt
+            gibt direkt an, wie
+            <strong>sicher</strong> das Modell ist.
+            Alles unter
+            <span class="key" style="--key-color:var(--color-warning)">75%</span>
+            gilt als <strong>unsicherer Grenzfall</strong> –
+            ideal für einen Experten-Review.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">Unsicherheits-Schwellenwert</span>
+            </h3>
+            <ul>
+              <li>
+                <code>max_prob = predict_proba.max(axis=1)</code>
+              </li>
+              <li>
+                <code>uncertain = max_prob &lt; 0.75</code>
+                → Boolean-Maske
+              </li>
+              <li>
+                Punkte mit
+                <strong>max. Konfidenz &lt; 75%</strong>
+                = unsicher
+              </li>
+              <li>
+                Grenzwert ist
+                <strong>frei wählbar</strong>:
+                je nach Domäne und Fehlertoleranz
+                z.B. 60%, 80%, 90%
+              </li>
+              <li>
+                Höherer Grenzwert →
+                mehr Punkte zum Review →
+                mehr Sicherheit, aber mehr Aufwand
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>🔍 Experten-Review Workflow</h3>
+            <ul>
+              <li>
+                ML klassifiziert <strong>alle</strong> Punkte
+              </li>
+              <li>
+                Unsichere Punkte werden
+                <strong>markiert &amp; gefiltert</strong>
+              </li>
+              <li>
+                Fachexperten beurteilen
+                <strong>nur diese Grenzfälle</strong>
+                neu – spart Zeit und Ressourcen
+              </li>
+              <li>
+                Optional: Neubeurteilungen können als
+                <strong>Trainingsdaten</strong>
+                für das nächste Modell genutzt werden
+                (Active Learning)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <p style="margin-top:var(--space-6); color:var(--color-text-muted); font-size:var(--text-sm)">
+          Der Code berechnet die maximale Konfidenz pro Testpunkt,
+          zeigt deren Verteilung als Histogramm
+          und hebt unsichere Punkte
+          (max. Konfidenz &lt; 75%) im Scatter-Plot farblich hervor –
+          getrennt nach echter Klasse.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Konfidenz-Histogramm &amp; Unsicherheits-Scatter
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+# Datensatz laden
+X_y = np.load('servo_engines.npy')
+X_train, X_test, y_train, y_test = train_test_split(
+    X_y[:, :-1], X_y[:, -1],
+    test_size=0.25, random_state=42)
+
+model = RandomForestClassifier(
+    n_estimators=100, random_state=0)
+model.fit(X_train, y_train)
+prediction_probabilities = model.predict_proba(X_test)
+
+# Maximale Konfidenz pro Punkt
+max_prediction_probabilities = (
+    prediction_probabilities.max(axis=1))
+
+THRESHOLD = 0.75
+uncertain = max_prediction_probabilities < THRESHOLD
+
+print(f"Unsichere Punkte: "
+      f"{uncertain.sum()} / {len(uncertain)}"
+      f" ({uncertain.mean()*100:.1f}%)")
+
+# Visualisierung: vertikal (2 × 1)
+fig, axes = plt.subplots(2, 1, figsize=(7, 10))
+
+# Plot 1: Histogramm der max. Konfidenz
+axes[0].hist(max_prediction_probabilities,
+             bins=20, color='steelblue',
+             edgecolor='white', alpha=0.85)
+axes[0].axvline(THRESHOLD, color='red',
+                linestyle='--', linewidth=2,
+                label=f'Schwellenwert = {THRESHOLD}')
+axes[0].set_xlabel('Maximale Klassenwahrscheinlichkeit')
+axes[0].set_ylabel('Anzahl Testpunkte')
+axes[0].set_title(
+    'Verteilung der Vorhersage-Konfidenz\n'
+    '(links der roten Linie = unsicher)')
+axes[0].legend()
+axes[0].grid(alpha=0.3)
+
+# Plot 2: Scatter – unsichere Punkte hervorgehoben
+colors_map = {False: 'steelblue', True: 'red'}
+labels_map = {False: 'Sicher (≥75%)',
+              True:  'Unsicher (<75%)'}
+sizes_map  = {False: 30, True: 80}
+markers_map = {False: 'o', True: 'X'}
+
+for flag in [False, True]:
+    mask = uncertain == flag
+    axes[1].scatter(
+        X_test[mask, 0],
+        X_test[mask, 1],
+        c=colors_map[flag],
+        s=sizes_map[flag],
+        marker=markers_map[flag],
+        edgecolors='k',
+        linewidths=0.4,
+        alpha=0.85,
+        label=labels_map[flag],
+        zorder=3 if flag else 2)
+
+axes[1].set_xlabel('Temperatur (skaliert)')
+axes[1].set_ylabel('Strom (skaliert)')
+axes[1].set_title(
+    'Unsichere Testpunkte im Feature-Raum\n'
+    '(rot ✕ = Konfidenz < 75% → Experten-Review)')
+axes[1].legend()
+axes[1].grid(alpha=0.3)
+
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Histogramm (oben):</strong>
+                <ul>
+                  <li>
+                    Viele Punkte rechts der
+                    <span style="color:red"><strong>roten Linie</strong></span>
+                    → hohe Konfidenz, klare Fälle
+                  </li>
+                  <li>
+                    Punkte links der Linie →
+                    <span class="key" style="--key-color:var(--color-warning)">Grenzfälle</span>
+                  </li>
+                  <li>
+                    Peak nahe 1.0: Die meisten Punkte
+                    werden <strong>sehr sicher</strong>
+                    klassifiziert
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Scatter-Plot (unten):</strong>
+                <ul>
+                  <li>
+                    <span style="color:steelblue"><strong>Blau ●</strong></span>
+                    = sicher klassifiziert
+                  </li>
+                  <li>
+                    <span style="color:red"><strong>Rot ✕</strong></span>
+                    = unsicher – befinden sich
+                    <strong>zwischen den Clustern</strong>
+                  </li>
+                  <li>
+                    Unsichere Punkte
+                    häufen sich erwartungsgemäß
+                    in den <strong>Überlappungsbereichen</strong>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           SCHRITT 4: VOLLSTÄNDIGE ÜBERSICHT
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="vollstaendige-uebersicht">
+        <div class="section-head">
+          <h2>Schritt 4 – Vollständige Diagnose-Übersicht</h2>
+          <p>
+            Alle Perspektiven kombiniert:
+            Entscheidungsgrenzen, Konfidenz-Heatmap,
+            wahrer Zustand und Unsicherheitsverteilung
+            in einem zusammenhängenden Plot.
+          </p>
+        </div>
+
+        <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+          Dieser Code erzeugt eine vollständige Diagnosegrafik:
+          Die Entscheidungsgrenzen des Modells werden als
+          Konfidenz-Heatmap über den Feature-Raum gelegt
+          (Helligkeit = Sicherheit des Modells).
+          Darüber werden alle Testpunkte mit ihrer
+          <strong>wahren Klasse</strong> geplottet,
+          unsichere Punkte zusätzlich mit einem roten Ring markiert.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Diagnose-Übersicht mit Konfidenz-Heatmap
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+X_y = np.load('servo_engines.npy')
+X_train, X_test, y_train, y_test = train_test_split(
+    X_y[:, :-1], X_y[:, -1],
+    test_size=0.25, random_state=42)
+
+model = RandomForestClassifier(
+    n_estimators=100, random_state=0)
+model.fit(X_train, y_train)
+
+proba = model.predict_proba(X_test)
+max_proba = proba.max(axis=1)
+uncertain  = max_proba < 0.75
+
+# Grid für Konfidenz-Heatmap
+x0_min, x0_max = X_y[:, 0].min()-2, X_y[:, 0].max()+2
+x1_min, x1_max = X_y[:, 1].min()-2, X_y[:, 1].max()+2
+xx, yy = np.meshgrid(
+    np.linspace(x0_min, x0_max, 300),
+    np.linspace(x1_min, x1_max, 300))
+grid_proba = model.predict_proba(
+    np.c_[xx.ravel(), yy.ravel()])
+conf_grid  = grid_proba.max(axis=1).reshape(xx.shape)
+pred_grid  = model.predict(
+    np.c_[xx.ravel(), yy.ravel()]
+).reshape(xx.shape)
+
+class_labels = ['healthy', 'do_inspection', 'bad']
+colors_cls   = ['#2ecc71', '#f39c12', '#e74c3c']
+
+fig, axes = plt.subplots(2, 1, figsize=(7, 11))
+
+# Plot 1: Konfidenz-Heatmap + Testpunkte
+axes[0].contourf(xx, yy, conf_grid,
+                 levels=20, cmap='Blues',
+                 alpha=0.55)
+axes[0].contour(xx, yy, pred_grid,
+                levels=[0.5, 1.5],
+                colors='gray', linewidths=0.8,
+                linestyles='--', alpha=0.6)
+for cls_idx, (label, col) in enumerate(
+        zip(class_labels, colors_cls)):
+    mask = y_test == cls_idx
+    axes[0].scatter(
+        X_test[mask, 0], X_test[mask, 1],
+        color=col, s=40, edgecolors='k',
+        linewidths=0.4, label=label, zorder=3)
+# Unsichere Punkte mit rotem Ring
+axes[0].scatter(
+    X_test[uncertain, 0],
+    X_test[uncertain, 1],
+    s=130, facecolors='none',
+    edgecolors='red', linewidths=2,
+    label=f'Unsicher (<75%)', zorder=4)
+axes[0].set_xlabel('Temperatur (skaliert)')
+axes[0].set_ylabel('Strom (skaliert)')
+axes[0].set_title(
+    'Entscheidungsgrenzen & Konfidenz-Heatmap\n'
+    '(heller = sicherer | roter Ring = unsicher)')
+axes[0].legend(fontsize=8, loc='upper left')
+axes[0].grid(alpha=0.2)
+
+# Plot 2: Konfidenz pro Klasse (gestapeltes Bar)
+cls_uncertain = [
+    ((y_test == i) & uncertain).sum()
+    for i in range(3)]
+cls_certain = [
+    ((y_test == i) & ~uncertain).sum()
+    for i in range(3)]
+
+x = np.arange(3)
+w = 0.4
+axes[1].bar(x - w/2, cls_certain,
+            width=w, color=colors_cls,
+            alpha=0.85, edgecolor='white',
+            label='Sicher')
+axes[1].bar(x + w/2, cls_uncertain,
+            width=w, color=colors_cls,
+            alpha=0.4, edgecolor='red',
+            linewidth=1.5, label='Unsicher')
+axes[1].set_xticks(x)
+axes[1].set_xticklabels(class_labels)
+axes[1].set_ylabel('Anzahl Testpunkte')
+axes[1].set_title(
+    'Unsichere Punkte pro Klasse\n'
+    '(transparent = unsicher, voll = sicher)')
+axes[1].legend()
+axes[1].grid(axis='y', alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+
+# Zusammenfassung
+print("\n── Diagnose-Report ──────────────────────")
+for i, label in enumerate(class_labels):
+    total   = (y_test == i).sum()
+    unc_n   = cls_uncertain[i]
+    print(f"  {label:<15}: "
+          f"{total:3d} Punkte | "
+          f"{unc_n:2d} unsicher "
+          f"({unc_n/total*100:.0f}%)")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span>📊 Ausgabe &amp; Interpretation</span>
+            </div>
+            <div class="output-side-body">
+              <div class="note note-primary">
+                <strong>Konfidenz-Heatmap (oben):</strong>
+                <ul>
+                  <li>
+                    <strong>Hellblau</strong> = Modell ist sicher
+                    (weit weg von Grenzen)
+                  </li>
+                  <li>
+                    <strong>Weiß/hellgrau</strong>
+                    = Grenzbereich, Modell unsicher
+                  </li>
+                  <li>
+                    <span style="color:red"><strong>Rote Ringe</strong></span>
+                    liegen erwartungsgemäß
+                    genau in diesen Grenzbereichen
+                  </li>
+                </ul>
+              </div>
+              <div class="note note-warning" style="margin-top:var(--space-3)">
+                <strong>Balkendiagramm (unten):</strong>
+                <ul>
+                  <li>
+                    <em>do_inspection</em> hat typischerweise
+                    die <strong>meisten unsicheren Punkte</strong>
+                    → liegt zwischen healthy und bad
+                  </li>
+                  <li>
+                    Zeigt, welche Klasse am härtesten
+                    trennbar ist →
+                    <strong>Handlungsbedarf</strong>
+                    für Experten
+                  </li>
+                </ul>
+              </div>
+              <div class="note" style="margin-top:var(--space-3)">
+                <strong>Diagnose-Report:</strong>
+                Prozentualer Anteil unsicherer Punkte
+                pro Klasse – direkt als Entscheidungsgrundlage
+                für den <strong>Review-Aufwand</strong>
+                nutzbar.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-6)">
+          <strong>So what – Mehrwert von predict_proba() in der Praxis:</strong>
+          <ul>
+            <li>
+              ML klassifiziert automatisch –
+              <strong>ohne Expertenwissen</strong>
+              für klare Fälle nötig
+            </li>
+            <li>
+              Unsichere Fälle werden
+              <strong>gezielt herausgefiltert</strong>
+              und an Experten weitergeleitet
+            </li>
+            <li>
+              Ergebnis: optimales
+              <span class="key" style="--key-color:var(--color-primary)">Mensch-Maschine-Zusammenspiel</span>
+            </li>
+            <li>
+              Der Schwellenwert von 75% ist
+              <strong>anwendungsspezifisch</strong>:
+              bei sicherheitskritischen Maschinen
+              eher 90%+ wählen
+            </li>
+          </ul>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-4)">
+          <strong>Nächste Schritte:</strong>
+          <br><br>
+          <a href="Page07.html">
+            → Seite 7: Boosting – AdaBoost &amp; Gradient Boosting
+          </a>
+          &nbsp;·&nbsp;
+          <a href="Page06.html">
+            ← Seite 6: RUL Prediction mit NASA-Datensatz
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 5 · Seite 6.1 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

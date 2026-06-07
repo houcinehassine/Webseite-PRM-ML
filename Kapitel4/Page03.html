@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – EM-Algorithmus in K-means</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · EM-Algorithmus"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page3"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Seite 3</span>
+            <h1>EM-Algorithmus <span class="key" style="--key-color:var(--color-primary)">in K-means</span></h1>
+            <p>
+              Die Heuristik von k-means wird zum formalen Rezept:
+              der <strong>Expectation-Maximization-Algorithmus</strong> –
+              mit mathematischer Herleitung und vollständiger
+              From-Scratch-Implementierung in Python.
+            </p>
+            <div class="pill-row">
+              <span class="pill">EM-Algorithmus</span>
+              <span class="pill">E-Schritt</span>
+              <span class="pill">M-Schritt</span>
+              <span class="pill">Mathematik</span>
+              <span class="pill">From Scratch</span>
+              <span class="pill">Konvergenz</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du verstehst, warum k-means ein Spezialfall des allgemeinen
+              EM-Algorithmus ist, kennst die mathematischen Schritte
+              und kannst den Algorithmus von Grund auf implementieren.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. WAS IST EM-ALGORITHMUS?
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="em-was">
+        <div class="section-head">
+          <h2>3.1 Was ist der EM-Algorithmus?</h2>
+          <p>
+            Die Heuristik von k-means lässt sich in ein allgemeines
+            „Rezept" überführen – den
+            <strong>Expectation-Maximization-Algorithmus</strong>.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Eigenschaften</span></h3>
+            <ul>
+              <li>Findet in <strong>vielen ML-Modellen</strong> Anwendung</li>
+              <li>Ist ein <strong>iterativer Algorithmus</strong></li>
+              <li>Wechselt zwischen zwei Schritten bis zur <strong>Konvergenz</strong></li>
+              <li>Garantiert <strong>lokale</strong>, aber nicht globale Optima</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Generelle Idee</span></h3>
+            <ul>
+              <li>
+                <strong>Init:</strong> Zufällige Konfiguration des Modells
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">E-Schritt</span>
+                – Zuordnung der Daten zu Modellteilen
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">M-Schritt</span>
+                – Parameter an neue Zuordnung anpassen
+              </li>
+              <li>
+                <strong>Konvergenz:</strong> Keine wesentliche Verbesserung → Abbruch
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. ANALOGE SCHRITTE BEI K-MEANS
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="em-schritte">
+        <div class="section-head">
+          <h2>3.2 Analoge Schritte bei K-means</h2>
+          <p>
+            Wie übersetzt sich der allgemeine EM-Ablauf
+            konkret auf k-means?
+          </p>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="step-no">0</div>
+            <div>
+              <h3>Initialisierung</h3>
+              <p>
+                <strong>Allgemein:</strong> Initialisiere eine zufällige Konfiguration des Modells.<br>
+                <span class="key" style="--key-color:var(--color-primary)">Bei k-means:</span>
+                Wähle <strong>k Centroids</strong> zufällig aus dem Datensatz.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no" style="background:var(--color-primary-highlight);color:var(--color-primary)">E</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-primary)">E(xpectation)-Schritt</span>
+              </h3>
+              <p>
+                <strong>Allgemein:</strong> Zuordnung der Daten zu den einzelnen Teilen des Modells.<br>
+                <span class="key" style="--key-color:var(--color-primary)">Bei k-means:</span>
+                Weise jeden Datenpunkt dem <strong>nächstgelegenen Centroid</strong> zu.
+                <br><br>
+                → <em>„Unsere Erwartung updaten, zu welchem Cluster die Datenpunkte gehören."</em>
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no" style="background:color-mix(in oklab,var(--color-warning) 15%,var(--color-surface-2));color:var(--color-warning)">M</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-warning)">M(aximization)-Schritt</span>
+              </h3>
+              <p>
+                <strong>Allgemein:</strong> Parameter an die neueste Zuordnung anpassen.<br>
+                <span class="key" style="--key-color:var(--color-warning)">Bei k-means:</span>
+                Berechne neue Centroids als <strong>arithmetisches Mittel</strong>
+                der zugeordneten Datenpunkte.
+                <br><br>
+                → <em>„Ein Gütemaß wird maximiert – durch Berechnung des Mittelwertes."</em>
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no">↻</div>
+            <div>
+              <h3>Wiederholen bis Konvergenz</h3>
+              <p>
+                E- und M-Schritt werden <strong>abwechselnd wiederholt</strong>,
+                bis keine wesentliche Verschiebung der Centroids mehr stattfindet
+                (<code>deviation ≤ threshold</code>).
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vergleichstabelle -->
+        <div style="margin-top:var(--space-6)">
+          <table>
+            <thead>
+              <tr>
+                <th>EM (Allgemein)</th>
+                <th>K-means (Konkret)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Zufällige Modell-Initialisierung</td>
+                <td>k Centroids zufällig wählen</td>
+              </tr>
+              <tr>
+                <td><span class="key" style="--key-color:var(--color-primary)">E-Schritt</span>: Daten zuordnen</td>
+                <td>Jeden Punkt dem nächsten Centroid zuweisen</td>
+              </tr>
+              <tr>
+                <td><span class="key" style="--key-color:var(--color-warning)">M-Schritt</span>: Parameter updaten</td>
+                <td>Centroids als Mittelwert neu berechnen</td>
+              </tr>
+              <tr>
+                <td>Konvergenz prüfen</td>
+                <td>Centroid-Verschiebung &lt; threshold?</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. INPUT & OUTPUT
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="em-input-output">
+        <div class="section-head">
+          <h2>3.3 Input &amp; Output</h2>
+          <p>
+            Was geht in den k-means-Algorithmus hinein –
+            und was kommt heraus?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <!-- INPUT -->
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">📥 Input</span></h3>
+            <ul>
+              <li>
+                <code style="color:var(--color-primary)"><strong>X</strong></code>
+                – Data matrix, Dimensionen \(N \times T\)
+              </li>
+              <li>
+                <code style="color:var(--color-warning)">N</code>
+                – Anzahl der Beobachtungen (Datenpunkte)
+              </li>
+              <li>
+                <code style="color:var(--color-warning)">T</code>
+                – Anzahl der Features
+                (z. B. \(\bar{x}, \sigma^2, \ldots\))
+              </li>
+              <li>
+                <code style="color:var(--color-success)">k</code>
+                – Anzahl der zu extrahierenden Cluster
+                <strong>(muss vorab angegeben werden!)</strong>
+              </li>
+            </ul>
+          </article>
+
+          <!-- OUTPUT -->
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">📤 Output</span></h3>
+            <ul>
+              <li>
+                <code style="color:var(--color-primary)"><strong>c</strong><sub>z</sub></code>
+                – Cluster-Centroids für \(z = 1, \ldots, k\)
+                <br>
+                <small style="color:var(--color-text-muted)">
+                  → Koordinaten der k Cluster-Mittelpunkte
+                </small>
+              </li>
+              <li>
+                <code style="color:var(--color-warning)">\(\hat{z}_t\)</code>
+                – Zugewiesener Cluster-Index für Datenpunkt
+                \(\mathbf{x}_t\)
+                <br>
+                <small style="color:var(--color-text-muted)">
+                  → Label-Vektor der Länge N
+                </small>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. MATHEMATISCHE AUSFÜHRUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="em-mathematik">
+        <div class="section-head">
+          <h2>3.4 Mathematische Ausführung</h2>
+          <p>
+            Die formale Beschreibung der drei Kernschritte
+            des EM-Algorithmus in k-means.
+          </p>
+        </div>
+
+        <div class="overview">
+
+          <article class="topic">
+            <div class="step-no" style="width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--color-surface-offset);font-weight:700">1</div>
+            <div>
+              <h3>Initialisierung</h3>
+              <p>
+                Wähle <strong>k Centroids</strong>
+                <span class="key" style="--key-color:var(--color-primary)">\(\mathbf{c}_z\)</span>
+                zufällig aus dem Datensatz.
+              </p>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="step-no" style="width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--color-primary-highlight);color:var(--color-primary);font-weight:700">E</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-primary)">Expectation-Schritt</span>
+                – Zuweisung zum nächsten Centroid
+              </h3>
+              <p>Jeden Datenpunkt dem nächstgelegenen Centroid zuweisen:</p>
+              <div class="math-display">
+                \[
+                \hat{z}_t = \arg\min_z \; d(\mathbf{c}_z,\, \mathbf{x}_t)
+                \]
+              </div>
+              <ul>
+                <li><code style="color:var(--color-primary)">\(\hat{z}_t\)</code> – zugewiesener Cluster-Index von Punkt \(\mathbf{x}_t\)</li>
+                <li><code style="color:var(--color-warning)">d(·,·)</code> – Distanzfunktion (Standard: euklidische Distanz)</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="step-no" style="width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:color-mix(in oklab,var(--color-warning) 15%,var(--color-surface-2));color:var(--color-warning);font-weight:700">M</div>
+            <div>
+              <h3>
+                <span class="key" style="--key-color:var(--color-warning)">Maximization-Schritt</span>
+                – Neuen Centroid berechnen
+              </h3>
+              <p>Centroid als gewichtetes Mittel der zugehörigen Punkte:</p>
+              <div class="math-display">
+                \[
+                \mathbf{c}_z \leftarrow
+                \frac{\displaystyle\sum_{t=1}^{T} u(t,z,\hat{z}_t)\,\mathbf{x}_t}
+                     {\displaystyle\sum_{t=1}^{T} u(t,z,\hat{z}_t)}
+                \]
+              </div>
+              <p>mit der Indikatorfunktion:</p>
+              <div class="math-display">
+                \[
+                u(t,z,\hat{z}_t) =
+                \begin{cases}
+                  1, & \text{wenn } \hat{z}_t = z \\
+                  0, & \text{sonst}
+                \end{cases}
+                \]
+              </div>
+              <ul>
+                <li><code style="color:var(--color-success)">u(·)</code> – wählt nur Punkte aus, die zu Cluster z gehören</li>
+                <li>Ergebnis = <strong>arithmetisches Mittel</strong> aller Cluster-Punkte</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="step-no" style="width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--color-surface-offset);font-weight:700">↻</div>
+            <div>
+              <h3>Wiederholen</h3>
+              <p>
+                Schritte <strong>E</strong> und <strong>M</strong> werden
+                abwechselnd ausgeführt, bis die Centroid-Verschiebung
+                unter einen Schwellwert <code>threshold</code> fällt
+                → <strong>Konvergenz</strong>.
+              </p>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           5. FROM SCRATCH IMPLEMENTIERUNG
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="em-from-scratch">
+        <div class="section-head">
+          <h2>3.5 From-Scratch Implementierung</h2>
+          <p>
+            Der k-means Algorithmus ist so anschaulich,
+            dass wir ihn vollständig von Hand implementieren können –
+            ohne sklearn's <code>KMeans</code>-Klasse.
+          </p>
+        </div>
+
+        <div class="note note-primary" style="margin-bottom:var(--space-5)">
+          <strong>Aufgabe:</strong> Schreibe eine Funktion
+          <code style="color:var(--color-primary)">find_clusters(X, num_clusters)</code>,
+          die als Eingabe die <strong>Datenmatrix</strong> und die
+          <strong>Anzahl der Cluster</strong> nimmt –
+          und <strong>Centroids + Labels</strong> zurückgibt.
+        </div>
+
+        <!-- Schritt 1: Daten -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin-bottom:var(--space-2)">
+          Schritt 1 · Daten vorbereiten
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.datasets import make_blobs
+
+# Datensatz: 300 Punkte, 4 Cluster
+X, y_true = make_blobs(
+    n_samples=300,
+    centers=4,
+    cluster_std=0.60,
+    random_state=0
+)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Info
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0;padding-left:1rem">
+                <li>Gleicher Datensatz wie auf Seite 2</li>
+                <li><code>X.shape</code> → <code>(300, 2)</code></li>
+                <li><code>y_true</code> wird <strong>nicht</strong> verwendet</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Funktion -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-6) 0 var(--space-2)">
+          Schritt 2 · find_clusters() Funktion implementieren
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+from scipy.spatial.distance import cdist
+
+def find_clusters(X, num_clusters, threshold=0.0001):
+    """
+    K-means from Scratch.
+    Returns: centroids, labels
+    """
+
+    # 1. Zufällige Initialisierung der Centroids
+    initial_centroid_indices = np.random.permutation(
+        X.shape[0])[:num_clusters]
+    centroids = X[initial_centroid_indices]
+
+    deviation = threshold + 1  # Startwert > threshold
+
+    while deviation > threshold:
+
+        # 2a. E-Schritt: Label = nächster Centroid
+        distances = cdist(X, centroids)
+        labels = np.argmin(distances, axis=1)
+
+        # 2b. M-Schritt: Neue Centroids = Mittelwert
+        new_centers = np.array([
+            X[labels == n_cluster].mean(0)
+            for n_cluster in range(num_clusters)
+        ])
+
+        # 2c. Konvergenz prüfen
+        deviation = np.sum((new_centers - centroids) ** 2)
+        centroids = new_centers
+
+    return centroids, labels</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Code-Erklärung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0;padding-left:1rem;line-height:1.8">
+                <li>
+                  <code style="color:var(--color-primary)">np.random.permutation</code>
+                  – zufällige Reihenfolge → erste k als Centroids
+                </li>
+                <li>
+                  <code style="color:var(--color-warning)">cdist(X, centroids)</code>
+                  – Abstands-Matrix: jeder Punkt zu jedem Centroid
+                </li>
+                <li>
+                  <code style="color:var(--color-success)">np.argmin(..., axis=1)</code>
+                  – Index des nächsten Centroids pro Punkt
+                </li>
+                <li>
+                  <code style="color:var(--color-primary)">.mean(0)</code>
+                  – Mittelwert entlang der Punkte-Achse (M-Schritt)
+                </li>
+                <li>
+                  <code style="color:var(--color-warning)">deviation</code>
+                  – quadratische Verschiebung der Centroids
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 3: Ausführen & Plotten -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+           text-transform:uppercase;color:var(--color-text-faint);
+           margin: var(--space-6) 0 var(--space-2)">
+          Schritt 3 · Funktion aufrufen &amp; Ergebnis plotten
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+
+# Funktion ausführen – k=4 Cluster
+centroids, labels = find_clusters(X, 4)
+
+# Ergebnis plotten
+plt.figure(figsize=(4, 3))
+plt.scatter(X[:, 0], X[:, 1],
+            c=labels, s=50, cmap='viridis')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.title('K-means from Scratch – k=4')
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="font-size:var(--text-xs);color:var(--color-text-muted)">
+                📊 Identisches Ergebnis wie
+                <code>sklearn.KMeans</code> –
+                4 farbige Cluster ohne schwarze Centroid-Punkte
+                (da wir sie separat plotten müssten).
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           6. NACHTEILE DES EM-ALGORITHMUS
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="em-nachteile">
+        <div class="section-head">
+          <h2>3.6 Nachteile des EM-Algorithmus</h2>
+          <p>
+            Zwei fundamentale Schwächen – und wie sklearn damit umgeht.
+          </p>
+        </div>
+
+        <div class="card-grid">
+
+          <!-- Nachteil 1 -->
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">⚠️ Kein globales Optimum</span></h3>
+            <ul>
+              <li>
+                EM <strong>verbessert sich</strong> von Iteration zu Iteration
+              </li>
+              <li>
+                Konvergenz ins <strong>globale Optimum</strong>
+                ist <strong>nicht garantiert</strong>
+              </li>
+              <li>
+                Abhängig von den <strong>Initialbedingungen</strong>
+                (zufällige Centroid-Wahl)
+              </li>
+              <li>
+                Lösung: Algorithmus <strong>mehrfach starten</strong>
+                mit verschiedenen Startbedingungen → bestes Ergebnis wählen
+              </li>
+            </ul>
+            <div class="note" style="margin-top:var(--space-4)">
+              <strong>sklearn-Lösung:</strong>
+              <code style="color:var(--color-primary)">n_init</code>
+              – steuert die Anzahl der Initialisierungen
+              (default: <code>n_init=10</code>).
+              sklearn führt dies <strong>automatisch</strong> durch.
+            </div>
+          </article>
+
+          <!-- Nachteil 2 -->
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">⚠️ k muss vorgegeben werden</span></h3>
+            <ul>
+              <li>
+                k-means lernt die Clusteranzahl
+                <strong>nicht eigenständig</strong> aus den Daten
+              </li>
+              <li>
+                Problem betrifft <strong>viele Unsupervised-Algorithmen</strong>
+              </li>
+              <li>
+                Jede beliebige Zahl k kann übergeben werden –
+                auch eine <strong>falsche</strong>
+              </li>
+              <li>
+                Man benötigt ein
+                <strong>Validierungskriterium</strong>
+                zur Entscheidung
+              </li>
+            </ul>
+            <div class="note note-warning" style="margin-top:var(--space-4)">
+              <strong>Lösung:</strong>
+              <a href="Page04.html">Seite 4</a> zeigt
+              <code style="color:var(--color-warning)">Elbow Plot</code>,
+              <code style="color:var(--color-warning)">Silhouette Score</code>
+              und weitere Validierungsmaße.
+            </div>
+          </article>
+
+        </div>
+
+        <!-- Beispiel: falsches k -->
+        <div style="margin-top:var(--space-6)">
+          <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+             text-transform:uppercase;color:var(--color-text-faint);
+             margin-bottom:var(--space-2)">
+            Beispiel · Was passiert bei falschem k? (k=6 statt k=4)
+          </p>
+          <div class="code-cell-split">
+            <div class="code-side">
+              <div class="code-side-header">
+                <span class="cell-lang">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                  </svg>
+                  Python
+                </span>
+                <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+              </div>
+              <pre><code>from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Datensatz hat eigentlich 4 Cluster
+X, y_true = make_blobs(n_samples=300, centers=4,
+                       cluster_std=0.60, random_state=0)
+
+# Aber wir geben k=6 an → zu viele Cluster!
+kmeans = KMeans(6, random_state=0)
+labels = kmeans.fit_predict(X)
+
+plt.scatter(X[:, 0], X[:, 1],
+            c=labels, s=50, cmap='viridis')
+plt.title("k=6 auf einem 4-Cluster-Datensatz")
+plt.show()</code></pre>
+            </div>
+            <div class="output-side">
+              <div class="output-side-header">
+                <span class="cell-lang">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                  Beobachtung
+                </span>
+              </div>
+              <div class="output-side-body">
+                <ul style="font-size:var(--text-xs);color:var(--color-text-muted);margin:0;padding-left:1rem;line-height:1.9">
+                  <li>
+                    6 Farben sichtbar –
+                    <strong>natürliche Cluster werden zerschnitten</strong>
+                  </li>
+                  <li>
+                    k-means erzwingt 6 Gruppen,
+                    obwohl nur 4 vorhanden sind
+                  </li>
+                  <li>
+                    → <strong>Validierung ist notwendig!</strong>
+                    Ohne Validierung ist das Ergebnis nicht interpretierbar
+                  </li>
+                  <li>
+                    Lösung:
+                    <a href="Page04.html">Seite 4 – Validierung →</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-6)">
+          <strong>Nächste Seite:</strong>
+          Wie findet man das richtige k? Dunn-Index, Davies-Bouldin,
+          Silhouette Score und Elbow Plot im Detail.
+          <br><br>
+          <a href="Page04.html">→ Seite 4: Validierung von Clustering</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Seite 3 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

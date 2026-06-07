@@ -1,0 +1,201 @@
+/* ============================================================
+   css_codes/sidebar.css
+   ============================================================ */
+   
+site-sidebar {
+  display: block;
+  height: 100%;
+  align-self: stretch;
+}
+.sidebar {
+  position: sticky;
+  top: 70px;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
+  padding: 1rem;
+}
+.toc {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  padding: 1.2rem 1rem;
+}
+.toc-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 1rem 0;
+}
+.toc ul { list-style: none; padding: 0; margin: 0; }
+.toc li { margin: 0; }
+.toc a {
+  display: block;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  text-decoration: none;
+  line-height: 1.4;
+}
+.toc a:hover {
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+}
+.toc-page { margin-top: 1rem; }
+.toc-page:first-child { margin-top: 0; }
+.toc-page a {
+  font-weight: 700;
+  color: var(--color-text);
+  font-size: 1rem;
+}
+.toc-sub { margin-left: 20px; }
+.toc-sub a {
+  display: inline-block;
+  padding-left: 15px;
+  position: relative;
+}
+
+/* ═══════════════════════════════════════════════════════
+   css for collapsible sections in the sidebar
+   ═══════════════════════════════════════════════════════ */
+
+.toc-section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.toc-section-toggle:hover {
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+}
+
+.toc-section {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: var(--space-2);
+}
+
+.toc-section.collapsed {
+  display: none;
+}
+
+.toc-section a.active {
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════════════
+    Alternative collapsible section style
+   ═══════════════════════════════════════════════════════ */
+
+   .toc-chapter {
+  margin-top: var(--space-3);
+}
+
+.toc-chapter:first-of-type {
+  margin-top: 0;
+}
+
+.toc-chapter-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toc-chapter-toggle:hover {
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+}
+
+.toc-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.toc-section {
+  display: none;
+  margin: var(--space-2) 0 0 0;
+  padding-left: var(--space-3);
+}
+
+.toc-chapter.open .toc-section {
+  display: block;
+}
+
+.toc-chapter.open .toc-arrow {
+  transform: rotate(90deg);
+}
+
+.toc-section a {
+  display: block;
+  padding: 0.35rem 0.55rem;
+  border-radius: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.toc-section a:hover {
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+}
+
+.toc-section a.active {
+  background: var(--color-primary-highlight);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* ── Sidebar: Trennlinie Prüfungsvorbereitung ─── */
+.toc-divider {
+  margin: var(--space-3) 0 var(--space-1);
+  padding: 0 var(--space-4);
+}
+.toc-divider-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.toc-divider-label::before,
+.toc-divider-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ── Sidebar: Prüfungsseiten-Buttons ─────────── */
+.toc-page-pruefung {
+  color: var(--color-warning) !important;
+}
+.toc-page-pruefung.active,
+.toc-page-pruefung:hover {
+  background: color-mix(in oklab, var(--color-warning) 10%, transparent) !important;
+}

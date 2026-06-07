@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Quiz: Data Preparation</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+</head>
+<body>
+
+  <site-header active="page1" title="Kapitel 1 · Quiz"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="quiz"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- Titel -->
+      <div style="padding:var(--space-8) 0 var(--space-5);border-bottom:1px solid var(--color-border);margin-bottom:0">
+        <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-faint)">
+          Kapitel 1 · Prüfungsvorbereitung
+        </span>
+        <h1 style="font-size:var(--text-2xl);margin:var(--space-2) 0 var(--space-2)">🧠 Quiz</h1>
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin:0">
+          20 Fragen über alle Themen aus Kapitel&nbsp;1 — Konzepte, Formeln, Code und typische Fallen.
+        </p>
+      </div>
+
+      <!-- ═══ HUD (sticky) ════════════════════════════════ -->
+      <div class="quiz-hud">
+        <div class="hud-stat">
+          <span class="hud-num" id="quiz-score" style="color:var(--color-success)">0</span>
+          <span class="hud-label">&nbsp;/ 20 richtig</span>
+        </div>
+        <div class="hud-stat">
+          <span class="hud-num" id="quiz-answered" style="color:var(--color-text-muted)">0</span>
+          <span class="hud-label">&nbsp;beantwortet</span>
+        </div>
+        <div class="hud-bar-wrap">
+          <div id="quiz-progress-bar"></div>
+        </div>
+        <button class="hud-reset-btn" id="quiz-reset">↺ Reset</button>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           SECTION 1 – Konzepte & Definitionen
+      ═══════════════════════════════════════════════════ -->
+      <div id="konzept-fragen"></div>
+      <div class="quiz-section-head">
+        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">
+          🧱 Konzepte
+        </span>
+        <span class="quiz-sec-title">Definitionen &amp; Grundlagen</span>
+        <span class="quiz-sec-count">Fragen 1–5</span>
+      </div>
+
+      <!-- Q01 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 1</div>
+        <p class="quiz-q-text">
+          Welche drei Eigenschaften müssen gute Features laut Vorlesung haben?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Schnell, günstig, skalierbar
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">B</span>
+            Informativ, Diskriminativ, Unabhängig (I-D-U)
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">C</span>
+            Numerisch, Kategorisch, Binär
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Groß, Klein, Mittelwertig
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          I-D-U: <b>Informativ</b> (trägt Information über das Phänomen), <b>Diskriminativ</b> (erklärt Unterschiede zwischen Klassen), <b>Unabhängig</b> (geringe Korrelation untereinander → kein Redundanz). Merksatz: I-D-U.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: B</strong>
+          Die drei Eigenschaften sind <b>Informativ, Diskriminativ und Unabhängig</b> (Merksatz: I-D-U).
+          Fehlt eine davon, leidet die Modellgüte.
+          <a href="Page02.html#eigenschaften">→ Seite 2 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q02 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 2</div>
+        <p class="quiz-q-text">
+          Was bedeutet die Schreibweise X&nbsp;∈&nbsp;ℝᴺˣᴷ für die Feature-Matrix?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            X hat N Features (Spalten) und K Samples (Zeilen)
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">B</span>
+            X hat N Samples (Zeilen) und K Features (Spalten)
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">C</span>
+            X hat N Klassen und K Algorithmen
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            X hat N Schichten und K Neuronen
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Jede <b>Zeile = ein Sample</b> (Beobachtungspunkt), jede <b>Spalte = ein Feature</b>. X.shape → (N, K). Typischer Fehler: N und K verwechseln.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: B</strong>
+          <b>N = Anzahl Samples (Zeilen)</b>, <b>K = Anzahl Features (Spalten)</b>. Nicht umgekehrt!
+          <a href="Page02.html#feature-matrix">→ Seite 2 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q03 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 3</div>
+        <p class="quiz-q-text">
+          Was ist die korrekte Aussage über den Feedback-Loop zwischen Features und Modell?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Das Modell erstellt automatisch neue Features aus den Rohdaten
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            Man optimiert nur das Modell, Features werden einmal festgelegt
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            Features und Modell beeinflussen sich gegenseitig — man optimiert iterativ beides
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Der Feedback-Loop beschreibt das Backpropagation-Verfahren
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Feature Engineering ist ein <b>iterativer Prozess</b>: Features → Modell trainieren → Analyse → neue/bessere Features → ... Es ist kein einmaliger Schritt!
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          Der Feedback-Loop bedeutet: <b>beide beeinflussen sich</b>. Man optimiert nicht nur das Modell, sondern auch die Features. Feature Engineering ist iterativ.
+          <a href="Page02.html#feedback-loop">→ Seite 2 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q04 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 4</div>
+        <p class="quiz-q-text">
+          Welche formale Notation beschreibt Feature Extraction aus Zeitserien korrekt?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            f&nbsp;:&nbsp;ℝᴷ → ℝᵀ &nbsp;&nbsp;(von K Features zu T Zeitschritten)
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">B</span>
+            f&nbsp;:&nbsp;ℝᵀ → ℝᴷ &nbsp;&nbsp;(von T Zeitschritten zu K Features, K ≪ T)
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">C</span>
+            f&nbsp;:&nbsp;ℝᴺ → ℝᴷ &nbsp;&nbsp;(von N Samples zu K Features)
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            f&nbsp;:&nbsp;ℝᴷ → ℝᴺ &nbsp;&nbsp;(von K Features zu N Samples)
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Die Eingabe ist eine Zeitserie mit T Messpunkten (ℝᵀ), die Ausgabe ein <b>kompaktes Feature-Vektor mit K Skalaren</b> (ℝᴷ). Ziel: K ≪ T (stark komprimiert).
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: B</strong>
+          f&nbsp;:&nbsp;<b>ℝᵀ → ℝᴷ</b> — Eingabe T Zeitschritte, Ausgabe K Features. Das Ziel ist Kompression (K ≪ T).
+          <a href="Page04.html#mathematik">→ Seite 4 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q05 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 5</div>
+        <p class="quiz-q-text">
+          Wofür sollte t-SNE laut Vorlesung <strong>nicht</strong> verwendet werden?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Zur Visualisierung hochdimensionaler Daten in 2D
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            Zur Darstellung der Cluster-Struktur des Digits-Datensatzes
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            Als Feature-Vektor für das Modelltraining
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Zur explorativen Analyse von Embeddings
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          t-SNE ist ein <b>reines Visualisierungswerkzeug</b>. Die projizierten 2D-Koordinaten sind nicht für das Modelltraining geeignet — sie sind nicht deterministisch und die globalen Abstände sind nicht interpretierbar.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          <b>t-SNE = NUR Visualisierung!</b> Die Ausgabe darf nicht als Feature für Modelle verwendet werden. Für Feature Extraction: PCA oder Autoencoder.
+          <a href="Page03.html#tsne">→ Seite 3 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           SECTION 2 – Encoding & Text
+      ═══════════════════════════════════════════════════ -->
+      <div id="code-fragen"></div>
+      <div class="quiz-section-head">
+        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface-2));color:var(--color-success)">
+          🔤 Encoding
+        </span>
+        <span class="quiz-sec-title">Encoding &amp; Text Features</span>
+        <span class="quiz-sec-count">Fragen 6–8</span>
+      </div>
+
+      <!-- Q06 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 6</div>
+        <p class="quiz-q-text">Was gibt folgender Code aus?</p>
+        <div class="quiz-q-code">from sklearn.preprocessing import LabelEncoder
+import numpy as np
+
+categories = np.array(['apple', 'milk', 'banana', 'apple'])
+enc = LabelEncoder()
+print(enc.fit_transform(categories))</div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            [1, 3, 2, 1] — apple=1, milk=3, banana=2
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">B</span>
+            [0, 2, 1, 0] — alphabetisch: apple=0, banana=1, milk=2
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">C</span>
+            [1, 2, 3, 1] — Reihenfolge im Array
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            [0, 1, 2, 0] — apple=0, milk=1, banana=2
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          LabelEncoder sortiert <b>alphabetisch</b>: apple=0, banana=1, milk=2. Daher: apple→0, milk→2, banana→1, apple→0. Genau das Problem: das Modell liest apple &lt; banana &lt; milk als falsche Ordnung!
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: B</strong>
+          LabelEncoder sortiert <b>alphabetisch</b>: apple=0, banana=1, milk=2. Ergebnis: [0, 2, 1, 0]. Nicht nach Reihenfolge im Array!
+          <a href="Page05.html#label-encoding">→ Seite 5 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q07 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 7</div>
+        <p class="quiz-q-text">
+          Zwei Dokumente werden mit CountVectorizer kodiert:<br>
+          Doc 1: "the dog bites the man"<br>
+          Doc 2: "the man bites the dog"<br>
+          Was ist korrekt?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Die Vektoren sind unterschiedlich, weil die Wortstellung abgebildet wird
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">B</span>
+            Beide Dokumente ergeben identische Vektoren — Bag-of-Words ignoriert Wortstellung
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">C</span>
+            CountVectorizer wirft einen Fehler bei doppelten Wörtern
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Nur Doc 1 wird korrekt kodiert, Doc 2 wird ignoriert
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Bag-of-Words ignoriert die Wortstellung komplett. Beide Sätze enthalten exakt die gleichen Wörter in den gleichen Häufigkeiten → <b>identische Vektoren</b>. Das ist die zentrale Schwäche von BoW.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: B</strong>
+          <b>Bag-of-Words ignoriert Wortstellung!</b> "dog bites man" = "man bites dog" → gleicher Vektor. Für reihenfolge-sensiblen Text: Word Embeddings oder Transformer.
+          <a href="Page05.html#bag-of-words">→ Seite 5 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q08 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 8</div>
+        <p class="quiz-q-text">
+          Du hast eine Spalte "Farbe" mit Werten: rot, grün, blau (keine natürliche Ordnung).
+          Welcher Encoder ist korrekt?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            LabelEncoder — weist rot=0, grün=1, blau=2 zu
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            StandardScaler — normiert die Farb-IDs
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            OneHotEncoder — erstellt 3 Binär-Spalten ohne künstliche Ordnung
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            MinMaxScaler — skaliert auf [0, 1]
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Bei <b>nominalen</b> Variablen (keine Ordnung) immer <b>OneHotEncoder</b>. LabelEncoder würde blau &lt; grün &lt; rot implizieren — was falsch ist.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          <b>OneHotEncoder</b> für nominale Kategorien ohne Ordnung. LabelEncoder ist nur bei echten ordinalen Variablen (klein/mittel/groß) korrekt.
+          <a href="Page05.html#one-hot-encoding">→ Seite 5 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           SECTION 3 – sklearn API & Data Leakage
+      ═══════════════════════════════════════════════════ -->
+      <div id="fallen-fragen"></div>
+      <div class="quiz-section-head">
+        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">
+          ⚙️ sklearn API
+        </span>
+        <span class="quiz-sec-title">sklearn API &amp; Data Leakage</span>
+        <span class="quiz-sec-count">Fragen 9–11</span>
+      </div>
+
+      <!-- Q09 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 9</div>
+        <p class="quiz-q-text">Was ist an folgendem Code falsch?</p>
+        <div class="quiz-q-code">scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.fit_transform(X_test)   # ← Zeile 3</div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            fit_transform() sollte durch fit() ersetzt werden
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            X_train_s muss vor X_test_s skaliert werden — die Reihenfolge ist falsch
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            Zeile 3 ist Data Leakage — fit_transform() auf Testdaten lernt Teststatistiken
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Es fehlt scaler.reset() zwischen Training und Test
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          <b>Data Leakage!</b> <code>fit_transform(X_test)</code> berechnet Mittelwert und Standardabweichung der <b>Testdaten</b> und verwendet diese für die Transformation. Das Modell "sieht" Testdaten indirekt.
+          Korrekt: <code>scaler.transform(X_test)</code>
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          <b>Data Leakage:</b> <code>fit_transform(X_test)</code> lernt von Testdaten. Richtig: <code>scaler.transform(X_test)</code> — nur transformieren, nicht neu lernen!
+          <a href="Page05.html#sklearn-syntax">→ Seite 5 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q10 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 10</div>
+        <p class="quiz-q-text">
+          Welche Aussage über <code>.fit()</code>, <code>.transform()</code> und
+          <code>.fit_transform()</code> ist korrekt?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            fit_transform() kann sicher auf Trainings- und Testdaten angewendet werden
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            transform() lernt die Parameter und wendet sie an
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            fit() lernt Parameter (nur Training); transform() wendet an (Training + Test); fit_transform() nur Training
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            fit() wendet die Transformation an; transform() lernt die Parameter
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          <b>fit()</b> = lernen (nur Training), <b>transform()</b> = anwenden (Training + Test), <b>fit_transform()</b> = beides kombiniert aber NUR auf Trainingsdaten!
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          fit() lernt, transform() wendet an, fit_transform() = beides — aber nur Training!
+          <a href="Page05.html#sklearn-syntax">→ Seite 5 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q11 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 11</div>
+        <p class="quiz-q-text">
+          Jemand skaliert den gesamten Datensatz <em>vor</em> dem Train/Test-Split.
+          Was ist das Problem?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Kein Problem — Skalierung ist symmetrisch und reihenfolge-unabhängig
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            Die Skalierung ist rechenintensiver als nach dem Split
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            Data Leakage — Testdaten-Statistiken fließen in den Scaler ein, Ergebnisse zu optimistisch
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Der Scaler kennt nicht alle Klassen wenn man vorher splittet
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Wenn vor dem Split skaliert wird, berechnet <code>fit()</code> Statistiken über <b>alle Daten</b> inklusive Testdaten. Das ist Data Leakage. Richtig: erst splitten, dann <code>fit()</code> nur auf X_train.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          <b>Immer erst splitten, dann skalieren!</b> Skalierung vor dem Split ist Data Leakage.
+          <a href="PageCheatsheet.html#cs-fallen">→ Cheatsheet: Typische Fallen</a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           SECTION 4 – Feature Selection
+      ═══════════════════════════════════════════════════ -->
+      <div class="quiz-section-head">
+        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">
+          🎯 Selection
+        </span>
+        <span class="quiz-sec-title">Feature Selection</span>
+        <span class="quiz-sec-count">Fragen 12–15</span>
+      </div>
+
+      <!-- Q12 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 12</div>
+        <p class="quiz-q-text">
+          Was beschreibt der „Curse of Dimensionality" am besten?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Mit mehr Samples werden die Berechnungen exponentiell langsamer
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            Zu viele Klassen überfordern den Klassifikationsalgorithmus
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            Mit steigender Feature-Anzahl K wächst der Raum exponentiell — Daten werden zu spärlich
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Mehr Features verringern die Trainingszeit des Modells
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Mit jedem Feature wächst der Raum exponentiell. Für gleiche Datendichte braucht man <b>10ᴷ Samples</b>. Algorithmen wie k-NN versagen, weil alle Abstände gleich werden.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          Mit steigendem K wächst der Raum exponentiell → Daten werden spärlich (Sparsity). k-NN leidet besonders.
+          <a href="Page07.html#curse-dimensionality">→ Seite 7 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q13 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 13</div>
+        <p class="quiz-q-text">Was ist X_new.shape nach diesem Code?</p>
+        <div class="quiz-q-code">from sklearn.datasets import load_digits
+from sklearn.feature_selection import SelectKBest, mutual_info_classif
+
+X, y = load_digits(return_X_y=True)
+sel  = SelectKBest(mutual_info_classif, k=20)
+X_new = sel.fit_transform(X, y)
+print(X_new.shape)</div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            (1797, 64) — unverändert
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            (20, 64) — nur 20 Samples behalten
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            (1797, 20) — alle Samples, aber nur 20 beste Features
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            (20, 1797) — transponiert
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          SelectKBest reduziert <b>Spalten (Features)</b>, nicht Zeilen (Samples). Digits: 1797 Samples × 64 Features → 1797 × 20. Die 20 informativsten Pixel-Positionen werden behalten.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          SelectKBest entfernt <b>Features (Spalten)</b>: 64 → 20. Samples bleiben alle: 1797. Ergebnis: (1797, 20).
+          <a href="Page07.html#selectkbest">→ Seite 7 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q14 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 14</div>
+        <p class="quiz-q-text">
+          Welche SelectKBest Scoring-Funktion ist die Standard-Wahl für
+          Klassifikation, wenn der Zusammenhang auch nicht-linear sein könnte?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            f_classif (ANOVA F-Test) — misst lineare Abhängigkeit
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            chi2 — Chi-Quadrat-Test für Häufigkeiten
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            mutual_info_classif — misst Mutual Information, auch nicht-linear
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            f_regression — für kontinuierliche Zielvariablen
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          <b>mutual_info_classif</b> ist die sicherste Wahl — es erkennt auch nicht-lineare Abhängigkeiten. f_classif ist schneller aber nur linear. chi2 nur für nicht-negative Features!
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          <b>mutual_info_classif</b> = Standard-Wahl. Erkennt auch nicht-lineare Zusammenhänge, anders als f_classif (nur linear) oder chi2 (nur positive Features).
+          <a href="Page07.html#selectkbest">→ Seite 7 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q15 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 15</div>
+        <p class="quiz-q-text">
+          X.var(axis=0) gibt <code>[0.139, 0.222, 0.250]</code> zurück.
+          Was macht <code>VarianceThreshold(threshold=0.15).fit_transform(X)</code>?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Nichts — alle Varianzen sind bereits &gt; 0
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">B</span>
+            Entfernt Feature 1 (Varianz 0.139 &lt; 0.15) — Ausgabe hat eine Spalte weniger
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">C</span>
+            Normiert alle Features auf Varianz = 0.15
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Entfernt alle Features mit Varianz &gt; 0.15
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Feature 1 hat Varianz 0.139 &lt; threshold 0.15 → wird entfernt. Features 2 (0.222) und 3 (0.250) bleiben. Aus (N×3) wird (N×2).
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: B</strong>
+          Feature 1 (var=0.139) liegt <b>unter</b> threshold=0.15 → wird entfernt. Ergebnis: 2 statt 3 Spalten.
+          <a href="Page07.html#einfache-methoden">→ Seite 7 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           SECTION 5 – Feature Scaling
+      ═══════════════════════════════════════════════════ -->
+      <div class="quiz-section-head">
+        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface-2));color:var(--color-success)">
+          ⚖️ Scaling
+        </span>
+        <span class="quiz-sec-title">Feature Scaling &amp; Normalisierung</span>
+        <span class="quiz-sec-count">Fragen 16–18</span>
+      </div>
+
+      <!-- Q16 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 16</div>
+        <p class="quiz-q-text">
+          Für welche Algorithmen ist Feature Scaling in der Regel <strong>nicht</strong> erforderlich?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            k-NN und SVM
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            Neuronale Netze und PCA
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">C</span>
+            Logistische Regression und lineare Regression
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">D</span>
+            Decision Tree, Random Forest und Gradient Boosting
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Baum-basierte Algorithmen (Decision Tree, Random Forest, XGBoost) sind <b>nicht skalensensitiv</b> — sie teilen Daten anhand von Schwellwerten, nicht Abständen.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: D</strong>
+          <b>Baum-basierte Algorithmen</b> brauchen kein Scaling. k-NN, SVM, PCA, Neuronale Netze und Gradient-Descent-Modelle sind skalensensitiv!
+          <a href="Page08.html#warum-scaling">→ Seite 8 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q17 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 17</div>
+        <p class="quiz-q-text">
+          Wann sollte <code>PowerTransformer(method='box-cox')</code>
+          <strong>nicht</strong> verwendet werden?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Wenn die Daten normalverteilt sind
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            Wenn man StandardScaler bereits verwendet hat
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            Wenn die Daten negative Werte oder Nullen enthalten
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Wenn mehr als 1000 Samples vorhanden sind
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Box-Cox funktioniert <b>nur für strikt positive Werte (X &gt; 0)</b>. Für Daten mit X ≤ 0: <code>method='yeo-johnson'</code> verwenden.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          <b>Box-Cox nur für X &gt; 0!</b> Bei negativen Werten oder Null: <code>yeo-johnson</code>.
+          <a href="Page08.html#power-transformations">→ Seite 8 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q18 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 18</div>
+        <p class="quiz-q-text">
+          Was sind nach Anwenden von <code>StandardScaler</code> die Eigenschaften
+          jedes Features (aus dem Notebook)?
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Alle Werte liegen zwischen 0 und 1
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">B</span>
+            Mittelwert = 0.473, Standardabweichung = 0.285 (unverändert)
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">C</span>
+            Mittelwert ≈ 0 (≈1.42e-16), Standardabweichung = 1.0
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Mittelwert = 1, Standardabweichung = 0
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          StandardScaler transformiert auf <b>μ≈0, σ=1</b>. Im Notebook: Vorher μ=0.473, σ=0.285 → Nachher μ=1.42e-16 (≈0), σ=1.0. Formel: Z = (X−μ)/σ.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: C</strong>
+          Z-Score: <b>μ=0, σ=1</b>. Im Notebook: Vorher 0.473/0.285, Nachher ≈0/1.0.
+          <a href="Page08.html#standardisierung">→ Seite 8 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           SECTION 6 – Berechnungen
+      ═══════════════════════════════════════════════════ -->
+      <div id="formel-fragen"></div>
+      <div class="quiz-section-head">
+        <span class="quiz-sec-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">
+          📐 Formeln
+        </span>
+        <span class="quiz-sec-title">Rechenaufgaben</span>
+        <span class="quiz-sec-count">Fragen 19–20</span>
+      </div>
+
+      <!-- Q19 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 19</div>
+        <p class="quiz-q-text">
+          Z-Score Berechnung: X = 11, μ = 8, σ = 3.<br>
+          <strong>Formel: Z = (X − μ) / σ</strong>
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            Z = 11 / 3 ≈ 3.67
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">B</span>
+            Z = (11 − 8) / 3 = 3/3 = 1.0
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">C</span>
+            Z = (8 − 11) / 3 = −3/3 = −1.0
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            Z = (11 + 8) / 3 ≈ 6.33
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          Z = (11 − 8) / 3 = <b>1.0</b>. X=11 liegt genau 1 Standardabweichung über dem Mittelwert μ=8. Positiver Z-Score = über dem Durchschnitt.
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: B</strong>
+          Z = <b>(X − μ) / σ</b> = (11 − 8) / 3 = <b>1.0</b>. Reihenfolge: zuerst X − μ, dann durch σ dividieren.
+          <a href="Page08.html#standardisierung">→ Seite 8 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- Q20 -->
+      <div class="quiz-question">
+        <div class="quiz-q-num">Frage 20</div>
+        <p class="quiz-q-text">
+          MinMax-Transformation: X = 4, X_min = 0, X_max = 10, Zielbereich [0, 1].<br>
+          <strong>Formel: X' = (X − X_min) / (X_max − X_min)</strong>
+        </p>
+        <div class="quiz-options">
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">A</span>
+            X' = 4 / 10 = 0.4 ← stimmt zufällig, aber falsch begründet
+          </button>
+          <button class="quiz-option" data-correct="true">
+            <span class="quiz-option-letter">B</span>
+            X' = (4 − 0) / (10 − 0) = 4/10 = 0.4
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">C</span>
+            X' = (10 − 4) / (10 − 0) = 6/10 = 0.6
+          </button>
+          <button class="quiz-option" data-correct="false">
+            <span class="quiz-option-letter">D</span>
+            X' = (4 − 0) / (10 + 0) = 4/10 = 0.4 ← falsche Formel
+          </button>
+        </div>
+        <div class="quiz-feedback is-correct">
+          <strong>✅ Richtig!</strong>
+          X' = <b>(X − X_min) / (X_max − X_min)</b> = (4−0)/(10−0) = 4/10 = <b>0.4</b>. Vorsicht: Option A gibt zufällig denselben Wert, hat aber die falsche Formel (X/X_max statt (X−Xmin)/(Xmax−Xmin)).
+        </div>
+        <div class="quiz-feedback is-wrong">
+          <strong>❌ Falsch — Richtige Antwort: B</strong>
+          Korrekte Formel: <b>(X − X_min) / (X_max − X_min)</b> = (4−0)/(10−0) = 0.4. Option C ist (X_max − X) / Bereich — das ist die falsche Richtung!
+          <a href="Page08.html#minmax">→ Seite 8 nachschlagen</a>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           ERGEBNIS-SCREEN
+      ═══════════════════════════════════════════════════ -->
+      <div id="quiz-result">
+        <div class="result-emoji-big" id="result-emoji">🎉</div>
+        <div id="result-score">0 / 20 (0%)</div>
+        <div id="result-msg">Ergebnis wird berechnet...</div>
+        <div class="result-bar-wrap">
+          <div id="result-bar"></div>
+        </div>
+        <button id="btn-retry">↺ Nochmal versuchen</button>
+        <div style="margin-top:var(--space-5);font-size:var(--text-xs);color:var(--color-text-faint)">
+          Tipp: Schaue dir falsche Antworten nochmal im
+          <a href="PageCheatsheet.html" style="color:var(--color-primary);font-weight:700">Cheatsheet</a>
+          nach.
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 1 · Quiz · 20 Fragen · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+  <script src="../js_codes/Quiz.js"></script>
+
+</body>
+</html>

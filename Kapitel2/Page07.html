@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Cross-Validation &amp; Train/Test/Validation Split</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ── CV BALKEN-VISUAL ───────────────────────────── */
+    .cv-visual {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin: var(--space-5) 0;
+    }
+    .cv-row-label {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--color-text-faint);
+      margin-bottom: var(--space-1);
+    }
+    .cv-bar {
+      display: flex;
+      height: 36px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .cv-seg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .cv-seg.train  { background: var(--color-success); }
+    .cv-seg.val    { background: #3b82f6; }
+    .cv-seg.all    { background: var(--color-text-muted); }
+    .cv-seg.test   { background: #f97316; }
+    .cv-legend {
+      display: flex; gap: var(--space-4); flex-wrap: wrap;
+      margin-top: var(--space-2);
+    }
+    .cv-legend-item {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-size: var(--text-xs); color: var(--color-text-muted);
+    }
+    .cv-legend-dot {
+      width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
+    }
+
+    /* ── WORKFLOW CHART (Folie 31) ──────────────────── */
+    .workflow {
+      margin: var(--space-5) 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .wf-row {
+      display: flex;
+      gap: var(--space-4);
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .wf-node {
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-align: center;
+      border: 2px solid;
+      min-width: 110px;
+    }
+    .wf-node.input {
+      background: color-mix(in oklab, #8b5cf6 10%, var(--color-surface-2));
+      border-color: #8b5cf6; color: #7c3aed;
+    }
+    .wf-node.process {
+      background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface-2));
+      border-color: var(--color-primary); color: var(--color-primary);
+    }
+    .wf-node.result {
+      background: color-mix(in oklab, var(--color-success) 10%, var(--color-surface-2));
+      border-color: var(--color-success); color: var(--color-success);
+    }
+    .wf-node.final {
+      background: color-mix(in oklab, var(--color-warning) 10%, var(--color-surface-2));
+      border-color: color-mix(in oklab, var(--color-warning) 80%, #000);
+      color: color-mix(in oklab, var(--color-warning) 80%, #000);
+    }
+    .wf-node.test-node {
+      background: color-mix(in oklab, #f97316 10%, var(--color-surface-2));
+      border-color: #f97316; color: #c2410c;
+    }
+    .wf-arrow-down {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--color-text-faint);
+      font-size: 1.2rem;
+      padding: var(--space-1) 0;
+      width: 100%;
+    }
+    .wf-arrow-h {
+      font-size: 1rem; color: var(--color-text-faint); flex-shrink: 0;
+    }
+    .wf-divider {
+      width: 2px; background: var(--color-border); height: 24px; flex-shrink: 0;
+    }
+
+    /* ── SO WHAT + FRAGE BOX ────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── SCORES ARRAY HIGHLIGHT ─────────────────────── */
+    .scores-display {
+      padding: var(--space-4) var(--space-5);
+      background: color-mix(in oklab, var(--color-success) 6%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-success) 25%, var(--color-border));
+      border-radius: var(--radius-xl);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      margin-top: var(--space-4);
+    }
+    .scores-row {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      margin: var(--space-3) 0 var(--space-2);
+    }
+    .score-chip {
+      padding: var(--space-1) var(--space-3);
+      background: color-mix(in oklab, var(--color-success) 12%, var(--color-surface));
+      color: var(--color-success);
+      border-radius: var(--radius-full);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      border: 1px solid color-mix(in oklab, var(--color-success) 30%, transparent);
+    }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Cross-Validation"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page7"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Seite 7 · Folien 28–32</span>
+            <h1>Cross-Validation
+              <span class="key" style="--key-color:var(--color-primary)">&amp; Splits</span>
+            </h1>
+            <p>
+              Holdout Sets haben einen Nachteil: Datenverlust.
+              Cross-Validation löst das – jeder Datenpunkt wird einmal als
+              Validation verwendet. Diese Seite zeigt Two-Fold, K-Fold, Leave-One-Out,
+              den State-of-the-Art 3-Way Split und den vollständigen Workflow.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Two-Fold CV</span>
+              <span class="pill">K-Fold</span>
+              <span class="pill">cross_val_score</span>
+              <span class="pill">Leave-One-Out</span>
+              <span class="pill">3-Way Split</span>
+              <span class="pill">Workflow</span>
+              <span class="pill">Repeated K-Fold</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du verstehst den Unterschied zwischen Holdout und
+              <span class="key" style="--key-color:var(--color-primary)">Cross-Validation</span>.
+              Du kannst
+              <code>cross_val_score(model, X, y, cv=5)</code>
+              anwenden und weißt, wann man den
+              <strong>3-Way Split</strong>
+              (Train / Validation / Test) benötigt und warum der
+              <strong>Model Training Workflow</strong> so aufgebaut ist.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           7.1  TWO-FOLD CROSS-VALIDATION  (Folie 28)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="two-fold">
+        <div class="section-head">
+          <h2>7.1 Two-Fold Cross-Validation</h2>
+          <p>
+            Nachteil des Holdout-Ansatzes: wir „verlieren" 50% unserer Daten zum Training.
+            Lösung: <span class="key" style="--key-color:var(--color-primary)">jede Hälfte einmal als Training und einmal als Validation</span>
+            verwenden → zwei Accuracy-Werte → mitteln → globale Performance.
+          </p>
+        </div>
+
+        <!-- Two-Fold Visual -->
+        <div class="cv-visual">
+          <div class="cv-row-label">All Data</div>
+          <div class="cv-bar">
+            <div class="cv-seg all" style="flex:1">Alle Daten (150 Samples)</div>
+          </div>
+          <div class="cv-row-label" style="margin-top:var(--space-3)">Fold 1</div>
+          <div class="cv-bar">
+            <div class="cv-seg train" style="flex:1">Training Set (75 Samples)</div>
+            <div class="cv-seg val"   style="flex:1">Validation Set (75 Samples)</div>
+          </div>
+          <div class="cv-row-label">Fold 2 (getauscht!)</div>
+          <div class="cv-bar">
+            <div class="cv-seg val"   style="flex:1">Validation Set (75 Samples)</div>
+            <div class="cv-seg train" style="flex:1">Training Set (75 Samples)</div>
+          </div>
+          <div class="cv-legend">
+            <div class="cv-legend-item"><div class="cv-legend-dot" style="background:var(--color-success)"></div><span>Training Set</span></div>
+            <div class="cv-legend-item"><div class="cv-legend-dot" style="background:#3b82f6"></div><span>Validation Set</span></div>
+          </div>
+        </div>
+
+        <!-- Konzept Cards -->
+        <div class="card-grid" style="margin-top:var(--space-4)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Two-Fold CV</span>
+              – Das Prinzip
+            </h3>
+            <ul>
+              <li>Nachteil Holdout: man „verliert" Daten für das Training</li>
+              <li>Lösung: <strong>jeden Teil des Datensatzes je einmal als Training- und Test-Set</strong> verwenden</li>
+              <li>→ zwei Genauigkeitswerte (acc1, acc2)</li>
+              <li>Diese <strong>aggregieren</strong> – z.B. mitteln → globale Performance-Bewertung</li>
+              <li>Diese Art der CV nennt man <span class="key" style="--key-color:var(--color-primary)">two-fold cross validation</span></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Ergebnis: globale Performance</h3>
+            <ul>
+              <li>Fold 1: trainiere auf X1/y1 → teste auf X2/y2 → Accuracy₁</li>
+              <li>Fold 2: trainiere auf X2/y2 → teste auf X1/y1 → Accuracy₂</li>
+              <li>Mittlere Accuracy = (Accuracy₁ + Accuracy₂) / 2</li>
+              <li>Kein Datenpunkt geht verloren – jeder ist einmal im Training, einmal im Test</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Schritt 1: Split -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Two-Fold CV — Schritt 1: Aufteilen
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir teilen die Daten in zwei gleiche Hälften mit
+          <code>train_test_split</code> und
+          <code>train_size=0.5</code>.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Two-Fold: Aufteilen
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.model_selection import train_test_split
+
+# Daten in zwei gleiche Hälften
+X1, X2, y1, y2 = train_test_split(
+    X, y, train_size=0.5)
+
+print("X1:", X1.shape, "X2:", X2.shape)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Ausgabe</span></div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); color:var(--color-text-muted)">
+                X1: (75, 4) &nbsp; X2: (75, 4)
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-3); padding-left:1rem; line-height:1.8">
+                <li>75 Samples im Training, 75 im Validation</li>
+                <li>4 Features (Iris-Datensatz)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Cross-Training + Aggregate -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Two-Fold CV — Schritt 2: Kreuzweises Training &amp; Aggregation
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Beide Folds werden je einmal als Training und als Validation verwendet.
+          Die Ergebnisse werden dann gemittelt.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Two-Fold CV: Kreuzweises Training
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.metrics import accuracy_score
+
+# Fold 1: train X1/y1, validate auf X2
+y2_model = model.fit(X1, y1).predict(X2)
+
+# Fold 2: train X2/y2, validate auf X1
+y1_model = model.fit(X2, y2).predict(X1)
+
+# Scores berechnen und mitteln
+acc1 = accuracy_score(y2, y2_model)
+acc2 = accuracy_score(y1, y1_model)
+mean_acc = (acc1 + acc2) / 2
+
+print(f"Fold 1: {acc1:.4f}")
+print(f"Fold 2: {acc2:.4f}")
+print(f"Mittlere Accuracy: {mean_acc:.4f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Ausgabe</span></div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                Fold 1: 0.9467<br>
+                Fold 2: 0.9600<br>
+                Mittlere Accuracy: 0.9533
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.8">
+                <li>Kein Datenverlust: alle 150 Samples genutzt</li>
+                <li>Mittelung gibt robusteres Bild als einzelnes Holdout</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfragen aus der Vorlesung</div>
+          <p>„Wie geht es wohl konzeptuell weiter? Was wird eine weitere Prämisse für uns sein?" &nbsp;·&nbsp; „Was tun wir mit diesen Genauigkeitswerten?"</p>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Two-Fold CV löst das Datenverlust-Problem von Holdout Sets.
+            Aber warum bei 2 Folds aufhören? → Mit mehr Folds wird die Schätzung robuster.
+            → <strong>K-Fold Cross-Validation</strong> verallgemeinert dieses Konzept.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           7.2  K-FOLD & LEAVE-ONE-OUT  (Folie 29)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="k-fold-loo">
+        <div class="section-head">
+          <h2>7.2 K-Fold &amp; Leave-One-Out Cross-Validation</h2>
+          <p>
+            sklearn verallgemeinert Two-Fold auf beliebig viele Splits mit
+            <span class="key" style="--key-color:var(--color-primary)">cross_val_score(model, X, y, cv=k)</span>.
+            Die Extremform: <span class="key" style="--key-color:var(--color-warning)">Leave-One-Out</span>.
+          </p>
+        </div>
+
+        <!-- 5-Fold Visual -->
+        <div class="cv-visual">
+          <div class="cv-row-label">5-Fold Cross-Validation – All Data (150 Samples)</div>
+          <div class="cv-bar">
+            <div class="cv-seg all" style="flex:1">Alle Daten</div>
+          </div>
+          <!-- 5 Folds -->
+          <div class="cv-row-label" style="margin-top:var(--space-2)">Split 1 – 5</div>
+          <div class="cv-bar">
+            <div class="cv-seg val"   style="flex:1; font-size:.58rem">Val</div>
+            <div class="cv-seg train" style="flex:4; font-size:.62rem">Training (Fold 2–5)</div>
+          </div>
+          <div class="cv-bar">
+            <div class="cv-seg train" style="flex:1; font-size:.62rem">Tr</div>
+            <div class="cv-seg val"   style="flex:1; font-size:.58rem">Val</div>
+            <div class="cv-seg train" style="flex:3; font-size:.62rem">Training (Fold 1,3–5)</div>
+          </div>
+          <div class="cv-bar">
+            <div class="cv-seg train" style="flex:2; font-size:.62rem">Training (1–2)</div>
+            <div class="cv-seg val"   style="flex:1; font-size:.58rem">Val</div>
+            <div class="cv-seg train" style="flex:2; font-size:.62rem">Training (4–5)</div>
+          </div>
+          <div class="cv-bar">
+            <div class="cv-seg train" style="flex:3; font-size:.62rem">Training (Fold 1–3)</div>
+            <div class="cv-seg val"   style="flex:1; font-size:.58rem">Val</div>
+            <div class="cv-seg train" style="flex:1; font-size:.62rem">Tr</div>
+          </div>
+          <div class="cv-bar">
+            <div class="cv-seg train" style="flex:4; font-size:.62rem">Training (Fold 1–4)</div>
+            <div class="cv-seg val"   style="flex:1; font-size:.58rem">Val</div>
+          </div>
+          <div class="cv-legend">
+            <div class="cv-legend-item"><div class="cv-legend-dot" style="background:var(--color-success)"></div><span>Training Set</span></div>
+            <div class="cv-legend-item"><div class="cv-legend-dot" style="background:#3b82f6"></div><span>Validation Set (wechselt)</span></div>
+          </div>
+        </div>
+
+        <!-- K-Fold Code -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-5) 0 var(--space-3)">
+          K-Fold CV mit
+          <span class="key" style="--key-color:var(--color-primary)">cross_val_score()</span>
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>cross_val_score()</code> führt für jeden der <code>cv</code> Splits
+          automatisch Training, Prediction und Accuracy Score aus.
+          Rückgabe: ein Array mit einem Score pro Split.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – K-Fold Cross-Validation (cv=5)
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.model_selection import cross_val_score
+
+# 5-Fold Cross-Validation
+scores = cross_val_score(model, X, y, cv=5)
+
+print("Scores:", scores)
+print("Mittelwert:", scores.mean().round(4))
+print("Std:", scores.std().round(4))</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Ausgabe</span></div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                Scores: [0.9667 0.9667 0.9333 0.9333 1.0000]<br>
+                Mittelwert: 0.96<br>
+                Std: 0.0249
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.8">
+                <li>5 Werte – einer pro Fold</li>
+                <li><code>.mean()</code> → globale Schätzung</li>
+                <li><code>.std()</code> → Streuung der Performance</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Score Chips Visual -->
+        <div class="scores-display">
+          <div style="font-size:var(--text-xs); font-weight:700; color:var(--color-text-faint); margin-bottom:var(--space-2)">
+            array([...]) – 5 Scores, einer pro Fold:
+          </div>
+          <div class="scores-row">
+            <span class="score-chip">Fold 1: 0.9667</span>
+            <span class="score-chip">Fold 2: 0.9667</span>
+            <span class="score-chip">Fold 3: 0.9333</span>
+            <span class="score-chip">Fold 4: 0.9333</span>
+            <span class="score-chip">Fold 5: 1.0000</span>
+          </div>
+          <div style="font-size:var(--text-xs); color:var(--color-text-muted)">
+            ⌀ Mittlere Accuracy: <strong style="color:var(--color-success)">0.96</strong>
+          </div>
+        </div>
+
+        <!-- Leave-One-Out Code -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          <span class="key" style="--key-color:var(--color-warning)">Leave-One-Out</span>
+          Cross-Validation – Extremform
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Die Extremform: das Validation-Set besteht nur noch aus
+          <strong>einem einzigen Datenpunkt</strong>. Es werden so viele Splits
+          durchgeführt wie Datenpunkte vorhanden sind (150 bei Iris).
+          Sehr rechenintensiv, aber maximale Datennutzung.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Leave-One-Out CV
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.model_selection import LeaveOneOut
+
+loo = LeaveOneOut()
+scores = cross_val_score(model, X, y, cv=loo)
+
+print("Anzahl Splits:", len(scores))
+print("Scores (erste 10):", scores[:10])
+print("Mittlere Accuracy:", scores.mean().round(4))</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Ausgabe (gekürzt)</span></div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                Anzahl Splits: 150<br>
+                Scores (erste 10): [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]<br>
+                Mittlere Accuracy: 0.9600
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.8">
+                <li><strong>150 Splits</strong> – einer pro Datenpunkt</li>
+                <li>Jeder Punkt ist genau einmal Validation</li>
+                <li>Sehr rechenintensiv bei großen Datensätzen</li>
+                <li>Bester unbiased Schätzer, aber hohe Varianz</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>„Was denken Sie? Wie sieht die Extremform dieses Konzepts aus?"</p>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-4)">
+          <article class="card">
+            <h3>Vergleich: K-Fold vs. Leave-One-Out</h3>
+            <table style="font-size:var(--text-xs); width:100%; border-collapse:collapse; margin-top:var(--space-2)">
+              <thead>
+                <tr>
+                  <th style="text-align:left; padding:var(--space-2); border-bottom:1px solid var(--color-border); background:var(--color-surface-offset)">Aspekt</th>
+                  <th style="text-align:left; padding:var(--space-2); border-bottom:1px solid var(--color-border); background:var(--color-surface-offset)">K-Fold (k=5)</th>
+                  <th style="text-align:left; padding:var(--space-2); border-bottom:1px solid var(--color-border); background:var(--color-surface-offset)">Leave-One-Out</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)"><strong>Val.-Set Größe</strong></td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">N/k Punkte</td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">1 Punkt</td>
+                </tr>
+                <tr>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)"><strong>Anzahl Splits</strong></td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">k (z.B. 5)</td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">N (z.B. 150)</td>
+                </tr>
+                <tr>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)"><strong>Rechenaufwand</strong></td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">niedrig</td>
+                  <td style="padding:var(--space-2); border-bottom:1px solid var(--color-divider)">hoch</td>
+                </tr>
+                <tr>
+                  <td style="padding:var(--space-2)"><strong>sklearn</strong></td>
+                  <td style="padding:var(--space-2)"><code>cv=5</code></td>
+                  <td style="padding:var(--space-2)"><code>cv=LeaveOneOut()</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            <code class="key" style="--key-color:var(--color-primary)">cross_val_score(model, X, y, cv=k)</code>
+            führt im Grunde Training, Prediction und Accuracy Score auf einmal aus –
+            für jeden der k Splits. Das Ergebnis ist ein Array mit k Scores, das man mitteln kann.
+            In der Praxis: <strong>cv=5</strong> oder <strong>cv=10</strong> ist Standard.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           7.3  TRAIN / TEST / VALIDATION SPLIT  (Folie 30)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="train-val-test">
+        <div class="section-head">
+          <h2>7.3 Train / Test / Validation Split – State-of-the-Art</h2>
+          <p>
+            Cross-Validation hat noch ein Problem: Parameter können zu genau an
+            Trainings- und Testdaten angepasst werden.
+            Lösung:
+            <span class="key" style="--key-color:var(--color-primary)">3-Way Split</span>
+            mit separatem Test-Set für die finale Evaluation.
+          </p>
+          <p style="margin-top:var(--space-2)">
+            Referenz:
+            <a href="https://scikit-learn.org/stable/modules/cross_validation.html"
+               target="_blank" style="color:var(--color-primary); font-size:var(--text-xs)">
+              scikit-learn.org/stable/modules/cross_validation.html
+            </a>
+          </p>
+        </div>
+
+        <!-- 3-Way Split Visual -->
+        <div class="cv-visual">
+          <div class="cv-row-label">All Data</div>
+          <div class="cv-bar">
+            <div class="cv-seg all" style="flex:1">Alle Daten</div>
+          </div>
+
+          <div class="cv-row-label" style="margin-top:var(--space-3)">Erste Aufteilung: Training + Test</div>
+          <div class="cv-bar">
+            <div class="cv-seg train" style="flex:4">Training data (80%)</div>
+            <div class="cv-seg test"  style="flex:1">Test data (20%) → Tabu!</div>
+          </div>
+
+          <div class="cv-row-label" style="margin-top:var(--space-3)">Finding Hyperparameters (5-Fold CV auf Training data)</div>
+          <div class="cv-bar" style="height:28px">
+            <div class="cv-seg val"   style="flex:1; font-size:.58rem">Val</div>
+            <div class="cv-seg train" style="flex:4; font-size:.58rem">Training</div>
+          </div>
+          <div class="cv-bar" style="height:28px">
+            <div class="cv-seg train" style="flex:1; font-size:.58rem">Tr</div>
+            <div class="cv-seg val"   style="flex:1; font-size:.58rem">Val</div>
+            <div class="cv-seg train" style="flex:3; font-size:.58rem">Training</div>
+          </div>
+          <div class="cv-bar" style="height:28px">
+            <div class="cv-seg train" style="flex:2; font-size:.58rem">Training</div>
+            <div class="cv-seg val"   style="flex:1; font-size:.58rem">Val</div>
+            <div class="cv-seg train" style="flex:2; font-size:.58rem">Training</div>
+          </div>
+          <div class="cv-bar" style="height:28px; margin-bottom:var(--space-2)">
+            <div class="cv-seg train" style="flex:3; font-size:.58rem">Training</div>
+            <div class="cv-seg val"   style="flex:1; font-size:.58rem">Val</div>
+            <div class="cv-seg train" style="flex:1; font-size:.58rem">Tr</div>
+          </div>
+
+          <div class="cv-row-label">Final Evaluation (nur einmal!)</div>
+          <div class="cv-bar" style="background:color-mix(in oklab,#f97316 10%,transparent)">
+            <div class="cv-seg test" style="flex:1">Test data → Final Evaluation</div>
+          </div>
+
+          <div class="cv-legend">
+            <div class="cv-legend-item"><div class="cv-legend-dot" style="background:var(--color-success)"></div><span>Training Set</span></div>
+            <div class="cv-legend-item"><div class="cv-legend-dot" style="background:#3b82f6"></div><span>Validation Set (für Hyperparams)</span></div>
+            <div class="cv-legend-item"><div class="cv-legend-dot" style="background:#f97316"></div><span>Test Set (finale, realistische Evaluation)</span></div>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">3-Way Split</span>
+              – Die drei Datensätze
+            </h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">Training Set</span>
+                – Modell wird darauf gefittet (<code>.fit()</code>)
+              </li>
+              <li>
+                <span class="key" style="--key-color:#3b82f6">Validation Set</span>
+                – für Hyperparameter-Optimierung (Cross-Validation)
+              </li>
+              <li>
+                <span class="key" style="--key-color:#f97316">Test Set</span>
+                – finale, <strong>realistische</strong> Performance-Bewertung
+                (nur einmal verwendet!)
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Warum 3-Way statt CV allein?</h3>
+            <ul>
+              <li>Cross-Validation allein: Parameter können zu genau an Trainings- <em>und</em> Testdaten angepasst werden</li>
+              <li>Training + Validation-Sets → <strong>optimale Hyperparameter</strong> finden</li>
+              <li>Das eigentliche Test-Set → <strong>realistische Performance</strong> bewerten</li>
+              <li>Test-Set ist „tabu" bis zur finalen Evaluation</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            State-of-the-Art: Training-Set zum Fitten, Validation-Set zur Hyperparameter-Optimierung (Cross-Validation),
+            Test-Set zur finalen, realistischen Performance-Bewertung. Das Test-Set wird
+            <strong>nur einmal</strong> am Ende verwendet – um eine unvoreingenommene Schätzung zu bekommen.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           7.4  MODEL TRAINING WORKFLOW  (Folie 31)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="workflow">
+        <div class="section-head">
+          <h2>7.4 Model Training Workflow</h2>
+          <p>
+            Der vollständige Ablauf vom Rohdatensatz bis zur finalen Evaluation –
+            als strukturierter Flowchart.
+          </p>
+        </div>
+
+        <!-- Workflow Chart -->
+        <div class="workflow">
+          <!-- Ebene 1: Inputs -->
+          <div class="wf-row">
+            <div class="wf-node input">🔧 Parameters<br><small style="font-weight:400; opacity:.75">Hyperparameter</small></div>
+            <div class="wf-node input">📦 Dataset<br><small style="font-weight:400; opacity:.75">Alle Daten</small></div>
+            <div class="wf-node test-node">🎯 Test data<br><small style="font-weight:400; opacity:.75">(Tabu!)</small></div>
+          </div>
+          <div class="wf-arrow-down">↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+
+          <!-- Ebene 2: Prozesse -->
+          <div class="wf-row">
+            <div class="wf-node process">⚙️ Cross-validation<br><small style="font-weight:400; opacity:.75">Finding Hyperparams</small></div>
+            <div class="wf-node input">📗 Training data<br><small style="font-weight:400; opacity:.75">80% des Datasets</small></div>
+          </div>
+          <div class="wf-arrow-down">↓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↓</div>
+
+          <!-- Ebene 3: Ergebnisse -->
+          <div class="wf-row">
+            <div class="wf-node result">✅ Best Hyperparameters<br><small style="font-weight:400; opacity:.75">Optimale Parameter</small></div>
+            <div class="wf-node process">🧠 Retrained model<br><small style="font-weight:400; opacity:.75">Final trainiertes Modell</small></div>
+          </div>
+          <div style="text-align:center; font-size:var(--text-xs); color:var(--color-text-faint); margin:var(--space-1) 0">
+            ↘ kombinieren ↙ &nbsp;+&nbsp; ↗ Test data (von oben)
+          </div>
+          <div class="wf-arrow-down">↓</div>
+
+          <!-- Ebene 4: Finale Evaluation -->
+          <div class="wf-row">
+            <div class="wf-node final" style="min-width:220px">
+              🏆 Final Evaluation<br>
+              <small style="font-weight:400; opacity:.85">Realistische Performance auf Test-Set</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Erklärung -->
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3>Workflow – Schritt für Schritt</h3>
+            <ul>
+              <li><strong>Input:</strong> Parameters (Hyperparameter-Range), Dataset, separates Test-Set</li>
+              <li>Dataset → aufteilen in Training data + Test data (Test-Set beiseite legen)</li>
+              <li>Parameters + Training data → Cross-Validation → Best Hyperparameters</li>
+              <li>Best Hyperparameters + Training data → Retrained model</li>
+              <li>Retrained model + Test data → <strong>Final evaluation</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">Achtung: Hyperparameter ≠ Parameter!</span>
+            </h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">Hyperparameter</span>
+                = werden <em>vor</em> dem Training festgelegt (z.B. <code>n_neighbors=1</code>)
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">Parameter</span>
+                = werden <em>durch</em> das Training gelernt (z.B. Koeffizienten der Geraden)
+              </li>
+              <li>Cross-Validation findet die <strong>besten Hyperparameter</strong></li>
+              <li>Training mit diesen Hyperparametern lernt die <strong>Parameter</strong></li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? – aus der Vorlesung (Folie 31)</div>
+          <p>
+            „Achtung: was hier evtl. verwirren könnte – es gibt einen Unterschied zwischen
+            den <strong>Hyperparametern</strong> und den <strong>Parametern</strong> eines Modells! :)"
+            Die Wahl des besten Modells anhand des Hyperparameter-Tunings ist einer der
+            wichtigsten Aspekte des Machine Learning.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           7.5  REPEATED K-FOLD  (Folie 32)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="repeated-kfold">
+        <div class="section-head">
+          <h2>7.5 Repeated K-Fold Cross-Validation</h2>
+          <p>
+            K-Fold CV kann durch zufällige Datenaufteilung
+            <span class="key" style="--key-color:var(--color-warning)">Artefakte</span>
+            erzeugen. Lösung: K-Fold mehrfach mit unterschiedlichen zufälligen Splits wiederholen.
+          </p>
+          <p style="margin-top:var(--space-2)">
+            Referenz:
+            <a href="https://scikit-learn.org/stable/modules/cross_validation.html#repeated-k-fold"
+               target="_blank" style="color:var(--color-primary); font-size:var(--text-xs)">
+              scikit-learn.org – Repeated K-Fold
+            </a>
+            &nbsp;·&nbsp;
+            <a href="https://machinelearningmastery.com/repeated-k-fold-cross-validation-with-python/"
+               target="_blank" style="color:var(--color-primary); font-size:var(--text-xs)">
+              machinelearningmastery.com
+            </a>
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Repeated K-Fold</span>
+              – Warum?
+            </h3>
+            <ul>
+              <li>K-Fold: zufällige Aufteilung kann zu
+                <span class="key" style="--key-color:var(--color-warning)">Artefakten</span>
+                führen (ungünstige Splits)</li>
+              <li>Lösung: K-Fold <strong>mehrfach wiederholen</strong> mit jeweils neuer zufälliger Aufteilung</li>
+              <li>Ergebnis: noch robustere, stabilere Performance-Schätzung</li>
+              <li>Preis: deutlich höherer Rechenaufwand</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Nested K-Fold</span>
+              – Weiterer Schritt
+            </h3>
+            <ul>
+              <li>Verschachtelung von Cross-Validation Schleifen</li>
+              <li>Outer loop: Modell-Performance bewerten</li>
+              <li>Inner loop: Hyperparameter optimieren</li>
+              <li>Vermeidet Overfitting auf Hyperparameter-Ebene</li>
+              <li>State-of-the-Art für unvoreingenommene Modellselektion</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Repeated K-Fold Code -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Repeated K-Fold in sklearn
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>RepeatedKFold</code> kombiniert mehrere K-Fold-Durchläufe mit unterschiedlichen
+          Zufalls-Seeds. Das Ergebnis: <code>n_splits × n_repeats</code> Scores.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Repeated K-Fold
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.model_selection import (
+    RepeatedKFold, cross_val_score)
+
+# 5-Fold, 3x wiederholt → 15 Scores
+rkf = RepeatedKFold(
+    n_splits=5,
+    n_repeats=3,
+    random_state=42)
+
+scores = cross_val_score(
+    model, X, y, cv=rkf)
+
+print(f"Anzahl Scores: {len(scores)}")
+print(f"Mittelwert: {scores.mean():.4f}")
+print(f"Std:        {scores.std():.4f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Ausgabe</span></div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                Anzahl Scores: 15<br>
+                Mittelwert: 0.9600<br>
+                Std:        0.0298
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.8">
+                <li><code>n_splits=5 × n_repeats=3</code> = 15 Scores</li>
+                <li>Jeder Repeat: neue zufällige Aufteilung</li>
+                <li>Robustere Schätzung als einfaches K-Fold</li>
+                <li>Niedrige Std → stabile Performance</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfrage aus der Vorlesung</div>
+          <p>„Was denken Sie? Treiben Sie den Ansatz auf die Spitze: wo/wie können Sie noch Artefakte vermeiden?"</p>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? – Zusammenfassung Seite 7</div>
+          <p>
+            Validierungs-Strategien in aufsteigender Robustheit:
+            <strong>Holdout → Two-Fold → K-Fold → LOO → Repeated K-Fold → Nested K-Fold</strong>.
+            State-of-the-Art in der Praxis: <code>cross_val_score(model, X, y, cv=5)</code>
+            kombiniert mit einem separaten Test-Set (3-Way Split).
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Seite 7 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

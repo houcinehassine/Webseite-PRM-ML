@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Kapitel 6 · Gaussian Mixture Models</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+</head>
+<body>
+
+  <!-- ══ SITE-HEADER ════════════════════════════════════════ -->
+  <site-header active="page6" title="Kapitel 6 · Gaussian Mixture Models"></site-header>
+
+  <!-- ══ MAIN ═══════════════════════════════════════════════ -->
+  <main id="main-content">
+    <div class="container">
+
+      <!-- ── HERO ──────────────────────────────────────────── -->
+      <section class="k6-hero">
+        <span class="eyebrow">🔵 Kapitel 6</span>
+        <h1>Gaussian Mixture Models</h1>
+        <p>
+          Von den Grenzen des k-means zur probabilistischen Dichteschätzung –
+          GMMs, der EM-Algorithmus und generative Modelle Schritt für Schritt.
+        </p>
+
+        <!-- Core formula badge -->
+        <div class="formula-badge">
+          <span class="f-eq">p(<b>x</b> | <b>θ</b>) =</span>
+          <span class="f-sum">∑</span>
+          <span style="font-size:0.75em; color:var(--color-text-faint); align-self:flex-end; margin-bottom:2px">k=1</span>
+          <span class="f-sum" style="font-size:0.85em; margin-left:-2px">K</span>
+          <span class="f-norm">w<sub>k</sub> · 𝒩(<b>x</b> | μ<sub>k</sub>, Σ<sub>k</sub>)</span>
+        </div>
+
+        <!-- ── GMM visualisation: 3 overlapping bell curves ── -->
+        <div class="gmm-visual">
+          <svg viewBox="0 0 600 118" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+
+            <!-- Baseline -->
+            <line x1="10" y1="106" x2="590" y2="106"
+                  stroke="var(--color-border)" stroke-width="1.2"/>
+
+            <!-- Component 1 — Indigo, centred ~155 -->
+            <path d="M 30,106 C 65,106 110,14 155,14 C 200,14 245,106 280,106"
+                  fill="color-mix(in oklab, #6366f1 18%, transparent)"
+                  stroke="#6366f1" stroke-width="2.2" stroke-linejoin="round"/>
+
+            <!-- Component 2 — Emerald, centred ~305, tallest -->
+            <path d="M 155,106 C 200,106 260,6 305,6 C 350,6 410,106 455,106"
+                  fill="color-mix(in oklab, #10b981 18%, transparent)"
+                  stroke="#10b981" stroke-width="2.2" stroke-linejoin="round"/>
+
+            <!-- Component 3 — Amber, centred ~455 -->
+            <path d="M 335,106 C 370,106 415,22 455,22 C 495,22 540,106 570,106"
+                  fill="color-mix(in oklab, #f59e0b 18%, transparent)"
+                  stroke="#f59e0b" stroke-width="2.2" stroke-linejoin="round"/>
+
+            <!-- Sum / mixture curve — dashed dark -->
+            <path d="M 30,106
+                     C 55,106 85,58  115,42
+                     C 135,32 148,18 165,20
+                     C 182,22 195,38 215,48
+                     C 245,60 268,14 305,10
+                     C 342,6  370,50 395,65
+                     C 418,78 432,60 455,38
+                     C 472,22 492,28 515,45
+                     C 538,62 558,88 570,106"
+                  fill="none"
+                  stroke="var(--color-text)"
+                  stroke-width="2.5"
+                  stroke-dasharray="6 3"
+                  opacity="0.45"/>
+
+            <!-- Labels -->
+            <text x="155" y="10"  font-size="9" fill="#6366f1" font-weight="700" text-anchor="middle">w₁·𝒩₁</text>
+            <text x="305" y="2"   font-size="9" fill="#10b981" font-weight="700" text-anchor="middle">w₂·𝒩₂</text>
+            <text x="455" y="18"  font-size="9" fill="#f59e0b" font-weight="700" text-anchor="middle">w₃·𝒩₃</text>
+            <text x="570" y="96"  font-size="8" fill="var(--color-text-faint)" font-weight="600" text-anchor="end">p(x|θ)</text>
+          </svg>
+        </div>
+
+        <!-- Themen-Überblick pills -->
+        <div class="overview-strip">
+          <span class="overview-pill">⚠️ k-means Grenzen</span>
+          <span class="overview-pill">🔵 Gaussian Mixture</span>
+          <span class="overview-pill">🔄 EM-Algorithmus</span>
+          <span class="overview-pill">📊 predict_proba()</span>
+          <span class="overview-pill">∑ MLE & Herleitung</span>
+          <span class="overview-pill">📐 BIC & AIC</span>
+          <span class="overview-pill">🎲 Generative Modelle</span>
+          <span class="overview-pill">✍️ Ziffern generieren</span>
+        </div>
+
+        <!-- Status pills -->
+        <div class="status-bar">
+          <span class="status-pill active"><span class="dot"></span>5 Seiten verfügbar</span>
+          <span class="status-pill"><span class="dot"></span>1 Anwendungsbeispiel</span>
+          <span class="status-pill">sklearn · numpy · matplotlib</span>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SEKTION 1 · Einführung & Mechanik                 -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div class="section-label">
+        <span class="section-label-icon">🚀</span>
+        <span class="section-label-text">Einführung & Mechanik</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="pages-grid">
+
+        <!-- Page 01 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page01.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-2)),
+                 color-mix(in oklab, var(--color-primary)  4%, var(--color-surface-offset)));">
+            🗺️
+            <span class="card-num">Seite 01</span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Motivation</div>
+            <div class="card-titel">Einführung & Reinkommen</div>
+            <div class="card-desc">
+              Wo befinden wir uns? Zwei strukturelle Schwächen von k-means:
+              kein probabilistisches Output und die sphärische Cluster-Annahme.
+              Improving k-means mit Hypersphären-Visualisierung – und dann
+              der erste Einsatz von <code>GaussianMixture()</code>.
+            </div>
+            <div class="card-tags">
+              <span class="tag">k-means Grenzen</span>
+              <span class="tag">Hypersphären</span>
+              <span class="tag">GaussianMixture</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Motivation · 4 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 02 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page02.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #10b981 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #10b981  4%, var(--color-surface-offset)));">
+            ⚙️
+            <span class="card-num"
+                  style="color:#059669; background:color-mix(in oklab,#10b981 12%,var(--color-surface))">
+              Seite 02
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Mechanik & sklearn</div>
+            <div class="card-titel">GMM – Mechanik & sklearn</div>
+            <div class="card-desc">
+              <code>.predict_proba()</code> in der Praxis: weiche Clusterzugehörigkeit
+              sichtbar machen – Punktgröße als Konfidenz-Signal.
+              EM-Algorithmus Schritt für Schritt erklärt.
+              Hyperparameter <code>covariance_type</code>: diag, spherical, full.
+            </div>
+            <div class="card-tags">
+              <span class="tag">predict_proba</span>
+              <span class="tag">EM-Algorithmus</span>
+              <span class="tag">covariance_type</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie & Code · 3 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Einführung -->
+
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SEKTION 2 · Mathematik & Tiefe                    -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div class="section-label">
+        <span class="section-label-icon">∑</span>
+        <span class="section-label-text">Mathematik & Tiefe</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="pages-grid">
+
+        <!-- Page 03 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page03.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #f59e0b 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #f59e0b  4%, var(--color-surface-offset)));">
+            📐
+            <span class="card-num"
+                  style="color:#d97706; background:color-mix(in oklab,#f59e0b 12%,var(--color-surface))">
+              Seite 03
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Deep Dive</div>
+            <div class="card-titel">GMM – Mathematisch / Deep Dive</div>
+            <div class="card-desc">
+              Formale Herleitung von Grund auf: allgemeine Formulierung,
+              1D-Beispiel mit 3 Komponenten, Satz von Bayes, Likelihood und
+              i.i.d.-Annahme. Log-Likelihood, MLE-Schätzung und der vollständige
+              EM-Algorithmus mit allen Update-Formeln für μ, Σ und w.
+            </div>
+            <div class="card-tags">
+              <span class="tag">MLE</span>
+              <span class="tag">Log-Likelihood</span>
+              <span class="tag">Responsibilities r_nk</span>
+              <span class="tag">Update-Formeln</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Mathematik · 5 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Page 04 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page04.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #8b5cf6 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #8b5cf6  4%, var(--color-surface-offset)));">
+            📊
+            <span class="card-num"
+                  style="color:#7c3aed; background:color-mix(in oklab,#8b5cf6 12%,var(--color-surface))">
+              Seite 04
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Dichteschätzung</div>
+            <div class="card-titel">Dichteschätzung & BIC/AIC</div>
+            <div class="card-desc">
+              GMM als generatives Modell – nicht nur Clustering, sondern
+              echte Dichteschätzung. Das „Zwei Monde"-Problem: warum
+              2 Komponenten versagen und 16 triumphieren. Neue Daten via
+              <code>.sample()</code> erzeugen. BIC &amp; AIC zur Modellwahl.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Dichteschätzung</span>
+              <span class="tag">Zwei Monde</span>
+              <span class="tag">.sample()</span>
+              <span class="tag">BIC & AIC</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Theorie & Code · 5 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Mathematik -->
+
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SEKTION 3 · Anwendungsbeispiel                    -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div class="section-label">
+        <span class="section-label-icon">🧪</span>
+        <span class="section-label-text">Anwendungsbeispiel</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="pages-grid">
+
+        <!-- Page 05 ─────────────────────────────────────── -->
+        <a class="page-card" href="Page05.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #ec4899 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #ec4899  4%, var(--color-surface-offset)));">
+            ✍️
+            <span class="card-num"
+                  style="color:#db2777; background:color-mix(in oklab,#ec4899 12%,var(--color-surface))">
+              Seite 05
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Hands-on Aufgabe</div>
+            <div class="card-titel">Anwendung: Ziffern generieren</div>
+            <div class="card-desc">
+              <code>load_digits</code> aus sklearn – ein GMM lernt die gesamte
+              Verteilung handschriftlicher Ziffern. AIC-Loop zur Modellauswahl
+              (50 bis 200 Komponenten). <code>GaussianMixture(120)</code> generiert
+              via <code>.sample(100)</code> neue, nie gesehene Ziffern.
+            </div>
+            <div class="card-tags">
+              <span class="tag">load_digits</span>
+              <span class="tag">AIC Modellwahl</span>
+              <span class="tag">Generierung</span>
+              <span class="tag">.sample(100)</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Code-Aufgabe mit Lösung · 3 Abschnitte</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Anwendung -->
+
+
+      <!-- ══════════════════════════════════════════════════ -->
+      <!-- SEKTION 4 · Prüfungsvorbereitung                  -->
+      <!-- ══════════════════════════════════════════════════ -->
+      <div class="section-label">
+        <span class="section-label-icon">📋</span>
+        <span class="section-label-text">Prüfungsvorbereitung</span>
+        <span class="section-label-line"></span>
+      </div>
+      <div class="pages-grid two-col">
+
+        <!-- Cheatsheet ──────────────────────────────────── -->
+        <a class="page-card" href="PageCheatsheet.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #0ea5e9 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #0ea5e9  4%, var(--color-surface-offset)));">
+            📋
+            <span class="card-num"
+                  style="color:#0284c7; background:color-mix(in oklab,#0ea5e9 12%,var(--color-surface))">
+              Cheatsheet
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Schnellreferenz</div>
+            <div class="card-titel">Cheatsheet GMM</div>
+            <div class="card-desc">
+              Alle Formeln auf einen Blick: GMM-Gleichung, EM-Schritte,
+              Responsibilities, Update-Regeln für μ, Σ und w.
+              sklearn API, Hyperparameter, BIC vs. AIC,
+              typische Prüfungsfallen und Merksätze.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Alle Formeln</span>
+              <span class="tag">EM-Schritte</span>
+              <span class="tag">sklearn API</span>
+              <span class="tag">BIC & AIC</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Prüfungsvorbereitung · Referenz</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+        <!-- Quiz ────────────────────────────────────────── -->
+        <a class="page-card" href="PageQuiz.html">
+          <div class="card-banner"
+               style="background: linear-gradient(135deg,
+                 color-mix(in oklab, #a855f7 12%, var(--color-surface-2)),
+                 color-mix(in oklab, #a855f7  4%, var(--color-surface-offset)));">
+            🧠
+            <span class="card-num"
+                  style="color:#9333ea; background:color-mix(in oklab,#a855f7 12%,var(--color-surface))">
+              Quiz
+            </span>
+          </div>
+          <div class="card-body">
+            <div class="card-subtitle">Selbsttest</div>
+            <div class="card-titel">Quiz – Alles auf Prüfung</div>
+            <div class="card-desc">
+              Konzeptfragen zu GMM, EM und Dichteschätzung.
+              Formelfragen zu MLE, Responsibilities und BIC/AIC.
+              Code-Fragen zur sklearn API.
+              Plus: typische Prüfungsfallen, die gerne übersehen werden.
+            </div>
+            <div class="card-tags">
+              <span class="tag">Konzeptfragen</span>
+              <span class="tag">Formelfragen</span>
+              <span class="tag">Code-Fragen</span>
+              <span class="tag">🪤 Fallen</span>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span>Selbsttest · 4 Kategorien</span>
+            <span class="card-arrow">→</span>
+          </div>
+        </a>
+
+      </div><!-- /pages-grid Prüfung -->
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- ══ FOOTER ═════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 6 – Gaussian Mixture Models · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

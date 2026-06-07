@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Multi-Class ROC Curves</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page7" title="Kapitel 7 · Multi-Class ROC Curves"></site-header>
+  <div class="layout">
+    <site-sidebar active="page7"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 7 · Seite 7</span>
+            <h1>Multi-Class <span class="key" style="--key-color:var(--color-primary)">ROC Curves</span></h1>
+            <p>
+              ROC-Kurven für mehr als zwei Klassen – One-vs-One (OvO),
+              One-vs-Rest (OvR), Micro- und Macro-Averaging.
+              Vollständiges Code-Beispiel mit dem Iris-Datensatz.
+            </p>
+            <div class="pill-row">
+              <span class="pill">OvO</span>
+              <span class="pill">OvR</span>
+              <span class="pill">Macro-Avg</span>
+              <span class="pill">Micro-Avg</span>
+              <span class="pill">label_binarize</span>
+              <span class="pill">OneVsRestClassifier</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du weißt, wie das Multi-Class-Problem auf binäre ROC-Probleme
+              reduziert wird (OvO / OvR), und kannst einen
+              <code>OneVsRestClassifier</code> mit mehreren ROC-Kurven implementieren.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. WARUM IST MULTI-CLASS SCHWIERIGER?
+           ════════════════════════════════════════════ -->
+      <section class="section" id="warum-schwieriger">
+        <div class="section-head">
+          <h2>7.1 Das Problem: ROC nur für binäre Klassifikation</h2>
+          <p>
+            <code>roc_curve()</code> ist explizit auf <strong>binäre Klassifikation</strong> beschränkt.
+            Wie geht man bei 3 oder mehr Klassen vor?
+          </p>
+        </div>
+
+        <div class="note note-warning" style="margin-bottom:var(--space-5)">
+          <strong>Aus der sklearn-Doku:</strong>
+          „This implementation is restricted to the binary classification task." →
+          Für Multi-Class muss man das Problem in mehrere binäre Probleme aufteilen.
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">One-vs-Rest (OvR)</span></h3>
+            <p>
+              Für jede Klasse \(i\) wird ein eigenes binäres Problem definiert:
+              <strong>Klasse \(i\) gegen alle anderen Klassen</strong>.
+            </p>
+            <ul>
+              <li>Bei k Klassen: k binäre Klassifikatoren</li>
+              <li>Jeder Klassifikator liefert eine ROC-Kurve und eine AUC</li>
+              <li>Aus allen k Kurven kann eine mittlere Kurve berechnet werden</li>
+              <li><strong>sklearn-Implementierung:</strong> <code>OneVsRestClassifier</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">One-vs-One (OvO)</span></h3>
+            <p>
+              Für jedes Paar von Klassen wird ein eigenes binäres Problem definiert.
+            </p>
+            <ul>
+              <li>Bei k Klassen: k·(k−1)/2 binäre Klassifikatoren</li>
+              <li>Beispiel: 3 Klassen → 3 Paare: (0 vs 1), (0 vs 2), (1 vs 2)</li>
+              <li>Rechenintensiver, aber manchmal genauer</li>
+              <li>Analogie zur SVM: Gleiche Strategie wie Multi-Class-SVM</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. MICRO UND MACRO AVERAGING
+           ════════════════════════════════════════════ -->
+      <section class="section" id="averaging">
+        <div class="section-head">
+          <h2>7.2 Micro-Average vs. Macro-Average</h2>
+          <p>
+            Wie kombiniert man die k ROC-Kurven zu einer einzigen mittleren Kurve?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Macro-Average</span></h3>
+            <p>
+              Berechne für alle k Klassen eine ROC-Kurve,
+              dann mittele die TPR-Werte bei denselben FPR-Punkten.
+            </p>
+            <ul>
+              <li>Jede Klasse hat gleiches Gewicht</li>
+              <li>Problematisch bei stark unbalancierten Klassen</li>
+              <li>Interpolation nötig: <code>np.interp()</code></li>
+            </ul>
+            <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+              Verwendung: Wenn alle Klassen gleich wichtig sind
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Micro-Average</span></h3>
+            <p>
+              Aggregiere alle TP, FP, TN, FN über alle Klassen,
+              dann berechne eine einzige ROC-Kurve.
+            </p>
+            <ul>
+              <li>Gewichtet nach Klassengröße</li>
+              <li>Bessere Maß bei unbalancierten Klassen</li>
+              <li>Berechnung: <code>roc_curve(y_test.ravel(), y_score.ravel())</code></li>
+            </ul>
+            <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+              Verwendung: Wenn größere Klassen wichtiger sind
+            </p>
+          </article>
+        </div>
+
+        <div style="margin-top:var(--space-5)">
+          <table>
+            <thead>
+              <tr>
+                <th>Methode</th>
+                <th>Wie berechnet?</th>
+                <th>Gewichtung</th>
+                <th>Wann nutzen?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Macro-Average</strong></td>
+                <td>Mittelwert der k Kurven (nach Interpolation)</td>
+                <td>Alle Klassen gleich</td>
+                <td>Balancierte Klassen</td>
+              </tr>
+              <tr>
+                <td><strong>Micro-Average</strong></td>
+                <td>Aggregierte Counts aller Klassen</td>
+                <td>Proportional zur Klassengröße</td>
+                <td>Unbalancierte Klassen</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. VOLLSTÄNDIGES CODE-BEISPIEL
+           ════════════════════════════════════════════ -->
+      <section class="section" id="code-beispiel">
+        <div class="section-head">
+          <h2>7.3 Vollständiges Code-Beispiel – Iris-Datensatz</h2>
+          <p>
+            Multi-Class ROC mit dem Iris-Datensatz (3 Klassen),
+            One-vs-Rest-Klassifikator und Macro-Average.
+          </p>
+        </div>
+
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+          text-transform:uppercase; color:var(--color-text-faint); margin-bottom:var(--space-2)">
+          Schritt 1 · Imports und Daten vorbereiten
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from itertools import cycle
+from sklearn import svm, datasets
+from sklearn.metrics import roc_curve, auc
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import label_binarize
+from sklearn.multiclass import OneVsRestClassifier
+from sklearn.metrics import roc_auc_score
+
+# Iris-Datensatz laden
+iris = datasets.load_iris()
+X = iris.data
+y = iris.target   # 3 Klassen: 0, 1, 2
+
+# Labels binarisieren (One-Hot): [1,0,0], [0,1,0], [0,0,1]
+y = label_binarize(y, classes=[0, 1, 2])
+n_classes = y.shape[1]   # = 3
+
+# Schwieriger machen: 200 zufällige Noise-Features hinzufügen
+random_state = np.random.RandomState(0)
+n_samples, n_features = X.shape
+X = np.c_[X, random_state.randn(n_samples, 200 * n_features)]
+
+# Train-Test-Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.5, random_state=0)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Erklärung
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li><code>label_binarize()</code>: y = [0,1,2] → One-Hot-Matrix (75, 3)</li>
+                <li>200× zufällige Noise-Features: macht Klassifikation schwieriger</li>
+                <li>50/50 Train-Test-Split</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+          text-transform:uppercase; color:var(--color-text-faint); margin: var(--space-6) 0 var(--space-2)">
+          Schritt 2 · OneVsRestClassifier trainieren und ROC berechnen
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># OneVsRestClassifier mit linearer SVM
+classifier = OneVsRestClassifier(
+    svm.SVC(kernel="linear", probability=True,
+            random_state=random_state)
+)
+y_score = classifier.fit(X_train, y_train).decision_function(X_test)
+
+# ROC-Kurven für jede Klasse einzeln berechnen
+fpr = dict()
+tpr = dict()
+roc_auc = dict()
+
+for i in range(n_classes):
+    fpr[i], tpr[i], _ = roc_curve(y_test[:, i], y_score[:, i])
+    roc_auc[i] = auc(fpr[i], tpr[i])
+
+# Micro-Average berechnen (aggregiert alle Klassen)
+fpr["micro"], tpr["micro"], _ = roc_curve(
+    y_test.ravel(), y_score.ravel()
+)
+roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Hinweise
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li><code>probability=True</code>: aktiviert Platt-Scaling für Wahrscheinlichkeiten</li>
+                <li><code>y_score</code> ist nun eine (n_test, 3)-Matrix</li>
+                <li>Schleife über alle 3 Klassen: je eine ROC-Kurve + AUC</li>
+                <li><code>.ravel()</code>: Matrix in 1D-Array umwandeln für Micro-Avg</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+          text-transform:uppercase; color:var(--color-text-faint); margin: var(--space-6) 0 var(--space-2)">
+          Schritt 3 · Macro-Average berechnen
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code># Alle einzigartigen FPR-Werte zusammenführen
+all_fpr = np.unique(np.concatenate(
+    [fpr[i] for i in range(n_classes)]
+))
+
+# Alle ROC-Kurven auf diese gemeinsamen FPR-Werte interpolieren
+mean_tpr = np.zeros_like(all_fpr)
+for i in range(n_classes):
+    mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+
+# Mitteln über alle Klassen und AUC berechnen
+mean_tpr /= n_classes
+fpr["macro"] = all_fpr
+tpr["macro"] = mean_tpr
+roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Warum interpolieren?
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>Jede Klassen-ROC hat unterschiedliche FPR-Stützstellen</li>
+                <li><code>np.unique(np.concatenate(...))</code>: Vereinigung aller FPR-Werte</li>
+                <li><code>np.interp()</code>: Lineare Interpolation auf das gemeinsame Raster</li>
+                <li>Dann: Mittelwert über alle Klassen</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+          text-transform:uppercase; color:var(--color-text-faint); margin: var(--space-6) 0 var(--space-2)">
+          Schritt 4 · Alle ROC-Kurven plotten
+        </p>
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Vollständiger Plot
+              </span>
+              <button class="copy-btn" aria-label="Code kopieren">Kopieren</button>
+            </div>
+            <pre><code>plt.figure()
+lw = 2
+
+# Macro-Average Kurve
+plt.plot(fpr["macro"], tpr["macro"],
+         label=f"Average ROC (area = {roc_auc['macro']:0.2f})",
+         color="navy", linestyle=":", linewidth=4)
+
+# Kurven für jede Klasse
+colors = cycle(["aqua", "darkorange", "cornflowerblue"])
+for i, color in zip(range(n_classes), colors):
+    plt.plot(fpr[i], tpr[i], color=color, lw=lw,
+             label=f"ROC class {i} (area = {roc_auc[i]:0.2f})")
+
+# Referenz-Diagonale
+plt.plot([0, 1], [0, 1], "k--", lw=lw)
+
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("Multi-Class ROC Curves – Iris")
+plt.legend(loc="lower right")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Ergebnis
+              </span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>3 farbige Kurven – je eine pro Klasse</li>
+                <li>Gestrichelte navy-Linie = Macro-Average</li>
+                <li>Gestrichelte schwarze Linie = Zufalls-Klassifikator</li>
+                <li>AUC-Werte im Label sichtbar</li>
+                <li>Klasse 0 (setosa) oft am leichtesten zu klassifizieren</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. ZUSAMMENFASSUNG
+           ════════════════════════════════════════════ -->
+      <section class="section" id="zusammenfassung">
+        <div class="section-head">
+          <h2>7.4 Zusammenfassung – Multi-Class ROC</h2>
+        </div>
+
+        <div class="timeline">
+          <div class="timeline-step">
+            <div class="step-no">1</div>
+            <div>
+              <h3>Labels binarisieren</h3>
+              <p>
+                <code>label_binarize(y, classes=[0,1,2])</code> → One-Hot-Matrix (n, k)
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">2</div>
+            <div>
+              <h3>OneVsRestClassifier</h3>
+              <p>
+                <code>OneVsRestClassifier(SVC(probability=True))</code>
+                → trainiert k binäre Klassifikatoren automatisch
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">3</div>
+            <div>
+              <h3>Klassen-ROC berechnen</h3>
+              <p>
+                Schleife über alle k Klassen:
+                <code>roc_curve(y_test[:,i], y_score[:,i])</code>
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">4</div>
+            <div>
+              <h3>Averaging</h3>
+              <p>
+                Micro: <code>roc_curve(y_test.ravel(), y_score.ravel())</code> |
+                Macro: Interpolation + Mittelwert
+              </p>
+            </div>
+          </div>
+          <div class="timeline-step">
+            <div class="step-no">5</div>
+            <div>
+              <h3>roc_auc_score für Multi-Class</h3>
+              <p>
+                <code>roc_auc_score(y_true, y_score, multi_class='ovr')</code>
+                oder <code>multi_class='ovo'</code> – direkt in sklearn verfügbar
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Wichtig:</strong>
+          <code>roc_curve()</code> kann <strong>nur binär</strong> umgehen.
+          <code>roc_auc_score()</code> hingegen kann direkt mit Multi-Class-Problemen umgehen –
+          mit den Parametern <code>multi_class='ovr'</code> und <code>average='macro'</code>.
+        </div>
+      </section>
+
+      <!-- Navigation -->
+      <section class="section" id="navigation">
+        <div class="card-grid">
+          <a href="Page06.html" class="card" style="text-decoration:none">
+            <h3>← Seite 6</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              Precision-Recall Curve, F1-Score
+            </p>
+          </a>
+          <a href="PageBeispiel.html" class="card"
+            style="text-decoration:none; border-color:var(--color-success);
+              background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2))">
+            <h3 style="color:var(--color-success)">→ Praxisbeispiel: Kugellager</h3>
+            <p style="color:var(--color-text-muted); font-size:var(--text-sm)">
+              adjusted_predict() vollständig implementiert – Cheap &amp; Expensive Bearings
+            </p>
+          </a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 7 · Seite 7 · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K6 · Quiz GMM</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <script type="module" src="../js_codes/Quiz.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+</head>
+<body>
+
+  <site-header active="page6" title="Kapitel 6 · Gaussian Mixture Models"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="quiz"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══ SCORE-BAR (sticky) ═══════════════════════════ -->
+      <div class="quiz-score-bar">
+        <div class="quiz-score-nums">
+          <span class="quiz-score-label">Richtig</span>
+          <span class="quiz-score-big" id="quiz-score">0</span>
+          <span class="quiz-score-sep">/</span>
+          <span id="quiz-total" style="font-size:var(--text-lg); color:var(--color-text-muted)">20</span>
+        </div>
+        <div class="quiz-progress-wrap">
+          <div class="quiz-progress-text">
+            <span id="quiz-answered">0</span> von
+            <span id="quiz-total-2">20</span> beantwortet
+          </div>
+          <div class="quiz-progress-track">
+            <div class="quiz-progress-fill" id="quiz-progress-bar"></div>
+          </div>
+        </div>
+        <button id="quiz-reset">↺ Neustart</button>
+      </div>
+
+
+      <!-- ══ HERO ══════════════════════════════════════════ -->
+      <section class="hero" style="padding-top:var(--space-6)">
+        <div>
+          <span class="eyebrow">Kapitel 6 · Selbsttest</span>
+          <h1>🧠 Quiz –
+            <span class="key" style="--key-color:var(--color-primary)">Alles auf Prüfung</span>
+          </h1>
+          <p>
+            20 Fragen in 4 Kategorien – klick eine Antwort an,
+            sieh sofort ob sie richtig ist, und lies die Erklärung.
+            Am Ende gibt es deine Gesamtnote.
+          </p>
+          <div class="pill-row">
+            <span class="pill">5 Konzeptfragen</span>
+            <span class="pill">5 Formelfragen</span>
+            <span class="pill">5 Code-Fragen</span>
+            <span class="pill">5 🪤 Fallen</span>
+          </div>
+        </div>
+      </section>
+
+
+      <div style="padding: 0 var(--space-2) var(--space-12)">
+
+        <!-- ════════════════════════════════════════════════
+             KATEGORIE 1: KONZEPTFRAGEN
+        ════════════════════════════════════════════════════ -->
+        <div class="quiz-cat-label">
+          <span class="quiz-cat-label-text">💡 Konzeptfragen</span>
+          <span class="quiz-cat-line" style="flex:1; height:1px; background:var(--color-border); margin:0 var(--space-3)"></span>
+          <span class="quiz-cat-count">Fragen 1–5</span>
+        </div>
+
+        <!-- Q1 -->
+        <div class="quiz-question" data-q="1">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">1</span>
+            <p class="quiz-q-text">Was ist die Hauptverbesserung von GMM gegenüber k-means?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              GMM ist deutlich schneller als k-means
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              GMM liefert Wahrscheinlichkeiten (weiche Zuweisung) und kann elliptische Cluster modellieren
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              GMM braucht weniger Komponenten als k-means Cluster
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              GMM kann nur mit normalverteilten Daten umgehen
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! GMM gibt über <code>predict_proba()</code> Wahrscheinlichkeiten zurück (weiche Zuweisung) und nutzt elliptische Gauß-Ellipsen statt sphärischer Kreise.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Die Hauptverbesserung ist die <strong>weiche probabilistische Zuweisung</strong> und die Fähigkeit, <strong>elliptische Cluster</strong> zu modellieren. Geschwindigkeit ist kein Vorteil von GMM.</div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="quiz-question" data-q="2">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">2</span>
+            <p class="quiz-q-text">Was bedeutet "generativ" in "Generative Probabilistic Model"?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Das Modell generiert automatisch bessere Hyperparameter
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              Das Modell modelliert die vollständige Datenverteilung und kann neue Datenpunkte via <code>.sample()</code> erzeugen
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              Das Modell generiert intern mehr Trainingsdaten um genauer zu werden
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Das Modell generiert Visualisierungen der Cluster automatisch
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! Ein generatives Modell modelliert \(p(\mathbf{x})\) – die vollständige Datenverteilung. Mit <code>.sample(n)</code> können neue Punkte aus dieser Verteilung gezogen werden.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. "Generativ" bedeutet: das Modell modelliert \(p(\mathbf{x})\) und kann damit <strong>neue Daten erzeugen</strong> via <code>.sample()</code>. Im Gegensatz zu diskriminativen Modellen (z.B. SVM), die nur klassifizieren.</div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="quiz-question" data-q="3">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">3</span>
+            <p class="quiz-q-text">Was ist der Unterschied zwischen einem generativen und einem diskriminativen Modell?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Generative Modelle sind immer genauer als diskriminative
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">B</span>
+              Diskriminative Modelle brauchen immer Labels, generative nie
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">C</span>
+              Generative Modelle modellieren \(p(\mathbf{x})\) (vollständige Verteilung), diskriminative modellieren \(p(y|\mathbf{x})\) (Entscheidungsgrenze)
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Es gibt keinen relevanten Unterschied bei unüberwachtem Lernen
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! Generativ: modelliert die Datenverteilung \(p(\mathbf{x})\), kann neue Daten erzeugen (GMM, VAE). Diskriminativ: modelliert nur die Entscheidungsgrenze \(p(y|\mathbf{x})\), kann nicht sampeln (SVM, k-means).</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Der Kern-Unterschied: Generativ modelliert \(p(\mathbf{x})\) → kann neue Daten erzeugen. Diskriminativ modelliert \(p(y|\mathbf{x})\) → kann nur klassifizieren/clustern.</div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="quiz-question" data-q="4">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">4</span>
+            <p class="quiz-q-text">Welcher <code>covariance_type</code>-Wert macht GMM am ähnlichsten zu k-means?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              <code>'full'</code>
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">B</span>
+              <code>'diag'</code>
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">C</span>
+              <code>'spherical'</code>
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              <code>'tied'</code>
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! <code>'spherical'</code> – alle Dimensionen haben die gleiche Streuung → Kreis/Sphäre. Genau wie k-means kugelförmige, gleichmäßige Cluster annimmt.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Die Antwort ist <code>'spherical'</code>. k-means nimmt kugelförmige Cluster an – genau das modelliert spherical: ein Streuungsparameter \(\sigma^2\) für alle Dimensionen = Kreis.</div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="quiz-question" data-q="5">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">5</span>
+            <p class="quiz-q-text">Warum funktioniert GMM mit 2 Komponenten beim „Zwei Monde"-Datensatz nicht?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              200 Datenpunkte sind zu wenig für ein GMM
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              Gauß-Komponenten erzeugen immer elliptische Formen – Mondformen sind nicht elliptisch und können so nicht abgebildet werden
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              GMM erfordert immer mehr als 5 Komponenten
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Der <code>random_state=0</code> führt zu einer schlechten Initialisierung
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! Jede Gauß-Komponente beschreibt eine elliptische Region. Eine Halbmondform ist nicht-elliptisch → 2 Ellipsen können sie prinzipiell nicht korrekt abbilden. Lösung: viele Komponenten (z.B. 16) als Dichteschätzer.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Das Problem ist geometrisch: Gauß-Komponenten sind immer <strong>elliptisch</strong>. Halbmondformen sind nicht-elliptisch → egal wie viel Daten, 2 Ellipsen können Monde nicht abbilden. Lösung: 16+ Komponenten.</div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════
+             KATEGORIE 2: FORMELFRAGEN
+        ════════════════════════════════════════════════════ -->
+        <div class="quiz-cat-label" style="margin-top:var(--space-8)">
+          <span class="quiz-cat-label-text">∑ Formelfragen</span>
+          <span style="flex:1; height:1px; background:var(--color-border); margin:0 var(--space-3)"></span>
+          <span class="quiz-cat-count">Fragen 6–10</span>
+        </div>
+
+        <!-- Q6 -->
+        <div class="quiz-question" data-q="6">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">6</span>
+            <p class="quiz-q-text">Was berechnet der E-Schritt des EM-Algorithmus?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Die neuen Mittelwerte \(\boldsymbol{\mu}_k\)
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">B</span>
+              Die neuen Kovarianzmatrizen \(\boldsymbol{\Sigma}_k\)
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">C</span>
+              Die Responsibilities \(r_{nk}\) – die Clusterzugehörigkeitswahrscheinlichkeiten für jeden Datenpunkt
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Den BIC-Wert des aktuellen Modells
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! E-Schritt = Expectation: berechne \(r_{nk}\) = wie wahrscheinlich erzeugte Gaussian \(k\) den Punkt \(\mathbf{x}_n\)? Das ist genau was <code>predict_proba()</code> zurückgibt.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. E-Schritt = "Expectation" → berechnet die <strong>Responsibilities</strong> \(r_{nk}\). M-Schritt = "Maximization" → aktualisiert \(\boldsymbol{\mu}_k\), \(\boldsymbol{\Sigma}_k\), \(w_k\).</div>
+        </div>
+
+        <!-- Q7 -->
+        <div class="quiz-question" data-q="7">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">7</span>
+            <p class="quiz-q-text">Wo liegt das Optimum bei BIC und AIC?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Maximum von BIC und Maximum von AIC
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">B</span>
+              Maximum von BIC, Minimum von AIC
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">C</span>
+              Minimum von BIC und Minimum von AIC
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Minimum von BIC, Maximum von AIC
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! Bei beiden Kriterien gilt: <strong>Optimum = Minimum</strong>. Beide enthalten einen Penalty-Term, der Komplexität bestraft. Kleiner Wert = gutes Gleichgewicht zwischen Modellgüte und Einfachheit.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch! Das ist eine klassische Falle. Bei <strong>beiden</strong> liegt das Optimum beim <strong>Minimum</strong>. Merksatz: BIC/AIC – niedriger ist besser.</div>
+        </div>
+
+        <!-- Q8 -->
+        <div class="quiz-question" data-q="8">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">8</span>
+            <p class="quiz-q-text">Was ist der Unterschied in den Straftermen von BIC und AIC?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              BIC hat keinen Strafterm, AIC schon
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              BIC nutzt \(m\ln(n)\) als Strafterm – wächst mit der Datenmenge \(n\). AIC nutzt \(2m\) – konstant unabhängig von \(n\)
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              AIC nutzt \(m\ln(n)\), BIC nutzt \(2m\)
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Beide haben identische Strafterme
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! BIC = \(m\ln(n) - 2\ln(\hat{L})\) · AIC = \(2m - 2\ln(\hat{L})\). BICs Strafe wächst mit \(\ln(n)\) → bei großen Datensätzen empfiehlt BIC einfachere Modelle als AIC.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. BIC-Formel: \(m\ln(n) - 2\ln(\hat{L})\) → Strafterm \(m\ln(n)\). AIC-Formel: \(2m - 2\ln(\hat{L})\) → Strafterm \(2m\). BIC wird konservativer bei großem \(n\).</div>
+        </div>
+
+        <!-- Q9 -->
+        <div class="quiz-question" data-q="9">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">9</span>
+            <p class="quiz-q-text">Woraus besteht die Update-Formel für den neuen Mittelwert \(\boldsymbol{\mu}_k^{\text{new}}\) im M-Schritt?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Einfacher Durchschnitt aller Datenpunkte (wie bei k-means)
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              Gewichteter Durchschnitt – Datenpunkte gewichtet mit den Responsibilities \(r_{nk}\)
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              Gewichteter Durchschnitt – Datenpunkte gewichtet mit den Komponentengewichten \(w_k\)
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Median aller Datenpunkte in Cluster \(k\)
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! \(\boldsymbol{\mu}_k^{\text{new}} = \frac{\sum_n r_{nk}\,\mathbf{x}_n}{\sum_n r_{nk}}\) – wie k-means, aber mit weichen Gewichten \(r_{nk}\) statt harter Zuweisung (0/1).</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Anders als k-means werden die Datenpunkte nicht hart zugewiesen, sondern mit den <strong>Responsibilities \(r_{nk}\)</strong> (weiche Gewichte) gewichtet: \(\boldsymbol{\mu}_k^{\text{new}} = \frac{\sum_n r_{nk}\,\mathbf{x}_n}{\sum_n r_{nk}}\)</div>
+        </div>
+
+        <!-- Q10 -->
+        <div class="quiz-question" data-q="10">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">10</span>
+            <p class="quiz-q-text">Warum kann MLE für GMM nicht analytisch gelöst werden?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Weil die Anzahl der Parameter zu groß ist
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">B</span>
+              Weil die Daten nicht i.i.d. sind
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">C</span>
+              Weil in der Log-Likelihood ein <code>log</code> vor einer <code>Summe</code> steht – das lässt sich nicht vereinfachen
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Weil GMM keine konvexe Kostenfunktion hat
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! \(\log p(\mathbf{x}|\boldsymbol{\theta}) = \sum_n \log \sum_k w_k \mathcal{N}(\ldots)\) – log vor Summe ist nicht analytisch vereinfachbar. Deshalb iterativer EM-Algorithmus.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Das Problem ist strukturell: In der Log-Likelihood steht \(\log\) vor einer \(\sum\). Das lässt sich nicht analytisch vereinfachen → deshalb EM nötig.</div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════
+             KATEGORIE 3: CODE-FRAGEN
+        ════════════════════════════════════════════════════ -->
+        <div class="quiz-cat-label" style="margin-top:var(--space-8)">
+          <span class="quiz-cat-label-text">⌨️ Code-Fragen</span>
+          <span style="flex:1; height:1px; background:var(--color-border); margin:0 var(--space-3)"></span>
+          <span class="quiz-cat-count">Fragen 11–15</span>
+        </div>
+
+        <!-- Q11 -->
+        <div class="quiz-question" data-q="11">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">11</span>
+            <p class="quiz-q-text">Was gibt der folgende Code zurück?</p>
+          </div>
+          <div class="quiz-code">
+            <pre><code>probs = gmm.predict_proba(X)
+print(probs.shape, probs[0].sum().round(2))</code></pre>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              <code>(n_samples,)</code> und <code>K</code> (Anzahl Komponenten)
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              <code>(n_samples, K)</code> und <code>1.0</code> (jede Zeile summiert zu 1)
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              <code>(K, n_samples)</code> und <code>1.0</code>
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              <code>(n_samples, K)</code> und <code>K</code>
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! <code>predict_proba(X)</code> → Shape <code>(n_samples, K)</code>. Jede Zeile ist ein Wahrscheinlichkeitsvektor über K Komponenten → summiert zu 1.0.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Form ist <code>(n_samples, K)</code> – eine Zeile pro Datenpunkt, K Spalten (eine pro Komponente). Jede Zeile summiert zu <strong>1.0</strong> (Wahrscheinlichkeiten).</div>
+        </div>
+
+        <!-- Q12 -->
+        <div class="quiz-question" data-q="12">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">12</span>
+            <p class="quiz-q-text">Was bewirkt der Exponent <code>** 4</code> in diesem Code?</p>
+          </div>
+          <div class="quiz-code">
+            <pre><code>size = 50 * probs.max(1) ** 4
+plt.scatter(X[:, 0], X[:, 1], c=labels, s=size)</code></pre>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Er normalisiert die Größen auf einen Bereich von 0–1
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              Er verstärkt die Unterschiede: sichere Punkte (p≈1.0) werden viel größer, unsichere (p≈0.25) bleiben sehr klein
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              Er berechnet die 4. Ableitung der Likelihood
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Er stellt sicher, dass alle Punkte gleich groß sind
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! <code>probs.max(1)</code> gibt die höchste Wahrscheinlichkeit je Punkt (0..1). <code>** 4</code> potenziert: 0.9⁴ ≈ 0.66, aber 0.3⁴ ≈ 0.008 → kleine Unterschiede werden drastisch sichtbar.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Der Exponent <code>** 4</code> <strong>verstärkt Unterschiede</strong>: ein sicherer Punkt mit p=0.99 wird fast Originalgröße (0.99⁴≈0.96), ein unsicherer Punkt mit p=0.3 wird winzig (0.3⁴=0.008).</div>
+        </div>
+
+        <!-- Q13 -->
+        <div class="quiz-question" data-q="13">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">13</span>
+            <p class="quiz-q-text">Wie findet man korrekt das optimale K aus einer AIC-Liste?</p>
+          </div>
+          <div class="quiz-code">
+            <pre><code>n_components = np.arange(1, 21)
+models = [GaussianMixture(n, ...).fit(X) for n in n_components]
+aics = [m.aic(X) for m in models]
+# Wie lautet die nächste Zeile?</code></pre>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              <code>best_k = n_components[np.argmax(aics)]</code>
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              <code>best_k = n_components[np.argmin(aics)]</code>
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              <code>best_k = np.max(n_components)</code>
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              <code>best_k = n_components[aics.index(max(aics))]</code>
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! <code>np.argmin(aics)</code> gibt den Index des kleinsten AIC-Werts. Optimum von AIC/BIC = Minimum. <code>n_components[index]</code> gibt das entsprechende K.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Das Optimum liegt beim <strong>Minimum</strong> von AIC → <code>np.argmin(aics)</code>! argmax würde das schlechteste Modell auswählen.</div>
+        </div>
+
+        <!-- Q14 -->
+        <div class="quiz-question" data-q="14">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">14</span>
+            <p class="quiz-q-text">Was gibt <code>gmm.sample(100)</code> zurück und welche Shape hat <code>X_new</code>?</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Ein Array mit Shape <code>(100,)</code> – 100 Cluster-Labels
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              Ein Tupel <code>(X_new, labels)</code> mit <code>X_new.shape = (100, n_features)</code>
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              Ein Array mit Shape <code>(100, K)</code> – Wahrscheinlichkeiten für 100 Punkte
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Einen einzelnen Float – die Log-Likelihood der 100 Samples
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! <code>X_new, _ = gmm.sample(100)</code> → <code>X_new.shape = (100, n_features)</code>, <code>_.shape = (100,)</code> (Komponenten-Indices, werden meist ignoriert).</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. <code>.sample(n)</code> gibt ein <strong>Tupel</strong> zurück: <code>(X_new, labels)</code>. <code>X_new</code> hat Shape <code>(n, n_features)</code> – neue Datenpunkte. <code>labels</code> gibt an, welche Komponente jeden Punkt erzeugt hat.</div>
+        </div>
+
+        <!-- Q15 -->
+        <div class="quiz-question" data-q="15">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">15</span>
+            <p class="quiz-q-text">Was ist das Problem mit diesem Code für das Ziffern-Anwendungsbeispiel?</p>
+          </div>
+          <div class="quiz-code">
+            <pre><code>from sklearn.datasets import load_digits
+data = load_digits().data   # shape: (1797, 64)
+
+n_components = np.arange(1, 21)  # 1 bis 20
+models = [GaussianMixture(n, ...).fit(data) for n in n_components]
+aics = [m.aic(data) for m in models]</code></pre>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              <code>load_digits()</code> muss mit <code>.target</code> geladen werden
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              Der Range 1–20 ist für 64-dimensionale Daten viel zu klein – mindestens 50–200 Komponenten nötig
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              Die Daten müssen auf [0,1] normalisiert werden
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Es fehlt <code>covariance_type='full'</code>
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! Bei 64-dimensionalen Daten mit 10 Ziffernklassen braucht man viel mehr Komponenten. Im Anwendungsbeispiel: <code>np.arange(50, 210, 10)</code> – also 50 bis 200.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Das Hauptproblem ist der Range: 1–20 Komponenten reichen für 2D-Daten, aber für 64-dimensionale Ziffern-Daten mit 10 Klassen braucht man <strong>50–200 Komponenten</strong>.</div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════
+             KATEGORIE 4: FALLEN-FRAGEN
+        ════════════════════════════════════════════════════ -->
+        <div class="quiz-cat-label" style="margin-top:var(--space-8)">
+          <span class="quiz-cat-label-text">🪤 Fallen-Fragen</span>
+          <span style="flex:1; height:1px; background:var(--color-border); margin:0 var(--space-3)"></span>
+          <span class="quiz-cat-count">Fragen 16–20</span>
+        </div>
+
+        <!-- Q16 -->
+        <div class="quiz-question" data-q="16">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">16</span>
+            <p class="quiz-q-text">Richtig oder Falsch: „Das Modell mit dem höchsten BIC-Wert ist am besten geeignet."</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Richtig – hohes BIC = hohe Likelihood = gutes Modell
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              Falsch – das Optimum liegt beim Minimum von BIC, nicht beim Maximum
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig erkannt – das ist eine Falle! BIC = \(m\ln(n) - 2\ln(\hat{L})\). Großes BIC = hohe Strafe oder geringe Likelihood. Das Optimum ist das <strong>Minimum</strong>.</div>
+          <div class="quiz-feedback is-wrong">❌ Das ist die Falle! Das Optimum liegt beim <strong>Minimum</strong> von BIC. BIC enthält einen Strafterm für Komplexität – kleiner Wert bedeutet gutes Gleichgewicht. Code: <code>np.argmin(bics)</code>.</div>
+        </div>
+
+        <!-- Q17 -->
+        <div class="quiz-question" data-q="17">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">17</span>
+            <p class="quiz-q-text">Richtig oder Falsch: „GMM ist primär ein Clustering-Algorithmus."</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Richtig – GMM wird in sklearn.mixture für Clustering verwendet
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              Falsch – GMM ist primär ein Dichteschätzer; Clustering ist nur ein Nebenprodukt
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig erkannt! Wie Jake VanderPlas schreibt: „Think of GMM primarily as a density estimator, and use it for clustering only when warranted within simple datasets." BIC/AIC messen Güte als Dichteschätzer.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch! GMM ist primär ein <strong>Dichteschätzer</strong>. Das Clustering via <code>.predict()</code> ist ein Nebenprodukt. BIC/AIC messen die Qualität als Dichteschätzer – nicht als Clusterer.</div>
+        </div>
+
+        <!-- Q18 -->
+        <div class="quiz-question" data-q="18">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">18</span>
+            <p class="quiz-q-text">Was ist falsch an diesem Code?</p>
+          </div>
+          <div class="quiz-code">
+            <pre><code>n_components = np.arange(1, 21)
+models = [GaussianMixture(n, covariance_type='full',
+          random_state=0).fit(X) for n in n_components]
+aics = [m.aic(X) for m in models]
+best_model = models[np.argmax(aics)]  # ← ??</code></pre>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">A</span>
+              <code>argmax</code> statt <code>argmin</code> – das Optimum von AIC ist das Minimum
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">B</span>
+              <code>covariance_type='full'</code> ist falsch – man muss <code>'spherical'</code> verwenden
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">C</span>
+              <code>models[...]</code> ist falsch – man braucht <code>n_components[...]</code>
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">D</span>
+              Es gibt keinen Fehler im Code
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! <code>argmax</code> würde das Modell mit dem <em>schlechtesten</em> AIC auswählen. Korrekt: <code>models[np.argmin(aics)]</code> – Optimum von AIC/BIC ist immer das Minimum!</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch. Der Fehler ist <code>argmax</code> statt <code>argmin</code>. AIC-Optimum = Minimum. argmax gibt den schlechtesten Wert zurück. Richtig: <code>models[np.argmin(aics)]</code>.</div>
+        </div>
+
+        <!-- Q19 -->
+        <div class="quiz-question" data-q="19">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">19</span>
+            <p class="quiz-q-text">Richtig oder Falsch: „Die Mischungsgewichte \(w_k\) sind Hyperparameter und werden vom Benutzer gesetzt."</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">A</span>
+              Richtig – man gibt <code>weights=[0.5, 0.3, 0.2]</code> an
+            </button>
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">B</span>
+              Falsch – \(w_k\) sind gelernte Parameter, die durch MLE (M-Schritt) optimiert werden
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! \(w_k\) werden im M-Schritt gelernt: \(w_k^{\text{new}} = \frac{1}{N}\sum_n r_{nk}\). Sie sind Parameter (gelernt durch EM), nicht Hyperparameter (wie z.B. \(K\) oder <code>covariance_type</code>). Nach dem Training: <code>gmm.weights_</code>.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch! \(w_k\) sind <strong>gelernte Parameter</strong> – sie werden im M-Schritt via \(w_k^{\text{new}} = \frac{1}{N}\sum_n r_{nk}\) berechnet. Hyperparameter ist z.B. die Anzahl der Komponenten \(K\).</div>
+        </div>
+
+        <!-- Q20 -->
+        <div class="quiz-question" data-q="20">
+          <div class="quiz-q-header">
+            <span class="quiz-q-num">20</span>
+            <p class="quiz-q-text">Richtig oder Falsch: „<code>GaussianMixture(covariance_type='full')</code> ist flexibler als <code>covariance_type='spherical'</code>."</p>
+          </div>
+          <div class="quiz-options">
+            <button class="quiz-option" data-correct="true">
+              <span class="opt-letter">A</span>
+              Richtig – <code>full</code> erlaubt beliebig rotierte Ellipsen; <code>spherical</code> erzwingt Kreisform
+            </button>
+            <button class="quiz-option" data-correct="false">
+              <span class="opt-letter">B</span>
+              Falsch – <code>spherical</code> ist flexibler, weil es weniger Parameter hat
+            </button>
+          </div>
+          <div class="quiz-feedback is-correct">✅ Richtig! <code>full</code> = volle Kovarianzmatrix = beliebige Ellipsenausrichtung = maximale Flexibilität. <code>spherical</code> = ein Streuungsparameter für alle Dimensionen = Kreis = eingeschränkteste Form. Flexibilität: spherical &lt; diag &lt; full.</div>
+          <div class="quiz-feedback is-wrong">❌ Falsch! <code>full</code> ist am <strong>flexibelsten</strong>: beliebig orientierte Ellipsen. <code>spherical</code> ist am eingeschränktesten: nur Kreisform. Rangfolge: spherical &lt; diag &lt; full.</div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════════════
+             ERGEBNIS-KARTE
+        ════════════════════════════════════════════════════ -->
+        <div id="quiz-result">
+          <div class="result-card">
+            <div class="result-emoji" id="result-emoji">🎓</div>
+            <div class="result-title" id="result-msg">Quiz abgeschlossen!</div>
+            <div class="result-sub">Dein Ergebnis:</div>
+            <span class="result-score-big" id="result-score">–</span>
+            <div class="result-bar-wrap">
+              <div class="result-bar-track">
+                <div class="result-bar-fill" id="result-bar"></div>
+              </div>
+            </div>
+            <div class="result-grades">
+              <span>≥ 90% 🏆 Sehr gut</span>
+              <span>≥ 70% 👍 Gut</span>
+              <span>≥ 50% 📚 Weiterüben</span>
+              <span>&lt; 50% 💪 Nochmal!</span>
+            </div>
+            <button id="btn-retry">↺ Nochmal versuchen</button>
+          </div>
+        </div>
+
+      </div><!-- /padding-wrap -->
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 6 – Gaussian Mixture Models · Quiz</small>
+    </div>
+  </footer>
+
+</body>
+</html>

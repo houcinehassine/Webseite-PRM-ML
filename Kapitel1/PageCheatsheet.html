@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Cheatsheet: Data Preparation</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       CHEATSHEET GLOBALS – kompakte Darstellung
+    ═══════════════════════════════════════════════════════ */
+    .cs-section {
+      padding: var(--space-6) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .cs-section:last-child { border-bottom: none; }
+
+    .cs-h2 {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: var(--text-lg);
+      font-weight: 700;
+      margin-bottom: var(--space-5);
+    }
+    .cs-badge {
+      font-size: .65rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: .09em;
+      padding: .15rem .55rem;
+      border-radius: var(--radius-full);
+      white-space: nowrap; flex-shrink: 0;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       STICKY JUMP-NAV
+    ═══════════════════════════════════════════════════════ */
+    .jump-nav {
+      position: sticky;
+      top: 64px;          /* Höhe des site-header */
+      z-index: 40;
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-2) 0;
+      margin: 0 0 var(--space-6) 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+    }
+    .jn-btn {
+      font-size: .65rem; font-weight: 700;
+      letter-spacing: .05em; text-transform: uppercase;
+      padding: .25rem .6rem;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      color: var(--color-text-muted);
+      cursor: pointer; text-decoration: none;
+      transition: background .12s, color .12s, border-color .12s;
+      white-space: nowrap;
+    }
+    .jn-btn:hover {
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      border-color: color-mix(in oklab,var(--color-primary) 25%,var(--color-border));
+    }
+    .jn-btn.warn:hover { background: color-mix(in oklab,var(--color-warning) 12%,var(--color-surface));
+      color: color-mix(in oklab,var(--color-warning) 80%,#000);
+      border-color: color-mix(in oklab,var(--color-warning) 30%,var(--color-border)); }
+
+    /* ═══════════════════════════════════════════════════════
+       2- UND 3-SPALTEN RASTER
+    ═══════════════════════════════════════════════════════ */
+    .cs-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+    .cs-3col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+    }
+    @media (max-width: 820px) {
+      .cs-2col, .cs-3col { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       KOMPAKT-KARTE
+    ═══════════════════════════════════════════════════════ */
+    .cs-card {
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .cs-card-title {
+      font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+    }
+    .cs-card p { font-size: var(--text-xs); color: var(--color-text-muted); margin: 0; line-height: 1.6; }
+    .cs-card code { font-size: .72rem; }
+
+    /* ═══════════════════════════════════════════════════════
+       FORMEL-ZEILE
+    ═══════════════════════════════════════════════════════ */
+    .formula-row-cs {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      flex-wrap: wrap;
+    }
+    .fr-name {
+      font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .06em;
+      color: var(--color-text-faint); width: 7rem; flex-shrink: 0;
+    }
+    .fr-formula {
+      font-family: var(--font-mono); font-size: var(--text-sm);
+      font-weight: 700; flex: 1;
+    }
+    .fr-hint { font-size: .7rem; color: var(--color-text-faint); flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════════════════
+       KOMPAKT CODE-BLOCK
+    ═══════════════════════════════════════════════════════ */
+    .cs-code {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .cs-code-header {
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--color-surface-2);
+      border-bottom: 1px solid var(--color-border);
+      font-size: .65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--color-text-faint);
+    }
+    .cs-code pre {
+      margin: 0; padding: var(--space-3) var(--space-4);
+      font-size: .72rem; line-height: 1.55;
+      overflow-x: auto;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ENTSCHEIDUNGS-TABELLE
+    ═══════════════════════════════════════════════════════ */
+    .cs-table {
+      width: 100%; border-collapse: collapse;
+      font-size: var(--text-xs);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .cs-table th {
+      background: var(--color-surface-2);
+      padding: var(--space-2) var(--space-3);
+      font-weight: 700; text-align: left;
+      border-bottom: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      white-space: nowrap;
+    }
+    .cs-table th:last-child { border-right: none; }
+    .cs-table td {
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      vertical-align: top; line-height: 1.5;
+    }
+    .cs-table td:last-child { border-right: none; }
+    .cs-table tr:last-child td { border-bottom: none; }
+    .cs-table tr:nth-child(even) td { background: var(--color-surface-offset, var(--color-surface-2)); }
+    .ok  { color: var(--color-success); font-weight: 700; }
+    .warn{ color: color-mix(in oklab,var(--color-warning) 80%,#000); font-weight: 700; }
+    .mono{ font-family: var(--font-mono); font-weight: 700; }
+
+    /* ═══════════════════════════════════════════════════════
+       FALLEN-LISTE
+    ═══════════════════════════════════════════════════════ */
+    .fallen-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+    }
+    @media (max-width: 700px) { .fallen-grid { grid-template-columns: 1fr; } }
+    .fallen-item {
+      display: flex; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      border: 1px solid color-mix(in oklab,var(--color-warning) 25%,var(--color-border));
+      background: color-mix(in oklab,var(--color-warning) 5%,var(--color-surface-2));
+    }
+    .fi-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .fi-body { display: flex; flex-direction: column; gap: .2rem; }
+    .fi-title { font-size: var(--text-xs); font-weight: 700; color: color-mix(in oklab,var(--color-warning) 80%,#000); }
+    .fi-desc { font-size: .7rem; color: var(--color-text-muted); line-height: 1.5; }
+    .fi-fix { font-size: .7rem; color: var(--color-success); font-weight: 700; }
+
+    /* ═══════════════════════════════════════════════════════
+       MERKSATZ-KARTEN
+    ═══════════════════════════════════════════════════════ */
+    .merksatz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-3);
+    }
+    .merksatz {
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .ms-label {
+      font-size: .62rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .09em; color: var(--color-text-faint); margin-bottom: var(--space-2);
+    }
+    .ms-text {
+      font-size: var(--text-sm); font-weight: 700;
+      line-height: 1.4; color: var(--color-text);
+    }
+    .ms-sub {
+      font-size: .7rem; color: var(--color-text-muted);
+      margin-top: var(--space-1); line-height: 1.4;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       PRÜFUNGSFRAGEN
+    ═══════════════════════════════════════════════════════ */
+    .pf-list { display: flex; flex-direction: column; gap: var(--space-3); }
+    .pf-item {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border);
+      overflow: hidden;
+    }
+    .pf-q {
+      display: flex; align-items: flex-start; gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      background: var(--color-surface-2);
+      cursor: pointer;
+    }
+    .pf-q-num {
+      font-size: .65rem; font-weight: 800; letter-spacing: .07em;
+      color: var(--color-primary);
+      background: var(--color-primary-highlight);
+      padding: .15rem .45rem; border-radius: var(--radius-full);
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .pf-q-text { font-size: var(--text-sm); font-weight: 600; flex: 1; }
+    .pf-toggle {
+      font-size: .8rem; color: var(--color-text-faint);
+      transition: transform .2s; flex-shrink: 0;
+    }
+    .pf-a {
+      padding: var(--space-3) var(--space-4);
+      background: color-mix(in oklab,var(--color-primary) 4%,var(--color-surface));
+      border-top: 1px solid var(--color-border);
+      font-size: var(--text-xs); color: var(--color-text-muted);
+      line-height: 1.65; display: none;
+    }
+    .pf-item.open .pf-a { display: block; }
+    .pf-item.open .pf-toggle { transform: rotate(180deg); }
+    .pf-a strong { color: var(--color-text); }
+    .pf-a code { font-size: .72rem; }
+
+    /* ═══════════════════════════════════════════════════════
+       SCORING TABELLE
+    ═══════════════════════════════════════════════════════ */
+    .scoring-compact {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+    }
+    @media (max-width: 640px) { .scoring-compact { grid-template-columns: 1fr; } }
+    .sc-group {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .sc-group-head {
+      padding: var(--space-2) var(--space-3);
+      font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .sc-fn {
+      display: flex; flex-direction: column; gap: .15rem;
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .sc-fn:last-child { border-bottom: none; }
+    .sc-fn-name { font-family: var(--font-mono); font-size: .75rem; font-weight: 700; }
+    .sc-fn-desc { font-size: .65rem; color: var(--color-text-muted); line-height: 1.4; }
+
+    /* ═══════════════════════════════════════════════════════
+       PIPELINE VISUAL (kompakt)
+    ═══════════════════════════════════════════════════════ */
+    .pipeline-cs {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 0; border-radius: var(--radius-lg); overflow: hidden;
+      border: 1px solid var(--color-border);
+      margin-top: var(--space-4);
+    }
+    .pcs-step {
+      display: flex; flex-direction: column; align-items: center;
+      gap: var(--space-1); padding: var(--space-3) var(--space-4);
+      background: var(--color-surface-2); flex: 1; text-align: center;
+      min-width: 80px;
+      border-right: 1px solid var(--color-border);
+    }
+    .pcs-step:last-child { border-right: none; }
+    .pcs-step.active { background: color-mix(in oklab,var(--color-primary) 7%,var(--color-surface)); }
+    .pcs-icon { font-size: 1.2rem; }
+    .pcs-label { font-size: .65rem; font-weight: 700; color: var(--color-text-muted); }
+    .pcs-step.active .pcs-label { color: var(--color-primary); }
+    .pcs-arrow {
+      font-size: .9rem; color: var(--color-text-faint); padding: 0;
+      background: var(--color-surface-2); display:none;
+    }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page1" title="Kapitel 1 · Cheatsheet"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="cheatsheet"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- Seitentitel (kein Hero – sofort zum Inhalt) -->
+      <div style="padding: var(--space-8) 0 var(--space-4); border-bottom: 1px solid var(--color-border); margin-bottom: 0;">
+        <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-faint)">
+          Kapitel 1 · Prüfungsvorbereitung
+        </span>
+        <h1 style="font-size:var(--text-2xl);margin:var(--space-2) 0 var(--space-2)">
+          📋 Cheatsheet — Data Preparation
+        </h1>
+        <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin:0">
+          Alle Formeln, Code-Snippets, Entscheidungshilfen und typischen Fallen
+          auf einen Blick. Klicke auf eine Sektion um direkt zu springen.
+        </p>
+      </div>
+
+      <!-- ══════════════════════════════════════════════════
+           STICKY JUMP-NAVIGATION
+      ═══════════════════════════════════════════════════ -->
+      <nav class="jump-nav" aria-label="Schnellzugriff Cheatsheet">
+        <a class="jn-btn" href="#cs-konzepte">🧱 Konzepte</a>
+        <a class="jn-btn" href="#cs-formeln">📐 Formeln</a>
+        <a class="jn-btn" href="#cs-encoding">🔤 Encoding</a>
+        <a class="jn-btn" href="#cs-api">⚙️ sklearn API</a>
+        <a class="jn-btn" href="#cs-selection">🎯 Selection</a>
+        <a class="jn-btn" href="#cs-scoring">📊 Scoring</a>
+        <a class="jn-btn" href="#cs-scaling">⚖️ Scaling</a>
+        <a class="jn-btn" href="#cs-entscheidung">🗺️ Wann was?</a>
+        <a class="jn-btn warn" href="#cs-fallen">⚠️ Fallen</a>
+        <a class="jn-btn" href="#cs-merksaetze">💡 Merksätze</a>
+        <a class="jn-btn" href="#cs-fragen">❓ Prüfungsfragen</a>
+      </nav>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-01  KERNKONZEPTE
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-konzepte">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">01</span>
+          🧱 Kernkonzepte
+        </div>
+
+        <div class="cs-3col">
+
+          <div class="cs-card">
+            <div class="cs-card-title" style="color:var(--color-primary)">3 Eigenschaften guter Features</div>
+            <p>
+              <strong>1. Informativ</strong> — trägt Information über das Phänomen<br>
+              <strong>2. Diskriminativ</strong> — erklärt Unterschiede / Klassen<br>
+              <strong>3. Unabhängig</strong> — geringe Korrelation untereinander
+            </p>
+            <div style="margin-top:var(--space-2);padding:var(--space-2) var(--space-3);
+                        background:var(--color-primary-highlight);border-radius:var(--radius-md)">
+              <code style="font-size:.72rem;color:var(--color-primary);font-weight:700">
+                Merksatz: I-D-U
+              </code>
+            </div>
+          </div>
+
+          <div class="cs-card">
+            <div class="cs-card-title" style="color:var(--color-success)">Feature-Matrix</div>
+            <p>
+              <strong>X ∈ ℝᴺˣᴷ</strong><br>
+              N = Anzahl Samples (Zeilen)<br>
+              K = Anzahl Features (Spalten)<br>
+              Jeder Datenpunkt = Punkt im K-dim. Raum
+            </p>
+            <p style="margin-top:var(--space-2)">
+              <code>X.shape → (N, K)</code>
+            </p>
+          </div>
+
+          <div class="cs-card">
+            <div class="cs-card-title" style="color:var(--color-text-muted)">Die Pipeline</div>
+            <div class="pipeline-cs">
+              <div class="pcs-step"><span class="pcs-icon">🗄️</span><span class="pcs-label">Quellen</span></div>
+              <div class="pcs-step active"><span class="pcs-icon">⚙️</span><span class="pcs-label">Extraction</span></div>
+              <div class="pcs-step active"><span class="pcs-icon">🎯</span><span class="pcs-label">Selection</span></div>
+              <div class="pcs-step active"><span class="pcs-icon">⚖️</span><span class="pcs-label">Scaling</span></div>
+              <div class="pcs-step"><span class="pcs-icon">🤖</span><span class="pcs-label">Modell</span></div>
+            </div>
+            <p style="margin-top:var(--space-2);font-size:.68rem;color:var(--color-primary)">
+              ← alles Teal = Feature Engineering (Kap. 1)
+            </p>
+          </div>
+
+        </div>
+
+        <div class="cs-2col" style="margin-top:var(--space-4)">
+          <div class="cs-card">
+            <div class="cs-card-title" style="color:var(--color-warning)">Aufwand-Realität</div>
+            <p>
+              Feature Engineering = <strong>~80% des Aufwands</strong><br>
+              Modellierung = gefühlte 20%<br>
+              <em>„Modellierung macht gefühlte 20 % aus"</em>
+            </p>
+          </div>
+          <div class="cs-card">
+            <div class="cs-card-title" style="color:var(--color-primary)">Iterativer Prozess</div>
+            <p>
+              Features ↔ Modell beeinflussen sich gegenseitig.<br>
+              Nicht nur Modell optimieren – auch Features!<br>
+              <strong>Feedback-Loop: Features → Train → Analyse → neue Features</strong>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-02  FORMELN
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-formeln">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface-2));color:var(--color-success)">02</span>
+          📐 Formelsammlung
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:var(--space-2)">
+
+          <div class="formula-row-cs" style="border-color:color-mix(in oklab,var(--color-primary) 25%,var(--color-border));background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface))">
+            <span class="fr-name" style="color:var(--color-primary)">MinMax</span>
+            <span class="fr-formula">
+              X' = <span style="color:var(--color-primary)">(X − X<sub>min</sub>) / (X<sub>max</sub> − X<sub>min</sub>)</span> × (max − min) + min
+            </span>
+            <span class="fr-hint">Standard: min=0, max=1</span>
+          </div>
+
+          <div class="formula-row-cs" style="border-color:color-mix(in oklab,var(--color-success) 25%,var(--color-border));background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface))">
+            <span class="fr-name" style="color:var(--color-success)">Z-Score</span>
+            <span class="fr-formula">
+              Z = <span style="color:var(--color-primary)">(X − μ)</span> / <span style="color:var(--color-success)">σ</span>
+            </span>
+            <span class="fr-hint">Ergebnis: μ=0, σ=1</span>
+          </div>
+
+          <div class="formula-row-cs">
+            <span class="fr-name">Feature Extr.</span>
+            <span class="fr-formula">
+              f : <span style="color:var(--color-success)">ℝᵀ</span> → <span style="color:var(--color-primary)">ℝᴷ</span>
+            </span>
+            <span class="fr-hint">T Zeitschritte → K Features (K ≪ T)</span>
+          </div>
+
+          <div class="formula-row-cs">
+            <span class="fr-name">Haar Feature</span>
+            <span class="fr-formula">
+              Haar = <span style="color:#f5f5f3;background:#555;padding:0 .3rem;border-radius:3px">Σ(weiß)</span> − <span style="color:#ddd;background:#1a1a18;padding:0 .3rem;border-radius:3px">Σ(schwarz)</span>
+            </span>
+            <span class="fr-hint">Ideal: 255−0=255 · Real: 229−8.75=220.25</span>
+          </div>
+
+          <div class="formula-row-cs">
+            <span class="fr-name">Varianz</span>
+            <span class="fr-formula">
+              Var(X) = Σ(xᵢ − x̄)² / N
+            </span>
+            <span class="fr-hint">VarianceThreshold prüft pro Feature</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-03  ENCODING CODE
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-encoding">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">03</span>
+          🔤 Encoding Code-Snippets
+        </div>
+
+        <div class="cs-3col">
+
+          <div class="cs-code">
+            <div class="cs-code-header" style="color:var(--color-primary)">Label-Encoding</div>
+            <pre><code>from sklearn.preprocessing import LabelEncoder
+enc = LabelEncoder()
+# alphabetisch: apple=0,banana=1,coffee=2,milk=3
+X_enc = enc.fit_transform(categories)
+# array([0, 0, 3, 1, 2])
+# ⚠️ Künstliche Ordnung! → OHE bevorzugen</code></pre>
+          </div>
+
+          <div class="cs-code">
+            <div class="cs-code-header" style="color:var(--color-success)">One-Hot-Encoding</div>
+            <pre><code>from sklearn.preprocessing import OneHotEncoder
+ohe = OneHotEncoder(handle_unknown='ignore')
+X_ohe = ohe.fit_transform(
+    categories.reshape(-1, 1)
+).toarray()
+# [[1,0,0,0],[1,0,0,0],[0,0,0,1],...]
+# Spalten: [apple, banana, coffee, milk]</code></pre>
+          </div>
+
+          <div class="cs-code">
+            <div class="cs-code-header" style="color:var(--color-text-muted)">Bag-of-Words</div>
+            <pre><code>from sklearn.feature_extraction.text import (
+    CountVectorizer
+)
+vec = CountVectorizer()
+X_bow = vec.fit_transform(corpus)
+# Sparse Matrix: Zeilen=Dokumente
+# Spalten=Wörter, Werte=Häufigkeiten
+# ⚠️ Wortstellung geht verloren</code></pre>
+          </div>
+
+        </div>
+
+        <div class="cs-card" style="margin-top:var(--space-4);border-color:color-mix(in oklab,var(--color-text-faint) 20%,var(--color-border))">
+          <div class="cs-card-title">Feature Hashing (Bonus – für viele Kategorien)</div>
+          <pre style="font-size:.72rem;margin:0"><code>from sklearn.feature_extraction import FeatureHasher
+fh = FeatureHasher(input_type='string', n_features=5)
+hash_encoded = fh.transform(categories).toarray()
+# Ausgabe immer 5-dim, unabhängig von Kategorienzahl</code></pre>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-04  SKLEARN API REGELN
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-api">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">04</span>
+          ⚙️ sklearn API – Die 3 Methoden
+        </div>
+
+        <div class="cs-3col">
+          <div class="cs-card" style="border-color:color-mix(in oklab,var(--color-primary) 20%,var(--color-border))">
+            <div class="cs-card-title" style="color:var(--color-primary)">.fit(X_train)</div>
+            <p>Lernt Parameter aus Training.<br>Transformiert NICHT.</p>
+            <code style="font-size:.72rem">enc.fit(X_train)</code>
+          </div>
+          <div class="cs-card" style="border-color:color-mix(in oklab,var(--color-success) 20%,var(--color-border))">
+            <div class="cs-card-title" style="color:var(--color-success)">.transform(X)</div>
+            <p>Wendet gelernte Parameter an.<br>Für Train UND Test verwendbar.</p>
+            <code style="font-size:.72rem">enc.transform(X_test)</code>
+          </div>
+          <div class="cs-card" style="border-color:color-mix(in oklab,var(--color-warning) 30%,var(--color-border));background:color-mix(in oklab,var(--color-warning) 5%,var(--color-surface-2))">
+            <div class="cs-card-title" style="color:color-mix(in oklab,var(--color-warning) 80%,#000)">.fit_transform(X)</div>
+            <p>fit + transform in einem.<br><strong>⚠️ NUR auf Trainingsdaten!</strong></p>
+            <code style="font-size:.72rem">enc.fit_transform(X_train)</code>
+          </div>
+        </div>
+
+        <div class="cs-code" style="margin-top:var(--space-4)">
+          <div class="cs-code-header" style="background:color-mix(in oklab,var(--color-warning) 10%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">
+            ⚠️ Data Leakage – Richtig vs. Falsch
+          </div>
+          <pre><code># ✅ RICHTIG: fit nur auf Training
+scaler.fit(X_train)
+X_train_s = scaler.transform(X_train)
+X_test_s  = scaler.transform(X_test)    # gleiche Scaler-Parameter!
+
+# ✅ AUCH RICHTIG (Kurzform für Training):
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+# ❌ FALSCH – Data Leakage!
+X_test_s = scaler.fit_transform(X_test)  # lernt von Testdaten!</code></pre>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-05  FEATURE SELECTION
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-selection">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">05</span>
+          🎯 Feature Selection Code
+        </div>
+
+        <div class="cs-2col">
+
+          <div class="cs-code">
+            <div class="cs-code-header">VarianceThreshold</div>
+            <pre><code>from sklearn.feature_selection import VarianceThreshold
+
+# Varianz prüfen (vor dem Threshold)
+X.var(axis=0)
+# array([0.139, 0.222, 0.250])
+
+# threshold=0.0 → nur konstante entfernen
+# threshold=.15 → Feature 1 entfernt (0.139 < .15)
+sel = VarianceThreshold(threshold=.15)
+X_new = sel.fit_transform(X)
+# (6,3) → (6,2): Feature 1 weg</code></pre>
+          </div>
+
+          <div class="cs-code">
+            <div class="cs-code-header">SelectKBest (Digits: 64 → 20)</div>
+            <pre><code>from sklearn.datasets import load_digits
+from sklearn.feature_selection import (
+    SelectKBest, mutual_info_classif
+)
+
+X, y = load_digits(return_X_y=True)
+# X.shape → (1797, 64)
+
+sel   = SelectKBest(mutual_info_classif, k=20)
+X_new = sel.fit_transform(X, y)
+# X_new.shape → (1797, 20)</code></pre>
+          </div>
+
+        </div>
+
+        <div class="cs-card" style="margin-top:var(--space-4)">
+          <div class="cs-card-title">Korrelation (Clustermap)</div>
+          <pre style="font-size:.72rem;margin:0"><code>import seaborn as sns
+corr = pd.DataFrame(X).corr()
+sns.clustermap(corr, cmap='coolwarm')
+# Stark korrelierende Features (r > 0.9) → eines entfernen</code></pre>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-06  SCORING FUNKTIONEN
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-scoring">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">06</span>
+          📊 SelectKBest – Alle Scoring-Funktionen
+        </div>
+
+        <div class="scoring-compact">
+
+          <div class="sc-group">
+            <div class="sc-group-head"
+                 style="background:color-mix(in oklab,var(--color-primary) 8%,var(--color-surface-2));
+                        color:var(--color-primary)">
+              🏷️ Klassifikation
+            </div>
+            <div class="sc-fn">
+              <span class="sc-fn-name" style="color:var(--color-primary)">mutual_info_classif</span>
+              <span class="sc-fn-desc">Gegenseitige Information. <strong>Auch nicht-linear.</strong> ← Standard-Wahl</span>
+            </div>
+            <div class="sc-fn">
+              <span class="sc-fn-name">f_classif</span>
+              <span class="sc-fn-desc">ANOVA F-Test. Nur linear. Schneller.</span>
+            </div>
+            <div class="sc-fn">
+              <span class="sc-fn-name">chi2</span>
+              <span class="sc-fn-desc">Chi-Quadrat. <strong>Nur für nicht-negative Features!</strong> (z.B. Worthäufigkeiten)</span>
+            </div>
+          </div>
+
+          <div class="sc-group">
+            <div class="sc-group-head"
+                 style="background:color-mix(in oklab,var(--color-success) 8%,var(--color-surface-2));
+                        color:var(--color-success)">
+              📈 Regression
+            </div>
+            <div class="sc-fn">
+              <span class="sc-fn-name" style="color:var(--color-success)">mutual_info_regression</span>
+              <span class="sc-fn-desc">Gegenseitige Information. <strong>Auch nicht-linear.</strong> ← Standard-Wahl</span>
+            </div>
+            <div class="sc-fn">
+              <span class="sc-fn-name">f_regression</span>
+              <span class="sc-fn-desc">Pearson-Korrelation. Nur linear.</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-07  FEATURE SCALING
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-scaling">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface-2));color:var(--color-success)">07</span>
+          ⚖️ Feature Scaling Code
+        </div>
+
+        <div class="cs-3col">
+
+          <div class="cs-code">
+            <div class="cs-code-header" style="color:var(--color-primary)">MinMaxScaler</div>
+            <pre><code>from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler()          # default: [0,1]
+scaler = MinMaxScaler(
+    feature_range=(-3, 5))       # custom range
+
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+# From Scratch:
+X_std = (X - X.min(axis=0)) / (
+         X.max(axis=0) - X.min(axis=0))
+X_s   = X_std * (max - min) + min</code></pre>
+          </div>
+
+          <div class="cs-code">
+            <div class="cs-code-header" style="color:var(--color-success)">StandardScaler</div>
+            <pre><code>from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)
+
+# Ergebnis: μ=0, σ=1
+# Vorher: μ=0.473, σ=0.285
+# Nachher: μ=1.42e-16≈0, σ=1.0
+
+# From Scratch:
+Z = (X - X.mean(axis=0)) / X.std(axis=0)</code></pre>
+          </div>
+
+          <div class="cs-code">
+            <div class="cs-code-header" style="color:color-mix(in oklab,var(--color-warning) 80%,#000)">PowerTransformer (Box-Cox)</div>
+            <pre><code>from sklearn.preprocessing import PowerTransformer
+
+# Box-Cox: NUR positive Werte!
+pt = PowerTransformer(method='box-cox')
+X_pt = pt.fit_transform(X)
+print(pt.lambdas_)
+# array([0.00583342])  λ≈0 ≈ log(X)
+
+# Für negative Werte: Yeo-Johnson
+pt2 = PowerTransformer(method='yeo-johnson')</code></pre>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-08  ENTSCHEIDUNGSGUIDE
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-entscheidung">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">08</span>
+          🗺️ Entscheidungsguide – Wann was?
+        </div>
+
+        <table class="cs-table">
+          <thead>
+            <tr>
+              <th>Situation</th>
+              <th>Methode</th>
+              <th>Begründung</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Kategoriale Variable, <strong>keine Ordnung</strong></td>
+              <td><code class="mono">OneHotEncoder</code></td>
+              <td>Kein künstliches Ordnungsproblem</td>
+            </tr>
+            <tr>
+              <td>Kategoriale Variable, <strong>Ordnung vorhanden</strong></td>
+              <td><code class="mono">LabelEncoder</code></td>
+              <td>klein=0, mittel=1, groß=2 – korrekt</td>
+            </tr>
+            <tr>
+              <td>Sehr viele Kategorien (&gt;1000)</td>
+              <td><code class="mono">FeatureHasher</code></td>
+              <td>Feste Ausgabe-Dimension, kein riesiges OHE</td>
+            </tr>
+            <tr>
+              <td>Text zu Features</td>
+              <td><code class="mono">CountVectorizer</code></td>
+              <td>Bag-of-Words, Worthäufigkeiten</td>
+            </tr>
+            <tr>
+              <td>Feature mit Varianz = 0</td>
+              <td><code class="mono">VarianceThreshold(0.0)</code></td>
+              <td>Konstante Features entfernen</td>
+            </tr>
+            <tr>
+              <td>K beste Features nach Label</td>
+              <td><code class="mono">SelectKBest(mutual_info_classif)</code></td>
+              <td>Standard-Wahl, auch nicht-linear</td>
+            </tr>
+            <tr>
+              <td>Scaling, kein Ausreißer, Bereich nötig</td>
+              <td><code class="mono">MinMaxScaler</code></td>
+              <td>Fester Ausgabebereich [0,1]</td>
+            </tr>
+            <tr>
+              <td>Scaling, allgemein robust</td>
+              <td><code class="mono">StandardScaler</code> ← <span class="ok">Standard</span></td>
+              <td>μ=0, σ=1, robuster als MinMax</td>
+            </tr>
+            <tr>
+              <td>Viele Ausreißer vorhanden</td>
+              <td><code class="mono">RobustScaler</code></td>
+              <td>Skaliert über IQR statt Min/Max</td>
+            </tr>
+            <tr>
+              <td>Schiefe (rechtslastige) Verteilung</td>
+              <td><code class="mono">PowerTransformer(box-cox)</code></td>
+              <td>Nur positive Werte! → Yeo-Johnson sonst</td>
+            </tr>
+            <tr>
+              <td>Tree-based Algorithmen (RF, XGB)</td>
+              <td><span class="ok">Kein Scaler nötig</span></td>
+              <td>Nicht skalensensitiv</td>
+            </tr>
+            <tr>
+              <td>SVM, k-NN, PCA, Neural Nets</td>
+              <td><span class="warn">Immer skalieren!</span></td>
+              <td>Stark skalensensitiv</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-09  TYPISCHE FALLEN
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-fallen">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-warning) 15%,var(--color-surface-2));color:color-mix(in oklab,var(--color-warning) 80%,#000)">09</span>
+          ⚠️ Typische Fallen &amp; Fehler
+        </div>
+
+        <div class="fallen-grid">
+
+          <div class="fallen-item">
+            <span class="fi-icon">💧</span>
+            <div class="fi-body">
+              <span class="fi-title">Data Leakage</span>
+              <span class="fi-desc"><code>.fit_transform(X_test)</code> — Teststatistiken fließen ins Training. Ergebnis zu optimistisch.</span>
+              <span class="fi-fix">✓ Fix: fit() nur auf X_train, transform() auf X_test</span>
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <span class="fi-icon">🔢</span>
+            <div class="fi-body">
+              <span class="fi-title">Künstliche Ordnung</span>
+              <span class="fi-desc">LabelEncoder für nominale Variablen → apple=0 &lt; banana=1 &lt; coffee=2 (falsch!)</span>
+              <span class="fi-fix">✓ Fix: OneHotEncoder für nominale Kategorien</span>
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <span class="fi-icon">📈</span>
+            <div class="fi-body">
+              <span class="fi-title">Curse of Dimensionality</span>
+              <span class="fi-desc">Zu viele Features → Raum wächst exponentiell, Daten werden spärlich, k-NN versagt</span>
+              <span class="fi-fix">✓ Fix: Feature Selection (VarianceThreshold, SelectKBest)</span>
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <span class="fi-icon">🗑️</span>
+            <div class="fi-body">
+              <span class="fi-title">Garbage In / Garbage Out</span>
+              <span class="fi-desc">Irrelevante Features schaden aktiv – Modell lernt Rauschen (Overfitting)</span>
+              <span class="fi-fix">✓ Fix: Feature Selection, Domänenwissen anwenden</span>
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <span class="fi-icon">🔢</span>
+            <div class="fi-body">
+              <span class="fi-title">Box-Cox mit negativen Werten</span>
+              <span class="fi-desc"><code>PowerTransformer(box-cox)</code> wirft Fehler wenn X ≤ 0</span>
+              <span class="fi-fix">✓ Fix: method='yeo-johnson' für alle Werte</span>
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <span class="fi-icon">🧭</span>
+            <div class="fi-body">
+              <span class="fi-title">t-SNE für Feature Extraction</span>
+              <span class="fi-desc">t-SNE-Ausgabe nicht für Training verwenden – nur Visualisierung!</span>
+              <span class="fi-fix">✓ Fix: PCA oder Autoencoder für Feature Extraction</span>
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <span class="fi-icon">📏</span>
+            <div class="fi-body">
+              <span class="fi-title">Skalieren vor Train/Test-Split</span>
+              <span class="fi-desc">Wenn man vor dem Split skaliert, kennt der Scaler alle Testdaten → Data Leakage</span>
+              <span class="fi-fix">✓ Fix: Erst splitten, dann fit() auf X_train</span>
+            </div>
+          </div>
+
+          <div class="fallen-item">
+            <span class="fi-icon">📊</span>
+            <div class="fi-body">
+              <span class="fi-title">chi2 mit negativen Werten</span>
+              <span class="fi-desc">chi2-Scoring erfordert nicht-negative Features (z.B. Häufigkeiten, TF-IDF)</span>
+              <span class="fi-fix">✓ Fix: mutual_info_classif oder f_classif verwenden</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-10  MERKSÄTZE
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-merksaetze">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface-2));color:var(--color-success)">10</span>
+          💡 Merksätze &amp; Definitionen
+        </div>
+
+        <div class="merksatz-grid">
+
+          <div class="merksatz" style="border-color:color-mix(in oklab,var(--color-primary) 20%,var(--color-border))">
+            <div class="ms-label">Feature</div>
+            <div class="ms-text">"An individual measurable property of a phenomenon"</div>
+            <div class="ms-sub">= bildet Eigenschaft auf Skalar ab: f(Messung) → Zahl</div>
+          </div>
+
+          <div class="merksatz" style="border-color:color-mix(in oklab,var(--color-primary) 20%,var(--color-border))">
+            <div class="ms-label">3 Eigenschaften</div>
+            <div class="ms-text">I – D – U</div>
+            <div class="ms-sub">Informativ · Diskriminativ · Unabhängig</div>
+          </div>
+
+          <div class="merksatz" style="border-color:color-mix(in oklab,var(--color-success) 20%,var(--color-border))">
+            <div class="ms-label">Feature-Matrix</div>
+            <div class="ms-text">X ∈ ℝᴺˣᴷ</div>
+            <div class="ms-sub">N Samples (Zeilen), K Features (Spalten)</div>
+          </div>
+
+          <div class="merksatz">
+            <div class="ms-label">Feedback-Loop</div>
+            <div class="ms-text">Features ↔ Modell</div>
+            <div class="ms-sub">Beide beeinflussen sich. Nicht nur Modell optimieren!</div>
+          </div>
+
+          <div class="merksatz" style="border-color:color-mix(in oklab,var(--color-success) 20%,var(--color-border))">
+            <div class="ms-label">Zeitserien-FE</div>
+            <div class="ms-text">f : ℝᵀ → ℝᴷ</div>
+            <div class="ms-sub">T Messpunkte → K Features · K ≪ T</div>
+          </div>
+
+          <div class="merksatz">
+            <div class="ms-label">Occam's Razor</div>
+            <div class="ms-text">So wenige Features wie möglich</div>
+            <div class="ms-sub">Einfachere Modelle generalisieren besser</div>
+          </div>
+
+          <div class="merksatz" style="border-color:color-mix(in oklab,var(--color-warning) 25%,var(--color-border))">
+            <div class="ms-label">Curse of Dim.</div>
+            <div class="ms-text">N ∝ 10ᴷ Samples nötig</div>
+            <div class="ms-sub">Raum wächst exponentiell mit K Features</div>
+          </div>
+
+          <div class="merksatz" style="border-color:color-mix(in oklab,var(--color-warning) 25%,var(--color-border))">
+            <div class="ms-label">Data Leakage</div>
+            <div class="ms-text">fit() NUR auf X_train!</div>
+            <div class="ms-sub">.fit_transform(X_test) = schwerer Fehler</div>
+          </div>
+
+          <div class="merksatz">
+            <div class="ms-label">Bag-of-Words</div>
+            <div class="ms-text">Wortstellung geht verloren</div>
+            <div class="ms-sub">"dog bites man" = "man bites dog" (gleicher Vektor!)</div>
+          </div>
+
+          <div class="merksatz" style="border-color:color-mix(in oklab,var(--color-success) 20%,var(--color-border))">
+            <div class="ms-label">StandardScaler</div>
+            <div class="ms-text">μ=0, σ=1 nach Skalierung</div>
+            <div class="ms-sub">Robust, allgemein einsetzbar – Standard-Wahl</div>
+          </div>
+
+          <div class="merksatz">
+            <div class="ms-label">Box-Cox</div>
+            <div class="ms-text">Nur für X &gt; 0!</div>
+            <div class="ms-sub">Yeo-Johnson auch für X ≤ 0 und X = 0</div>
+          </div>
+
+          <div class="merksatz">
+            <div class="ms-label">t-SNE</div>
+            <div class="ms-text">NUR Visualisierung!</div>
+            <div class="ms-sub">Nicht für Feature Extraction oder Modelltraining</div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           CS-11  TYPISCHE PRÜFUNGSFRAGEN
+      ═══════════════════════════════════════════════════ -->
+      <section class="cs-section" id="cs-fragen">
+        <div class="cs-h2">
+          <span class="cs-badge" style="background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface-2));color:var(--color-primary)">11</span>
+          ❓ Typische Prüfungsfragen (aufklappen)
+        </div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-4)">
+          Klicke auf eine Frage um die Antwort zu sehen.
+        </p>
+
+        <div class="pf-list">
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F1</span>
+              <span class="pf-q-text">Nenne und erkläre die 3 Eigenschaften, die gute Features haben müssen.</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <strong>1. Informativ:</strong> Features müssen Informationen über das zugrundeliegende Phänomen tragen. Ein nicht-informatives Feature hat keinen Zusammenhang mit dem, was wir vorhersagen wollen.<br><br>
+              <strong>2. Diskriminativ:</strong> Features müssen Unterschiede zwischen den Klassen/Strukturen in den Daten erklären können. Ein Feature, das für alle Klassen denselben Wert liefert, hilft dem Modell nicht.<br><br>
+              <strong>3. Unabhängig:</strong> Features dürfen nicht zu stark miteinander korrelieren (Redundanz vermeiden). Hoch korrelierende Features liefern dieselbe Information doppelt ohne Mehrwert.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F2</span>
+              <span class="pf-q-text">Was ist das Problem mit Label-Encoding bei nominalen Variablen? Wie löst man es?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <strong>Problem:</strong> LabelEncoder weist alphabetisch Zahlen zu (apple=0, banana=1, coffee=2, milk=3). Das Modell interpretiert diese als Reihenfolge: milk(3) &gt; coffee(2) &gt; banana(1) &gt; apple(0). Diese Ordnung existiert nicht — es ist eine <strong>künstliche Ordnung</strong>.<br><br>
+              <strong>Lösung:</strong> <code>OneHotEncoder</code> — erzeugt für jede Kategorie eine eigene Binär-Spalte ohne implizite Reihenfolge. Label-Encoding ist nur bei <em>ordinalen</em> Variablen korrekt (z.B. klein/mittel/groß).
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F3</span>
+              <span class="pf-q-text">Erkläre den Unterschied zwischen .fit(), .transform() und .fit_transform(). Was ist Data Leakage?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <strong>.fit(X):</strong> Lernt die Parameter aus den Daten (z.B. Min/Max für MinMaxScaler). Transformiert nicht.<br>
+              <strong>.transform(X):</strong> Wendet die gelernten Parameter an. Nur für Trainingsdaten nötig, aber auf beide anwendbar.<br>
+              <strong>.fit_transform(X):</strong> fit + transform in einem Schritt. <strong>Nur auf Trainingsdaten!</strong><br><br>
+              <strong>Data Leakage:</strong> Wenn man <code>.fit_transform(X_test)</code> verwendet, lernt der Scaler die Statistiken (Min, Max, μ, σ) der Testdaten — diese fließen dann indirekt ins Modelltraining ein. Das Modell "sieht" die Testdaten also schon beim Training → Ergebnisse sind zu optimistisch und nicht realistisch.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F4</span>
+              <span class="pf-q-text">Was ist der Curse of Dimensionality? Welche Algorithmen leiden besonders?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              Mit steigender Anzahl an Features (K) wächst der Feature-Raum <strong>exponentiell</strong>. Für gleiche Datendichte benötigt man 10ᴷ Samples. Dieselben N Datenpunkte werden im hochdimensionalen Raum immer spärlicher verteilt (<em>Sparsity</em>).<br><br>
+              <strong>Besonders betroffen:</strong> k-NN (Abstände werden gleichförmig, "nächster Nachbar" bedeutungslos), SVM, k-Means. Tree-based Algorithmen leiden weniger.<br><br>
+              <strong>Lösung:</strong> Feature Selection (VarianceThreshold, SelectKBest) oder Dimensionsreduktion (PCA, Autoencoder).
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F5</span>
+              <span class="pf-q-text">Berechne den Z-Score für X=8, wenn μ=5 und σ=3.</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <strong>Formel:</strong> Z = (X − μ) / σ<br><br>
+              <strong>Rechnung:</strong> Z = (8 − 5) / 3 = 3 / 3 = <strong>1.0</strong><br><br>
+              Das bedeutet: X=8 liegt genau <strong>1 Standardabweichung über dem Mittelwert</strong>.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F6</span>
+              <span class="pf-q-text">Welche Scoring-Funktion verwendest du für SelectKBest bei einem Klassifikationsproblem, wenn du nicht weißt ob der Zusammenhang linear ist?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <code>mutual_info_classif</code> — misst die <strong>gegenseitige Information</strong> (Mutual Information) zwischen Feature und Zielvariable.<br><br>
+              Im Gegensatz zu <code>f_classif</code> (ANOVA F-Test, nur linear) erkennt <code>mutual_info_classif</code> auch <strong>nicht-lineare Abhängigkeiten</strong>.<br><br>
+              <code>chi2</code> wäre falsch, wenn Features negative Werte haben können.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F7</span>
+              <span class="pf-q-text">Wann verwendest du MinMaxScaler, wann StandardScaler?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <strong>MinMaxScaler:</strong> Wenn ein fester Ausgabebereich benötigt wird (z.B. [0,1] für Sigmoid-Aktivierungen in Neural Nets), und keine starken Ausreißer vorhanden sind. Sensibel gegenüber Ausreißern.<br><br>
+              <strong>StandardScaler:</strong> Standard-Wahl für die meisten Fälle. Robuster als MinMax. Gut für SVM, PCA, Lineare Modelle, k-NN. Setzt keine Normalverteilung voraus, funktioniert aber besonders gut bei annähernd normalverteilten Daten.<br><br>
+              <strong>Faustregel:</strong> StandardScaler wenn unsicher. MinMaxScaler wenn expliziter Wertebereich nötig und keine Ausreißer.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F8</span>
+              <span class="pf-q-text">Was macht VarianceThreshold(threshold=0.15) mit diesem Array? X.var(axis=0) = [0.139, 0.222, 0.250]</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <strong>Antwort:</strong> Feature 1 (Varianz = 0.139) liegt unter dem Schwellwert 0.15 und wird entfernt. Features 2 (0.222) und 3 (0.250) überleben.<br><br>
+              Eine (6×3)-Matrix wird zu einer <strong>(6×2)-Matrix</strong> — Feature 1 (erste Spalte) wird entfernt.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Abschluss -->
+        <div class="note note-primary" style="margin-top:var(--space-8)">
+          <strong>Noch mehr üben?</strong> &nbsp;
+          Das interaktive Quiz testet dich mit zufälligen Fragen und gibt
+          direktes Feedback – inklusive Fallen-Fragen und Code-Interpretationen.
+          <br><br>
+          <a href="PageQuiz.html">→ Zum interaktiven Quiz</a>
+          &nbsp;·&nbsp;
+          <a href="Kapitel1.html">← Zur Kapitelübersicht</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 1 · Cheatsheet · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

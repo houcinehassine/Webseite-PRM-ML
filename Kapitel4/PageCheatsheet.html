@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Cheatsheet Clustering</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <site-header active="page4" title="Kapitel 4 · Cheatsheet"></site-header>
+  <div class="layout">
+    <site-sidebar active="cheatsheet"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 4 · Prüfungshilfe</span>
+            <h1>Clustering <span class="key" style="--key-color:var(--color-primary)">Cheatsheet</span></h1>
+            <p>Alle Formeln, alle sklearn-Befehle, alle Entscheidungsregeln –
+               kompakt auf einer Seite für die Prüfung.</p>
+            <div class="pill-row">
+              <span class="pill">Formeln</span>
+              <span class="pill">sklearn API</span>
+              <span class="pill">Entscheidungsregeln</span>
+              <span class="pill">Typische Fallen</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Prüfungs-Tipp</h2>
+            <p>Diese Seite ist als schnelle Referenz gedacht –
+               nicht zum ersten Lernen. Nutze sie zur Wiederholung
+               und kurz vor der Prüfung.</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           1. FORMELN KOMPAKT
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="formeln">
+        <div class="section-head">
+          <h2>Alle Formeln auf einen Blick</h2>
+        </div>
+
+        <div class="card-grid">
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Dunn-Index</span></h3>
+            <div class="math-display">
+              \[DI_m = \frac{\min\limits_{1 \leq i < j \leq m} \delta(C_i, C_j)}
+                           {\max\limits_{1 \leq k \leq m} \Delta_k}\]
+            </div>
+            <ul>
+              <li>Je <strong>größer</strong>, desto besser</li>
+              <li>Zähler = kleinste Inter-Cluster-Distanz</li>
+              <li>Nenner = größte Intra-Cluster-Distanz</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Davies-Bouldin Index</span></h3>
+            <div class="math-display">
+              \[DB = \frac{1}{m} \sum_{i=1}^{m} \max_{i \neq j}
+                \left(\frac{s_i + s_j}{d(C_i, C_j)}\right)\]
+            </div>
+            <ul>
+              <li>Je <strong>kleiner</strong>, desto besser</li>
+              <li>\(s_i\) = Streuung innerhalb Cluster \(i\)</li>
+              <li>sklearn: <code>davies_bouldin_score(X, y)</code></li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Silhouette Score S(o)</span></h3>
+            <div class="math-display">
+              \[S(o) = \frac{\text{dist}(B,o) - \text{dist}(A,o)}
+                           {\max\{\text{dist}(A,o),\,\text{dist}(B,o)\}}\]
+            </div>
+            <ul>
+              <li>Wertebereich <strong>−1 bis +1</strong>, höher = besser</li>
+              <li>\(\text{dist}(A,o)\) = Ø Abstand zum eigenen Cluster</li>
+              <li>\(\text{dist}(B,o)\) = Ø Abstand zum nächsten fremden Cluster</li>
+              <li>sklearn: <code>silhouette_score(X, labels)</code></li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-purple)">SSE / Inertia</span></h3>
+            <div class="math-display">
+              \[\text{SSE} = \sum_{i=1}^{k} \sum_{x \in C_i} \|x - \mu_i\|^2\]
+            </div>
+            <ul>
+              <li>Je <strong>kleiner</strong>, desto kompakter die Cluster</li>
+              <li>Sinkt immer mit steigendem \(k\) – allein nicht aussagekräftig</li>
+              <li>sklearn: <code>kmeans.inertia_</code></li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Manhattan-Distanz (k-Median)</span></h3>
+            <div class="math-display">
+              \[d(a, b) = \sum_i |a_i - b_i|\]
+            </div>
+            <ul>
+              <li>Robuster gegenüber Ausreißern als euklidisch</li>
+              <li>Wird im M-Schritt von k-Median verwendet</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Intra-/Inter-Cluster</span></h3>
+            <div class="math-display">
+              \[\text{dist}(A,o) = \frac{1}{n_A-1}\sum_{a \in A, a\neq o}\text{dist}(a,o)\]
+            </div>
+            <div class="math-display">
+              \[\text{dist}(B,o) = \min_{C \neq A}\frac{1}{n_C}\sum_{c \in C}\text{dist}(c,o)\]
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           2. SKLEARN API
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="sklearn-api">
+        <div class="section-head">
+          <h2>sklearn API – Alle wichtigen Befehle</h2>
+        </div>
+
+        <div class="card-grid">
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">KMeans</span></h3>
+            <pre><code>from sklearn.cluster import KMeans
+
+km = KMeans(
+    n_clusters=k,
+    init='k-means++',  # Default
+    n_init=10,
+    random_state=0
+)
+labels = km.fit_predict(X)
+
+km.inertia_           # SSE
+km.cluster_centers_   # Centroids
+km.labels_            # Cluster-Labels
+km.n_iter_            # Iterationen</code></pre>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">DBSCAN</span></h3>
+            <pre><code>from sklearn.cluster import DBSCAN
+
+db = DBSCAN(
+    eps=0.20,         # Radius
+    min_samples=5     # Min. Nachbarn
+)
+db.fit(X)
+
+db.labels_              # -1 = Noise
+db.core_sample_indices_ # Indizes Core
+db.components_          # Core-Punkte</code></pre>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Spectral Clustering</span></h3>
+            <pre><code>from sklearn.cluster import SpectralClustering
+
+sc = SpectralClustering(
+    n_clusters=2,
+    affinity='nearest_neighbors',
+    assign_labels='kmeans',
+    random_state=0
+)
+labels = sc.fit_predict(X)
+# Kein .predict() verfügbar!</code></pre>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-purple)">Validierungsmetriken</span></h3>
+            <pre><code>from sklearn.metrics import (
+    silhouette_score,
+    silhouette_samples,
+    davies_bouldin_score
+)
+
+# Durchschnittlicher Score
+s = silhouette_score(X, labels)
+
+# Pro Datenpunkt
+s_all = silhouette_samples(X, labels)
+
+# Davies-Bouldin (kleiner = besser)
+db = davies_bouldin_score(X, labels)</code></pre>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">DBSCAN + kNN Pipeline</span></h3>
+            <pre><code>from sklearn.neighbors import (
+    KNeighborsClassifier
+)
+
+# kNN auf Core-Punkten trainieren
+knn = KNeighborsClassifier(n_neighbors=50)
+knn.fit(
+    db.components_,
+    db.labels_[db.core_sample_indices_]
+)
+
+# Neuen Punkt zuordnen
+knn.predict([[x1, x2]])</code></pre>
+          </article>
+
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Scaling</span></h3>
+            <pre><code>from sklearn.preprocessing import (
+    StandardScaler,
+    MinMaxScaler
+)
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Für neue Punkte (KEIN fit_transform!)
+X_new_scaled = scaler.transform(X_new)</code></pre>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           3. ENTSCHEIDUNGSREGELN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="entscheidungen">
+        <div class="section-head">
+          <h2>Entscheidungsregeln für die Prüfung</h2>
+          <p>Welchen Algorithmus, welches Maß – wann?</p>
+        </div>
+
+        <div class="overview">
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">?</div>
+            <div>
+              <h3>Welcher Clustering-Algorithmus?</h3>
+              <ul>
+                <li>
+                  <span class="key" style="--key-color:var(--color-primary)">Konvexe, kompakte Cluster</span>
+                  → <strong>k-means / k-means++</strong>
+                </li>
+                <li>
+                  <span class="key" style="--key-color:var(--color-success)">Beliebige Formen, nicht-linear</span>
+                  → <strong>DBSCAN</strong> oder <strong>Spectral Clustering</strong>
+                </li>
+                <li>
+                  <span class="key" style="--key-color:var(--color-warning)">Unterschiedliche Dichten</span>
+                  → <strong>HDBSCAN</strong> oder <strong>OPTICS</strong>
+                </li>
+                <li>
+                  <span class="key" style="--key-color:var(--color-purple)">Ausreißer explizit erkennen</span>
+                  → <strong>DBSCAN</strong> (Noise-Label −1)
+                </li>
+                <li>
+                  <span class="key" style="--key-color:var(--color-primary)">k unbekannt</span>
+                  → <strong>DBSCAN, MeanShift, AffinityPropagation</strong>
+                </li>
+                <li>
+                  <span class="key" style="--key-color:var(--color-warning)">Sehr große Datensätze</span>
+                  → <strong>MiniBatchKMeans</strong> oder <strong>BIRCH</strong>
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">📏</div>
+            <div>
+              <h3>Skalieren oder nicht?</h3>
+              <ul>
+                <li>
+                  Frage: Soll das Feature mit
+                  <strong>größerem Wertebereich</strong>
+                  auch mehr Gewicht bekommen?
+                </li>
+                <li>
+                  <strong>Ja</strong> → <strong>kein</strong> Scaling
+                </li>
+                <li>
+                  <strong>Nein / alle gleich gewichten</strong>
+                  → <strong>StandardScaler</strong> anwenden
+                </li>
+                <li>
+                  Faustregel: Bei physikalisch unterschiedlichen Einheiten
+                  (z. B. Vibration vs. Temperatur) meist <strong>skalieren</strong>
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">k?</div>
+            <div>
+              <h3>Optimales k finden</h3>
+              <ul>
+                <li>
+                  <strong>Elbow Plot:</strong>
+                  SSE gegen k – Knick = optimales k
+                </li>
+                <li>
+                  <strong>Silhouette Score:</strong>
+                  Maximum = optimales k
+                </li>
+                <li>
+                  Beide Methoden <strong>kombinieren</strong>
+                  für robuste Entscheidung
+                </li>
+                <li>
+                  Domänenwissen (z. B. 6 Weihenstephaner Zustände)
+                  als <strong>Startpunkt</strong> nutzen
+                </li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-purple)">✓</div>
+            <div>
+              <h3>Silhouette-Plot lesen</h3>
+              <ul>
+                <li>
+                  <strong>Gut:</strong> alle Balken rechts der roten Linie,
+                  ähnliche Breiten, keine negativen Werte
+                </li>
+                <li>
+                  <strong>Schlecht:</strong>
+                  viele Balken links der roten Linie,
+                  negative Scores, stark unterschiedliche Breiten
+                </li>
+                <li>
+                  Rote Linie = Durchschnittlicher Silhouette Score
+                </li>
+              </ul>
+            </div>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           4. TYPISCHE FALLEN
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="fallen">
+        <div class="section-head">
+          <h2>Typische Fallen &amp; Missverständnisse</h2>
+          <p>Was in der Prüfung gerne falsch gemacht wird.</p>
+        </div>
+
+        <div class="card-grid">
+
+          <article class="card" style="border-left: 3px solid var(--color-warning)">
+            <h3>🪤 k-means auf nicht-linearen Daten</h3>
+            <p>
+              k-means versagt bei Halbmonden, Kreisen etc. –
+              die Cluster-Grenzen sind <strong>immer linear</strong>.
+              Lösung: Spectral Clustering oder DBSCAN.
+            </p>
+          </article>
+
+          <article class="card" style="border-left: 3px solid var(--color-warning)">
+            <h3>🪤 SSE / Inertia als alleiniges Maß</h3>
+            <p>
+              Inertia sinkt <strong>immer</strong> mit steigendem k –
+              auch wenn die Cluster schlechter werden.
+              Immer mit Silhouette kombinieren!
+            </p>
+          </article>
+
+          <article class="card" style="border-left: 3px solid var(--color-warning)">
+            <h3>🪤 DBSCAN: fit_transform vs. transform</h3>
+            <p>
+              Scaler muss auf Trainingsdaten mit
+              <code>.fit_transform()</code> angepasst werden.
+              Für neue Punkte nur <code>.transform()</code>
+              – sonst werden die Statistiken neu berechnet!
+            </p>
+          </article>
+
+          <article class="card" style="border-left: 3px solid var(--color-warning)">
+            <h3>🪤 DBSCAN Label −1 vergessen</h3>
+            <p>
+              <code>dbscan.labels_</code> enthält <code>−1</code>
+              für Noise-Punkte.
+              Beim Zählen der Cluster mit
+              <code>np.unique()</code> enthält das Ergebnis
+              auch <code>−1</code> – nicht als Cluster zählen!
+            </p>
+            <pre><code># Korrekt: Noise herausfiltern
+n_clusters = len(set(labels)) - (1 if -1 in labels else 0)</code></pre>
+          </article>
+
+          <article class="card" style="border-left: 3px solid var(--color-warning)">
+            <h3>🪤 components_ vs. labels_</h3>
+            <p>
+              <code>dbscan.components_</code> enthält nur die
+              <strong>Core-Punkte</strong> (Koordinaten),
+              nicht alle Datenpunkte.
+              <code>dbscan.labels_</code> enthält Labels für
+              <strong>alle</strong> Datenpunkte inkl. Border und Noise.
+            </p>
+          </article>
+
+          <article class="card" style="border-left: 3px solid var(--color-warning)">
+            <h3>🪤 Dunn vs. Davies-Bouldin Richtung</h3>
+            <p>
+              <span class="key" style="--key-color:var(--color-primary)">Dunn-Index:</span>
+              <strong>größer = besser</strong>
+              <br>
+              <span class="key" style="--key-color:var(--color-warning)">Davies-Bouldin:</span>
+              <strong>kleiner = besser</strong>
+              <br>
+              Beide verwechseln führt zu falschen Schlüssen!
+            </p>
+          </article>
+
+          <article class="card" style="border-left: 3px solid var(--color-warning)">
+            <h3>🪤 kNN trainiert auf falschen Labels</h3>
+            <p>
+              Beim DBSCAN+kNN Pattern:
+              kNN muss auf
+              <code>db.labels_[db.core_sample_indices_]</code>
+              trainiert werden – <strong>nicht</strong> auf
+              <code>db.labels_</code> direkt,
+              da <code>components_</code> nur Core-Punkte enthält.
+            </p>
+          </article>
+
+          <article class="card" style="border-left: 3px solid var(--color-warning)">
+            <h3>🪤 Spectral Clustering: kein predict()</h3>
+            <p>
+              <code>SpectralClustering</code> hat kein
+              <code>.predict()</code> –
+              nur <code>.fit_predict()</code>.
+              Für neue Punkte → kNN auf den gelernten Labels trainieren.
+            </p>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════
+           5. MERKSÄTZE
+      ════════════════════════════════════════════════ -->
+      <section class="section" id="merksaetze">
+        <div class="section-head">
+          <h2>Merksätze – Ein Satz pro Konzept</h2>
+          <p>Für schnelle Wiederholung kurz vor der Prüfung.</p>
+        </div>
+
+        <div class="overview">
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">1</div>
+            <div>
+              <p>
+                <strong>k-means</strong> teilt Daten in k Gruppen –
+                durch abwechselndes Zuordnen (E-Schritt)
+                und Centroid-Neuberechnen (M-Schritt),
+                bis Konvergenz.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">2</div>
+            <div>
+              <p>
+                <strong>Validierung:</strong> Gut = Intra-Cluster-Ähnlichkeit hoch
+                <em>und</em> Inter-Cluster-Ähnlichkeit gering.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">3</div>
+            <div>
+              <p>
+                <strong>Elbow Plot:</strong> SSE gegen k –
+                der Knick zeigt, wo weitere Cluster kaum
+                noch Varianz erklären.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-purple)">4</div>
+            <div>
+              <p>
+                <strong>Silhouette Score</strong> nahe +1:
+                Punkt liegt gut im Cluster;
+                nahe 0: zwischen zwei Clustern;
+                negativ: falsches Cluster.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-primary)">5</div>
+            <div>
+              <p>
+                <strong>DBSCAN</strong> findet Cluster
+                als dichte Regionen –
+                beliebige Formen, automatisches k,
+                Noise wird explizit erkannt (Label −1).
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-success)">6</div>
+            <div>
+              <p>
+                <strong>Spectral Clustering</strong>
+                nutzt den Kernel-Trick –
+                Daten werden via Graphentheorie transformiert,
+                sodass k-means beliebige Formen trennen kann.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-warning)">7</div>
+            <div>
+              <p>
+                <strong>Scaling-Entscheidung:</strong>
+                Sollen alle Features gleich gewichtet werden?
+                → Ja: StandardScaler. Nein: kein Scaling.
+              </p>
+            </div>
+          </article>
+          <article class="topic">
+            <div class="topic-badge" style="background:var(--color-purple)">8</div>
+            <div>
+              <p>
+                <strong>kNN</strong> hat kein echtes Training –
+                er speichert nur den Datensatz und
+                klassifiziert per Majoritätsvotum der k nächsten Nachbarn.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 4 · Cheatsheet · Stand Juni 2026</small>
+    </div>
+  </footer>
+</body>
+</html>

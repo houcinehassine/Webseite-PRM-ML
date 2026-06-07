@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Einführung: Was erwartet dich?</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       AGENDA ROADMAP  (4-Schritt horizontal)
+    ═══════════════════════════════════════════════════════ */
+    .agenda-roadmap {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin-top: var(--space-6);
+    }
+    .rm-step {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      padding: var(--space-5) var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: 0;
+      text-decoration: none;
+      color: var(--color-text);
+      flex: 1;
+      transition: background 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .rm-step:first-child { border-radius: var(--radius-xl) 0 0 var(--radius-xl); }
+    .rm-step:last-child  { border-radius: 0 var(--radius-xl) var(--radius-xl) 0; }
+    .rm-step + .rm-step  { border-left: none; }
+    .rm-step:hover {
+      background: color-mix(in oklab, var(--color-primary) 6%, var(--color-surface));
+      border-color: color-mix(in oklab, var(--color-primary) 25%, var(--color-border));
+      z-index: 1;
+    }
+    .rm-step:hover .rm-num {
+      background: var(--color-primary);
+      color: #fff;
+    }
+    .rm-num {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: var(--text-sm);
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      transition: background 0.15s, color 0.15s;
+      flex-shrink: 0;
+    }
+    .rm-body { display: flex; flex-direction: column; gap: 0.25rem; }
+    .rm-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--color-text);
+    }
+    .rm-sub {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      line-height: 1.4;
+    }
+    .rm-page {
+      margin-top: auto;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      opacity: 0.7;
+    }
+    /* Responsive: auf kleinen Screens untereinander */
+    @media (max-width: 760px) {
+      .agenda-roadmap { flex-direction: column; }
+      .rm-step:first-child { border-radius: var(--radius-xl) var(--radius-xl) 0 0; }
+      .rm-step:last-child  { border-radius: 0 0 var(--radius-xl) var(--radius-xl); }
+      .rm-step + .rm-step  { border-left: 1px solid var(--color-border); border-top: none; }
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       WOCHENPLAN-TABELLE  (Woche 2 hervorgehoben)
+    ═══════════════════════════════════════════════════════ */
+    .week-highlight td,
+    .week-highlight th {
+      background: color-mix(in oklab, var(--color-primary) 8%, var(--color-surface));
+    }
+    .week-highlight td { font-weight: 600; }
+    .week-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-full);
+      background: var(--color-primary);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      white-space: nowrap;
+    }
+    .week-dim { opacity: 0.55; }
+
+    /* ═══════════════════════════════════════════════════════
+       NAVIGATION-KARTEN (Section 1.4)
+    ═══════════════════════════════════════════════════════ */
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-5);
+    }
+    .nav-card {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      color: var(--color-text);
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .nav-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-card-icon {
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .nav-card-body { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+    .nav-card-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--color-text-faint);
+    }
+    .nav-card-title {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      line-height: 1.3;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .nav-card-sub {
+      font-size: 0.68rem;
+      color: var(--color-text-muted);
+      line-height: 1.3;
+    }
+
+    /* Farbvariante Grün */
+    .nav-card.green:hover { border-color: var(--color-success); }
+    .nav-card.green .nav-card-num { color: var(--color-success); }
+    /* Farbvariante Orange */
+    .nav-card.orange:hover { border-color: var(--color-warning); }
+    .nav-card.orange .nav-card-num {
+      color: color-mix(in oklab, var(--color-warning) 80%, #000);
+    }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page1" title="Kapitel 1 · Einführung"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page1"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 1 · Seite 1</span>
+            <h1>Einführung
+              <span class="key" style="--key-color:var(--color-primary)">Was erwartet dich?</span>
+            </h1>
+            <p>
+              Zeitliche Einordnung, der 4-Punkte-Fahrplan durch dieses Kapitel
+              und direkte Links zu allen Unterseiten – damit du sofort weißt,
+              wo du anfangen und wohin du springen kannst.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Wochenplan</span>
+              <span class="pill">4-Punkte-Agenda</span>
+              <span class="pill">Motivation</span>
+              <span class="pill">Standard-Setup</span>
+              <span class="pill">Navigation</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du weißt, <strong>wo wir uns im Semester befinden</strong>,
+              kennst die 4 Themenblöcke dieses Kapitels und verstehst,
+              warum Feature Engineering so entscheidend für die
+              Modellgüte ist – bevor wir auch nur eine Zeile Modell-Code schreiben.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           1.1  WO SIND WIR? — Wochenplan
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="wochenplan">
+        <div class="section-head">
+          <h2>1.1 Wo sind wir?</h2>
+          <p>Das Semesterprogramm auf einen Blick – wir befinden uns in <strong>Woche&nbsp;2</strong>.</p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th style="width:5rem">Woche</th>
+              <th>Thema (in der Sitzung)</th>
+              <th>Außerhalb der Sitzung</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr class="week-dim">
+              <td>1</td>
+              <td>Getting Started: Python, Tools, Predictive Analytics</td>
+              <td>Getting Started: Advanced, Kaggle Playground Tutorial</td>
+            </tr>
+
+            <!-- ── Woche 2 hervorgehoben ── -->
+            <tr class="week-highlight">
+              <td>
+                <span class="week-badge">2 ← Wir</span>
+              </td>
+              <td><strong>Data Preparation 2: Feature Engineering</strong></td>
+              <td>Data Preparation 2: Kaggle Pandas Tutorial + NumPy</td>
+            </tr>
+
+            <tr>
+              <td>3</td>
+              <td>Modelling 1: Einführung zu Machine Learning</td>
+              <td>Modelling 1: Kaggle ML&nbsp;1 Tutorial</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>Modelling 2: Supervised Learning – Support Vector Machines</td>
+              <td>Modelling 2: Übungsblatt</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>Modelling 3: Unsupervised Learning – Clustering</td>
+              <td>Modelling 3: Übungsblatt</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>Modelling 4: Supervised Learning – Random Forest</td>
+              <td>Modelling 4: Übungsblatt</td>
+            </tr>
+            <tr>
+              <td>7</td>
+              <td>Modelling 5: Unsupervised Learning – Principal Component Analysis</td>
+              <td>Modelling 5: Übungsblatt</td>
+            </tr>
+            <tr>
+              <td>8</td>
+              <td>Modelling 6: Supervised Learning – Naïve Bayes</td>
+              <td>Modelling 6: Übungsblatt</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           1.2  AGENDA — 4 Punkte als visuelle Roadmap
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="agenda">
+        <div class="section-head">
+          <h2>1.2 Agenda</h2>
+          <p>
+            Vier Themenblöcke – von der Grundlage bis zur Skalierung.
+            Klicke auf einen Schritt, um direkt zur passenden Seite zu springen.
+          </p>
+        </div>
+
+        <div class="agenda-roadmap">
+
+          <a href="Page02.html" class="rm-step">
+            <div class="rm-num">1</div>
+            <div class="rm-body">
+              <span class="rm-title">Was ist ein Feature?</span>
+              <span class="rm-sub">Vom Daten- in den Feature-Raum – Definition, Eigenschaften, Feature-Matrix</span>
+              <span class="rm-page">Seiten 2 – 3 →</span>
+            </div>
+          </a>
+
+          <a href="Page04.html" class="rm-step">
+            <div class="rm-num">2</div>
+            <div class="rm-body">
+              <span class="rm-title">Feature-Extraktion</span>
+              <span class="rm-sub">Zeitserien, Encoding, Bag-of-Words, Autoencoder, Haar Features</span>
+              <span class="rm-page">Seiten 4 – 6 →</span>
+            </div>
+          </a>
+
+          <a href="Page07.html" class="rm-step">
+            <div class="rm-num">3</div>
+            <div class="rm-body">
+              <span class="rm-title">Feature-Selektion</span>
+              <span class="rm-sub">Curse of Dimensionality, VarianceThreshold, Korrelation, SelectKBest</span>
+              <span class="rm-page">Seite 7 →</span>
+            </div>
+          </a>
+
+          <a href="Page08.html" class="rm-step">
+            <div class="rm-num">4</div>
+            <div class="rm-body">
+              <span class="rm-title">Feature Scaling &amp; Normalisierung</span>
+              <span class="rm-sub">MinMax-Transformation, Standardisierung, Power Transformations</span>
+              <span class="rm-page">Seite 8 →</span>
+            </div>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           1.3  WARUM FEATURE ENGINEERING? — Motivation
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="warum">
+        <div class="section-head">
+          <h2>1.3 Warum ist das so wichtig?</h2>
+          <p>Der unterschätzte Aufwand im Data-Science-Prozess – bevor das erste Modell trainiert wird.</p>
+        </div>
+
+        <div class="card-grid three">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">Der Realitätscheck</span>
+            </h3>
+            <p>
+              Den meisten Aufwand im Data Science Prozess hat man mit
+              <strong>Datenbereinigung und Feature-Engineering</strong>.
+              Modellierung macht gefühlte <strong>20&nbsp;%</strong> aus.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">Features &amp; Modell</span>
+            </h3>
+            <p>
+              Ein Machine Learning Modell nutzt Features, um <strong>Labels vorherzusagen</strong>.
+              Die Güte des Modells hängt maßgeblich von der
+              Qualität der Features ab – unabhängig vom gewählten Algorithmus.
+            </p>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">Iterativer Prozess</span>
+            </h3>
+            <p>
+              Feature Engineering ist ein <strong>Feedback-Loop</strong> zwischen Features und Modell.
+              Im Erzeugen guter Features steckt <strong>Domänenwissen</strong> –
+              wir unterstützen das Modell durch unser Verständnis der Daten.
+            </p>
+          </article>
+        </div>
+
+        <!-- Pipeline-Übersicht als Note -->
+        <div class="note note-primary" style="margin-top:var(--space-6)">
+          <strong>Die Datenpipeline:</strong> &nbsp;
+          Quellen&nbsp;→&nbsp;Rohdaten&nbsp;→&nbsp;<strong>(Bereinigen + Transformieren)</strong>&nbsp;→&nbsp;Features&nbsp;→&nbsp;Modelle&nbsp;→&nbsp;Erkenntnisse
+        </div>
+
+        <!-- Fehlbalance-Hinweis -->
+        <div class="note note-warning" style="margin-top:var(--space-3)">
+          <strong>Garbage in, garbage out:</strong> &nbsp;
+          Auch das beste Modell kann aus schlechten oder unrelevanten Features keine guten Vorhersagen machen.
+          Feature Engineering ist keine Vorstufe zum eigentlichen Lernen –
+          <strong>es ist ein gleichwertiger Teil des ML-Projekts</strong>.
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           1.4  STANDARD-SETUP — Aus dem Notebook
+           (aus 01_data_preparation_core.ipynb)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="setup">
+        <div class="section-head">
+          <h2>1.4 Standard-Setup für dieses Kapitel</h2>
+          <p>
+            Diese drei Imports bilden die Grundlage aller Code-Beispiele in Kapitel&nbsp;1 –
+            direkt aus dem Notebook <code>01_data_preparation_core.ipynb</code>.
+          </p>
+        </div>
+
+        <div class="code-cell">
+          <div class="code-cell-header">
+            <span class="cell-lang">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+              </svg>
+              Python – Standard-Imports
+            </span>
+          </div>
+          <pre><code># ── Standard-Imports für Kapitel 1 ──────────────────────────
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt</code></pre>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-4)">
+          <article class="card">
+            <h3><code style="color:var(--color-primary)">numpy</code></h3>
+            <p>
+              Basis für numerische Berechnungen: Arrays, Matrizen, mathematische Operationen.
+              Die Feature-Matrix <code>X</code> liegt immer als NumPy-Array vor –
+              Form&nbsp;<code>(N, K)</code> mit N Samples und K Features.
+            </p>
+          </article>
+          <article class="card">
+            <h3><code style="color:var(--color-success)">pandas</code></h3>
+            <p>
+              DataFrames für tabellarische Daten. Wird für Datenbereinigung,
+              Exploration und die Übergabe an sklearn-Klassen verwendet.
+              Spalten des DataFrames entsprechen Features.
+            </p>
+          </article>
+          <article class="card">
+            <h3><code style="color:var(--color-warning)">matplotlib.pyplot</code></h3>
+            <p>
+              Visualisierung: Feature-Verteilungen, Korrelations-Heatmaps,
+              t-SNE-Projektionen und Histogramme – alles aus diesem Kapitel
+              lässt sich damit darstellen.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           1.5  ALLE SEITEN — Direkte Navigation
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="alle-seiten">
+        <div class="section-head">
+          <h2>1.5 Alle Seiten auf einen Blick</h2>
+          <p>
+            Direkt zum Thema springen – oder der Reihe nach durcharbeiten.
+          </p>
+        </div>
+
+        <!-- Gruppe: Fundament -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+                  text-transform:uppercase;color:var(--color-text-faint);
+                  margin-bottom:var(--space-3)">
+          🧱 Fundament
+        </p>
+        <div class="nav-grid" style="margin-bottom:var(--space-6)">
+
+          <a href="Page02.html" class="nav-card">
+            <span class="nav-card-icon">🔄</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 2</span>
+              <span class="nav-card-title">Von Daten zu Features</span>
+              <span class="nav-card-sub">Definition · Matrix · Pipeline · Feedback-Loop</span>
+            </div>
+          </a>
+
+          <a href="Page03.html" class="nav-card">
+            <span class="nav-card-icon">🧭</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 3</span>
+              <span class="nav-card-title">Feature-Raum &amp; Visualisierung</span>
+              <span class="nav-card-sub">Geometrie · t-SNE · Digits-Beispiel</span>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Gruppe: Feature Extraction -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+                  text-transform:uppercase;color:var(--color-text-faint);
+                  margin-bottom:var(--space-3)">
+          ⚙️ Feature Extraction
+        </p>
+        <div class="nav-grid" style="margin-bottom:var(--space-6)">
+
+          <a href="Page04.html" class="nav-card green">
+            <span class="nav-card-icon">📈</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num" style="color:var(--color-success)">Seite 4</span>
+              <span class="nav-card-title">Extraction: Zeitserien</span>
+              <span class="nav-card-sub">Mathematik · CompEngine · BirdNET</span>
+            </div>
+          </a>
+
+          <a href="Page05.html" class="nav-card green">
+            <span class="nav-card-icon">🔤</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num" style="color:var(--color-success)">Seite 5</span>
+              <span class="nav-card-title">Encoding &amp; Text</span>
+              <span class="nav-card-sub">LabelEncoder · OneHotEncoder · Bag-of-Words</span>
+            </div>
+          </a>
+
+          <a href="Page06.html" class="nav-card green">
+            <span class="nav-card-icon">🧠</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num" style="color:var(--color-success)">Seite 6</span>
+              <span class="nav-card-title">Autoencoder &amp; Haar</span>
+              <span class="nav-card-sub">Bottleneck · Intensitätsdifferenz</span>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Gruppe: Selection & Scaling -->
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;
+                  text-transform:uppercase;color:var(--color-text-faint);
+                  margin-bottom:var(--space-3)">
+          🎯 Selection &amp; Scaling
+        </p>
+        <div class="nav-grid">
+
+          <a href="Page07.html" class="nav-card orange">
+            <span class="nav-card-icon">🔍</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num" style="color:color-mix(in oklab, var(--color-warning) 80%, #000)">Seite 7</span>
+              <span class="nav-card-title">Feature Selection</span>
+              <span class="nav-card-sub">Curse · VarianceThreshold · SelectKBest</span>
+            </div>
+          </a>
+
+          <a href="Page08.html" class="nav-card orange">
+            <span class="nav-card-icon">⚖️</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num" style="color:color-mix(in oklab, var(--color-warning) 80%, #000)">Seite 8</span>
+              <span class="nav-card-title">Feature Scaling</span>
+              <span class="nav-card-sub">MinMaxScaler · StandardScaler · Box-Cox</span>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Weiter-Button -->
+        <div class="note" style="margin-top:var(--space-8)">
+          <strong>Nächste Seite:</strong>&nbsp;
+          Was genau ist ein Feature – und welche Eigenschaften muss es haben?
+          Der theoretische Unterbau für das gesamte Kapitel.
+          <br><br>
+          <a href="Page02.html">→ Seite 2: Von Daten zu Features</a>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 1 · Seite 1 · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>

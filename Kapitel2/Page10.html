@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K2 · Grid Search &amp; Hyperparameter-Tuning</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ── FEHLERFLÄCHEN HEATMAP (Folie 46) ───────────── */
+    .error-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 3px;
+      margin: var(--space-4) 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--color-border);
+    }
+    .eg-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+      cursor: default;
+      transition: transform .1s;
+    }
+    .eg-cell:hover { transform: scale(1.15); z-index: 2; }
+    /* Grid Search Gitter-Punkte Visual */
+    .grid-search-visual {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 4px;
+      margin-top: var(--space-4);
+      padding: var(--space-3);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+    }
+    .gs-point {
+      aspect-ratio: 1;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      border: 1.5px solid var(--color-border);
+      font-weight: 700;
+    }
+    .gs-point.best {
+      background: color-mix(in oklab, var(--color-success) 15%, var(--color-surface));
+      border-color: var(--color-success);
+      color: var(--color-success);
+    }
+    .gs-point.tested {
+      background: color-mix(in oklab, var(--color-primary) 8%, var(--color-surface));
+      border-color: color-mix(in oklab, var(--color-primary) 25%, var(--color-border));
+      color: var(--color-text-faint);
+    }
+
+    /* ── BEST PARAMS OUTPUT BOX ─────────────────────── */
+    .best-params-box {
+      background: color-mix(in oklab, var(--color-success) 5%, var(--color-surface-2));
+      border: 1.5px solid color-mix(in oklab, var(--color-success) 30%, var(--color-border));
+      border-radius: var(--radius-xl);
+      padding: var(--space-4) var(--space-5);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      margin-top: var(--space-4);
+    }
+    .best-params-box .bp-label {
+      font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--color-success); margin-bottom: var(--space-3);
+    }
+    .bp-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-2) 0;
+      border-bottom: 1px solid color-mix(in oklab, var(--color-success) 10%, var(--color-border));
+      font-size: var(--text-xs);
+    }
+    .bp-row:last-child { border-bottom: none; }
+    .bp-key { color: var(--color-primary); font-weight: 700; flex: 1; }
+    .bp-val { color: var(--color-success); font-weight: 800; }
+    .bp-note { color: var(--color-text-faint); font-size: 0.65rem; margin-left: auto; }
+
+    /* ── ABSCHLUSS SECTION ──────────────────────────── */
+    .abschluss-hero {
+      text-align: center;
+      padding: var(--space-8) var(--space-6);
+      background: linear-gradient(135deg,
+        color-mix(in oklab, var(--color-primary) 6%, var(--color-surface-2)),
+        color-mix(in oklab, var(--color-success) 6%, var(--color-surface-2)));
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      margin-top: var(--space-5);
+    }
+    .abschluss-emoji { font-size: 3rem; margin-bottom: var(--space-3); }
+    .abschluss-title { font-size: var(--text-xl); font-weight: 800;
+      font-family: var(--font-display); margin-bottom: var(--space-4); }
+    .abschluss-tag {
+      display: inline-block;
+      padding: var(--space-1) var(--space-3);
+      background: var(--color-surface-offset);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-full);
+      font-size: 0.7rem; font-weight: 700;
+      color: var(--color-text-faint);
+      margin-bottom: var(--space-4);
+    }
+
+    /* ── SO WHAT + FRAGE BOX ────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning); border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── QUOTE BLOCK ────────────────────────────────── */
+    .quote-block { margin:var(--space-6) 0; padding:var(--space-6);
+      background:var(--color-surface-2); border:1px solid var(--color-border);
+      border-radius:var(--radius-xl); text-align:center; }
+    .quote-block blockquote { font-family:var(--font-display); font-size:var(--text-xl);
+      font-style:italic; color:var(--color-text); margin:0 0 var(--space-3) 0; line-height:1.4; }
+    .quote-block cite { font-size:var(--text-xs); color:var(--color-text-muted);
+      font-style:normal; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+
+    /* ── CHAPTER SUMMARY CARDS ──────────────────────── */
+    .chapter-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-5);
+    }
+    .cs-card {
+      padding: var(--space-4);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      border-top: 3px solid var(--cs-color, var(--color-primary));
+    }
+    .cs-card-num {
+      font-size: 0.65rem; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--cs-color, var(--color-primary));
+      margin-bottom: var(--space-2);
+    }
+    .cs-card-title { font-size: var(--text-xs); font-weight: 700; line-height: 1.3; }
+    .cs-card-sub { font-size: 0.65rem; color: var(--color-text-muted); margin-top: 3px; line-height: 1.4; }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page2" title="Kapitel 2 · Grid Search"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page10"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 2 · Seite 10 · Folien 46–49 · Finale Seite</span>
+            <h1>Grid Search &amp;
+              <span class="key" style="--key-color:var(--color-primary)">Hyperparameter-Tuning</span>
+            </h1>
+            <p>
+              Was passiert, wenn wir mehr als einen Hyperparameter haben?
+              Dann wird aus einer Validierungskurve eine mehrdimensionale
+              Fehlerfläche.
+              <span class="key" style="--key-color:var(--color-primary)">GridSearchCV</span>
+              sucht das Optimum dieser Fläche systematisch –
+              und liefert die beste Hyperparameter-Kombination.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Fehlerfläche</span>
+              <span class="pill">param_grid</span>
+              <span class="pill">GridSearchCV</span>
+              <span class="pill">.best_params_</span>
+              <span class="pill">.best_estimator_</span>
+              <span class="pill">Abschluss</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kannst <code>GridSearchCV</code> einsetzen – von der
+              <code>param_grid</code>-Definition über
+              <code>.fit()</code> bis zur Nutzung von
+              <code>.best_params_</code> und
+              <code>.best_estimator_</code>.
+              Du verstehst, warum Grid Search bei mehreren Hyperparametern
+              nötig ist und was eine <strong>mehrdimensionale Fehlerfläche</strong> bedeutet.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           10.1  GRID SEARCH – GRUNDKONZEPT  (Folie 46)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="grid-search-konzept">
+        <div class="section-head">
+          <h2>10.1 Grid Search – Grundkonzept</h2>
+          <p>
+            Validierungs- und Lernkurven haben uns einen Einblick in das Trainieren
+            von ML-Algorithmen verschafft – aber in der Praxis haben Modelle
+            <span class="key" style="--key-color:var(--color-primary)">mehr als einen Hyperparameter</span>.
+          </p>
+        </div>
+
+        <!-- Fehlerflächen Visualisierung (2D Heatmap) -->
+        <div class="card" style="margin-bottom:var(--space-5)">
+          <h3>
+            <span class="key" style="--key-color:var(--color-primary)">Mehrdimensionale Fehlerfläche</span>
+            – Folie 46
+          </h3>
+          <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-4)">
+            Jede Achse = ein Hyperparameter (w₁, w₂). Der Farbwert = Fehler E(w).
+            <strong>Dunkel (violett) = niedriger Fehler = gut</strong>.
+            Das Ziel: das globale Minimum der Fehlerfläche finden.
+          </p>
+          <!-- Pseudo-3D Heatmap: 8×8 Grid mit Farben -->
+          <div style="display:grid; grid-template-columns:auto 1fr auto; gap:var(--space-3); align-items:center">
+            <div style="writing-mode:vertical-rl; font-size:0.65rem; font-weight:700;
+                        text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-faint);
+                        transform:rotate(180deg)">w₂ →</div>
+            <div>
+              <div class="error-grid">
+                <!-- Row 1 (w2=high) – mostly high error -->
+                <div class="eg-cell" style="background:#fbbf24; color:#1f2937">400</div>
+                <div class="eg-cell" style="background:#f59e0b; color:#1f2937">350</div>
+                <div class="eg-cell" style="background:#d97706; color:#fff">280</div>
+                <div class="eg-cell" style="background:#b45309; color:#fff">200</div>
+                <div class="eg-cell" style="background:#92400e; color:#fff">150</div>
+                <div class="eg-cell" style="background:#7c3aed; color:#fff">100</div>
+                <div class="eg-cell" style="background:#6d28d9; color:#fff">120</div>
+                <div class="eg-cell" style="background:#fbbf24; color:#1f2937">380</div>
+                <!-- Row 2 -->
+                <div class="eg-cell" style="background:#f59e0b; color:#1f2937">320</div>
+                <div class="eg-cell" style="background:#d97706; color:#fff">240</div>
+                <div class="eg-cell" style="background:#92400e; color:#fff">160</div>
+                <div class="eg-cell" style="background:#6d28d9; color:#fff">80</div>
+                <div class="eg-cell" style="background:#5b21b6; color:#fff">50</div>
+                <div class="eg-cell" style="background:#4c1d95; color:#fff">30</div>
+                <div class="eg-cell" style="background:#7c3aed; color:#fff">90</div>
+                <div class="eg-cell" style="background:#d97706; color:#fff">200</div>
+                <!-- Row 3 -->
+                <div class="eg-cell" style="background:#d97706; color:#fff">280</div>
+                <div class="eg-cell" style="background:#92400e; color:#fff">180</div>
+                <div class="eg-cell" style="background:#5b21b6; color:#fff">60</div>
+                <div class="eg-cell" style="background:#4c1d95; color:#fff">25</div>
+                <div class="eg-cell" style="background:#3730a3; color:#fff; font-size:.6rem">10 ★</div>
+                <div class="eg-cell" style="background:#4c1d95; color:#fff">28</div>
+                <div class="eg-cell" style="background:#6d28d9; color:#fff">70</div>
+                <div class="eg-cell" style="background:#92400e; color:#fff">190</div>
+                <!-- Row 4 -->
+                <div class="eg-cell" style="background:#b45309; color:#fff">200</div>
+                <div class="eg-cell" style="background:#6d28d9; color:#fff">110</div>
+                <div class="eg-cell" style="background:#4c1d95; color:#fff">40</div>
+                <div class="eg-cell" style="background:#3730a3; color:#fff">15</div>
+                <div class="eg-cell" style="background:#312e81; color:#fff">8</div>
+                <div class="eg-cell" style="background:#3730a3; color:#fff">18</div>
+                <div class="eg-cell" style="background:#5b21b6; color:#fff">55</div>
+                <div class="eg-cell" style="background:#b45309; color:#fff">210</div>
+                <!-- Row 5 (low region - optimal) -->
+                <div class="eg-cell" style="background:#92400e; color:#fff">180</div>
+                <div class="eg-cell" style="background:#5b21b6; color:#fff">90</div>
+                <div class="eg-cell" style="background:#3730a3; color:#fff">20</div>
+                <div class="eg-cell" style="background:#312e81; color:#fff">7</div>
+                <div class="eg-cell" style="background:#1e1b4b; color:#fff; font-size:.6rem; border:2px solid #10b981">0 ✓</div>
+                <div class="eg-cell" style="background:#312e81; color:#fff">9</div>
+                <div class="eg-cell" style="background:#4c1d95; color:#fff">45</div>
+                <div class="eg-cell" style="background:#92400e; color:#fff">170</div>
+                <!-- Row 6 -->
+                <div class="eg-cell" style="background:#b45309; color:#fff">220</div>
+                <div class="eg-cell" style="background:#7c3aed; color:#fff">120</div>
+                <div class="eg-cell" style="background:#5b21b6; color:#fff">55</div>
+                <div class="eg-cell" style="background:#3730a3; color:#fff">22</div>
+                <div class="eg-cell" style="background:#312e81; color:#fff">12</div>
+                <div class="eg-cell" style="background:#3730a3; color:#fff">25</div>
+                <div class="eg-cell" style="background:#6d28d9; color:#fff">80</div>
+                <div class="eg-cell" style="background:#b45309; color:#fff">230</div>
+                <!-- Row 7 -->
+                <div class="eg-cell" style="background:#d97706; color:#fff">280</div>
+                <div class="eg-cell" style="background:#92400e; color:#fff">190</div>
+                <div class="eg-cell" style="background:#7c3aed; color:#fff">110</div>
+                <div class="eg-cell" style="background:#6d28d9; color:#fff">75</div>
+                <div class="eg-cell" style="background:#5b21b6; color:#fff">60</div>
+                <div class="eg-cell" style="background:#6d28d9; color:#fff">72</div>
+                <div class="eg-cell" style="background:#92400e; color:#fff">150</div>
+                <div class="eg-cell" style="background:#d97706; color:#fff">270</div>
+                <!-- Row 8 (w2=low) – high error -->
+                <div class="eg-cell" style="background:#fbbf24; color:#1f2937">400</div>
+                <div class="eg-cell" style="background:#f59e0b; color:#1f2937">350</div>
+                <div class="eg-cell" style="background:#d97706; color:#fff">290</div>
+                <div class="eg-cell" style="background:#b45309; color:#fff">230</div>
+                <div class="eg-cell" style="background:#92400e; color:#fff">180</div>
+                <div class="eg-cell" style="background:#7c3aed; color:#fff">130</div>
+                <div class="eg-cell" style="background:#d97706; color:#fff">260</div>
+                <div class="eg-cell" style="background:#fbbf24; color:#1f2937">400</div>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-top:var(--space-2)">
+                <span style="font-size:0.65rem; color:var(--color-text-faint)">w₁ = 0.2</span>
+                <span style="font-size:0.65rem; color:var(--color-text-faint); font-weight:700">w₁ →</span>
+                <span style="font-size:0.65rem; color:var(--color-text-faint)">w₁ = 1.0</span>
+              </div>
+              <div style="display:flex; gap:var(--space-3); margin-top:var(--space-3); flex-wrap:wrap; font-size:0.65rem; color:var(--color-text-muted)">
+                <span><span style="display:inline-block; width:10px; height:10px; background:#fbbf24; border-radius:2px; vertical-align:middle; margin-right:4px"></span>Hoher Fehler (400)</span>
+                <span><span style="display:inline-block; width:10px; height:10px; background:#1e1b4b; border-radius:2px; vertical-align:middle; margin-right:4px"></span>Niedriger Fehler (0 = Optimum ✓)</span>
+              </div>
+            </div>
+            <div style="writing-mode:vertical-rl; font-size:0.65rem; color:var(--color-text-faint)">← w₂ = 0.2</div>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>Vom Kurven- zum Flächen-Problem</h3>
+            <ul>
+              <li>Validierungs- und Lernkurven geben Einblick in ML-Training</li>
+              <li>In der Praxis: ML-Modelle haben <strong>mehr als einen Hyperparameter</strong></li>
+              <li>Dadurch werden aus Validierungskurven
+                <span class="key" style="--key-color:var(--color-primary)">mehrdimensionale „Flächen"</span>
+              </li>
+              <li>Daher: in der Praxis nur den Validierungs-Score untersuchen</li>
+              <li>
+                <span class="key" style="--key-color:var(--color-success)">Optimum</span>
+                = globales Maximum des Validierungs-Scores
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">Warum heißt es „Grid Search"?</span>
+            </h3>
+            <ul>
+              <li>Der Parameterraum wird als <strong>Gitter (Grid)</strong> aufgespannt</li>
+              <li>Jeder Gitterpunkt = eine Hyperparameter-Kombination</li>
+              <li>An jedem Punkt wird ein Modell trainiert und validiert</li>
+              <li>Am Ende: der Punkt mit dem höchsten Validierungs-Score = <strong>Best Model</strong></li>
+              <li>Brute-Force: alle Kombinationen werden durchsucht</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">💬 Denkfragen aus der Vorlesung</div>
+          <p>„Was liegt uns jetzt vor?" &nbsp;·&nbsp; „Wieso sagt man Grid Search?"</p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           10.2  GRIDSEARCHCV – DEFINITION  (Folie 47)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="gridsearchcv">
+        <div class="section-head">
+          <h2>10.2 GridSearchCV – Definition &amp; Implementation</h2>
+          <p>
+            Man definiert vorab einen
+            <span class="key" style="--key-color:var(--color-primary)">param_grid</span>
+            mit den zu suchenden Hyperparameter-Bereichen.
+            <code>GridSearchCV</code> übernimmt dann den Rest.
+          </p>
+        </div>
+
+        <div class="card" style="margin-bottom:var(--space-5)">
+          <h3>sklearn API: <code>GridSearchCV</code></h3>
+          <ul>
+            <li>
+              <code class="key" style="--key-color:var(--color-primary)">GridSearchCV(model, param_grid, cv=k)</code>
+            </li>
+            <li>Beim Grid Search gibt man vorab <strong>bestimmte Bereiche der Hyperparameter</strong> vor</li>
+            <li>Diese Bereiche werden „abgefahren" / „gesweept" / „getuned":
+              für jede Parameterkombination wird ein Modell trainiert</li>
+            <li>Jedes dieser Modelle resultiert in einen <strong>Validierungs-Score</strong></li>
+            <li>Aufgabe: <strong>Optimum / Maximum des Validierungs-Scores</strong> in Abhängigkeit von der Parametereinstellung finden</li>
+          </ul>
+        </div>
+
+        <!-- Schritt 1: Setup-Funktionen -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Schritt 1 — Hilfsfunktionen vorbereiten
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir benötigen wieder unsere Hilfsfunktionen
+          <code>PolynomialRegression()</code> und <code>make_data()</code>
+          aus Seite 9. Hier zur Vollständigkeit nochmals definiert.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – Setup (Imports &amp; Hilfsfunktionen)
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+
+def PolynomialRegression(degree=2, **kwargs):
+    return make_pipeline(
+        PolynomialFeatures(degree),
+        LinearRegression(**kwargs))
+
+def make_data(N, err=1.0, rseed=1):
+    rng = np.random.RandomState(rseed)
+    X = rng.rand(N, 1) ** 2
+    y = 10 - 1. / (X.ravel() + 0.1)
+    if err > 0:
+        y += err * rng.randn(N)
+    return X, y
+
+X, y = make_data(50)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Erklärung</span></div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li><code>PolynomialRegression(degree)</code> = Pipeline aus PolynomialFeatures + LinearRegression</li>
+                <li><code>make_data(50)</code>: 50 synthetische Datenpunkte</li>
+                <li>Pipeline-Parameter: <code>stepname__param</code> (doppelter Unterstrich)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: param_grid + GridSearchCV -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-5) 0 var(--space-3)">
+          Schritt 2 —
+          <span class="key" style="--key-color:var(--color-primary)">param_grid</span>
+          definieren &amp; GridSearchCV erstellen
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Das <code>param_grid</code>-Dictionary enthält alle zu suchenden Hyperparameter-Bereiche.
+          Die Keys folgen der Pipeline-Konvention:
+          <code>stufenname__parametername</code> (doppelter Unterstrich).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – param_grid &amp; GridSearchCV
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.model_selection import GridSearchCV
+
+# Hyperparameter-Bereiche definieren
+param_grid = {
+    'polynomialfeatures__degree':
+        np.arange(21),              # 0 bis 20
+    'linearregression__fit_intercept':
+        [True, False],              # 2 Optionen
+}
+
+# GridSearchCV Instanz erstellen
+grid = GridSearchCV(
+    PolynomialRegression(),
+    param_grid,
+    cv=7)
+
+# Anzahl Kombinationen berechnen
+n = 21 * 2
+print(f"Anzahl Kombinationen: {n}")
+print(f"Anzahl CV-Splits:     7")
+print(f"Anzahl Trainings:     {n * 7}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Ausgabe</span></div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                Anzahl Kombinationen: 42<br>
+                Anzahl CV-Splits:     7<br>
+                Anzahl Trainings:     294
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>21 Degree-Werte × 2 fit_intercept-Werte = <strong>42 Kombinationen</strong></li>
+                <li>Für jede → 7-Fold CV → 294 Trainings!</li>
+                <li>→ Das ist der „Preis" des Grid Search</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pipeline-Variante (aus Folie 47) -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-5) 0 var(--space-3)">
+          Alternativ: GridSearchCV mit expliziter Pipeline (Folie 47, Teil 2)
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Man kann GridSearchCV auch direkt mit einer expliziten sklearn Pipeline
+          und allen 3 Parametern (inkl. <code>fit_intercept</code>) definieren.
+          Beide Varianten führen zum gleichen Ergebnis.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – GridSearchCV mit Pipeline (Folie 47)
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code>from sklearn.pipeline import Pipeline
+
+# Explizite Pipeline-Variante
+grid_pipeline = GridSearchCV(
+    cv=7,
+    estimator=Pipeline(steps=[
+        ('polynomialfeatures', PolynomialFeatures()),
+        ('linearregression',   LinearRegression())
+    ]),
+    param_grid={
+        'polynomialfeatures__degree': np.arange(21),
+        'linearregression__fit_intercept': [True, False]
+    }
+)
+
+print("param_grid keys:")
+for k in grid_pipeline.param_grid:
+    print(" ", k)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Ausgabe</span></div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                param_grid keys:<br>
+                &nbsp; polynomialfeatures__degree<br>
+                &nbsp; linearregression__fit_intercept
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>Beide Varianten (PolynomialRegression()-Shortcut vs. explizite Pipeline) sind äquivalent</li>
+                <li>Pipeline-Benennung: <code>stepname__param</code></li>
+                <li>Stufenname = lowercase Klassenname</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid Visual -->
+        <div style="margin-top:var(--space-5)">
+          <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--color-text-faint); margin-bottom:var(--space-3)">
+            Visualisierung: das „Gitter" beim Grid Search (6×6 Ausschnitt, 2 Hyperparameter)
+          </p>
+          <div class="grid-search-visual">
+            <!-- Row headers as first column -->
+            <div class="gs-point" style="background:var(--color-surface-offset); border:none; font-size:.6rem; color:var(--color-text-faint)">d=0</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point" style="background:var(--color-surface-offset); border:none; font-size:.6rem; color:var(--color-text-faint)">d=3</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point best">✓</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point" style="background:var(--color-surface-offset); border:none; font-size:.6rem; color:var(--color-text-faint)">d=5</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point" style="background:var(--color-surface-offset); border:none; font-size:.6rem; color:var(--color-text-faint)">d=10</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point" style="background:var(--color-surface-offset); border:none; font-size:.6rem; color:var(--color-text-faint)">d=15</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <div class="gs-point tested">×</div>
+            <!-- Axis label row -->
+            <div style="font-size:.6rem; color:var(--color-text-faint); text-align:center">degree →</div>
+            <div style="font-size:.6rem; color:var(--color-text-faint); text-align:center">True</div>
+            <div style="font-size:.6rem; color:var(--color-text-faint); text-align:center">False</div>
+            <div style="font-size:.6rem; color:var(--color-text-faint); text-align:center">True</div>
+            <div style="font-size:.6rem; color:var(--color-text-faint); text-align:center">False</div>
+            <div style="font-size:.6rem; color:var(--color-text-faint); text-align:center">fit_int →</div>
+          </div>
+          <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-2)">
+            × = getestete Kombination, <span style="color:var(--color-success); font-weight:700">✓</span> = Best Model (degree=3, fit_intercept=False)
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           10.3  GRIDSEARCHCV – ANWENDUNG  (Folie 48)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="grid-search-anwendung">
+        <div class="section-head">
+          <h2>10.3 GridSearchCV – Anwendung &amp; Ergebnisse</h2>
+          <p>
+            Wie ein normales ML-Modell: GridSearchCV per
+            <span class="key" style="--key-color:var(--color-warning)">.fit()</span>
+            anpassen, dann
+            <span class="key" style="--key-color:var(--color-success)">.best_params_</span>
+            und
+            <span class="key" style="--key-color:var(--color-success)">.best_estimator_</span>
+            nutzen.
+          </p>
+        </div>
+
+        <!-- Schritt 3: grid.fit() + best_params_ -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Schritt 3 —
+          <span class="key" style="--key-color:var(--color-warning)">.fit()</span>
+          ausführen &amp;
+          <span class="key" style="--key-color:var(--color-success)">.best_params_</span>
+          ausgeben
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>grid.fit(X, y)</code> startet den kompletten Grid Search –
+          alle Kombinationen werden per Cross-Validation evaluiert.
+          Danach stehen <code>.best_params_</code> und <code>.best_score_</code> bereit.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – grid.fit() + best_params_
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code># Grid Search ausführen (dauert etwas!)
+grid.fit(X, y)
+
+# Beste Hyperparameter ausgeben
+print("Best Params:")
+print(grid.best_params_)
+
+# Bester CV-Score
+print("\nBest CV-Score:", grid.best_score_.round(4))</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Ausgabe (Folie 48)</span></div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs); background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md); margin-bottom:var(--space-3); color:var(--color-text-muted)">
+                Best Params:<br>
+                {'linearregression__fit_intercept': False,<br>
+                &nbsp;'polynomialfeatures__degree': 4}<br>
+                <br>
+                Best CV-Score: 0.9894
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>Optimaler Polynomgrad: <strong>degree=4</strong></li>
+                <li>fit_intercept=False ist besser für diese Daten</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Best Params Box -->
+        <div class="best-params-box">
+          <div class="bp-label">✅ grid.best_params_ – Beste Hyperparameter-Kombination</div>
+          <div class="bp-row">
+            <span class="bp-key">'linearregression__fit_intercept'</span>
+            <span class="bp-val">False</span>
+            <span class="bp-note">Achsenabschnitt nicht fitten</span>
+          </div>
+          <div class="bp-row">
+            <span class="bp-key">'polynomialfeatures__degree'</span>
+            <span class="bp-val">4</span>
+            <span class="bp-note">Optimaler Polynomgrad</span>
+          </div>
+        </div>
+
+        <!-- Schritt 4: best_estimator_ + Plot -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-5) 0 var(--space-3)">
+          Schritt 4 —
+          <span class="key" style="--key-color:var(--color-success)">.best_estimator_</span>
+          nutzen &amp; plotten
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>grid.best_estimator_</code> gibt das komplett konfigurierte Modell
+          mit den besten Hyperparametern zurück.
+          Wir fitten es auf den gesamten Datensatz und visualisieren den resultierenden Fit.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>Python – best_estimator_ nutzen &amp; plotten
+              </span>
+              <button class="copy-btn" aria-label="kopieren">Kopieren</button>
+            </div>
+            <pre><code># Bestes Modell extrahieren
+model = grid.best_estimator_
+
+# Scatter + Fit plotten
+plt.scatter(X.ravel(), y, label='Daten')
+lim = plt.axis()
+
+X_new = np.linspace(0, 1, 100).reshape(-1, 1)
+y_new = model.fit(X, y).predict(X_new)
+
+plt.plot(X_new, y_new, color='blue',
+         label='Best Model (degree=4)')
+plt.axis(lim)
+plt.legend()
+plt.xlabel('x'); plt.ylabel('y')
+plt.title('GridSearchCV – Bestes Modell')
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header"><span class="cell-lang">Beobachtung</span></div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>📊 Scatter mit blauer Kurve (degree=4)</li>
+                <li>Glatter, realistischer Fit – kein Overfitting</li>
+                <li>Kurve folgt dem allgemeinen Trend der Daten</li>
+                <li><code>.best_estimator_</code> = voll konfiguriertes Modell</li>
+                <li>Kann direkt wie ein normales sklearn-Modell verwendet werden</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>GridSearchCV als normales Modell</h3>
+            <ul>
+              <li>Wie ein normales ML-Modell auch: GridSearchCV auf Daten anpassen mit
+                <code class="key" style="--key-color:var(--color-warning)">.fit(X, y)</code>
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-success)">.best_params_</code>
+                → beste Hyperparameter-Kombination als Dictionary
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-success)">.best_estimator_</code>
+                → konfiguriertes Modell mit Best Params
+              </li>
+              <li>
+                <code class="key" style="--key-color:var(--color-success)">.best_score_</code>
+                → bester CV-Score
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>Zusammenfassung – Grid Search Prozess</h3>
+            <ul>
+              <li><strong>Schritt 1:</strong> <code>param_grid</code> Dictionary definieren</li>
+              <li><strong>Schritt 2:</strong> <code>GridSearchCV(model, param_grid, cv=k)</code></li>
+              <li><strong>Schritt 3:</strong> <code>grid.fit(X, y)</code> – alle Kombinationen testen</li>
+              <li><strong>Schritt 4:</strong> <code>grid.best_params_</code> und <code>grid.best_estimator_</code> nutzen</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            <code>GridSearchCV</code> automatisiert das Hyperparameter-Tuning komplett.
+            Nach dem <code>.fit()</code> verhält es sich wie ein normales sklearn-Modell.
+            Rechenintensiv bei vielen Kombinationen – aber vollständig automatisiert.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           10.4  ABSCHLUSS  (Folie 49)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="abschluss">
+        <div class="section-head">
+          <h2>10.4 Abschluss – Kapitel 2</h2>
+          <p>
+            Das war eine Menge Information – aber genau dafür ist diese Referenz da.
+          </p>
+        </div>
+
+        <!-- Abschluss Hero -->
+        <div class="abschluss-hero">
+          <div class="abschluss-emoji">😸</div>
+          <div class="abschluss-tag">#toomaninformation</div>
+          <div class="abschluss-title">Jetzt haben wir uns viele Informationen zu Gemüte geführt!</div>
+          <p style="color:var(--color-text-muted); font-size:var(--text-sm); max-width:600px; margin:0 auto">
+            Viele generische Machine Learning Konzepte kennengelernt –
+            und das auch noch mit sklearn verknüpft.
+            Jetzt wird es Zeit für
+            <span class="key" style="--key-color:var(--color-primary)">konkrete Algorithmen</span>
+            und anwendungsorientierte Aufgaben!
+          </p>
+        </div>
+
+        <!-- Was wir gelernt haben -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Kapitel 2 in 10 Seiten – Überblick
+        </h3>
+        <div class="chapter-summary-grid">
+          <a href="Page01.html" class="cs-card" style="--cs-color:var(--color-primary); text-decoration:none">
+            <div class="cs-card-num">Seite 1</div>
+            <div class="cs-card-title">Einführung</div>
+            <div class="cs-card-sub">Was ist ML? · Agenda · Semester</div>
+          </a>
+          <a href="Page02.html" class="cs-card" style="--cs-color:var(--color-success); text-decoration:none">
+            <div class="cs-card-num">Seite 2</div>
+            <div class="cs-card-title">Kategorien des ML</div>
+            <div class="cs-card-sub">Supervised · Unsupervised · X, y</div>
+          </a>
+          <a href="Page03.html" class="cs-card" style="--cs-color:var(--color-primary); text-decoration:none">
+            <div class="cs-card-num">Seite 3</div>
+            <div class="cs-card-title">Supervised Learning</div>
+            <div class="cs-card-sub">Klassifikation · Regression · Scoring</div>
+          </a>
+          <a href="Page04.html" class="cs-card" style="--cs-color:var(--color-success); text-decoration:none">
+            <div class="cs-card-num">Seite 4</div>
+            <div class="cs-card-title">Unsupervised Learning</div>
+            <div class="cs-card-sub">Clustering · Dimensionsreduktion</div>
+          </a>
+          <a href="Page05.html" class="cs-card" style="--cs-color:#3b82f6; text-decoration:none">
+            <div class="cs-card-num">Seite 5</div>
+            <div class="cs-card-title">sklearn API</div>
+            <div class="cs-card-sub">6 Bereiche · 4 Schritte · LinearRegression</div>
+          </a>
+          <a href="Page06.html" class="cs-card" style="--cs-color:#ef4444; text-decoration:none">
+            <div class="cs-card-num">Seite 6</div>
+            <div class="cs-card-title">Model Validation</div>
+            <div class="cs-card-sub">Holdout · accuracy_score · train_test_split</div>
+          </a>
+          <a href="Page07.html" class="cs-card" style="--cs-color:#8b5cf6; text-decoration:none">
+            <div class="cs-card-num">Seite 7</div>
+            <div class="cs-card-title">Cross-Validation</div>
+            <div class="cs-card-sub">K-Fold · LOO · 3-Way Split · Workflow</div>
+          </a>
+          <a href="Page08.html" class="cs-card" style="--cs-color:#f97316; text-decoration:none">
+            <div class="cs-card-num">Seite 8</div>
+            <div class="cs-card-title">Bias-Variance Trade-off</div>
+            <div class="cs-card-sub">Underfitting · Overfitting · Dartscheibe</div>
+          </a>
+          <a href="Page09.html" class="cs-card" style="--cs-color:var(--color-primary); text-decoration:none">
+            <div class="cs-card-num">Seite 9</div>
+            <div class="cs-card-title">Validierungskurven</div>
+            <div class="cs-card-sub">validation_curve · learning_curve</div>
+          </a>
+          <a href="Page10.html" class="cs-card" style="--cs-color:var(--color-warning); text-decoration:none; border-color:color-mix(in oklab,var(--color-warning) 40%,var(--color-border))">
+            <div class="cs-card-num">Seite 10</div>
+            <div class="cs-card-title">Grid Search ← Du bist hier</div>
+            <div class="cs-card-sub">GridSearchCV · best_params_ · Abschluss</div>
+          </a>
+        </div>
+
+        <!-- So What Abschluss -->
+        <div class="so-what" style="margin-top:var(--space-6)">
+          <div class="so-what-label">💡 So what? – Folie 49</div>
+          <p>
+            Die Aspekte, die wir in diesem Themenblock kennengelernt haben, werden häufig nur
+            <strong>implizit vermittelt</strong> – parallel zur Einführung einzelner ML-Modelle.
+            Sehen Sie das hier auch als
+            <span class="key" style="--key-color:var(--color-success)">Referenz</span>:
+            wir werden immer wieder auf diesen Foliensatz zurückkommen.
+          </p>
+        </div>
+
+        <div class="quote-block">
+          <blockquote>„Wir werden immer wieder auf diesen Foliensatz zurückkommen."</blockquote>
+          <cite>Prof. · Folie 49 · Abschluss Kapitel 2</cite>
+        </div>
+
+        <!-- Nächste Schritte -->
+        <div class="card" style="margin-top:var(--space-5)">
+          <h3>🚀 Jetzt kommen konkrete Algorithmen</h3>
+          <ul>
+            <li>
+              <strong>Woche 4:</strong> Supervised Learning –
+              <span class="key" style="--key-color:var(--color-primary)">Support Vector Machines (SVM)</span>
+            </li>
+            <li>
+              <strong>Woche 5:</strong> Unsupervised Learning –
+              <span class="key" style="--key-color:var(--color-success)">Clustering (k-Means, DBSCAN)</span>
+            </li>
+            <li>
+              <strong>Woche 6:</strong> Supervised Learning –
+              <span class="key" style="--key-color:var(--color-warning)">Random Forest</span>
+            </li>
+            <li>
+              <strong>Woche 7:</strong> Unsupervised Learning –
+              <span class="key" style="--key-color:#8b5cf6">Principal Component Analysis (PCA)</span>
+            </li>
+            <li>
+              <strong>Woche 8:</strong> Supervised Learning –
+              <span class="key" style="--key-color:#f97316">Naive Bayes</span>
+            </li>
+          </ul>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 2 · Seite 10 · Stand Juni 2026 · Alle 49 Folien abgedeckt ✓</small>
+    </div>
+  </footer>
+
+</body>
+</html>

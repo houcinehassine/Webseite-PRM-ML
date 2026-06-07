@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K6 · GMM Mechanik &amp; sklearn</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+  <site-header active="page6" title="Kapitel 6 · Gaussian Mixture Models"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page2"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ══════════════════════════════════════════════════════ -->
+      <section class="hero" id="predict-proba">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 6 · Seite 02</span>
+            <h1>GMM –
+              <span class="key" style="--key-color:var(--color-primary)">Mechanik</span>
+              &amp; sklearn
+            </h1>
+            <p>
+              Von der harten Zuweisung zur
+              <span class="key" style="--key-color:var(--color-primary)">weichen Wahrscheinlichkeit</span>:
+              wir nutzen <code>.predict_proba()</code>, verstehen den
+              <span class="key" style="--key-color:var(--color-primary)">EM-Algorithmus</span>
+              mechanisch und lernen den Hyperparameter
+              <code>covariance_type</code> kennen.
+            </p>
+            <div class="pill-row">
+              <span class="pill">predict_proba()</span>
+              <span class="pill">Soft Assignment</span>
+              <span class="pill">EM-Algorithmus</span>
+              <span class="pill">E-Step / M-Step</span>
+              <span class="pill">covariance_type</span>
+              <span class="pill">diag · spherical · full</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>
+                <code>.predict_proba()</code> nutzen und
+                <strong>Clusterzugehörigkeitswahrscheinlichkeiten</strong> interpretieren
+              </li>
+              <li>
+                Den <span class="key" style="--key-color:var(--color-primary)">EM-Algorithmus</span>
+                mechanisch verstehen – E-Step und M-Step
+              </li>
+              <li>
+                <strong>Weiche vs. harte</strong> Zuweisung:
+                Unterschied zu k-means begreifen
+              </li>
+              <li>
+                Den Hyperparameter
+                <code>covariance_type</code> kennen und die drei Varianten
+                einordnen können
+              </li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           1. GMM UND predict_proba()
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="predict-proba">
+        <div class="section-head">
+          <h2>GMM und <code>.predict_proba()</code></h2>
+          <p>
+            Neben der <code>.predict()</code>-Methode – die hart einem Cluster zuweist –
+            gibt es bei probabilistischen Modellen wie GMM auch die
+            <span class="key" style="--key-color:var(--color-primary)">.predict_proba()</span>-Methode,
+            die für jeden Datenpunkt die Wahrscheinlichkeit zu
+            <em>jedem</em> Cluster berechnet.
+          </p>
+        </div>
+
+        <!-- Kontext-Hinweis -->
+        <div class="note note-primary" style="margin-bottom:var(--space-5)">
+          <p>
+            <strong>📌 Kontext:</strong>
+            Die Variablen <code>gmm</code>, <code>X</code> und <code>labels</code>
+            stammen aus <strong>Seite 01</strong> und werden hier direkt weiterverwendet.
+            Das GMM ist bereits mit <code>n_components=4</code> auf <code>X</code> gefittet.
+          </p>
+        </div>
+
+        <!-- Schritt 1 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2)">
+          Schritt 1 · Wahrscheinlichkeiten berechnen &amp; ausgeben
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <code>predict_proba(X)</code> gibt für jeden der 400 Datenpunkte
+          einen <strong>Vektor der Länge 4</strong> zurück – eine Wahrscheinlichkeit pro Cluster.
+          Die Summe jeder Zeile ist immer <strong>1.0</strong>.
+          Werte nahe <code>1.0</code> = sicher zugeordnet;
+          Werte nahe <code>0.25</code> = komplett unsicher.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code>probs = gmm.predict_proba(X)
+print(probs[:5].round(3))</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <pre style="font-size:var(--text-xs)">[[0.    0.    1.    0.   ]
+ [0.    0.998 0.002 0.   ]
+ [0.    0.    0.    1.   ]
+ [0.001 0.    0.999 0.   ]
+ [0.    0.    0.    1.   ]]</pre>
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs); margin-top:var(--space-2)">
+                5 Zeilen × 4 Spalten – jede Zeile summiert zu <code>1.0</code>.
+                Hier: fast alle Punkte sind sehr sicher zugeordnet.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2 -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-2); margin-top:var(--space-5)">
+          Schritt 2 · Konfidenz als Punktgröße visualisieren
+        </p>
+
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir skalieren die <strong>Punktgröße</strong> mit der maximalen
+          Zugehörigkeitswahrscheinlichkeit.
+          Der Exponent <code>** 4</code> verstärkt die Unterschiede:
+          sichere Punkte werden
+          <span class="key" style="--key-color:var(--color-primary)">groß</span>,
+          unsichere Punkte werden
+          <span class="key" style="--key-color:var(--color-warning)">klein und grau</span>.
+          Das macht Cluster-Grenzbereiche sofort sichtbar.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python
+              </span>
+            </div>
+            <pre><code># Größe ∝ max. Wahrscheinlichkeit (hoch potenziert → verstärkt Unterschiede)
+size = 50 * probs.max(1) ** 4
+
+plt.scatter(X[:, 0], X[:, 1], c=labels,
+            cmap='viridis', s=size, edgecolors='gray')
+plt.title("GMM: Konfidenz als Punktgröße")
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                Output
+              </span>
+            </div>
+            <div class="output-side-body">
+              <p style="color:var(--color-text-muted); font-size:var(--text-xs)">
+                🎯 Scatter-Plot mit
+                <strong>größenkodierten Punkten</strong>:
+                <br>• <strong>Große Punkte</strong> → hohe Konfidenz
+                (klare Cluster-Zugehörigkeit)
+                <br>• <strong>Kleine graue Punkte</strong> → geringe Konfidenz
+                (Punkte an Cluster-Grenzen)
+                <br><br>
+                Gerade an den <em>Übergängen zwischen Clustern</em>
+                sieht man viele kleine Punkte –
+                hier ist das Modell unsicher.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Erklärungskarten predict_proba -->
+        <div class="card-grid" style="margin-top:var(--space-6)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Was liefert predict_proba()?
+              </span>
+            </h3>
+            <ul>
+              <li>
+                <strong>Form:</strong> <code>Array (n_samples, n_components)</code>
+                – eine Zeile pro Datenpunkt
+              </li>
+              <li>
+                <strong>Jede Zeile:</strong> Wahrscheinlichkeitsvektor –
+                Summe = <code>1.0</code>
+              </li>
+              <li>
+                → <code>probs.max(1)</code> gibt die
+                <span class="key" style="--key-color:var(--color-primary)">Konfidenz</span>
+                des sichersten Clusters pro Punkt
+              </li>
+              <li>
+                → Wert nahe <code>1.0</code> = sicher;
+                Wert nahe <code>1/K</code> = völlig unsicher
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                Hart vs. Weich
+              </span>
+            </h3>
+            <ul>
+              <li>
+                <span class="key" style="--key-color:var(--color-warning)">k-means</span>:
+                <strong>harte Zuweisung</strong> –
+                jeder Punkt gehört genau einem Cluster
+              </li>
+              <li>
+                → <code>labels[i] ∈ {0, 1, 2, 3}</code>
+              </li>
+              <li>
+                <span class="key" style="--key-color:var(--color-primary)">GMM</span>:
+                <strong>weiche Zuweisung</strong> –
+                jeder Punkt gehört <em>anteilig</em> zu allen Clustern
+              </li>
+              <li>
+                → <code>probs[i] = [0.02, 0.95, 0.02, 0.01]</code>
+              </li>
+              <li>
+                → <code>.predict()</code> gibt das
+                <em>argmax</em> zurück (härteste Zuweisung)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           2. GMM MECHANISCHE BESCHREIBUNG
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="gmm-mechanik">
+        <div class="section-head">
+          <h2>GMM Mechanische Beschreibung</h2>
+          <p>
+            GMMs nutzen – wie k-means auch – den
+            <span class="key" style="--key-color:var(--color-primary)">Expectation-Maximization</span>-Algorithmus
+            (EM). Das Verfahren wechselt iterativ zwischen zwei Schritten,
+            bis die Parameter konvergieren.
+          </p>
+        </div>
+
+        <!-- EM-Algorithmus als Timeline -->
+        <div class="timeline">
+
+          <div class="timeline-step">
+            <div class="step-no">0</div>
+            <div>
+              <strong>Initialisierung</strong>
+              <p>
+                <span class="key" style="--key-color:var(--color-warning)">Zufällige Initialisierung</span>
+                des Ortes (<code>μ</code>) und der Form (<code>Σ</code>)
+                jeder Gauß-Komponente.
+                Die Gewichtungen <code>w_k</code> starten gleichmäßig bei
+                <code>1/K</code>.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no" style="background:color-mix(in oklab,var(--color-primary) 15%,var(--color-surface)); color:var(--color-primary)">E</div>
+            <div>
+              <strong>E-Step – Expectation</strong>
+              <p>
+                Berechne für jeden Datenpunkt <code>x_n</code> eine
+                <span class="key" style="--key-color:var(--color-primary)">Hilfsvariable</span>,
+                die die
+                <span class="key" style="--key-color:var(--color-primary)">Wahrscheinlichkeit der Cluster-Zugehörigkeit</span>
+                repräsentiert (<em>Responsibility</em>
+                <code>r_nk</code>).
+                <br>→ Das entspricht dem, was
+                <code>.predict_proba()</code> ausgibt.
+              </p>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no" style="background:color-mix(in oklab,#f59e0b 15%,var(--color-surface)); color:#d97706">M</div>
+            <div>
+              <strong>M-Step – Maximization</strong>
+              <p>
+                Aktualisiere für jeden Gaussian den Ort und die Form mittels der
+                Responsibilities – jeweils <strong>einen Parameter fixieren,
+                den anderen optimieren</strong>:
+              </p>
+              <ul>
+                <li>
+                  <span class="key" style="--key-color:var(--color-primary)">Mittelwert</span>
+                  <code>μ_k</code> → gewichteter Durchschnitt aller Punkte
+                </li>
+                <li>
+                  <span class="key" style="--key-color:var(--color-primary)">Kovarianz</span>
+                  <code>Σ_k</code> → gewichtete empirische Kovarianzmatrix
+                </li>
+                <li>
+                  <span class="key" style="--key-color:var(--color-primary)">Gewichtung</span>
+                  <code>w_k</code> → durchschnittlicher Responsibility-Anteil
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="timeline-step">
+            <div class="step-no">↻</div>
+            <div>
+              <strong>Wiederhole E → M → E → M → …</strong>
+              <p>
+                Schritte E und M werden abwechselnd wiederholt,
+                bis das Modell
+                <span class="key" style="--key-color:var(--color-success)">konvergiert</span>
+                – d. h. die Parameter sich kaum noch verändern.
+                Genau wie beim k-means-Algorithmus.
+              </p>
+            </div>
+          </div>
+
+        </div><!-- /timeline -->
+
+        <!-- Detail-Karten E-Step / M-Step -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">
+                E-Step im Detail
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Für jeden Datenpunkt <code>x_n</code> und jede Komponente
+                <code>k</code>: berechne wie wahrscheinlich es ist,
+                dass <code>x_n</code> durch Gaussian <code>k</code>
+                erzeugt wurde
+              </li>
+              <li>
+                → Ergebnis: Matrix der
+                <span class="key" style="--key-color:var(--color-primary)">Responsibilities</span>
+                <code>r_nk</code> (N × K)
+              </li>
+              <li>
+                Jede Zeile summiert zu <code>1.0</code>
+                (das ist genau was <code>predict_proba()</code> zurückgibt)
+              </li>
+              <li>
+                Weiche Zuweisung: ein Punkt kann
+                <em>mehreren</em> Clustern anteilig gehören
+              </li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">
+                M-Step im Detail
+              </span>
+            </h3>
+            <ul>
+              <li>
+                Nutze die <code>r_nk</code>-Werte als
+                <strong>Gewichte</strong>, um die Gauß-Parameter
+                neu zu schätzen
+              </li>
+              <li>
+                <strong>Mittelwert:</strong> gewichteter Schwerpunkt
+                aller Datenpunkte für Cluster <code>k</code>
+              </li>
+              <li>
+                <strong>Kovarianz:</strong> gewichtete empirische
+                Streuung um den neuen Mittelwert
+              </li>
+              <li>
+                <strong>Gewichtung:</strong> mittlere Responsibility
+                über alle Punkte
+              </li>
+              <li>
+                → Detaillierte Formeln: Seite 03 (Deep Dive)
+              </li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Ergebnis Note -->
+        <div class="note note-success" style="margin-top:var(--space-4)">
+          <p>
+            <strong>✅ Ergebnis des EM-Algorithmus:</strong>
+            Jeder Cluster wird durch ein „smoothes"
+            <span class="key" style="--key-color:var(--color-success)">Gauß'sches Modell</span>
+            repräsentiert.
+            Die <strong>Summe aller Gaussians</strong> = das vollständige
+            Modell unserer Daten.
+            Im Gegensatz zu k-means erhalten wir damit automatisch
+            <span class="key" style="--key-color:var(--color-success)">weiche Zugehörigkeitswahrscheinlichkeiten</span>
+            für jeden Datenpunkt.
+          </p>
+        </div>
+
+      </section>
+
+
+      <!-- ══════════════════════════════════════════════════
+           3. HYPERPARAMETER covariance_type
+      ══════════════════════════════════════════════════════ -->
+      <section class="section" id="covariance-type">
+        <div class="section-head">
+          <h2>Der Hyperparameter <code>covariance_type</code></h2>
+          <p>
+            Ein wichtiger Hyperparameter der
+            <code>GaussianMixture()</code>-Klasse in sklearn ist
+            <span class="key" style="--key-color:var(--color-primary)">covariance_type</span>.
+            Er bestimmt, welche <strong>Form</strong> die Kovarianzmatrix –
+            und damit die <strong>Ellipse</strong> jeder Gauß-Komponente –
+            haben darf.
+          </p>
+        </div>
+
+        <!-- Tabelle der drei Typen -->
+        <table style="margin-bottom:var(--space-5)">
+          <thead>
+            <tr>
+              <th><code>covariance_type</code></th>
+              <th>Bedeutung</th>
+              <th>Form der Ellipse</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>diag</code></td>
+              <td>
+                Streuung kann
+                <strong>pro Dimension unabhängig</strong>
+                gewählt werden
+              </td>
+              <td>
+                Ellipse entlang der
+                <strong>Achsen</strong> ausgerichtet
+              </td>
+            </tr>
+            <tr>
+              <td><code>spherical</code></td>
+              <td>
+                Alle Dimensionen haben die
+                <strong>gleiche Streuung</strong>
+              </td>
+              <td>
+                Ellipse = <strong>Sphäre</strong> (Kreis)
+              </td>
+            </tr>
+            <tr>
+              <td><code>full</code></td>
+              <td>
+                Alle Freiheitsgrade
+                <strong>frei wählbar</strong>
+              </td>
+              <td>
+                Ellipse mit
+                <strong>beliebiger Ausrichtung</strong>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- 3 Karten: eine pro covariance_type -->
+        <div class="overview-3">
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-primary)">diag</span>
+            </h3>
+            <!-- SVG: axis-aligned ellipse -->
+            <div style="text-align:center; padding:var(--space-3) 0">
+              <svg viewBox="0 0 100 60" width="100" height="60" aria-hidden="true">
+                <ellipse cx="50" cy="30" rx="42" ry="18"
+                         fill="color-mix(in oklab,var(--color-primary) 15%,transparent)"
+                         stroke="var(--color-primary)" stroke-width="2"/>
+                <line x1="50" y1="5" x2="50" y2="55" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="3,2"/>
+                <line x1="5" y1="30" x2="95" y2="30" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="3,2"/>
+              </svg>
+            </div>
+            <ul>
+              <li>Achsen-ausgerichtete Ellipse</li>
+              <li>
+                Kovarianzmatrix ist <strong>diagonal</strong> –
+                keine Korrelation zwischen Dimensionen
+              </li>
+              <li>Flexibler als <code>spherical</code></li>
+              <li>
+                Eingeschränkter als <code>full</code> –
+                keine Drehung möglich
+              </li>
+              <li>
+                Gut für Daten, die
+                <strong>entlang der Achsen</strong> gestreckt sind
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-warning)">spherical</span>
+            </h3>
+            <!-- SVG: circle -->
+            <div style="text-align:center; padding:var(--space-3) 0">
+              <svg viewBox="0 0 100 60" width="100" height="60" aria-hidden="true">
+                <circle cx="50" cy="30" r="25"
+                        fill="color-mix(in oklab,#f59e0b 15%,transparent)"
+                        stroke="#f59e0b" stroke-width="2"/>
+                <line x1="50" y1="5" x2="50" y2="55" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="3,2"/>
+                <line x1="5" y1="30" x2="95" y2="30" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="3,2"/>
+              </svg>
+            </div>
+            <ul>
+              <li>Kreis / Sphäre – alle Richtungen gleich</li>
+              <li>
+                Ein einziger Streuungsparameter
+                <code>σ²</code> für alle Dimensionen
+              </li>
+              <li>
+                ⭐ <strong>Ähnelt k-means am meisten</strong> –
+                k-means nimmt ebenfalls
+                kugelförmige Cluster an
+              </li>
+              <li>Einfachstes Modell – wenigste Parameter</li>
+              <li>
+                Eingeschränkteste Ausdrucksstärke –
+                <span class="key" style="--key-color:var(--color-warning)">versagt bei elliptischen Daten</span>
+              </li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>
+              <span class="key" style="--key-color:var(--color-success)">full</span>
+            </h3>
+            <!-- SVG: rotated ellipse -->
+            <div style="text-align:center; padding:var(--space-3) 0">
+              <svg viewBox="0 0 100 60" width="100" height="60" aria-hidden="true">
+                <ellipse cx="50" cy="30" rx="42" ry="16"
+                         transform="rotate(-30 50 30)"
+                         fill="color-mix(in oklab,#10b981 15%,transparent)"
+                         stroke="#10b981" stroke-width="2"/>
+                <line x1="50" y1="5" x2="50" y2="55" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="3,2"/>
+                <line x1="5" y1="30" x2="95" y2="30" stroke="var(--color-border)" stroke-width="1" stroke-dasharray="3,2"/>
+              </svg>
+            </div>
+            <ul>
+              <li>Volle Kovarianzmatrix – beliebige Ausrichtung</li>
+              <li>
+                Kann Ellipsen in
+                <span class="key" style="--key-color:var(--color-success)">jede Richtung</span>
+                drehen – auch Korrelationen zwischen Dimensionen
+              </li>
+              <li>
+                Flexibelstes Modell –
+                passt sich an beliebige elliptische Strukturen an
+              </li>
+              <li>
+                Meiste Parameter → höchstes
+                <span class="key" style="--key-color:var(--color-warning)">Overfitting-Risiko</span>
+                bei kleinen Datensätzen
+              </li>
+              <li>
+                Standardwahl für die meisten Anwendungen
+              </li>
+            </ul>
+          </article>
+
+        </div><!-- /overview-3 -->
+
+        <!-- Prüfungsfrage Note -->
+        <div class="note note-warning" style="margin-top:var(--space-5)">
+          <p>
+            <strong>💡 Klassische Prüfungsfrage:</strong>
+            Welche Einstellung ähnelt k-means am meisten?
+          </p>
+          <p style="margin-top:var(--space-2)">
+            → <code>spherical</code>, da k-means ebenfalls
+            <span class="key" style="--key-color:var(--color-warning)">kugelförmige, gleichmäßige Cluster</span>
+            annimmt.
+            <code>GaussianMixture(covariance_type='spherical')</code> ist
+            damit das probabilistische Äquivalent von k-means.
+          </p>
+        </div>
+
+        <!-- Verwendungs-Übersicht als compact note-row -->
+        <div class="note-row" style="margin-top:var(--space-4)">
+          <div class="note">
+            <p>
+              <strong>Wann <code>spherical</code>?</strong><br>
+              <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                Baselines, k-means Vergleich,
+                sehr einfache Cluster-Strukturen
+              </span>
+            </p>
+          </div>
+          <div class="note">
+            <p>
+              <strong>Wann <code>diag</code>?</strong><br>
+              <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                Daten mit achsenausgerichteter Streuung,
+                Features unkorreliert
+              </span>
+            </p>
+          </div>
+          <div class="note">
+            <p>
+              <strong>Wann <code>full</code>?</strong><br>
+              <span style="font-size:var(--text-xs); color:var(--color-text-muted)">
+                Standard in der Praxis –
+                wenn Cluster beliebig orientiert sein können
+              </span>
+            </p>
+          </div>
+        </div>
+
+      </section>
+
+    </main><!-- /content -->
+  </div><!-- /layout -->
+
+  <!-- ══ FOOTER ═════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 6 – Gaussian Mixture Models · Seite 02</small>
+    </div>
+  </footer>
+
+</body>
+</html>

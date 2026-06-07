@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Feature Scaling & Normalisierung</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       WARUM SKALIEREN – SCALE VISUAL
+    ═══════════════════════════════════════════════════════ */
+    .scale-compare {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-5);
+      align-items: start;
+      margin-top: var(--space-6);
+    }
+    @media (max-width: 680px) {
+      .scale-compare { grid-template-columns: 1fr; }
+      .scale-arrow    { transform: rotate(90deg); }
+    }
+    .scale-box {
+      padding: var(--space-5);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .scale-box-title {
+      font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--color-text-faint); margin-bottom: var(--space-4);
+    }
+    .scale-bars { display: flex; flex-direction: column; gap: var(--space-3); }
+    .scale-bar-row {
+      display: grid;
+      grid-template-columns: 6rem 1fr 5rem;
+      align-items: center; gap: var(--space-3);
+    }
+    .scale-bar-label { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted); text-align: right; }
+    .scale-bar-track {
+      height: 12px; border-radius: var(--radius-full);
+      background: var(--color-border); overflow: hidden;
+    }
+    .scale-bar-fill { height: 100%; border-radius: var(--radius-full); }
+    .scale-bar-val { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 700; }
+    .scale-arrow {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; color: var(--color-text-faint); padding-top: 3rem;
+    }
+    .scale-arrow-label { font-size: .65rem; font-weight: 700; text-transform: uppercase;
+                         letter-spacing: .06em; color: var(--color-primary); margin-top: var(--space-2);
+                         text-align: center; }
+
+    /* ═══════════════════════════════════════════════════════
+       FORMEL-BOXEN
+    ═══════════════════════════════════════════════════════ */
+    .formula-highlight {
+      padding: var(--space-6);
+      border-radius: var(--radius-xl);
+      text-align: center;
+      margin-top: var(--space-6);
+    }
+    .formula-highlight.minmax {
+      background: color-mix(in oklab,var(--color-primary) 6%,var(--color-surface));
+      border: 2px solid color-mix(in oklab,var(--color-primary) 25%,var(--color-border));
+    }
+    .formula-highlight.stdz {
+      background: color-mix(in oklab,var(--color-success) 6%,var(--color-surface));
+      border: 2px solid color-mix(in oklab,var(--color-success) 25%,var(--color-border));
+    }
+    .formula-tag {
+      font-size: var(--text-xs); font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: var(--space-3);
+    }
+    .formula-math {
+      font-family: var(--font-mono);
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: 700; line-height: 1.6;
+    }
+    .formula-parts {
+      display: flex; gap: var(--space-6); justify-content: center;
+      flex-wrap: wrap; margin-top: var(--space-4);
+    }
+    .formula-part {
+      display: flex; flex-direction: column; align-items: center; gap: .2rem;
+    }
+    .fp-sym {
+      font-family: var(--font-mono); font-size: var(--text-base); font-weight: 700;
+    }
+    .fp-desc { font-size: .7rem; color: var(--color-text-muted); }
+
+    /* ═══════════════════════════════════════════════════════
+       BEFORE / AFTER VISUAL (StandardScaler)
+    ═══════════════════════════════════════════════════════ */
+    .before-after {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-5); align-items: center;
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 580px) {
+      .before-after { grid-template-columns: 1fr; }
+    }
+    .ba-box {
+      padding: var(--space-5); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .ba-title {
+      font-size: var(--text-xs); font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: var(--space-4);
+    }
+    .ba-stats { display: flex; flex-direction: column; gap: var(--space-3); }
+    .ba-stat-row {
+      display: flex; align-items: center; gap: var(--space-3);
+    }
+    .ba-stat-label { font-size: var(--text-xs); color: var(--color-text-muted); width: 3rem; flex-shrink: 0; }
+    .ba-stat-bar-track {
+      flex: 1; height: 8px; border-radius: var(--radius-full);
+      background: var(--color-border); overflow: hidden;
+    }
+    .ba-stat-bar-fill { height: 100%; border-radius: var(--radius-full); }
+    .ba-stat-val { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 700; width: 5rem; text-align: right; }
+    .ba-arrow { font-size: 1.4rem; color: var(--color-text-faint); text-align: center; }
+
+    /* ═══════════════════════════════════════════════════════
+       POWER TRANSFORMATIONS VISUAL
+    ═══════════════════════════════════════════════════════ */
+    .pt-visual {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-5); align-items: center;
+      margin-top: var(--space-6);
+    }
+    @media (max-width: 580px) { .pt-visual { grid-template-columns: 1fr; } }
+    .pt-box {
+      padding: var(--space-5); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      text-align: center;
+    }
+    .pt-label {
+      font-size: var(--text-xs); font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--color-text-faint); margin-bottom: var(--space-3);
+    }
+    .pt-dist-svg { display: block; width: 100%; margin: 0 auto; }
+    .pt-dist-caption {
+      font-size: var(--text-xs); color: var(--color-text-muted);
+      margin-top: var(--space-2); line-height: 1.4;
+    }
+    .pt-transform-label {
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+      font-size: var(--text-sm); color: var(--color-text-faint);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       VERGLEICHSTABELLE
+    ═══════════════════════════════════════════════════════ */
+    .comparison-table {
+      width: 100%; border-collapse: collapse;
+      border-radius: var(--radius-xl); overflow: hidden;
+      border: 1px solid var(--color-border);
+      margin-top: var(--space-6);
+    }
+    .comparison-table th {
+      background: var(--color-surface-2);
+      padding: var(--space-3) var(--space-4);
+      text-align: left;
+      font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--color-text-muted);
+      border-bottom: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+    }
+    .comparison-table th:last-child { border-right: none; }
+    .comparison-table td {
+      padding: var(--space-3) var(--space-4);
+      font-size: var(--text-xs); line-height: 1.6;
+      border-bottom: 1px solid var(--color-border);
+      border-right: 1px solid var(--color-border);
+      vertical-align: top;
+    }
+    .comparison-table td:last-child { border-right: none; }
+    .comparison-table tr:last-child td { border-bottom: none; }
+    .comparison-table tr:nth-child(even) td { background: var(--color-surface-offset, var(--color-surface-2)); }
+    .ct-method {
+      font-family: var(--font-mono); font-weight: 700;
+      font-size: var(--text-sm); white-space: nowrap;
+    }
+    .ct-ok { color: var(--color-success); font-weight: 700; }
+    .ct-warn { color: color-mix(in oklab,var(--color-warning) 80%,#000); font-weight: 700; }
+    .ct-na { color: var(--color-text-faint); }
+
+    /* ═══════════════════════════════════════════════════════
+       ALGORITHMEN SENSITIVITÄT
+    ═══════════════════════════════════════════════════════ */
+    .algo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-4);
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 580px) { .algo-grid { grid-template-columns: 1fr; } }
+    .algo-group {
+      padding: var(--space-5); border-radius: var(--radius-xl);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .algo-group-title {
+      font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      margin-bottom: var(--space-3); padding-bottom: var(--space-2);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .algo-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+    /* ═══════════════════════════════════════════════════════
+       ZITAT-BOX
+    ═══════════════════════════════════════════════════════ */
+    .quote-box {
+      margin: var(--space-6) 0;
+      padding: var(--space-5) var(--space-6);
+      border-left: 3px solid var(--color-success);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      background: color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2));
+    }
+    .quote-box blockquote {
+      font-style: italic; font-size: var(--text-sm);
+      line-height: 1.7; color: var(--color-text); margin: 0 0 var(--space-2) 0;
+    }
+    .quote-box cite {
+      font-size: var(--text-xs); font-weight: 700; font-style: normal;
+      letter-spacing: .04em; text-transform: uppercase; color: var(--color-text-muted);
+    }
+
+  </style>
+</head>
+<body>
+
+  <site-header active="page1" title="Kapitel 1 · Feature Scaling & Normalisierung"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page8"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ═══════════════════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 1 · Seite 8</span>
+            <h1>Feature Scaling
+              <span class="key" style="--key-color:color-mix(in oklab,var(--color-warning) 80%,#000)">&amp; Normalisierung</span>
+            </h1>
+            <p>
+              Die letzte Stufe der Feature Pipeline – gleiche Gewichtung für alle Features.
+              MinMax skaliert auf einen Bereich, Standardisierung normiert auf μ=0 / σ=1,
+              Power Transformations machen schiefe Verteilungen normalverteilungsähnlich.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Skalensensitivität</span>
+              <span class="pill">MinMax-Transformation</span>
+              <span class="pill">MinMaxScaler</span>
+              <span class="pill">Z-Score</span>
+              <span class="pill">StandardScaler</span>
+              <span class="pill">Box-Cox</span>
+              <span class="pill">PowerTransformer</span>
+              <span class="pill">Quantisierung</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <p>
+              Du kannst erklären, warum skalensensitive Algorithmen
+              Probleme mit unskaliierten Daten haben, kennst die Formeln
+              für <strong>MinMax</strong> und <strong>Z-Score</strong>
+              und weißt, wann welche Methode einzusetzen ist.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           8.1  WARUM SKALIEREN?
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="warum-scaling">
+        <div class="section-head">
+          <h2>8.1 Warum skalieren?</h2>
+          <p>
+            Features haben oft sehr unterschiedliche Wertebereiche –
+            was Algorithmen, die auf Abständen oder Gradienten basieren, stark beeinträchtigt.
+          </p>
+        </div>
+
+        <!-- Before/After Skalen-Visual -->
+        <div class="scale-compare">
+
+          <div class="scale-box">
+            <div class="scale-box-title" style="color:color-mix(in oklab,var(--color-warning) 70%,#000)">
+              ⚠️ Vor dem Skalieren
+            </div>
+            <div class="scale-bars">
+              <div class="scale-bar-row">
+                <span class="scale-bar-label">Alter</span>
+                <div class="scale-bar-track">
+                  <div class="scale-bar-fill" style="width:4%;background:var(--color-primary)"></div>
+                </div>
+                <span class="scale-bar-val">25 Jahre</span>
+              </div>
+              <div class="scale-bar-row">
+                <span class="scale-bar-label">Einkommen</span>
+                <div class="scale-bar-track">
+                  <div class="scale-bar-fill" style="width:90%;background:color-mix(in oklab,var(--color-warning) 70%,#000)"></div>
+                </div>
+                <span class="scale-bar-val">45.000 €</span>
+              </div>
+              <div class="scale-bar-row">
+                <span class="scale-bar-label">Kinder</span>
+                <div class="scale-bar-track">
+                  <div class="scale-bar-fill" style="width:1%;background:var(--color-success)"></div>
+                </div>
+                <span class="scale-bar-val">2</span>
+              </div>
+            </div>
+            <p style="margin-top:var(--space-4);font-size:var(--text-xs);color:var(--color-text-muted)">
+              Das Einkommen dominiert alle Berechnungen –
+              Alter und Kinder-Anzahl werden praktisch ignoriert.
+            </p>
+          </div>
+
+          <div class="scale-arrow">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:.4rem">
+              <span>→</span>
+              <span class="scale-arrow-label">Skalieren</span>
+            </div>
+          </div>
+
+          <div class="scale-box" style="border-color:color-mix(in oklab,var(--color-success) 30%,var(--color-border))">
+            <div class="scale-box-title" style="color:var(--color-success)">
+              ✅ Nach dem Skalieren
+            </div>
+            <div class="scale-bars">
+              <div class="scale-bar-row">
+                <span class="scale-bar-label">Alter</span>
+                <div class="scale-bar-track">
+                  <div class="scale-bar-fill" style="width:40%;background:var(--color-primary)"></div>
+                </div>
+                <span class="scale-bar-val">0.40</span>
+              </div>
+              <div class="scale-bar-row">
+                <span class="scale-bar-label">Einkommen</span>
+                <div class="scale-bar-track">
+                  <div class="scale-bar-fill" style="width:55%;background:var(--color-success)"></div>
+                </div>
+                <span class="scale-bar-val">0.55</span>
+              </div>
+              <div class="scale-bar-row">
+                <span class="scale-bar-label">Kinder</span>
+                <div class="scale-bar-track">
+                  <div class="scale-bar-fill" style="width:33%;background:var(--color-warning)"></div>
+                </div>
+                <span class="scale-bar-val">0.33</span>
+              </div>
+            </div>
+            <p style="margin-top:var(--space-4);font-size:var(--text-xs);color:var(--color-text-muted)">
+              Alle Features tragen gleichberechtigt zur
+              Distanzberechnung und Gradientenoptimierung bei.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Skalensensitive Algorithmen -->
+        <div class="algo-grid">
+          <div class="algo-group">
+            <div class="algo-group-title"
+                 style="color:color-mix(in oklab,var(--color-warning) 80%,#000)">
+              ⚠️ Skalensensitiv – immer skalieren!
+            </div>
+            <div class="algo-chips">
+              <span class="tag">k-NN</span>
+              <span class="tag">SVM</span>
+              <span class="tag">k-Means</span>
+              <span class="tag">PCA</span>
+              <span class="tag">Lineare Regression</span>
+              <span class="tag">Gradient Descent</span>
+              <span class="tag">Neuronale Netze</span>
+              <span class="tag">Logistische Regression</span>
+            </div>
+          </div>
+          <div class="algo-group">
+            <div class="algo-group-title" style="color:var(--color-success)">
+              ✅ Nicht skalensensitiv – Skalieren optional
+            </div>
+            <div class="algo-chips">
+              <span class="tag">Decision Tree</span>
+              <span class="tag">Random Forest</span>
+              <span class="tag">Gradient Boosting</span>
+              <span class="tag">Naive Bayes</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           8.2  MINMAX-TRANSFORMATION
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="minmax">
+        <div class="section-head">
+          <h2>8.2 MinMax-Transformation</h2>
+          <p>
+            Skaliert alle Werte auf einen <strong>fest definierten Wertebereich</strong>
+            [min, max] – standardmäßig [0, 1].
+          </p>
+        </div>
+
+        <!-- Formel -->
+        <div class="formula-highlight minmax">
+          <div class="formula-tag" style="color:var(--color-primary)">MinMax-Formel</div>
+          <div class="formula-math">
+            X' = <span style="color:var(--color-primary)">(X − X<sub>min</sub>)</span>
+            / <span style="color:var(--color-success)">(X<sub>max</sub> − X<sub>min</sub>)</span>
+            × (max − min) + min
+          </div>
+          <div class="formula-parts">
+            <div class="formula-part">
+              <span class="fp-sym" style="color:var(--color-primary)">X</span>
+              <span class="fp-desc">Originalwert</span>
+            </div>
+            <div class="formula-part">
+              <span class="fp-sym" style="color:var(--color-primary)">X<sub>min</sub>, X<sub>max</sub></span>
+              <span class="fp-desc">Min/Max der Trainingsdaten</span>
+            </div>
+            <div class="formula-part">
+              <span class="fp-sym" style="color:var(--color-success)">min, max</span>
+              <span class="fp-desc">Ziel-Wertebereich</span>
+            </div>
+            <div class="formula-part">
+              <span class="fp-sym" style="color:var(--color-text-muted)">X'</span>
+              <span class="fp-desc">Skalierter Wert</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code: From Scratch + MinMaxScaler -->
+        <div class="code-cell-split" style="margin-top:var(--space-6)">
+          <div class="code-cell-split-code">
+            <div class="code-cell-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – MinMax From Scratch + MinMaxScaler (aus Notebook)
+              </span>
+            </div>
+            <pre><code>import numpy as np
+from sklearn.preprocessing import MinMaxScaler
+
+# Zufällige Daten (10 Samples, 5 Features)
+X = np.random.randn(10, 5)
+
+# ── Variante A: From Scratch ───────────────────────
+max_value = 5
+min_value = -3
+
+# Schritt 1: Auf [0, 1] normieren
+X_std = (X - X.min(axis=0)) / (X.max(axis=0) - X.min(axis=0))
+
+# Schritt 2: Auf [min_value, max_value] skalieren
+X_scaled = X_std * (max_value - min_value) + min_value
+
+# ── Variante B: MinMaxScaler ───────────────────────
+scaler = MinMaxScaler(feature_range=(min_value, max_value))
+scaler.fit_transform(X)   # Gleiche Ausgabe wie X_scaled</code></pre>
+          </div>
+          <div class="code-cell-split-output">
+            <div class="code-cell-header">
+              <span class="cell-lang">Output (Ausschnitt)</span>
+            </div>
+            <pre><code>array([[-2.87,  4.03,  1.72, -1.84, -1.54],
+       [ 5.  ,  1.86, -0.50,  0.61, -1.34],
+       [ 0.88,  0.67,  0.79,  3.79,  1.05],
+       [ 2.41,  0.27,  5.  , -0.58,  5.  ],
+       ...
+       [-3.  , -3.  ,  2.32, -1.53, -3.  ],
+       [ 0.39,  0.51,  1.38, -1.67, -2.94]])
+
+# Jede Spalte liegt nun exakt in [-3, 5]</code></pre>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Vorteil</span></h3>
+            <p>
+              Klarer, interpretierbarer Wertebereich. Gut für Algorithmen, die
+              Eingaben in [0,&nbsp;1] erwarten (z.&nbsp;B. Neuronale Netze mit Sigmoid,
+              k-NN wenn gleiche Gewichtung gewünscht).
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-warning)">Nachteil: Ausreißer</span></h3>
+            <p>
+              Ein einzelner extremer Ausreißer „streckt" die Skala –
+              alle anderen Werte werden auf einen engen Bereich gedrückt.
+              <strong>Lösung:</strong> RobustScaler (skaliert anhand von Quartilen).
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           8.3  STANDARDISIERUNG
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="standardisierung">
+        <div class="section-head">
+          <h2>8.3 Standardisierung (Z-Score)</h2>
+          <p>
+            Transformiert Features auf <strong>Mittelwert&nbsp;0</strong> und
+            <strong>Standardabweichung&nbsp;1</strong> – die robusteste und meistgenutzte Methode.
+          </p>
+        </div>
+
+        <!-- Formel -->
+        <div class="formula-highlight stdz">
+          <div class="formula-tag" style="color:var(--color-success)">Z-Score Formel</div>
+          <div class="formula-math">
+            Z = <span style="color:var(--color-primary)">(X − μ)</span>
+            / <span style="color:var(--color-success)">σ</span>
+          </div>
+          <div class="formula-parts">
+            <div class="formula-part">
+              <span class="fp-sym" style="color:var(--color-primary)">X</span>
+              <span class="fp-desc">Originalwert</span>
+            </div>
+            <div class="formula-part">
+              <span class="fp-sym" style="color:var(--color-primary)">μ</span>
+              <span class="fp-desc">Mittelwert (Trainingsdaten)</span>
+            </div>
+            <div class="formula-part">
+              <span class="fp-sym" style="color:var(--color-success)">σ</span>
+              <span class="fp-desc">Standardabweichung (Training)</span>
+            </div>
+            <div class="formula-part">
+              <span class="fp-sym" style="color:var(--color-text-muted)">Z</span>
+              <span class="fp-desc">Standardisierter Wert</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zitat aus Skript -->
+        <div class="quote-box">
+          <blockquote>
+            "Standardization of datasets is a common requirement for many machine learning
+            estimators implemented in scikit-learn; they might behave badly if the individual
+            features do not more or less look like standard normally distributed data:
+            Gaussian with zero mean and unit variance."
+          </blockquote>
+          <cite>sklearn Dokumentation – zitiert im Skript</cite>
+        </div>
+
+        <!-- Before / After mit echten Notebook-Werten -->
+        <div class="before-after">
+
+          <div class="ba-box">
+            <div class="ba-title" style="color:color-mix(in oklab,var(--color-warning) 70%,#000)">
+              Vor StandardScaler
+            </div>
+            <div class="ba-stats">
+              <div class="ba-stat-row">
+                <span class="ba-stat-label">μ</span>
+                <div class="ba-stat-bar-track">
+                  <div class="ba-stat-bar-fill"
+                       style="width:47%;background:color-mix(in oklab,var(--color-warning) 60%,#000)"></div>
+                </div>
+                <span class="ba-stat-val"
+                      style="color:color-mix(in oklab,var(--color-warning) 70%,#000)">0.473</span>
+              </div>
+              <div class="ba-stat-row">
+                <span class="ba-stat-label">σ</span>
+                <div class="ba-stat-bar-track">
+                  <div class="ba-stat-bar-fill"
+                       style="width:28%;background:color-mix(in oklab,var(--color-warning) 60%,#000)"></div>
+                </div>
+                <span class="ba-stat-val"
+                      style="color:color-mix(in oklab,var(--color-warning) 70%,#000)">0.285</span>
+              </div>
+            </div>
+            <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3)">
+              Werte zwischen 0–100 (Uniform × 100)
+            </p>
+          </div>
+
+          <div class="ba-arrow">→</div>
+
+          <div class="ba-box" style="border-color:color-mix(in oklab,var(--color-success) 30%,var(--color-border))">
+            <div class="ba-title" style="color:var(--color-success)">
+              Nach StandardScaler
+            </div>
+            <div class="ba-stats">
+              <div class="ba-stat-row">
+                <span class="ba-stat-label">μ</span>
+                <div class="ba-stat-bar-track">
+                  <div class="ba-stat-bar-fill"
+                       style="width:0.5%;background:var(--color-success)"></div>
+                </div>
+                <span class="ba-stat-val" style="color:var(--color-success)">≈ 0.0</span>
+              </div>
+              <div class="ba-stat-row">
+                <span class="ba-stat-label">σ</span>
+                <div class="ba-stat-bar-track">
+                  <div class="ba-stat-bar-fill"
+                       style="width:100%;background:var(--color-success)"></div>
+                </div>
+                <span class="ba-stat-val" style="color:var(--color-success)">1.0</span>
+              </div>
+            </div>
+            <p style="font-size:var(--text-xs);color:var(--color-text-muted);margin-top:var(--space-3)">
+              μ = 1.42e-16 ≈ 0, σ = 1.0 (exakt)
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Code aus Notebook -->
+        <div class="code-cell-split" style="margin-top:var(--space-5)">
+          <div class="code-cell-split-code">
+            <div class="code-cell-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – StandardScaler (aus Notebook)
+              </span>
+            </div>
+            <pre><code>from sklearn.preprocessing import StandardScaler
+
+# Daten (200 Samples, 1 Feature) – uniform verteilt
+X = np.random.rand(200, 1)
+
+# Vor der Skalierung
+print(X.mean())   # 0.4732...
+print(X.std())    # 0.2849...
+
+# Skalieren
+scaler = StandardScaler()
+X = scaler.fit_transform(X)
+
+# Nach der Skalierung
+print(X.mean())   # ≈ 0 (1.42e-16)
+print(X.std())    # 1.0</code></pre>
+          </div>
+          <div class="code-cell-split-output">
+            <div class="code-cell-header">
+              <span class="cell-lang">Output</span>
+            </div>
+            <pre><code># Vorher:
+0.47321914003220394
+0.28491808432327165
+
+# Nachher:
+1.4210854715202004e-16   # ≈ 0
+1.0</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           8.4  POWER TRANSFORMATIONS
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="power-transformations">
+        <div class="section-head">
+          <h2>8.4 Power Transformations (Box-Cox)</h2>
+          <p>
+            Für Daten mit stark <strong>schiefer Verteilung</strong> –
+            transformiert in eine normalverteilungsähnliche Form,
+            damit Algorithmen, die Normalverteilung voraussetzen, besser funktionieren.
+          </p>
+        </div>
+
+        <!-- Visual: Schief → Normal -->
+        <div class="pt-visual">
+
+          <div class="pt-box">
+            <div class="pt-label" style="color:color-mix(in oklab,var(--color-warning) 70%,#000)">
+              Vor Box-Cox
+            </div>
+            <!-- Stilisiertes Histogramm einer Log-Normalverteilung -->
+            <svg class="pt-dist-svg" viewBox="0 0 180 80" aria-label="Schiefe Log-Normal Verteilung">
+              <!-- Balken: sehr schief nach rechts, viele niedrige Werte -->
+              <rect x="5"  y="10" width="14" height="65" fill="color-mix(in oklab,#964219 60%,#f7f6f2)" rx="1"/>
+              <rect x="22" y="25" width="14" height="50" fill="color-mix(in oklab,#964219 50%,#f7f6f2)" rx="1"/>
+              <rect x="39" y="40" width="14" height="35" fill="color-mix(in oklab,#964219 40%,#f7f6f2)" rx="1"/>
+              <rect x="56" y="52" width="14" height="23" fill="color-mix(in oklab,#964219 30%,#f7f6f2)" rx="1"/>
+              <rect x="73" y="60" width="14" height="15" fill="color-mix(in oklab,#964219 25%,#f7f6f2)" rx="1"/>
+              <rect x="90" y="66" width="14" height="9"  fill="color-mix(in oklab,#964219 20%,#f7f6f2)" rx="1"/>
+              <rect x="107" y="70" width="14" height="5" fill="color-mix(in oklab,#964219 15%,#f7f6f2)" rx="1"/>
+              <rect x="124" y="72" width="14" height="3" fill="color-mix(in oklab,#964219 12%,#f7f6f2)" rx="1"/>
+              <rect x="141" y="73" width="14" height="2" fill="color-mix(in oklab,#964219 10%,#f7f6f2)" rx="1"/>
+              <!-- Achse -->
+              <line x1="5" y1="75" x2="165" y2="75" stroke="#ccc" stroke-width="1"/>
+            </svg>
+            <div class="pt-dist-caption">Log-Normal – rechtsschiefe Verteilung<br>z.&nbsp;B. Gehälter, Hauspreise</div>
+          </div>
+
+          <div class="pt-transform-label">
+            <span style="font-size:1.5rem; color:var(--color-text-faint)">→</span>
+            <code style="font-size:.75rem;color:var(--color-primary)">Box-Cox<br>λ ≈ 0.006</code>
+          </div>
+
+          <div class="pt-box" style="border-color:color-mix(in oklab,var(--color-success) 30%,var(--color-border))">
+            <div class="pt-label" style="color:var(--color-success)">
+              Nach Box-Cox
+            </div>
+            <!-- Stilisiertes Histogramm einer Normalverteilung -->
+            <svg class="pt-dist-svg" viewBox="0 0 180 80" aria-label="Normalverteilung nach Box-Cox">
+              <rect x="5"  y="72" width="14" height="3"  fill="color-mix(in oklab,#437a22 15%,#f7f6f2)" rx="1"/>
+              <rect x="22" y="63" width="14" height="12" fill="color-mix(in oklab,#437a22 25%,#f7f6f2)" rx="1"/>
+              <rect x="39" y="47" width="14" height="28" fill="color-mix(in oklab,#437a22 40%,#f7f6f2)" rx="1"/>
+              <rect x="56" y="27" width="14" height="48" fill="color-mix(in oklab,#437a22 55%,#f7f6f2)" rx="1"/>
+              <rect x="73" y="10" width="14" height="65" fill="color-mix(in oklab,#437a22 65%,#f7f6f2)" rx="1"/>
+              <rect x="90" y="14" width="14" height="61" fill="color-mix(in oklab,#437a22 60%,#f7f6f2)" rx="1"/>
+              <rect x="107" y="30" width="14" height="45" fill="color-mix(in oklab,#437a22 50%,#f7f6f2)" rx="1"/>
+              <rect x="124" y="50" width="14" height="25" fill="color-mix(in oklab,#437a22 35%,#f7f6f2)" rx="1"/>
+              <rect x="141" y="65" width="14" height="10" fill="color-mix(in oklab,#437a22 20%,#f7f6f2)" rx="1"/>
+              <!-- Achse -->
+              <line x1="5" y1="75" x2="165" y2="75" stroke="#ccc" stroke-width="1"/>
+            </svg>
+            <div class="pt-dist-caption">Annähernd normalverteilt<br>nach PowerTransformer(Box-Cox)</div>
+          </div>
+
+        </div>
+
+        <!-- Code aus Notebook -->
+        <div class="code-cell-split" style="margin-top:var(--space-6)">
+          <div class="code-cell-split-code">
+            <div class="code-cell-header">
+              <span class="cell-lang">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – PowerTransformer Box-Cox (aus Notebook)
+              </span>
+            </div>
+            <pre><code>from sklearn.preprocessing import PowerTransformer
+
+# Log-normal verteilte Daten (typisch schief)
+X = np.random.lognormal(size=(2000, 1))
+
+# Vor der Transformation: stark rechtsschiefe Verteilung
+plt.hist(X, bins=100); plt.show()
+
+# Box-Cox Transformation anwenden
+pt = PowerTransformer(method='box-cox')
+X_transformed = pt.fit_transform(X)
+
+# Nach der Transformation: annähernd normalverteilt
+plt.hist(X_transformed, bins=100); plt.show()
+
+# Gelernter Box-Cox Parameter λ
+print(pt.lambdas_)</code></pre>
+          </div>
+          <div class="code-cell-split-output">
+            <div class="code-cell-header">
+              <span class="cell-lang">Output</span>
+            </div>
+            <pre><code># Box-Cox Parameter λ:
+array([0.00583342])
+
+# λ ≈ 0 entspricht einer
+# Log-Transformation:
+# X' ≈ log(X)
+# (Box-Cox ist eine Verallgemeinerung)</code></pre>
+          </div>
+        </div>
+
+        <div class="note" style="margin-top:var(--space-4)">
+          <strong>Box-Cox Bedingung:</strong> &nbsp;
+          Box-Cox funktioniert <strong>nur mit positiven Werten</strong> (X&nbsp;&gt;&nbsp;0).
+          Für Daten mit negativen Werten: <code>PowerTransformer(method='yeo-johnson')</code>
+          (funktioniert auch mit Null und negativen Werten).
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           BONUS: QUANTISIERUNG  (aus Notebook)
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="quantisierung">
+        <div class="section-head">
+          <h3 style="font-size:var(--text-xl)">Bonus aus dem Notebook: Quantisierung</h3>
+          <p>
+            Diskretisierung kontinuierlicher Werte in Klassen –
+            feste oder adaptive Klassengrenzen.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-primary)">Feste Klassengrößen</span></h3>
+            <p>
+              Gleichmäßige Klassengrenzen auf einer <strong>logarithmischen</strong>
+              oder linearen Skala. Geeignet für log-normalverteilte Daten
+              (z.&nbsp;B. Einkommensverteilungen, Hauspreise).
+            </p>
+            <pre style="margin-top:var(--space-3);font-size:.7rem"><code># Klassen: 10, 100, 1000, 10.000
+plt.vlines([10, 100, 1000, 10_000],
+           ymin=0, ymax=1.5e4, color='r')</code></pre>
+          </article>
+          <article class="card">
+            <h3><span class="key" style="--key-color:var(--color-success)">Adaptive Klassengrößen (Dezile)</span></h3>
+            <p>
+              Quantile-basierte Klassengrenzen – jede Klasse enthält
+              <strong>gleich viele Datenpunkte</strong>. Robust gegenüber
+              Ausreißern und skewed distributions.
+            </p>
+            <pre style="margin-top:var(--space-3);font-size:.7rem"><code># 10. bis 90. Perzentile als Grenzen
+dezile = df.quantile(
+    [.1, .2, .3, .4, .5, .6, .7, .8, .9]
+)</code></pre>
+          </article>
+        </div>
+      </section>
+
+      <!-- ══════════════════════════════════════════════════
+           8.5  VERGLEICH – WANN WELCHE METHODE?
+      ═══════════════════════════════════════════════════ -->
+      <section class="section" id="vergleich">
+        <div class="section-head">
+          <h2>8.5 Vergleich: Wann welche Methode?</h2>
+          <p>Entscheidungshilfe für die Praxis.</p>
+        </div>
+
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Methode</th>
+              <th>Wertebereich</th>
+              <th>Ausreißer</th>
+              <th>Verteilung</th>
+              <th>Wann einsetzen?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="ct-method">MinMaxScaler</code></td>
+              <td><span class="ct-ok">[min, max]</span><br><small>fest definiert</small></td>
+              <td><span class="ct-warn">Sensibel</span></td>
+              <td>Beliebig</td>
+              <td>Wenn fester Ausgabebereich nötig (z.&nbsp;B. [0,&nbsp;1] für Neural Nets), keine starken Ausreißer</td>
+            </tr>
+            <tr>
+              <td><code class="ct-method">StandardScaler</code></td>
+              <td><span class="ct-na">Unbegrenzt</span><br><small>μ=0, σ=1</small></td>
+              <td><span class="ct-ok">Robuster</span></td>
+              <td>Bevorzugt Normalvert.</td>
+              <td><strong>Standard-Wahl</strong>. Für SVM, PCA, Lineare Modelle, k-NN. Wenn Verteilung unbekannt.</td>
+            </tr>
+            <tr>
+              <td><code class="ct-method">RobustScaler</code></td>
+              <td><span class="ct-na">Unbegrenzt</span><br><small>median=0</small></td>
+              <td><span class="ct-ok">Sehr robust</span></td>
+              <td>Beliebig</td>
+              <td>Wenn Ausreißer vorhanden und nicht entfernt werden können. Skalierung über IQR.</td>
+            </tr>
+            <tr>
+              <td><code class="ct-method">PowerTransformer</code></td>
+              <td><span class="ct-na">Unbegrenzt</span><br><small>≈ Normalvert.</small></td>
+              <td><span class="ct-warn">Sensibel</span></td>
+              <td>Schief → Normal</td>
+              <td>Wenn Daten stark rechtsschiefe Verteilung haben. Box-Cox nur für positive Werte.</td>
+            </tr>
+            <tr>
+              <td><code class="ct-method">Keine</code></td>
+              <td><span class="ct-na">Original</span></td>
+              <td><span class="ct-na">—</span></td>
+              <td>—</td>
+              <td>Tree-based Algorithmen (Random Forest, Gradient Boosting, Decision Tree).</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="note note-primary" style="margin-top:var(--space-5)">
+          <strong>Goldene Regel:</strong> &nbsp;
+          <code>.fit()</code> <strong>immer nur auf den Trainingsdaten</strong>.
+          Dann <code>.transform()</code> auf Training- und Testdaten separat.
+          Nie <code>.fit_transform()</code> auf Testdaten → Data Leakage
+          (gilt für alle sklearn-Scaler, genau wie für Encoder auf Seite&nbsp;5).
+        </div>
+
+        <!-- Abschluss-Note: Kapitel 1 fertig -->
+        <div class="note note-success"
+             style="margin-top:var(--space-6);
+                    background:color-mix(in oklab,var(--color-success) 6%,var(--color-surface-2));
+                    border-color:color-mix(in oklab,var(--color-success) 25%,transparent)">
+          <strong>🎉 Kapitel 1 abgeschlossen!</strong> &nbsp;
+          Du hast jetzt alle Themen aus Data Preparation &amp; Feature Engineering:
+          Feature-Raum, Extraktion (Zeitserien, Encoding, Autoencoder, Haar),
+          Selection (VarianceThreshold, Korrelation, SelectKBest) und
+          Scaling (MinMax, Standardisierung, Box-Cox).
+          <br><br>
+          <a href="Kapitel1.html">← Zurück zur Kapitelübersicht</a>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <small>PRM Prüfungsvorbereitung · Kapitel 1 · Seite 8 (letzte Seite) · Stand Juni 2026</small>
+    </div>
+  </footer>
+
+</body>
+</html>
