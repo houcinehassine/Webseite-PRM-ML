@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────
 //  Kapitel5/Sidebar.js  –  Nur Daten, Logik kommt aus Core
 // ─────────────────────────────────────────────────────────
-import { registerSidebar } from '../js_codes/sidebar-core.js';
+import { registerSidebar } from '../script.js';
 
 
 const chapter = {

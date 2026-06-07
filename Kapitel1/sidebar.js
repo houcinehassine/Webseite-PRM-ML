@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────
 //  Kapitel1/Sidebar.js  –  Nur Daten, Logik kommt aus Core
 // ─────────────────────────────────────────────────────────
-import { registerSidebar } from 'script.js';
+import { registerSidebar } from '../script.js';
 
 const chapter = {
   title: 'Kapitel 1 · Data Preparation',
