@@ -25,18 +25,15 @@ class SiteHeader extends HTMLElement {
       document.head.appendChild(link);
     });
 
-    /* ── CSS ── */
-    // ── CSS aus css_codes/ laden ──────────────────────────────
-    ['base.css', 'code.css', 'components.css', 'index.css', 'kapitel.css', 'layout.css', 'Quiz.css', 'sidebar-styles.css', 'sidebar.css', 'tokens.css' ,'topbar.css'].forEach(file => {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = `../css_codes/${file}`;
-      document.head.appendChild(link);
-    });
+    // --- CSS ---
+    const css = document.createElement('link');
+    css.rel = 'stylesheet';
+    css.href = 'style.css';
+    document.head.appendChild(css);
 
     // ── MathJax ──
     const mj = document.createElement('script');
-    mj.src = '../js_codes/mathjax.js';
+    mj.src = 'script.js';
     mj.defer = true;
     document.head.appendChild(mj);
 
@@ -70,7 +67,7 @@ class SiteHeader extends HTMLElement {
 
     /* ── Copy Buttons ── */
     const copyScript = document.createElement('script');
-    copyScript.src = '../js_codes/copy.js';
+    copyScript.src = 'script.js';
     copyScript.defer = true;
     document.head.appendChild(copyScript);
 
