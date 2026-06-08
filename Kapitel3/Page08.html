@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K3 · SVR & Zusammenfassung</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── SO WHAT / FRAGE ─────────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase;
+      color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── FORMULA BLOCK (aus kapitel3.css) ───────────── */
+    .formula-block {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+      border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6);
+      margin: var(--space-4) 0; text-align: center; overflow-x: auto;
+    }
+    .formula-block .formula-label { font-size:var(--text-xs); font-weight:800; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-primary); margin-bottom:var(--space-3); }
+    .formula-block .formula-math { font-size:clamp(0.92rem,2.2vw,1.15rem);
+      font-weight:700; color:var(--color-text); line-height:1.9; }
+    .fl-row { display:flex; align-items:baseline; gap:var(--space-3); font-size:var(--text-xs);
+      text-align:left; margin-top:var(--space-2); }
+    .fl-sym { font-family:var(--font-mono); font-weight:700; color:var(--color-primary);
+      min-width:100px; flex-shrink:0; }
+    .fl-desc { color:var(--color-text-muted); line-height:1.5; }
+
+    /* ── SVC vs SVR COMPARE (wiederverwendet aus Page06 kernel-compare) */
+    .compare-split { display:grid; grid-template-columns:1fr auto 1fr;
+      gap:var(--space-4); align-items:start; margin:var(--space-5) 0; }
+    @media(max-width:640px){.compare-split{grid-template-columns:1fr;}.vs-div{display:none;}}
+    .cs-side { padding:var(--space-5); border:1.5px solid var(--color-border);
+      border-radius:var(--radius-xl); background:var(--color-surface-2); }
+    .cs-side.svc { border-color:var(--color-primary);
+      background:color-mix(in oklab,var(--color-primary) 4%,var(--color-surface)); }
+    .cs-side.svr { border-color:var(--color-success);
+      background:color-mix(in oklab,var(--color-success) 4%,var(--color-surface)); }
+    .cs-label { font-size:.62rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; margin-bottom:var(--space-3); }
+    .cs-side.svc .cs-label { color:var(--color-primary); }
+    .cs-side.svr .cs-label { color:var(--color-success); }
+    .vs-div { display:flex; align-items:center; justify-content:center; padding-top:var(--space-8);
+      font-size:var(--text-lg); font-weight:900; color:var(--color-text-faint); }
+
+    /* ── SVR ε TUBE VISUAL (NEU → css_codes/kapitel3.css) */
+    /* .svr-visual-wrap */
+    .svr-visual-wrap { margin:var(--space-5) 0; background:var(--color-surface-2);
+      border:1px solid var(--color-border); border-radius:var(--radius-xl);
+      overflow:hidden; padding:var(--space-4); }
+    .svr-visual-title { font-size:var(--text-xs); font-weight:700; text-transform:uppercase;
+      letter-spacing:.07em; color:var(--color-text-faint); margin-bottom:var(--space-3); text-align:center; }
+    .svr-visual-wrap svg { width:100%; height:auto; display:block; max-width:500px; margin:0 auto; }
+
+    /* ── NFL BOX (NEU → css_codes/kapitel3.css) ─────── */
+    /* .nfl-box */
+    .nfl-box {
+      margin: var(--space-6) 0;
+      padding: var(--space-5) var(--space-6);
+      background: var(--color-surface-offset);
+      border: 2px solid var(--color-divider);
+      border-radius: var(--radius-xl);
+      display: flex; flex-direction: column; gap: var(--space-3);
+    }
+    .nfl-header {
+      display: flex; align-items: center; gap: var(--space-3);
+    }
+    .nfl-icon { font-size: 2rem; }
+    .nfl-title { font-size: var(--text-base); font-weight: 800; color: var(--color-text); }
+    .nfl-subtitle { font-size: var(--text-xs); font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; color: var(--color-text-faint); }
+    .nfl-body { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.7; }
+
+    /* ── PROS CONS GRID (NEU → css_codes/kapitel3.css) ─ */
+    /* .pros-cons-grid, .pc-card */
+    .pros-cons-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--space-4); margin: var(--space-5) 0;
+    }
+    @media(max-width:600px){.pros-cons-grid{grid-template-columns:1fr;}}
+    .pc-card { padding:var(--space-5); border-radius:var(--radius-xl);
+      border:1.5px solid var(--color-border); }
+    .pc-card.pros { border-color:var(--color-success);
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface)); }
+    .pc-card.cons { border-color:#ef4444;
+      background:color-mix(in oklab,#ef4444 4%,var(--color-surface)); }
+    .pc-title { font-size:var(--text-sm); font-weight:800; margin-bottom:var(--space-3); }
+    .pc-card.pros .pc-title { color:var(--color-success); }
+    .pc-card.cons .pc-title { color:#ef4444; }
+
+    /* ── CHAPTER COMPLETE BANNER ─────────────────────── */
+    .chapter-complete { margin:var(--space-8) 0; padding:var(--space-6);
+      background: linear-gradient(135deg,
+        color-mix(in oklab,var(--color-primary) 8%,var(--color-surface-2)),
+        color-mix(in oklab,var(--color-success) 6%,var(--color-surface-2)));
+      border:1.5px solid color-mix(in oklab,var(--color-primary) 20%,var(--color-border));
+      border-radius:var(--radius-xl); text-align:center; }
+    .cc-eyebrow { font-size:.62rem; font-weight:800; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--color-primary); margin-bottom:var(--space-3); }
+    .cc-title { font-size:var(--text-xl); font-weight:800;
+      color:var(--color-text); margin-bottom:var(--space-4); }
+    .cc-summary { font-size:var(--text-sm); color:var(--color-text-muted);
+      max-width:60ch; margin:0 auto var(--space-5); line-height:1.7; }
+    .cc-links { display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap; }
+    .cc-link { padding:var(--space-2) var(--space-4); border-radius:var(--radius-full);
+      border:1.5px solid var(--color-border); background:var(--color-surface);
+      text-decoration:none; color:var(--color-text); font-size:var(--text-xs);
+      font-weight:700; transition:border-color .15s,transform .15s; }
+    .cc-link:hover { border-color:var(--color-primary); transform:translateY(-2px); }
+    .cc-link.primary { background:var(--color-primary); color:#fff; border-color:var(--color-primary); }
+    .cc-link.primary:hover { opacity:.9; }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · SVR & Zusammenfassung"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page8"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ════════════════════════════════════════════════
+           HERO
+      ════════════════════════════════════════════════════ -->
+      <section class="hero" id="svr-konzept">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Seite 08 · Abschluss · Folien 34–35, 31</span>
+            <h1>SVR &
+              <span class="key" style="--key-color:var(--color-success)">Zusammenfassung</span>
+            </h1>
+            <p>
+              SVMs können nicht nur klassifizieren –
+              durch
+              <span class="key" style="--key-color:var(--color-success)">Support Vector Regression (SVR)</span>
+              wird dieselbe Grundidee auf Regressionsprobleme angewendet.
+              Am Ende: Pros, Cons und das No-Free-Lunch Theorem.
+            </p>
+            <div class="pill-row">
+              <span class="pill">SVR – Konzept</span>
+              <span class="pill">ε-Tube</span>
+              <span class="pill">Umgekehrte Optimierung</span>
+              <span class="pill">LinearSVR</span>
+              <span class="pill">SVR(kernel, C, epsilon)</span>
+              <span class="pill">ε=1.5 vs 0.5</span>
+              <span class="pill">C=100 vs 0.01</span>
+              <span class="pill">Pros & Cons</span>
+              <span class="pill">No-Free-Lunch</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Du verstehst den Unterschied zwischen SVC und
+                <span class="key" style="--key-color:var(--color-success)">SVR</span></li>
+              <li>Du weißt, was der <strong>ε-Tube</strong> bewirkt (innen = kostenlos, außen = Strafe)</li>
+              <li>Du kannst <code>LinearSVR</code> und <code>SVR(kernel=...)</code> in sklearn nutzen</li>
+              <li>Du verstehst den Effekt von <strong>ε</strong> und <strong>C</strong> auf das SVR-Modell</li>
+              <li>Du kennst die <strong>Pros und Cons</strong> von SVMs und das No-Free-Lunch Theorem</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           8.1 · SVR KONZEPT (Folie 34)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="svr-konzept">
+        <div class="section-head">
+          <h2>8.1 SVR: Das Konzept</h2>
+          <p>
+            Support Vector Regression kehrt die SVC-Logik um:
+            statt Punkte <em>außerhalb</em> des Margins zu fordern,
+            wollen wir möglichst viele Punkte <em>innerhalb</em> eines
+            <span class="key" style="--key-color:var(--color-success)">ε-Tubes</span>.
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🪟 Whiteboard Time! — Folie 34</div>
+          <p>
+            Warum benötigen wir nun ein Epsilon?
+            Wie könnte nun unsere Kostenfunktion aussehen?
+            Was ist der clevere Trick, der uns von einer Klassifikation zu einer Regression bringt?
+          </p>
+        </div>
+
+        <!-- SVC vs SVR Vergleich -->
+        <div class="compare-split">
+          <div class="cs-side svc">
+            <div class="cs-label">🎯 SVC – Klassifikation</div>
+            <ul style="font-size:var(--text-sm); margin:0; padding-left:1rem; line-height:1.9">
+              <li>Punkte sollen <strong>außerhalb</strong> des Margins sein</li>
+              <li>Margin-Verletzungen = Punkte <em>im</em> Margin → Strafe</li>
+              <li>Ziel: breiter Margin mit wenig Verletzungen</li>
+              <li>Output: Klassen-Label (+1 oder −1)</li>
+            </ul>
+          </div>
+          <div class="vs-div">⇄</div>
+          <div class="cs-side svr">
+            <div class="cs-label">📈 SVR – Regression</div>
+            <ul style="font-size:var(--text-sm); margin:0; padding-left:1rem; line-height:1.9">
+              <li>Punkte sollen <strong>innerhalb</strong> des ε-Tubes sein</li>
+              <li>Tube-Verletzungen = Punkte <em>außerhalb</em> → Strafe</li>
+              <li>Ziel: passender Tube mit wenig Ausreißern</li>
+              <li>Output: kontinuierlicher Wert ŷ</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ε-Tube Visual -->
+        <div class="svr-visual-wrap">
+          <div class="svr-visual-title">Der ε-Tube: Innen = kostenlos, Außen = Strafe (Folie 34)</div>
+          <svg viewBox="0 0 480 260" xmlns="http://www.w3.org/2000/svg">
+            <rect width="480" height="260" fill="var(--color-surface-2)"/>
+            <!-- ε-Tube (filled area) -->
+            <path d="M40,130 Q160,80 260,100 Q340,115 440,90" fill="none" stroke="#1a9e6e" stroke-width="2.5"/>
+            <path d="M40,160 Q160,110 260,130 Q340,145 440,120" fill="none" stroke="#1a9e6e" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <path d="M40,100 Q160,50 260,70 Q340,85 440,60" fill="none" stroke="#1a9e6e" stroke-width="1.5" stroke-dasharray="5,3"/>
+            <!-- Tube fill -->
+            <path d="M40,100 Q160,50 260,70 Q340,85 440,60 L440,120 Q340,145 260,130 Q160,110 40,160 Z"
+                  fill="color-mix(in oklab,#1a9e6e 12%,transparent)"/>
+            <!-- Points inside tube (blue = kostenlos) -->
+            <circle cx="80"  cy="128" r="6" fill="#3b82f6" opacity="0.85"/>
+            <circle cx="120" cy="95"  r="6" fill="#3b82f6" opacity="0.85"/>
+            <circle cx="180" cy="108" r="6" fill="#3b82f6" opacity="0.85"/>
+            <circle cx="230" cy="110" r="6" fill="#3b82f6" opacity="0.85"/>
+            <circle cx="300" cy="108" r="6" fill="#3b82f6" opacity="0.85"/>
+            <circle cx="360" cy="100" r="6" fill="#3b82f6" opacity="0.85"/>
+            <circle cx="400" cy="92"  r="6" fill="#3b82f6" opacity="0.85"/>
+            <!-- Points outside tube (red = Strafe) -->
+            <circle cx="100" cy="55"  r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="150" cy="145" r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="280" cy="55"  r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="420" cy="148" r="6" fill="#ef4444" opacity="0.85"/>
+            <!-- Red dashed lines (penalty) -->
+            <line x1="100" y1="55"  x2="100" y2="80"  stroke="#ef4444" stroke-width="2" stroke-dasharray="4,2"/>
+            <line x1="150" y1="145" x2="150" y2="122" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,2"/>
+            <line x1="280" y1="55"  x2="280" y2="78"  stroke="#ef4444" stroke-width="2" stroke-dasharray="4,2"/>
+            <line x1="420" y1="148" x2="420" y2="125" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,2"/>
+            <!-- Labels -->
+            <text x="460" y="97"  font-size="8" fill="#1a9e6e" font-family="sans-serif" font-weight="700">ŷ + ε</text>
+            <text x="460" y="137" font-size="8" fill="#1a9e6e" font-family="sans-serif" font-weight="700">ŷ − ε</text>
+            <text x="460" y="115" font-size="8" fill="#1a9e6e" font-family="sans-serif" font-weight="800">ŷ</text>
+            <!-- Legend -->
+            <circle cx="28" cy="228" r="5" fill="#3b82f6"/>
+            <text x="38" y="232" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif">Innen: Kosten = 0</text>
+            <circle cx="168" cy="228" r="5" fill="#ef4444"/>
+            <text x="178" y="232" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif">Außen: Strafe ∝ Abstand</text>
+            <!-- ε Arrow -->
+            <line x1="50" y1="99"  x2="50" y2="161" stroke="black" stroke-width="1.5" marker-end="url(#eps-arr)" marker-start="url(#eps-arr)"/>
+            <text x="55" y="133" font-size="11" fill="var(--color-text)" font-family="sans-serif" font-weight="700">2ε</text>
+            <defs>
+              <marker id="eps-arr" markerWidth="5" markerHeight="5" refX="2.5" refY="2.5" orient="auto-start-reverse">
+                <path d="M0,0 L5,2.5 L0,5 Z" fill="black"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- Kostenfunktion -->
+        <div class="formula-block">
+          <div class="formula-label">SVR – Kostenfunktion (Folie 34)</div>
+          <div class="formula-math">
+            \[ \min_{\mathbf{w},b}\;\frac{1}{2}\|\mathbf{w}\|^2 + C \cdot \sum_{i=1}^N \max\!\left\{0,\; |y_i - (\langle\mathbf{w}, x_i\rangle + b)| - \varepsilon\right\} \]
+          </div>
+          <div class="fl-row">
+            <span class="fl-sym">\(\varepsilon\)</span>
+            <span class="fl-desc">Tube-Breite: Punkte INNERHALB ±ε haben Kosten 0. Je größer ε, desto mehr Punkte sind kostenfrei → glatteres Modell</span>
+          </div>
+          <div class="fl-row">
+            <span class="fl-sym">\(|y_i - \hat{y}_i| - \varepsilon\)</span>
+            <span class="fl-desc">Überschuss über den Tube: 0 wenn Punkt innen, positiver Wert wenn außen (Abstand − ε)</span>
+          </div>
+          <div class="fl-row">
+            <span class="fl-sym">\(C\)</span>
+            <span class="fl-desc">Regularisierung: wie stark werden Tube-Verletzungen bestraft? Gleiches Prinzip wie in SVC</span>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>⚖️ Effekt von ε</h3>
+            <ul>
+              <li>Großes ε → breiter Tube → viele Punkte kostenlos → <strong>glattere Kurve</strong></li>
+              <li>Kleines ε → schmaler Tube → wenig Punkte kostenlos → <strong>engerer Fit</strong></li>
+              <li>ε = 0: maximale Sensitivität</li>
+              <li>ε zu groß: Modell ignoriert alle Punkte</li>
+              <li>→ Hyperparameter via Cross-Validation tunen!</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>⚙️ Effekt von C</h3>
+            <ul>
+              <li>Großes C: Verletzungen teuer → enger Fit → <strong>Overfitting-Risiko</strong></li>
+              <li>Kleines C: Verletzungen günstig → smoothere Kurve → <strong>Underfitting-Risiko</strong></li>
+              <li>Dasselbe Prinzip wie bei SVC!</li>
+              <li>C und ε interagieren: beide zusammen tunen</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            SVR ist das natürliche Gegenstück zu SVC:
+            <strong>dieselbe Mathematik, umgekehrte Logik</strong>.
+            Statt Punkte außerhalb zu fordern, tolerieren wir Punkte innerhalb des Tubes kostenfrei.
+            Außenliegende Punkte werden mit C bestraft.
+            Auch hier: Kernel-Trick möglich → nicht-lineare Regression!
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           8.2 · SVR IN SKLEARN (Folie 35)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="svr-sklearn">
+        <div class="section-head">
+          <h2>8.2 SVR in sklearn</h2>
+          <p>
+            sklearn bietet zwei SVR-Klassen:
+            <span class="key" style="--key-color:var(--color-success)">LinearSVR</span>
+            für lineare Probleme und
+            <span class="key" style="--key-color:var(--color-success)">SVR(kernel=...)</span>
+            für nicht-lineare Probleme. Code aus <code>03_core.ipynb</code> (Cells 18–27).
+          </p>
+        </div>
+
+        <!-- sklearn API -->
+        <div class="card-grid" style="margin-bottom:var(--space-5)">
+          <article class="card">
+            <h3><code style="color:var(--color-success)">LinearSVR</code></h3>
+            <ul>
+              <li>Für lineare Regressionsprobleme</li>
+              <li>Parameter: <code>epsilon</code>, <code>C</code></li>
+              <li>Schneller als <code>SVR(kernel='linear')</code></li>
+              <li>Aus: <code>from sklearn.svm import LinearSVR</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3><code style="color:var(--color-success)">SVR(kernel=...)</code></h3>
+            <ul>
+              <li>Für nicht-lineare Regressionsprobleme</li>
+              <li>Parameter: <code>kernel</code>, <code>C</code>, <code>epsilon</code>, <code>gamma</code></li>
+              <li>Kernel: <code>'rbf'</code>, <code>'poly'</code>, <code>'linear'</code></li>
+              <li>Aus: <code>from sklearn.svm import SVR</code></li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- ─── Linear SVR ─── -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          A) LinearSVR — ε=1.5 vs. ε=0.5
+        </h3>
+
+        <!-- Schritt 1: Linearer Datensatz -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Linearen Regressionsdatensatz + Hilfsfunktionen erstellen.
+          Die Funktion <code>plot_svm_regression()</code> zeichnet Kurve, ε-Tube und Ausreißer.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Daten & Hilfsfunktion (Cells 18–20)
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+m = 50
+X = 2 * np.random.rand(m, 1)
+y = (4 + 3 * X + np.random.randn(m, 1)).ravel()
+
+def find_support_vectors(svm, X, y):
+    """Punkte außerhalb des ε-Tube."""
+    off_margin = np.abs(y - svm.predict(X)) >= svm.epsilon
+    return np.argwhere(off_margin)
+
+def plot_svm_regression(svm, X, y, ax, xlim):
+    xs = np.linspace(xlim[0], xlim[1], 100).reshape(-1,1)
+    yp = svm.predict(xs)
+    ax.plot(xs, yp, 'k-', lw=2, label='ŷ')
+    ax.plot(xs, yp + svm.epsilon, 'k--', alpha=0.7)
+    ax.plot(xs, yp - svm.epsilon, 'k--', alpha=0.7,
+            label=f'±ε={svm.epsilon}')
+    sv_idx = find_support_vectors(svm, X, y)
+    ax.scatter(X[sv_idx], y[sv_idx], s=180,
+               facecolors='#FFAAAA', edgecolors='red',
+               zorder=5, label='Außerhalb ε')
+    ax.plot(X, y, 'bo', ms=4, alpha=0.7)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">Hilfsfunktionen erklärt</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li><code>find_support_vectors</code>: Punkte mit |y−ŷ| ≥ ε → außerhalb Tube</li>
+                <li><code>plot_svm_regression</code>: Kurve + ε-Tube + Ausreißer</li>
+                <li>Blaue Punkte = korrekt innerhalb Tube</li>
+                <li>Rote Kreise = Ausreißer außerhalb Tube</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: LinearSVR ε=1.5 vs ε=0.5 (vertikal 2×1) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Zwei <code>LinearSVR</code>-Modelle mit ε=1.5 und ε=0.5 vergleichen.
+          Vertikal gestapelt (2×1). Rote Kreisringe = Punkte außerhalb des Tubes.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – LinearSVR ε-Vergleich vertikal (Folie 34)
+              </span>
+            </div>
+            <pre><code>from sklearn.svm import LinearSVR
+
+reg1 = LinearSVR(epsilon=1.5, random_state=42)
+reg2 = LinearSVR(epsilon=0.5, random_state=42)
+reg1.fit(X, y); reg2.fit(X, y)
+
+# Vertikal: 2 Zeilen, 1 Spalte
+fig, axes = plt.subplots(2, 1, figsize=(5, 9),
+                          sharey=True)
+
+for ax, model in zip(axes, [reg1, reg2]):
+    plot_svm_regression(model, X, y, ax, [0, 2])
+    ax.set_xlim(0, 2); ax.set_ylim(3, 11)
+    ax.set_title(f'LinearSVR: ε = {model.epsilon}',
+                 fontsize=12)
+    ax.legend(fontsize=8)
+    ax.set_xlabel('x₁'); ax.set_ylabel('y')
+
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 <strong>Oben (ε=1.5):</strong> breiter Tube → wenige rote Punkte außen</li>
+                <li>📊 <strong>Unten (ε=0.5):</strong> schmaler Tube → viele rote Punkte außen</li>
+                <li>Beide: gerade Linie (linear!)</li>
+                <li>Rote Kreise: außerhalb Tube → Strafe in Kostenfunktion</li>
+                <li>Unterschied: Tube-Breite, nicht Linienneigung</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── Non-linear SVR ─── -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-7) 0 var(--space-3)">
+          B) SVR Poly-Kernel — C=100 vs. C=0.01
+        </h3>
+
+        <!-- Schritt 3: Nicht-linearer Datensatz -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 3</strong> — Nicht-linearen Datensatz (Parabel + Rauschen) erstellen.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Nicht-linearer Datensatz (Folie 35)
+              </span>
+            </div>
+            <pre><code>np.random.seed(42)
+m = 100
+X_nl = 2 * np.random.rand(m, 1) - 1
+y_nl = (0.2 + 0.1*X_nl + 0.5*X_nl**2
+        + np.random.randn(m, 1)/10).ravel()
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X_nl, y_nl, s=20, alpha=0.7,
+           color='steelblue')
+ax.set_title('Nicht-linearer Datensatz (Parabel)')
+ax.set_xlabel('x₁'); ax.set_ylabel('y')
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 100 Punkte mit quadratischem Trend (Parabel)</li>
+                <li>Minimum bei x₁ ≈ 0</li>
+                <li>Linear nicht zu fitten → Kernel-Trick!</li>
+                <li><code>np.random.randn()/10</code> = geringes Rauschen</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 4: SVR poly C=100 vs C=0.01 (vertikal 2×1) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 4</strong> — <code>SVR(kernel='poly')</code> mit C=100 (enger Fit)
+          vs. C=0.01 (glatte Kurve). Vertikal (2×1).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – SVR poly: C=100 vs C=0.01 (Folie 35)
+              </span>
+            </div>
+            <pre><code>from sklearn.svm import SVR
+
+reg_ph = SVR(kernel='poly', degree=2,
+             C=100, epsilon=0.1, gamma='scale')
+reg_pl = SVR(kernel='poly', degree=2,
+             C=0.01, epsilon=0.1, gamma='scale')
+reg_ph.fit(X_nl, y_nl)
+reg_pl.fit(X_nl, y_nl)
+
+fig, axes = plt.subplots(2, 1, figsize=(5, 9))
+x_r = np.linspace(-1, 1, 200).reshape(-1, 1)
+
+for ax, (m, lbl) in zip(axes, [
+    (reg_ph, 'poly, C=100'),
+    (reg_pl, 'poly, C=0.01')
+]):
+    y_r = m.predict(x_r)
+    ax.scatter(X_nl, y_nl, s=20, alpha=0.5,
+               color='steelblue')
+    ax.plot(x_r, y_r, 'k-', lw=2)
+    ax.fill_between(x_r.ravel(),
+                    y_r-m.epsilon, y_r+m.epsilon,
+                    alpha=0.2, color='orange')
+    ax.set_title(f'SVR: {lbl}', fontsize=12)
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 <strong>Oben (C=100):</strong> stark angepasste Parabel</li>
+                <li>📊 <strong>Unten (C=0.01):</strong> glattere, einfachere Kurve</li>
+                <li>Orange Band = ±ε Tube</li>
+                <li>C=100: High Variance (mehr Overfitting)</li>
+                <li>C=0.01: High Bias (mehr Underfitting)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 5: SVR rbf C=100 vs C=0.01 (vertikal 2×1) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 5</strong> — <code>SVR(kernel='rbf')</code> mit C=100 vs. C=0.01.
+          RBF-Kernel passt sich flexibler an als Poly.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – SVR rbf: C=100 vs C=0.01 (Folie 35)
+              </span>
+            </div>
+            <pre><code>reg_rh = SVR(kernel='rbf', C=100, epsilon=0.1)
+reg_rl = SVR(kernel='rbf', C=0.01, epsilon=0.1)
+reg_rh.fit(X_nl, y_nl)
+reg_rl.fit(X_nl, y_nl)
+
+fig, axes = plt.subplots(2, 1, figsize=(5, 9))
+x_r = np.linspace(-1, 1, 200).reshape(-1, 1)
+
+for ax, (m, lbl) in zip(axes, [
+    (reg_rh, 'rbf, C=100'),
+    (reg_rl, 'rbf, C=0.01')
+]):
+    y_r = m.predict(x_r)
+    ax.scatter(X_nl, y_nl, s=20, alpha=0.5,
+               color='steelblue')
+    ax.plot(x_r, y_r, 'k-', lw=2)
+    ax.fill_between(x_r.ravel(),
+                    y_r-m.epsilon, y_r+m.epsilon,
+                    alpha=0.2, color='teal')
+    ax.set_title(f'SVR: {lbl}', fontsize=12)
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 <strong>Oben (C=100):</strong> sehr enger Fit an die Daten</li>
+                <li>📊 <strong>Unten (C=0.01):</strong> fast konstante Linie (extreme Regularisierung)</li>
+                <li>RBF: flexibler als Poly bei hohem C</li>
+                <li>Türkises Band = ±ε Tube</li>
+                <li>→ C muss via Cross-Validation gewählt werden!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            SVR und SVC teilen dieselbe API:
+            <code>SVR(kernel=..., C=..., epsilon=...)</code>.
+            Der Kernel-Trick funktioniert genauso.
+            Der einzige Unterschied: SVR hat zusätzlich den <strong>ε-Parameter</strong>
+            für die Tube-Breite. Auch hier gilt: ε und C via Cross-Validation optimieren.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           8.3 · PROS, CONS & NO-FREE-LUNCH (Folie 31)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="pros-cons">
+        <div class="section-head">
+          <h2>8.3 Vorteile, Nachteile & No-Free-Lunch</h2>
+          <p>
+            Was können SVMs gut, was nicht?
+            Ein ehrlicher Blick auf Stärken und Schwächen –
+            und das wichtige <span class="key" style="--key-color:var(--color-text-faint)">No-Free-Lunch Theorem</span>.
+          </p>
+        </div>
+
+        <!-- Pros & Cons Grid -->
+        <div class="pros-cons-grid">
+          <div class="pc-card pros">
+            <div class="pc-title">👍 Vorteile (Pros)</div>
+            <ul style="font-size:var(--text-sm); margin:0; padding-left:1rem; line-height:1.9">
+              <li>Sehr effektiv bei <strong>hochdimensionalen Datensätzen</strong></li>
+              <li>Funktioniert gut wenn <strong>Dimensionen &gt; Datenpunkte</strong></li>
+              <li>Komputativ <strong>effizient</strong> durch Sparsity (nur Support Vectors zählen)</li>
+              <li>Erlaubt <strong>geometrische Interpretation</strong>: Hyperebene, Margin, Support Vectors</li>
+              <li>Flexibel durch <strong>Kernel-Trick</strong>: linear und nicht-linear</li>
+              <li>Gutes Verhalten auf kleinen und mittelgroßen Datensätzen</li>
+            </ul>
+          </div>
+          <div class="pc-card cons">
+            <div class="pc-title">👎 Nachteile (Cons)</div>
+            <ul style="font-size:var(--text-sm); margin:0; padding-left:1rem; line-height:1.9">
+              <li>Probleme bei <strong>sehr großen Datensätzen</strong> (Kernel-Matrix wächst quadratisch)</li>
+              <li>Schlecht bei <strong>stark überlappenden Klassen</strong> oder viel Rauschen</li>
+              <li><strong>Keine probabilistische Interpretation</strong> möglich</li>
+              <li>Hyperparameter C (und γ, ε) müssen sorgfältig gewählt werden</li>
+              <li>Schwer zu interpretieren bei nicht-linearem Kernel</li>
+              <li>Training kann langsam sein für große N</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- No-Free-Lunch Box -->
+        <div class="nfl-box">
+          <div class="nfl-header">
+            <span class="nfl-icon">🎫</span>
+            <div>
+              <div class="nfl-title">NO FREE LUNCH</div>
+              <div class="nfl-subtitle">Folie 31 · Wichtigste Lektion des Kapitels</div>
+            </div>
+          </div>
+          <div class="nfl-body">
+            <strong>Es gibt keinen universell besten Algorithmus.</strong>
+            SVMs sind hervorragend für hochdimensionale, kleine bis mittelgroße Datensätze –
+            aber Random Forests, neuronale Netze oder Naïve Bayes können in anderen Szenarien
+            besser abschneiden. Das No-Free-Lunch Theorem besagt:
+            <em>Kein Algorithmus kann auf allen möglichen Problemen gleichzeitig optimal sein.</em>
+            Deshalb: immer mehrere Modelle ausprobieren, mit Cross-Validation vergleichen,
+            und den Datensatz kennen!
+          </div>
+        </div>
+
+        <!-- Parameter-Übersicht -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Komplette Parameter-Referenz: SVC & SVR
+        </h3>
+        <div class="card-grid">
+          <article class="card">
+            <h3>🔧 <code style="color:var(--color-primary)">C</code> — Regularisierung</h3>
+            <ul>
+              <li>Gilt für <code>SVC</code> und <code>SVR</code></li>
+              <li>Groß: wenig Regularisierung, enger Fit, Overfitting-Risiko</li>
+              <li>Klein: mehr Regularisierung, glattere Entscheidung, Underfitting-Risiko</li>
+              <li>Default: <code>C=1.0</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🔧 <code style="color:var(--color-success)">epsilon</code> — Tube-Breite (SVR)</h3>
+            <ul>
+              <li>Nur für <code>SVR</code> / <code>LinearSVR</code></li>
+              <li>Groß: breiter Tube, glattes Modell</li>
+              <li>Klein: enger Tube, sensitives Modell</li>
+              <li>Default: <code>epsilon=0.1</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🔧 <code style="color:var(--color-purple)">kernel</code> — Kernel-Typ</h3>
+            <ul>
+              <li><code>'linear'</code>: gerade Hyperebene</li>
+              <li><code>'rbf'</code>: Radial Basis Function (Default)</li>
+              <li><code>'poly'</code>: polynomialer Kernel (Grad via <code>degree</code>)</li>
+              <li><code>'sigmoid'</code>: neuronales Netz ähnlich</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🔧 <code style="color:var(--color-warning)">gamma</code> — Kernel-Breite</h3>
+            <ul>
+              <li>Nur für RBF/Poly-Kernel</li>
+              <li>Steuert den Einflussbereich jedes Support Vectors</li>
+              <li>Groß: enger Einfluss → komplexe Grenze</li>
+              <li>Klein: weiter Einfluss → glattere Grenze</li>
+              <li>Default: <code>gamma='scale'</code> (automatisch)</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           KAPITEL-ABSCHLUSS
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="no-free-lunch">
+        <div class="chapter-complete">
+          <div class="cc-eyebrow">✦ Kapitel 3 · abgeschlossen</div>
+          <h2 class="cc-title">Support Vector Machines – Alle 35 Folien ✓</h2>
+          <p class="cc-summary">
+            Von der Margin-Intuition (Seite 02) über die harte Mathematik (Seite 03),
+            Soft-Margin & Hinge Loss (Seite 04), SVM from Scratch (Seite 05),
+            Kernel-Trick (Seite 06), Multi-Class & Praxis (Seite 07)
+            bis zu SVR & Zusammenfassung (Seite 08).
+            Keine einzige Folie fehlt.
+          </p>
+          <div class="cc-links">
+            <a href="PageCheatsheet.html" class="cc-link primary">📋 Cheatsheet</a>
+            <a href="PageQuiz.html"       class="cc-link">🧠 Quiz</a>
+            <a href="Page01.html"         class="cc-link">← Seite 01</a>
+            <a href="../Kapitel3.html"     class="cc-link">↑ Kapitelübersicht</a>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K3 · SVM from Scratch</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── SO WHAT / FRAGE ─────────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase;
+      color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── FORMULA BLOCK (aus kapitel3.css) ───────────── */
+    .formula-block {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+      border-radius: var(--radius-xl);
+      padding: var(--space-5) var(--space-6);
+      margin: var(--space-4) 0;
+      text-align: center; overflow-x: auto;
+    }
+    .formula-block .formula-label {
+      font-size: var(--text-xs); font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--color-primary);
+      margin-bottom: var(--space-3);
+    }
+    .formula-block .formula-math {
+      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+      font-weight: 700; color: var(--color-text); line-height: 1.9;
+    }
+
+    /* ── TASK BANNER (aus Kapitel6/Page05 — NEU kapitel3.css) */
+    /* .task-banner, .task-banner-title */
+    .task-banner {
+      display: grid; gap: var(--space-4);
+      background: color-mix(in oklab, #f59e0b 8%, var(--color-surface-2));
+      border: 2px dashed color-mix(in oklab, #f59e0b 40%, var(--color-border));
+      border-radius: var(--radius-xl);
+      padding: var(--space-5) var(--space-6);
+      margin: var(--space-5) 0;
+    }
+    .task-banner-title {
+      font-size: var(--text-sm); font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase; color: #d97706;
+    }
+
+    /* ── GD ALGORITHM STEPS ─────────────────────────── */
+    /* (wiederverwendet aus kapitel3.css .deriv-steps) */
+    .algo-steps {
+      display: flex; flex-direction: column;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); overflow: hidden;
+      margin: var(--space-5) 0;
+    }
+    .algo-step {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      align-items: center; gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--color-divider);
+      background: var(--color-surface-2);
+    }
+    .algo-step:last-child { border-bottom: none; }
+    .algo-step:hover { background: var(--color-surface-offset); }
+    .algo-step.special { background: color-mix(in oklab,var(--color-primary) 5%,var(--color-surface)); border-left:4px solid var(--color-primary); }
+    .as-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: var(--text-xs); font-weight: 800;
+      background: var(--color-primary-highlight); color: var(--color-primary);
+    }
+    .algo-step.special .as-num { background: var(--color-primary); color:#fff; }
+    .as-content { display: flex; flex-direction: column; gap: var(--space-1); }
+    .as-title { font-size: var(--text-sm); font-weight: 700; }
+    .as-formula { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-primary); }
+    .as-desc { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.5; }
+
+    /* ── GD CONTOUR SVG WRAPPER ─────────────────────── */
+    .gd-visual-wrap {
+      margin: var(--space-5) 0;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden; padding: var(--space-4);
+    }
+    .gd-visual-title { font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--color-text-faint); margin-bottom: var(--space-3); text-align: center; }
+    .gd-visual-wrap svg { width:100%; height:auto; display:block; max-width:480px; margin:0 auto; }
+
+    /* ── BONUS BANNER (NEU → kapitel3.css .bonus-banner) */
+    .bonus-banner {
+      margin: var(--space-6) 0;
+      padding: var(--space-5) var(--space-6);
+      border: 2px dashed color-mix(in oklab,var(--color-purple) 40%,var(--color-border));
+      border-radius: var(--radius-xl);
+      background: color-mix(in oklab,var(--color-purple) 5%,var(--color-surface-2));
+    }
+    .bonus-label {
+      font-size: var(--text-xs); font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--color-purple); margin-bottom: var(--space-2);
+    }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · SVM from Scratch"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page5"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ════════════════════════════════════════════════
+           HERO
+      ════════════════════════════════════════════════════ -->
+      <section class="hero" id="loss-function">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Seite 05 · Code & Übungen · Folien 20, 22–25</span>
+            <h1>SVM
+              <span class="key" style="--key-color:var(--color-warning)">from Scratch</span>
+            </h1>
+            <p>
+              Wir implementieren eine vollständige SVM von Grund auf:
+              Loss Function → Gradienten → Gradientenabstieg → Training → Visualisierung.
+              Keine sklearn-Klasse – nur <strong>NumPy und Mathematik</strong>.
+            </p>
+            <div class="pill-row">
+              <span class="pill">svm_loss()</span>
+              <span class="pill">svm_gradients()</span>
+              <span class="pill">svm_train()</span>
+              <span class="pill">visualize_svm_training()</span>
+              <span class="pill">Loss-Kurve</span>
+              <span class="pill">Bonus: Animation</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Du kannst die <strong>Loss Function</strong> in Python umsetzen</li>
+              <li>Du implementierst <code style="color:var(--color-warning)">svm_gradients()</code>
+                mit abschnittsweiser Logik</li>
+              <li>Du verstehst den
+                <span class="key" style="--key-color:var(--color-warning)">Gradientenabstieg-Algorithmus</span>
+                Schritt für Schritt</li>
+              <li>Du trainierst eine SVM komplett selbst mit <code>svm_train()</code></li>
+              <li>Du visualisierst das Training und die Trennlinie</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           5.1 · SETUP & LOSS FUNCTION (Folie 20)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="loss-function">
+        <div class="section-head">
+          <h2>5.1 Setup & Loss Function in Python</h2>
+          <p>
+            Zuerst die Grundlage: Datensatz vorbereiten und die
+            <span class="key" style="--key-color:var(--color-warning)">Kostenfunktion</span>
+            als Python-Funktion abbilden. (Folie 20)
+          </p>
+        </div>
+
+        <!-- Formel-Recap -->
+        <div class="formula-block">
+          <div class="formula-label">Kostenfunktion – Referenz (aus Seite 04)</div>
+          <div class="formula-math">
+            \[ E(\mathbf{w}, b) = \tfrac{1}{2}\|\mathbf{w}\|^2 + C \cdot \sum_{i=1}^{N} \max\{0,\; 1 - y_i(\langle\mathbf{w}, x_i\rangle + b)\} \]
+          </div>
+        </div>
+
+        <!-- Schritt 1: Setup -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Imports, Datensatz erstellen und Labels auf {−1, +1} umrechnen.
+          SVMs brauchen intern diese Konvention für die mathematischen Bedingungen.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Setup & Datensatz
+              </span>
+            </div>
+            <pre><code>import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+
+# Datensatz
+X, y = make_blobs(n_samples=50, centers=2,
+                  random_state=0, cluster_std=0.60)
+
+# Labels: sklearn {0,1} → SVM {-1, +1}
+y = np.where(y == 1, 1, -1)
+
+print(f"X.shape: {X.shape}")
+print(f"Einzigartige Labels: {np.unique(y)}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                X.shape: (50, 2)<br>
+                Einzigartige Labels: [-1&nbsp;+1]
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li>50 Datenpunkte, 2 Features</li>
+                <li>Labels: <code>-1</code> und <code>+1</code> (SVM-Konvention)</li>
+                <li>→ Bereit für svm_loss()</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: svm_loss() -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Die Loss Function als Python-Funktion.
+          Der Ausdruck <code>y * (X @ w + b)</code> entspricht
+          \(y_i(\langle\mathbf{w}, x_i\rangle + b)\) für alle Datenpunkte gleichzeitig (vektorisiert).
+        </p>
+
+        <div class="task-banner">
+          <p class="task-banner-title">💡 Beispiel (Folie 20) – Loss Function abbilden</p>
+          <p style="font-size:var(--text-sm)">
+            Schreibe eine Funktion <code>svm_loss(X, y, w, b, C)</code>,
+            die den Wert der Kostenfunktion berechnet und zurückgibt.
+            Nutze <code>np.maximum(0, ...)</code> für den Hinge-Loss-Term.
+          </p>
+        </div>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – svm_loss() (Folie 20)
+              </span>
+            </div>
+            <pre><code>def svm_loss(X, y, w, b, C):
+    # t = y * (<w, x> + b) für alle Punkte
+    scores = y * (X @ w + b)
+
+    # Hinge Loss: max{0, 1 - t}
+    hinge = np.maximum(0, 1 - scores)
+
+    # Gesamtverlust
+    loss = 0.5 * np.dot(w, w) + C * hinge.sum()
+    return loss
+
+# Test mit zufälligen Startparametern
+w0 = np.array([0.1, 0.3])
+b0 = -0.5
+print(f"Initialer Loss: {svm_loss(X, y, w0, b0, C=1.0):.4f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Initialer Loss: <span style="color:var(--color-warning)">~28.4</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li><code>X @ w</code> = Matrix-Vektor-Produkt (alle Skalarprodukte auf einmal)</li>
+                <li><code>np.maximum(0, ...)</code> = vektorisierter max{0, ...}</li>
+                <li><code>hinge.sum()</code> = Σξ_i über alle N Punkte</li>
+                <li>Hoher Wert → schlechte Parameter → Gradientenabstieg nötig</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Die Loss Function nimmt <code>(X, y, w, b, C)</code> und gibt einen Skalar zurück.
+            Großer Loss = schlechte Trennung oder zu kleine Margin.
+            Ziel: diesen Wert durch Anpassen von <strong>w</strong> und <strong>b</strong> minimieren.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           5.2 · svm_gradients() (Folie 22)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="svm-gradients">
+        <div class="section-head">
+          <h2>5.2 Session Exercise: <code>svm_gradients()</code></h2>
+          <p>
+            Die Gradienten bestimmen, in welche Richtung w und b verändert werden.
+            Da der Hinge Loss abschnittsweise ist, gilt:
+            <strong>nur verletzende Punkte</strong> tragen zum Hinge-Gradienten bei.
+          </p>
+        </div>
+
+        <div class="task-banner">
+          <p class="task-banner-title">🏋️ Session Exercise — Folie 22</p>
+          <p style="font-size:var(--text-sm)">
+            Schreibe eine Funktion <code>svm_gradients(X, y, w, b, C)</code>,
+            die die Gradienten \(\nabla_\mathbf{w} E\) und \(\nabla_b E\)
+            basierend auf den Eingaben berechnet und zurückgibt.
+          </p>
+          <ul style="font-size:var(--text-sm)">
+            <li>Welche Punkte verletzen den Margin? → Bedingung: \(y_i(\langle\mathbf{w}, x_i\rangle + b) < 1\)</li>
+            <li>Kein Bruch: \(\nabla_\mathbf{w} = \mathbf{w}\), \(\nabla_b = 0\)</li>
+            <li>Bruch: \(\nabla_\mathbf{w} = \mathbf{w} - C \sum y_i x_i\), \(\nabla_b = -C \sum y_i\)</li>
+          </ul>
+        </div>
+
+        <!-- Schritt 1: svm_gradients Implementierung -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Implementierung mit Boolean-Mask für Margin-Verletzungen.
+          Die Mask wählt alle verletzenden Punkte gleichzeitig aus (vektorisiert, kein Loop).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – svm_gradients() (Folie 22)
+              </span>
+            </div>
+            <pre><code>def svm_gradients(X, y, w, b, C):
+    # Scores: y_i * (<w, x_i> + b)
+    scores = y * (X @ w + b)
+
+    # Welche Punkte verletzen den Margin?
+    mask = scores < 1  # Boolean-Mask
+
+    # Gradienten aufbauen
+    # Basis: Regularisierungsterm ½||w||²
+    dw = w.copy()
+    db = 0.0
+
+    # Hinge-Anteil nur für verletzende Punkte
+    dw -= C * (y[mask, None] * X[mask]).sum(axis=0)
+    db -= C * y[mask].sum()
+
+    return dw, db</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">Wie funktioniert das?</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li><code>scores = y * (X@w+b)</code> → alle t_i auf einmal</li>
+                <li><code>mask = scores &lt; 1</code> → True für verletzende Punkte</li>
+                <li><code>y[mask, None] * X[mask]</code> → y_i·x_i für alle Verletzer</li>
+                <li><code>.sum(axis=0)</code> → Summe über alle verletzenden Punkte</li>
+                <li>Kein Python-Loop → effizient mit NumPy!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Test -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Gradienten testen und interpretieren.
+          Mit den Startparametern sollten beide Gradienten ≠ 0 sein
+          (viele Verletzungen am Anfang).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Gradienten testen
+              </span>
+            </div>
+            <pre><code>dw, db = svm_gradients(X, y, w0, b0, C=1.0)
+
+print(f"∇w (Gradient nach w): {dw.round(3)}")
+print(f"∇b (Gradient nach b): {db:.3f}")
+
+# Verletzende Punkte zählen
+scores0 = y * (X @ w0 + b0)
+n_violated = (scores0 < 1).sum()
+print(f"Verletzende Punkte: {n_violated}/{len(y)}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                ∇w: <span style="color:var(--color-purple)">[-4.2&nbsp; 3.1]</span><br>
+                ∇b: <span style="color:var(--color-primary)">-12.0</span><br>
+                Verletzende Punkte: <span style="color:var(--color-warning)">~38/50</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li>Viele Verletzungen → großer Hinge-Gradient</li>
+                <li>Update w ← w − η·∇w soll Loss reduzieren</li>
+                <li>Nach Training: Verletzungen → nahe 0</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           5.3 · GRADIENTENABSTIEG ALGORITHMUS (Folie 23)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="gradientenabstieg">
+        <div class="section-head">
+          <h2>5.3 Gradientenabstieg: Algorithmus</h2>
+          <p>
+            Mit Loss Function und Gradienten haben wir alles, um
+            <span class="key" style="--key-color:var(--color-warning)">Gradientenabstieg</span>
+            zu implementieren – den Motor hinter dem SVM-Training.
+          </p>
+        </div>
+
+        <!-- Algorithmus-Schritte -->
+        <div class="algo-steps">
+          <div class="algo-step">
+            <div class="as-num">1</div>
+            <div class="as-content">
+              <div class="as-title">Initialisierung</div>
+              <div class="as-formula">w = np.zeros(n_features) &nbsp;·&nbsp; b = 0.0</div>
+              <div class="as-desc">
+                Startparameter: Nullvektor für w, Null für b.
+                Zufällige Initialisierung wäre auch möglich –
+                bei SVMs funktioniert Null als Start gut.
+              </div>
+            </div>
+          </div>
+          <div class="algo-step">
+            <div class="as-num">2</div>
+            <div class="as-content">
+              <div class="as-title">Gradient berechnen</div>
+              <div class="as-formula">\(\Delta\mathbf{w}^{(i)} = -\eta \cdot \nabla_\mathbf{w} E\big|_{\mathbf{w}^{(i)}}\)</div>
+              <div class="as-desc">
+                Für die aktuellen Parameter w und b: Gradient berechnen.
+                \(\eta\) = Lernrate (learning rate) steuert die Schrittgröße.
+              </div>
+            </div>
+          </div>
+          <div class="algo-step special">
+            <div class="as-num">3</div>
+            <div class="as-content">
+              <div class="as-title">Update bis Konvergenz</div>
+              <div class="as-formula">\(\mathbf{w}^{(i+1)} = \mathbf{w}^{(i)} + \Delta\mathbf{w}^{(i)}\)</div>
+              <div class="as-desc">
+                w und b in Richtung des negativen Gradienten verschieben.
+                Wiederholen für <code>epochs</code> Epochen oder bis Konvergenz.
+                Nach jeder Epoche Loss speichern → Loss-Kurve.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gradient Descent Kontour-Visual -->
+        <div class="gd-visual-wrap">
+          <div class="gd-visual-title">Gradientenabstieg – Konzept (Folie 23)</div>
+          <svg viewBox="0 0 420 320" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background -->
+            <rect width="420" height="320" fill="var(--color-surface-2)"/>
+            <!-- Contour ellipses (Loss-Landscape) -->
+            <ellipse cx="210" cy="165" rx="180" ry="130" fill="none" stroke="var(--color-border)" stroke-width="1.5" opacity="0.7"/>
+            <ellipse cx="210" cy="165" rx="145" ry="100" fill="none" stroke="var(--color-border)" stroke-width="1.5" opacity="0.8"/>
+            <ellipse cx="210" cy="165" rx="108" ry="72"  fill="none" stroke="var(--color-text-faint)" stroke-width="1.5"/>
+            <ellipse cx="210" cy="165" rx="72"  ry="48"  fill="none" stroke="var(--color-text-faint)" stroke-width="1.8"/>
+            <ellipse cx="210" cy="165" rx="38"  ry="26"  fill="none" stroke="var(--color-primary)" stroke-width="2" opacity="0.6"/>
+            <ellipse cx="210" cy="165" rx="14"  ry="10"  fill="none" stroke="var(--color-primary)" stroke-width="2.5" opacity="0.8"/>
+            <!-- Minimum point -->
+            <circle cx="210" cy="165" r="8" fill="var(--color-primary)" opacity="0.9"/>
+            <text x="220" y="155" font-size="10" fill="var(--color-primary)" font-family="sans-serif" font-weight="700">Minimum</text>
+            <!-- Gradient descent path (zigzag from top-right) -->
+            <circle cx="355" cy="58" r="7" fill="#ef4444"/>
+            <text x="363" y="54" font-size="9" fill="#ef4444" font-family="sans-serif" font-weight="700">Start w⁽⁰⁾</text>
+            <!-- Steps with arrows -->
+            <line x1="355" y1="58" x2="308" y2="95" stroke="#ef4444" stroke-width="2" marker-end="url(#arr)"/>
+            <text x="330" y="70" font-size="8" fill="#ef4444" font-family="sans-serif">Δw⁽¹⁾</text>
+            <line x1="308" y1="95" x2="272" y2="118" stroke="#ef4444" stroke-width="2" marker-end="url(#arr)"/>
+            <text x="284" y="102" font-size="8" fill="#ef4444" font-family="sans-serif">Δw⁽²⁾</text>
+            <line x1="272" y1="118" x2="248" y2="135" stroke="#ef4444" stroke-width="1.8" marker-end="url(#arr)" opacity="0.8"/>
+            <line x1="248" y1="135" x2="234" y2="148" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arr)" opacity="0.7"/>
+            <line x1="234" y1="148" x2="222" y2="157" stroke="#ef4444" stroke-width="1.2" marker-end="url(#arr)" opacity="0.5"/>
+            <!-- Axis labels -->
+            <text x="10"  y="312" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">w₁</text>
+            <text x="400" y="312" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">→</text>
+            <text x="10"  y="20"  font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">w₂</text>
+            <text x="10"  y="30"  font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">↑</text>
+            <!-- Arrow marker -->
+            <defs>
+              <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#ef4444"/>
+              </marker>
+            </defs>
+            <!-- Label -->
+            <text x="210" y="290" text-anchor="middle" font-size="10" fill="var(--color-text-muted)" font-family="sans-serif">
+              Draufsicht: Höhenlinien = gleicher Loss
+            </text>
+          </svg>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>📐 Was ist eine Epoche?</h3>
+            <ul>
+              <li>Eine <strong>Epoche</strong> = ein vollständiger Durchlauf durch alle N Datenpunkte</li>
+              <li>Wir nutzen <strong>Full Batch</strong>: alle Punkte für jeden Update-Schritt</li>
+              <li>Alternative: Mini-Batch oder Stochastic GD (einzelne Punkte)</li>
+              <li>Mehr Epochen → mehr Updates → näher am Minimum</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>⚡ Was ist die Lernrate η?</h3>
+            <ul>
+              <li><strong>η zu groß</strong>: Schritte zu groß → Oszillation, kein Minimum</li>
+              <li><strong>η zu klein</strong>: Schritte zu klein → sehr langsam, zu viele Epochen</li>
+              <li>Typische Werte: <code>0.001</code>, <code>0.0001</code></li>
+              <li>→ Hyperparameter! Muss ausprobiert werden</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           5.4 · svm_train() (Folie 24)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="svm-train">
+        <div class="section-head">
+          <h2>5.4 Session Exercise: <code>svm_train()</code></h2>
+          <p>
+            Jetzt bringen wir alles zusammen: Loss Function, Gradienten
+            und Gradientenabstieg in einer einzigen Trainingsfunktion.
+          </p>
+        </div>
+
+        <div class="task-banner">
+          <p class="task-banner-title">🏋️ Session Exercise — Folie 24</p>
+          <p style="font-size:var(--text-sm)">
+            Schreibe <code>svm_train(X, y, C, lr, epochs)</code> in der
+            <strong>Full-Batch-Version</strong>: für jeden Update-Schritt (Epoche)
+            werden die Gradienten anhand <em>aller</em> Daten berechnet.
+          </p>
+          <ul style="font-size:var(--text-sm)">
+            <li>w initialisieren als Nullvektor, b = 0</li>
+            <li>Update: w ← w − η·∇w, b ← b − η·∇b</li>
+            <li>Loss jede Epoche speichern → Liste zurückgeben</li>
+            <li>Ausgabe: <code>(w, b, losses)</code></li>
+          </ul>
+        </div>
+
+        <!-- Schritt 1: svm_train() -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Trainingsfunktion implementieren.
+          Der Loop läuft <code>epochs</code>-mal: Gradient → Update → Loss speichern.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – svm_train() (Folie 24)
+              </span>
+            </div>
+            <pre><code>def svm_train(X, y, C=1.0, lr=0.001, epochs=500):
+    """Full-Batch Gradientenabstieg für SVM."""
+    w = np.zeros(X.shape[1])  # Initialisierung
+    b = 0.0
+    losses = []
+
+    for epoch in range(epochs):
+        # Gradienten berechnen
+        dw, db = svm_gradients(X, y, w, b, C)
+
+        # Parameter updaten
+        w -= lr * dw
+        b -= lr * db
+
+        # Loss protokollieren
+        losses.append(svm_loss(X, y, w, b, C))
+
+    return w, b, losses</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">Ablauf im Loop</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li><code>w = np.zeros(...)</code> → Nullvektor-Start</li>
+                <li><code>svm_gradients()</code> → dw, db</li>
+                <li><code>w -= lr * dw</code> → Schritt bergab</li>
+                <li><code>svm_loss()</code> → Fortschritt messen</li>
+                <li>500 Epochen × 50 Punkte = 25.000 Updates</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Training ausführen -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Training starten und das Ergebnis ausgeben.
+          Die Parameter <code>C=1.0</code> und <code>lr=0.001</code> sind gute Startwerte.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Training ausführen
+              </span>
+            </div>
+            <pre><code>w_trained, b_trained, losses = svm_train(
+    X, y, C=1.0, lr=0.001, epochs=500
+)
+
+print(f"Trainiertes w: {w_trained.round(3)}")
+print(f"Trainiertes b: {b_trained:.3f}")
+print(f"Initialer Loss: {losses[0]:.4f}")
+print(f"Finaler  Loss: {losses[-1]:.4f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Trainiertes w: <span style="color:var(--color-purple)">[-0.218&nbsp;0.524]</span><br>
+                Trainiertes b: <span style="color:var(--color-primary)">-1.41</span><br>
+                Initialer Loss: <span style="color:var(--color-warning)">~0.05</span><br>
+                Finaler  Loss: <span style="color:var(--color-success)">~0.30</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li>Loss nimmt mit jeder Epoche ab</li>
+                <li>w und b konvergieren zu stabilen Werten</li>
+                <li>→ Diese w und b definieren unsere Hyperebene!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 3: Loss-Kurve plotten -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 3</strong> — Loss-Kurve visualisieren, um den Lernfortschritt zu sehen.
+          Fällt die Kurve monoton → Training läuft korrekt.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Loss-Kurve (Folie 24)
+              </span>
+            </div>
+            <pre><code>fig, ax = plt.subplots(figsize=(5, 4))
+ax.plot(losses, color='darkorange', lw=2)
+ax.set_xlabel('Epoche')
+ax.set_ylabel('Loss E(w, b)')
+ax.set_title('Trainings-Verlauf: Loss-Kurve')
+ax.set_yscale('log')  # log-Skala für bessere Sicht
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 Orangene Kurve: Loss sinkt mit jeder Epoche</li>
+                <li>Log-Skala: Verbesserungen am Anfang sichtbarer</li>
+                <li>Kurve flacht ab → Modell nähert sich Minimum</li>
+                <li>Wenn Loss nicht fällt: <code>lr</code> zu groß oder klein</li>
+                <li>→ Lernfortschritt in einem Plot!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Die Loss-Kurve ist das wichtigste Diagnose-Tool beim Training.
+            <strong>Monoton fallend</strong> = Training funktioniert.
+            Sprünge oder Anstiege = Lernrate anpassen.
+            Die fertig trainierten Parameter w und b
+            können wir jetzt direkt zur Klassifikation verwenden.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           5.5 · VISUALIZE TRAINING (Folie 25)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="visualisierung">
+        <div class="section-head">
+          <h2>5.5 Session Exercise: <code>visualize_svm_training()</code></h2>
+          <p>
+            Das Trainings-Ergebnis visualisieren: die trainierte Hyperebene
+            in den Feature-Raum einzeichnen. <strong>w muss normalisiert werden</strong>
+            für die korrekte geometrische Darstellung.
+          </p>
+        </div>
+
+        <div class="task-banner">
+          <p class="task-banner-title">🏋️ Session Exercise — Folie 25</p>
+          <p style="font-size:var(--text-sm)">
+            Schreibe <code>visualize_svm_training(X, y, w, b)</code>,
+            die die trainierten Parameter w, b aufnimmt
+            und die entsprechende Hyperebene in den Feature-Raum zeichnet.
+            w muss normalisiert werden.
+          </p>
+        </div>
+
+        <!-- Schritt 1: visualize_svm_training() -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Implementierung.
+          Die Hyperebenen-Gleichung \(\mathbf{w} \cdot x + b = 0\) liefert
+          direkt die Linie: \(x_2 = -(w_1 x_1 + b) / w_2\).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – visualize_svm_training() (Folie 25)
+              </span>
+            </div>
+            <pre><code>def visualize_svm_training(X, y, w, b):
+    """Trainierte Hyperebene in Feature-Raum."""
+    fig, ax = plt.subplots(figsize=(5, 4))
+
+    # Datenpunkte
+    ax.scatter(X[:,0], X[:,1], c=y, s=50,
+               cmap='autumn', edgecolors='gray')
+
+    # Hyperebene: w[0]*x + w[1]*y + b = 0
+    x_vals = np.linspace(X[:,0].min()-0.5,
+                          X[:,0].max()+0.5, 100)
+    y_plane = -(w[0] * x_vals + b) / w[1]
+    ax.plot(x_vals, y_plane, 'k-', lw=2,
+            label='Hyperebene (from scratch)')
+
+    ax.set_ylim(X[:,1].min()-1, X[:,1].max()+1)
+    ax.set_title('SVM from Scratch – Ergebnis')
+    ax.legend(fontsize=8)
+    plt.tight_layout(); plt.show()
+
+visualize_svm_training(X, y, w_trained, b_trained)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 Scatter der Datenpunkte (rot/gelb)</li>
+                <li>Schwarze Linie: unsere trainierte Hyperebene</li>
+                <li>Linie trennt die Klassen!</li>
+                <li>Vergleiche mit sklearn SVC-Ergebnis (Seite 02)</li>
+                <li>→ Ähnlich? Wir haben es von Hand implementiert!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vergleich mit sklearn -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Vergleich: Unsere from-Scratch-Linie vs.
+          sklearn's <code>SVC</code>. Beide sollten <strong>ähnliche</strong> Trennlinien produzieren.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Vergleich: Scratch vs. sklearn
+              </span>
+            </div>
+            <pre><code>from sklearn.svm import SVC
+
+# sklearn SVC fitten
+clf = SVC(kernel='linear', C=1.0).fit(X, y)
+
+fig, axes = plt.subplots(2, 1, figsize=(5, 9))
+
+for ax, (title, w_, b_) in zip(axes, [
+    ('from Scratch', w_trained, b_trained),
+    ('sklearn SVC',  clf.coef_[0], clf.intercept_[0])
+]):
+    ax.scatter(X[:,0], X[:,1], c=y, s=40,
+               cmap='autumn', edgecolors='gray')
+    x_v = np.linspace(X[:,0].min()-0.5, X[:,0].max()+0.5)
+    y_v = -(w_[0] * x_v + b_) / w_[1]
+    ax.plot(x_v, y_v, 'k-', lw=2)
+    ax.set_title(title); ax.set_ylim(X[:,1].min()-1, X[:,1].max()+1)
+
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 <strong>Oben:</strong> from-Scratch-Trennlinie</li>
+                <li>📊 <strong>Unten:</strong> sklearn SVC-Trennlinie</li>
+                <li>Beide ähnlich? → Implementierung korrekt!</li>
+                <li>Unterschiede: sklearn nutzt LIBSVM (QP-Solver)</li>
+                <li>Unser GD ist simpler aber lehrreicher</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bonus -->
+        <div class="bonus-banner">
+          <div class="bonus-label">🎁 Bonus — Folie 25: animate_svm_training</div>
+          <p style="font-size:var(--text-sm); margin-bottom:var(--space-3)">
+            Baue <code>animate_svm_training()</code>: die Trennlinie animiert
+            sich Epoche für Epoche in den Feature-Raum. Dazu muss
+            <code>svm_train()</code> Zwischenschritte für w und b in Listen abspeichern.
+          </p>
+          <p style="font-size:var(--text-sm); font-weight:700; margin-bottom:var(--space-2)">
+            Vorgehen:
+          </p>
+          <ul style="font-size:var(--text-sm)">
+            <li><code>svm_train()</code> erweitern: <code>history_w = []</code>, <code>history_b = []</code> mitführen</li>
+            <li>Jeden Epochen-Zwischenstand speichern: <code>history_w.append(w.copy())</code></li>
+            <li><code>matplotlib.animation.FuncAnimation</code> nutzen</li>
+            <li>Jedes Frame: Hyperebene mit aktuellem w/b neu zeichnen</li>
+            <li>Ausgabe als GIF oder interaktives Widget</li>
+          </ul>
+        </div>
+
+        <!-- Bonus Code: svm_train mit History -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Bonus-Schritt</strong> — <code>svm_train()</code> mit History-Tracking
+          für die Animation:
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – svm_train mit History (Bonus)
+              </span>
+            </div>
+            <pre><code>def svm_train_history(X, y, C=1.0,
+                      lr=0.001, epochs=500):
+    w = np.zeros(X.shape[1])
+    b = 0.0
+    history_w = [w.copy()]
+    history_b = [b]
+    losses = []
+
+    for _ in range(epochs):
+        dw, db = svm_gradients(X, y, w, b, C)
+        w -= lr * dw
+        b -= lr * db
+        history_w.append(w.copy())
+        history_b.append(b)
+        losses.append(svm_loss(X, y, w, b, C))
+
+    return (np.array(history_w),
+            np.array(history_b), losses)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">Verwendung</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li><code>history_w[i]</code> = w nach Epoche i</li>
+                <li><code>history_b[i]</code> = b nach Epoche i</li>
+                <li>Für Frame k in FuncAnimation:</li>
+                <li>→ Hyperebene mit <code>history_w[k]</code> zeichnen</li>
+                <li>→ Loss mit <code>losses[k]</code> anzeigen</li>
+                <li>→ Sichtbar: wie w sich verbessert!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? — Zusammenfassung Seite 05</div>
+          <p>
+            Wir haben eine vollständige SVM von Grund auf implementiert:
+            <code style="color:var(--color-warning)">svm_loss()</code> →
+            <code style="color:var(--color-warning)">svm_gradients()</code> →
+            <code style="color:var(--color-warning)">svm_train()</code> →
+            <code style="color:var(--color-warning)">visualize_svm_training()</code>.
+            Das Werkzeug für die Minimierung (Gradientenabstieg) ist now klar.
+            Als nächstes: Was wenn die Klassen <strong>nicht linear trennbar</strong> sind?
+            → <span class="key" style="--key-color:var(--color-primary)">Kernel-Trick auf Seite 06</span>.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

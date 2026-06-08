@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Quiz SVM · Kapitel 3</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── QUIZ ITEM ────────────────────────────────── */
+    .quiz-block { display:flex; flex-direction:column; gap:var(--space-4); }
+    .quiz-item {
+      border:1px solid var(--color-border);
+      border-radius:var(--radius-xl); overflow:hidden;
+      transition:border-color .15s;
+    }
+    .quiz-item:has(details[open]) { border-color:var(--color-primary); }
+
+    .quiz-q {
+      padding:var(--space-4) var(--space-5);
+      background:var(--color-surface-2);
+      display:grid; grid-template-columns:44px 1fr;
+      gap:var(--space-3); align-items:start;
+    }
+    .q-badge {
+      width:36px; height:36px; border-radius:50%;
+      display:grid; place-items:center;
+      font-size:.68rem; font-weight:800;
+      background:var(--color-primary-highlight); color:var(--color-primary);
+      flex-shrink:0;
+    }
+    .q-badge.konzept { background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface)); color:var(--color-primary); }
+    .q-badge.formel  { background:color-mix(in oklab,var(--color-purple) 12%,var(--color-surface));  color:var(--color-purple); }
+    .q-badge.code    { background:color-mix(in oklab,var(--color-success) 12%,var(--color-surface)); color:var(--color-success); }
+    .q-badge.falle   { background:color-mix(in oklab,var(--color-warning) 15%,var(--color-surface)); color:color-mix(in oklab,var(--color-warning) 80%,#000); }
+
+    .q-content { display:flex; flex-direction:column; gap:var(--space-2); }
+    .q-category { font-size:.62rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+    .q-category.konzept { color:var(--color-primary); }
+    .q-category.formel  { color:var(--color-purple); }
+    .q-category.code    { color:var(--color-success); }
+    .q-category.falle   { color:color-mix(in oklab,var(--color-warning) 80%,#000); }
+    .q-text { font-size:var(--text-sm); font-weight:700; line-height:1.5; }
+    .q-hint { font-size:var(--text-xs); color:var(--color-text-muted); font-style:italic; }
+
+    /* Code block inside question */
+    .q-code { background:var(--color-surface-offset); padding:var(--space-3);
+      border-radius:var(--radius-md); font-family:var(--font-mono);
+      font-size:.72rem; line-height:1.6; overflow-x:auto;
+      margin:var(--space-2) 0; }
+
+    /* Answer reveal (details/summary) */
+    .quiz-item details { }
+    .quiz-item summary {
+      padding:var(--space-2) var(--space-5);
+      font-size:.7rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+      color:var(--color-primary); cursor:pointer;
+      background:color-mix(in oklab,var(--color-primary) 3%,var(--color-surface));
+      border-top:1px solid var(--color-divider);
+      user-select:none; list-style:none;
+    }
+    .quiz-item summary::after { content:' ▾ Antwort anzeigen'; }
+    .quiz-item details[open] summary::after { content:' ▴ Antwort verbergen'; }
+    .quiz-item summary::-webkit-details-marker { display:none; }
+
+    .q-answer {
+      padding:var(--space-4) var(--space-5);
+      border-top:1px solid var(--color-divider);
+      background:color-mix(in oklab,var(--color-primary) 4%,var(--color-surface));
+      font-size:var(--text-xs); line-height:1.8; color:var(--color-text-muted);
+    }
+    .q-answer strong { color:var(--color-text); }
+    .q-answer .ans-correct { display:inline-block; padding:.1rem .5rem;
+      border-radius:var(--radius-full); background:color-mix(in oklab,var(--color-success) 15%,var(--color-surface));
+      color:var(--color-success); font-weight:800; }
+    .q-answer .ans-wrong   { display:inline-block; padding:.1rem .5rem;
+      border-radius:var(--radius-full); background:color-mix(in oklab,#ef4444 10%,var(--color-surface));
+      color:#ef4444; font-weight:800; }
+    .q-answer .ans-formula { font-family:var(--font-mono); font-size:.75rem;
+      font-weight:700; color:var(--color-primary); background:var(--color-surface-offset);
+      padding:.2rem .5rem; border-radius:var(--radius-md); }
+
+    /* Score bar */
+    .score-bar {
+      display:flex; align-items:center; gap:var(--space-3);
+      padding:var(--space-4) var(--space-5);
+      background:var(--color-surface-2); border:1px solid var(--color-border);
+      border-radius:var(--radius-xl); margin-bottom:var(--space-6);
+    }
+    .sb-icon { font-size:1.6rem; }
+    .sb-text { font-size:var(--text-sm); color:var(--color-text-muted); }
+    .sb-text strong { color:var(--color-text); }
+
+    /* Section divider */
+    .quiz-section-divider {
+      display:flex; align-items:center; gap:var(--space-3);
+      margin:var(--space-8) 0 var(--space-4);
+    }
+    .qsd-label {
+      font-size:.62rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase;
+      white-space:nowrap; padding:.25rem .75rem; border-radius:var(--radius-full);
+      border:1px solid var(--color-border);
+    }
+    .qsd-label.konzept { color:var(--color-primary); border-color:var(--color-primary); }
+    .qsd-label.formel  { color:var(--color-purple); border-color:var(--color-purple); }
+    .qsd-label.code    { color:var(--color-success); border-color:var(--color-success); }
+    .qsd-label.falle   { color:color-mix(in oklab,var(--color-warning) 80%,#000); border-color:var(--color-warning); }
+    .qsd-line { flex:1; height:1px; background:var(--color-border); }
+    .qsd-count { font-size:.62rem; color:var(--color-text-faint); }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · Quiz SVM"></site-header>
+  <div class="layout">
+    <site-sidebar active="quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Prüfungsvorbereitung</span>
+            <h1>SVM <span class="key" style="--key-color:var(--color-primary)">Quiz</span></h1>
+            <p>Teste dein Wissen – Konzeptfragen, Formelfragen, Code-Fragen und Fallen.
+               Klicke auf "Antwort anzeigen" nach deinem Versuch.</p>
+            <div class="pill-row">
+              <span class="pill">8 Konzeptfragen</span>
+              <span class="pill">6 Formelfragen</span>
+              <span class="pill">6 Code-Fragen</span>
+              <span class="pill">6 Fallen</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-base)">🧠 Anleitung</h2>
+            <ul style="font-size:var(--text-xs)">
+              <li>Versuche jede Frage <strong>selbst zu beantworten</strong> bevor du die Antwort aufklappst</li>
+              <li>🟦 Konzept = Verständnis</li>
+              <li>🟣 Formel = Mathematik</li>
+              <li>🟢 Code = Python/sklearn</li>
+              <li>🟠 Falle = typische Fehler</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <!-- HINT BAR -->
+      <div class="score-bar">
+        <span class="sb-icon">💡</span>
+        <span class="sb-text"><strong>Tipp:</strong> Bearbeite alle Fragen eines Typs durch, bevor du zur nächsten Kategorie wechselst. Die Fallen sind besonders wichtig für die Prüfung!</span>
+      </div>
+
+
+      <!-- ════════════════════════════════════════════════
+           KONZEPTFRAGEN
+      ════════════════════════════════════════════════════ -->
+      <div class="quiz-section-divider">
+        <div class="qsd-label konzept">🟦 Konzeptfragen</div>
+        <div class="qsd-line"></div>
+        <div class="qsd-count">8 Fragen</div>
+      </div>
+
+      <div class="quiz-block">
+
+        <!-- K1 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge konzept">K1</div>
+            <div class="q-content">
+              <span class="q-category konzept">Konzept</span>
+              <span class="q-text">Was sind Support Vectors? Warum sind sie so wichtig für das SVM-Modell?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              Support Vectors sind die Datenpunkte, die <strong>am nächsten an der Entscheidungsgrenze</strong> liegen –
+              exakt auf den Margin-Grenzen.<br><br>
+              <span class="ans-correct">Warum wichtig?</span> Das gesamte SVM-Modell ist durch <strong>nur diese Punkte definiert</strong>.
+              Alle anderen Trainingspunkte können entfernt werden, ohne das Modell zu verändern.
+              In sklearn: <span class="ans-formula">model.support_vectors_</span><br><br>
+              Wert der decision function an SVs: <span class="ans-formula">±1</span> (exakt auf Margin-Grenze)
+            </div>
+          </details>
+        </div>
+
+        <!-- K2 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge konzept">K2</div>
+            <div class="q-content">
+              <span class="q-category konzept">Konzept</span>
+              <span class="q-text">Was bedeutet es, dass SVMs "diskriminative" Klassifikatoren sind?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-correct">Diskriminativ</span> bedeutet: SVMs modellieren direkt die <strong>Grenze zwischen Klassen</strong>,
+              ohne die Datenverteilung selbst zu modellieren.<br><br>
+              Im Gegensatz dazu stehen <em>generative</em> Modelle (z.B. GMM, Naïve Bayes), die die Verteilung P(x|y) modellieren.<br><br>
+              SVMs fragen: <em>"Wo liegt die optimale Trennlinie?"</em><br>
+              Generative Modelle fragen: <em>"Wie wurden die Daten erzeugt?"</em>
+            </div>
+          </details>
+        </div>
+
+        <!-- K3 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge konzept">K3</div>
+            <div class="q-content">
+              <span class="q-category konzept">Konzept</span>
+              <span class="q-text">Erkläre den Unterschied zwischen One-vs-One (OvO) und One-vs-Rest (OvR) für Multi-Class SVMs.</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <strong>OvO (One-vs-One):</strong> Für jede <em>Paarung</em> zweier Klassen wird eine SVM trainiert.
+              N Klassen → <span class="ans-formula">N(N−1)/2</span> SVMs. sklearn SVC nutzt OvO.<br><br>
+              <strong>OvR (One-vs-Rest):</strong> Für jede Klasse vs. alle anderen wird eine SVM trainiert.
+              N Klassen → <span class="ans-formula">N</span> SVMs.<br><br>
+              <span class="ans-correct">OvO:</span> mehr SVMs, aber jede auf einem ausgeglicheneren Datensatz.<br>
+              <span class="ans-correct">OvR:</span> weniger SVMs, aber unbalancierte Daten pro SVM.
+            </div>
+          </details>
+        </div>
+
+        <!-- K4 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge konzept">K4</div>
+            <div class="q-content">
+              <span class="q-category konzept">Konzept</span>
+              <span class="q-text">Warum eignen sich SVMs besonders gut für hochdimensionale Daten?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-correct">3 Gründe:</span><br><br>
+              1. SVMs sind <strong>sparse</strong>: Nur die Support Vectors definieren das Modell – nicht alle N Punkte.<br>
+              2. SVMs funktionieren gut, wenn <strong>Dimensionen > Datenpunkte</strong> (im Gegensatz zu z.B. k-NN).<br>
+              3. Durch den <strong>Kernel-Trick</strong> können sie in noch höherdimensionalen Räumen operieren.<br><br>
+              Nachteil bei sehr großen N: Die Kernel-Matrix (N×N) wird zu groß – dann sind andere Modelle besser.
+            </div>
+          </details>
+        </div>
+
+        <!-- K5 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge konzept">K5</div>
+            <div class="q-content">
+              <span class="q-category konzept">Konzept</span>
+              <span class="q-text">Was bewirkt eine Verdoppelung der Datenpunkte (von N=60 auf N=120) bei SVMs?</span>
+              <div class="q-hint">Hinweis: gleiche Datenverteilung, random_state=0</div>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-correct">Nahezu keine Änderung!</span> Die Trennlinie und die Support Vectors bleiben identisch.<br><br>
+              Warum? Weil SVMs nur von den Support Vectors (Punkte an der Margin-Grenze) abhängen.
+              Die neuen 60 Punkte liegen weiter weg von der Grenze und beeinflussen das Modell nicht.<br><br>
+              Das zeigt die <strong>Robustheit</strong> von SVMs gegenüber "irrelevanten" Datenpunkten.
+              Mehr Daten helfen nur, wenn neue Punkte nah an der Entscheidungsgrenze liegen.
+            </div>
+          </details>
+        </div>
+
+        <!-- K6 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge konzept">K6</div>
+            <div class="q-content">
+              <span class="q-category konzept">Konzept</span>
+              <span class="q-text">Erkläre die Slack-Variable ξ_i. Welche Werte kann sie annehmen und was bedeuten sie?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              Die Slack-Variable ξ_i misst die <strong>Margin-Verletzung</strong> des i-ten Datenpunkts:<br><br>
+              <span class="ans-formula">ξ_i = 0</span>: Punkt korrekt außerhalb des Margins → keine Verletzung<br>
+              <span class="ans-formula">0 &lt; ξ_i ≤ 1</span>: Punkt im Margin, aber richtige Seite<br>
+              <span class="ans-formula">ξ_i &gt; 1</span>: Punkt auf der falschen Seite (Missklassifikation)<br><br>
+              Im Soft-Margin-Problem: <span class="ans-formula">y_i(⟨w,x_i⟩+b) ≥ 1 − ξ_i</span> mit ξ_i ≥ 0.
+              Je größer C, desto teurer sind Verletzungen → weniger ξ_i > 0.
+            </div>
+          </details>
+        </div>
+
+        <!-- K7 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge konzept">K7</div>
+            <div class="q-content">
+              <span class="q-category konzept">Konzept</span>
+              <span class="q-text">Warum ist SVR die "umgekehrte Optimierung" von SVC?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <strong>SVC:</strong> Sucht eine Hyperebene, außerhalb der sich Punkte befinden sollen.
+              <strong>Margin-Verletzungen</strong> = Punkte die sich INNEN befinden = werden bestraft.<br><br>
+              <strong>SVR:</strong> Sucht eine Regressionsgerade + ε-Tube, INNEN deren sich Punkte befinden sollen.
+              <strong>Tube-Verletzungen</strong> = Punkte die sich AUSSEN befinden = werden bestraft.<br><br>
+              <span class="ans-correct">Schlüsselunterschied:</span> SVC will Punkte außen → SVR will Punkte innen.
+              Deshalb: "umgekehrte Optimierungsbedingung".
+            </div>
+          </details>
+        </div>
+
+        <!-- K8 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge konzept">K8</div>
+            <div class="q-content">
+              <span class="q-category konzept">Konzept</span>
+              <span class="q-text">Was ist das No-Free-Lunch-Theorem und warum ist es für SVMs relevant?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              Das No-Free-Lunch-Theorem besagt: <strong>Kein Algorithmus ist auf allen möglichen Problemen gleichzeitig optimal.</strong><br><br>
+              Für SVMs bedeutet das:<br>
+              • SVMs sind exzellent für hochdimensionale, kleine Datensätze<br>
+              • Für große N oder sehr verrauschte Daten können andere Modelle besser sein<br>
+              • Der optimale Hyperparameter C (und γ, ε) ist immer <strong>datensatzspezifisch</strong><br><br>
+              <span class="ans-correct">Prüfungsrelevanz:</span> Immer Cross-Validation nutzen, immer mehrere Modelle vergleichen,
+              nie blind auf "besten" Algorithmus vertrauen.
+            </div>
+          </details>
+        </div>
+
+      </div><!-- /quiz-block konzept -->
+
+
+      <!-- ════════════════════════════════════════════════
+           FORMELFRAGEN
+      ════════════════════════════════════════════════════ -->
+      <div class="quiz-section-divider">
+        <div class="qsd-label formel">🟣 Formelfragen</div>
+        <div class="qsd-line"></div>
+        <div class="qsd-count">6 Fragen</div>
+      </div>
+
+      <div class="quiz-block">
+
+        <!-- F1 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge formel">F1</div>
+            <div class="q-content">
+              <span class="q-category formel">Formel</span>
+              <span class="q-text">Vervollständige: Das Hard-Margin-Optimierungsproblem lautet min _____ unter der Bedingung _____.</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-formula">min ½‖w‖²</span> &nbsp; unter der Bedingung &nbsp;
+              <span class="ans-formula">y_i(⟨w, x_i⟩ + b) ≥ 1 ∀ i</span><br><br>
+              Warum ½? Für einfachere Ableitung: d/dw (½‖w‖²) = w (kein störender Faktor).<br>
+              Äquivalent zu: max r = max 1/‖w‖ = min ‖w‖.
+            </div>
+          </details>
+        </div>
+
+        <!-- F2 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge formel">F2</div>
+            <div class="q-content">
+              <span class="q-category formel">Formel</span>
+              <span class="q-text">Ein trainiertes SVM hat ‖w‖ = 2.5. Wie groß ist der Margin r?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-formula">r = 1/‖w‖ = 1/2.5 = 0.4</span><br><br>
+              Das ist der Abstand von der Hyperebene bis zur Margin-Grenze.
+              Der gesamte Margin (von +1 Ebene bis −1 Ebene) ist 2r = 0.8.<br><br>
+              Zu minimieren ist ½‖w‖² = ½·6.25 = 3.125.
+            </div>
+          </details>
+        </div>
+
+        <!-- F3 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge formel">F3</div>
+            <div class="q-content">
+              <span class="q-category formel">Formel</span>
+              <span class="q-text">Berechne den Hinge Loss für t = 0.3 und für t = 1.8.</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <strong>Hinge Loss:</strong> L(t) = max{0, 1−t}<br><br>
+              t = 0.3: L(0.3) = max{0, 1−0.3} = max{0, 0.7} = <span class="ans-formula">0.7</span> (Verlust!)<br>
+              t = 1.8: L(1.8) = max{0, 1−1.8} = max{0, −0.8} = <span class="ans-formula">0</span> (kein Verlust)<br><br>
+              t = y·f(x). Bei t = 0.3: Punkt auf richtiger Seite, aber noch im Margin. Bei t = 1.8: Punkt außerhalb Margin → kein Verlust.
+            </div>
+          </details>
+        </div>
+
+        <!-- F4 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge formel">F4</div>
+            <div class="q-content">
+              <span class="q-category formel">Formel</span>
+              <span class="q-text">Schreibe den Gradienten ∇_w E für den Fall eines Margin-Bruchs bei Punkt (x_i, y_i). C = 2, Summe nur über diesen einen Punkt.</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              Bei Margin-Bruch: <span class="ans-formula">∇_w E = w − C · y_i · x_i</span><br><br>
+              Mit C = 2, und dem einen verletzenden Punkt:<br>
+              <span class="ans-formula">∇_w E = w − 2 · y_i · x_i</span><br><br>
+              Update: <span class="ans-formula">w_neu = w − η · (w − 2 · y_i · x_i)</span><br><br>
+              Für ∇_b: <span class="ans-formula">∇_b E = −C · y_i = −2 · y_i</span>
+            </div>
+          </details>
+        </div>
+
+        <!-- F5 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge formel">F5</div>
+            <div class="q-content">
+              <span class="q-category formel">Formel</span>
+              <span class="q-text">Für N = 7 Klassen: Wie viele SVMs trainiert sklearn intern mit OvO?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-formula">N(N−1)/2 = 7·6/2 = 21 SVMs</span><br><br>
+              Alle Paare: (1,2), (1,3), (1,4), (1,5), (1,6), (1,7), (2,3), ... (6,7).<br><br>
+              Merke: N=2 → 1 SVM | N=3 → 3 | N=4 → 6 | N=5 → 10 | N=10 → 45 | N=100 → 4950
+            </div>
+          </details>
+        </div>
+
+        <!-- F6 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge formel">F6</div>
+            <div class="q-content">
+              <span class="q-category formel">Formel</span>
+              <span class="q-text">Ein Punkt x hat ‖x‖² = 0. Was ist der RBF-Wert r? Ein anderer Punkt hat ‖x‖² = 100. Was ist r?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-formula">r = exp(−‖x‖²)</span><br><br>
+              ‖x‖² = 0 (Ursprung): <span class="ans-formula">r = exp(0) = 1</span> (maximaler Wert, Innenring)<br>
+              ‖x‖² = 100 (weit weg): <span class="ans-formula">r ≈ 3.7·10⁻⁴⁴ ≈ 0</span> (nahezu null, Außenring)<br><br>
+              Das ist genau der Trick: Innenring hat r ≈ 1 (oben im 3D-Raum), Außenring r ≈ 0 (unten) → linear trennbar!
+            </div>
+          </details>
+        </div>
+
+      </div><!-- /quiz-block formel -->
+
+
+      <!-- ════════════════════════════════════════════════
+           CODE-FRAGEN
+      ════════════════════════════════════════════════════ -->
+      <div class="quiz-section-divider">
+        <div class="qsd-label code">🟢 Code-Fragen</div>
+        <div class="qsd-line"></div>
+        <div class="qsd-count">6 Fragen</div>
+      </div>
+
+      <div class="quiz-block">
+
+        <!-- C1 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge code">C1</div>
+            <div class="q-content">
+              <span class="q-category code">Code</span>
+              <span class="q-text">Was gibt dieser Code aus?</span>
+              <div class="q-code">model = SVC(kernel='linear', C=1E10).fit(X, y)
+print(len(model.support_vectors_))
+print(model.decision_function(model.support_vectors_).round(2))</div>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <strong>Zeile 1:</strong> Anzahl der Support Vectors (typisch: 3 für make_blobs mit random_state=0, cluster_std=0.6)<br>
+              <strong>Zeile 2:</strong> <span class="ans-formula">[-1. 1. -1.]</span> (oder ähnlich) –
+              Support Vectors liegen auf den Margin-Grenzen, decision_function = ±1<br><br>
+              <span class="ans-correct">Schlüsselwissen:</span> <code>model.support_vectors_</code> enthält die Koordinaten
+              der Support Vectors. decision_function für diese Punkte ist immer betragsmäßig ≈ 1.
+            </div>
+          </details>
+        </div>
+
+        <!-- C2 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge code">C2</div>
+            <div class="q-content">
+              <span class="q-category code">Code</span>
+              <span class="q-text">Was macht dieser Code? Was wird unterschiedlich sein bei ε=1.5 vs ε=0.5?</span>
+              <div class="q-code">from sklearn.svm import LinearSVR
+reg1 = LinearSVR(epsilon=1.5, random_state=42).fit(X, y)
+reg2 = LinearSVR(epsilon=0.5, random_state=42).fit(X, y)
+off1 = (np.abs(y - reg1.predict(X)) >= reg1.epsilon).sum()
+off2 = (np.abs(y - reg2.predict(X)) >= reg2.epsilon).sum()
+print(off1, off2)</div>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <strong>Was macht der Code:</strong> Zählt die Punkte außerhalb des ε-Tubes (= "Support Vectors" bei SVR)<br><br>
+              <strong>Erwartetes Ergebnis:</strong> off1 &lt; off2<br>
+              ε=1.5 hat weniger Punkte außerhalb (breiterer Tube → mehr Punkte innen → off1 klein)<br>
+              ε=0.5 hat mehr Punkte außerhalb (schmaler Tube → wenige innen → off2 groß)<br><br>
+              <span class="ans-correct">Merke:</span> Großes ε → wenig Verletzungen, kleines ε → viele Verletzungen.
+            </div>
+          </details>
+        </div>
+
+        <!-- C3 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge code">C3</div>
+            <div class="q-content">
+              <span class="q-category code">Code</span>
+              <span class="q-text">Was macht <code>r = np.exp(-(X**2).sum(axis=1))</code>? Was bedeutet axis=1?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <strong>Schritt für Schritt:</strong><br>
+              1. <span class="ans-formula">X**2</span>: Quadriert jedes Element (x₁², x₂²) – Form: (N, 2)<br>
+              2. <span class="ans-formula">.sum(axis=1)</span>: Summiert über Spalten (Features) → ‖x‖² = x₁² + x₂² – Form: (N,)<br>
+              3. <span class="ans-formula">np.exp(-...)</span>: Berechnet r = e^(−‖x‖²) für jeden Datenpunkt<br><br>
+              <span class="ans-correct">axis=1:</span> "summiere entlang der Feature-Achse" = Summe pro Datenpunkt (Zeile).
+              axis=0 würde über Datenpunkte summieren (Spaltensumme).
+            </div>
+          </details>
+        </div>
+
+        <!-- C4 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge code">C4</div>
+            <div class="q-content">
+              <span class="q-category code">Code</span>
+              <span class="q-text">Was passiert bei diesem Code? Welchen Score erwarten Sie?</span>
+              <div class="q-code">from sklearn.datasets import make_circles
+from sklearn.svm import SVC
+
+X, y = make_circles(100, factor=0.1, noise=0.1)
+clf_lin = SVC(kernel='linear').fit(X, y)
+clf_rbf = SVC(kernel='rbf',    C=1E6).fit(X, y)
+print(clf_lin.score(X, y), clf_rbf.score(X, y))</div>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <strong>Ergebnis:</strong> <span class="ans-formula">~0.55  1.0</span><br><br>
+              <strong>linear:</strong> ~55% – schlechter als Zufall bei diesem Problem! Kann konzentrische Ringe nicht trennen.<br>
+              <strong>rbf mit C=1E6:</strong> ≈100% – RBF-Kernel projiziert implizit in höheren Raum, findet kreisförmige Grenze.<br><br>
+              <span class="ans-correct">Wichtig:</span> C=1E6 = sehr harter Margin. Bei diesem synthetischen Datensatz ohne Rauschen OK,
+              aber in der Praxis via Cross-Validation wählen!
+            </div>
+          </details>
+        </div>
+
+        <!-- C5 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge code">C5</div>
+            <div class="q-content">
+              <span class="q-category code">Code</span>
+              <span class="q-text">Ergänze den fehlenden Code für svm_gradients (Margin-Bruch Fall):</span>
+              <div class="q-code">def svm_gradients(X, y, w, b, C):
+    scores = y * (X @ w + b)
+    mask = scores < 1
+    dw = w.copy()        # Kein Bruch: nur w
+    db = 0.0
+    dw -= C * (________)  # Ergänze hier
+    db -= C * y[mask].sum()
+    return dw, db</div>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-formula">(y[mask, None] * X[mask]).sum(axis=0)</span><br><br>
+              Vollständig: <code>dw -= C * (y[mask, None] * X[mask]).sum(axis=0)</code><br><br>
+              Erklärung:<br>
+              • <code>y[mask, None]</code>: Labels der verletzenden Punkte als Spaltenvektor (N_v, 1)<br>
+              • <code>X[mask]</code>: Feature-Vektoren der verletzenden Punkte (N_v, 2)<br>
+              • Elementweises Produkt: y_i · x_i für jeden verletzenden Punkt<br>
+              • <code>.sum(axis=0)</code>: Summiert über alle verletzenden Punkte → Vektor der Form (2,)
+            </div>
+          </details>
+        </div>
+
+        <!-- C6 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge code">C6</div>
+            <div class="q-content">
+              <span class="q-category code">Code</span>
+              <span class="q-text">Was muss man vor diesem Code tun, damit er korrekte Ergebnisse liefert? Warum?</span>
+              <div class="q-code">clf = SVC(kernel='rbf', C=10, gamma='scale')
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+clf.fit(X_train, y_train)
+print(clf.score(X_test, y_test))</div>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-correct">Skalierung (StandardScaler) fehlt!</span><br><br>
+              <div style="font-family:var(--font-mono); font-size:.72rem; background:var(--color-surface-offset); padding:var(--space-3); border-radius:var(--radius-md)">
+              from sklearn.preprocessing import StandardScaler<br>
+              scaler = StandardScaler()<br>
+              X_train = scaler.fit_transform(X_train)<br>
+              X_test  = scaler.transform(X_test)  # NICHT fit_transform!
+              </div>
+              <br>
+              <span class="ans-correct">Warum wichtig?</span> RBF-Kernel berechnet ‖x_i − x_j‖². Features mit unterschiedlichen
+              Skalen (z.B. Feature 1 im Bereich [0,1], Feature 2 im Bereich [0,1000]) würden Feature 2 völlig dominieren.<br><br>
+              <strong>Achtung:</strong> Scaler immer nur auf Trainingsdaten fitten, dann auf Test anwenden!
+            </div>
+          </details>
+        </div>
+
+      </div><!-- /quiz-block code -->
+
+
+      <!-- ════════════════════════════════════════════════
+           FALLEN-FRAGEN
+      ════════════════════════════════════════════════════ -->
+      <div class="quiz-section-divider">
+        <div class="qsd-label falle">🟠 Fallen</div>
+        <div class="qsd-line"></div>
+        <div class="qsd-count">6 Fallen-Fragen</div>
+      </div>
+
+      <div class="quiz-block">
+
+        <!-- Falle 1 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge falle">🪤</div>
+            <div class="q-content">
+              <span class="q-category falle">Falle</span>
+              <span class="q-text">„Ein SVM mit C=1E10 funktioniert auf jedem Datensatz und gibt immer den besten Margin." Wahr oder falsch?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-wrong">FALSCH!</span><br><br>
+              C=1E10 erzwingt Hard-Margin: <strong>kein Punkt darf im Margin liegen</strong>.
+              Bei nicht-linear separierbaren Daten oder Daten mit Rauschen/Überlappung:
+              sklearn findet keinen validen Hard-Margin oder produziert ein sehr schlecht generalisierendes Modell.<br><br>
+              <span class="ans-correct">Richtig:</span> C via Cross-Validation wählen. C=1E10 nur bei synthetischen, perfekt separierbaren Daten sinnvoll.
+            </div>
+          </details>
+        </div>
+
+        <!-- Falle 2 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge falle">🪤</div>
+            <div class="q-content">
+              <span class="q-category falle">Falle</span>
+              <span class="q-text">„model.coef_ gibt den Normalenvektor w zurück, der immer normiert ist (‖w‖=1)." Wahr oder falsch?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-wrong">FALSCH!</span><br><br>
+              model.coef_ gibt w zurück, aber <strong>nicht normiert</strong> (‖w‖ ≠ 1 im Allgemeinen)!<br><br>
+              Die Normierungsbedingung ‖w‖=1 galt nur im ursprünglichen Optimierungsproblem (Folie 14).
+              Nach der Skalierung (Folie 15) hat w einen beliebigen Betrag – der Margin ist r = 1/‖w‖.<br><br>
+              <span class="ans-correct">Prüfen:</span> <code>np.linalg.norm(model.coef_[0])</code> → meist ≠ 1.
+            </div>
+          </details>
+        </div>
+
+        <!-- Falle 3 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge falle">🪤</div>
+            <div class="q-content">
+              <span class="q-category falle">Falle</span>
+              <span class="q-text">„Bei SVR bedeutet ε=0 das beste Modell, da keine Toleranz erlaubt wird." Wahr oder falsch?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-wrong">FALSCH!</span><br><br>
+              ε=0 macht SVR zum normalen Regressionsmodell mit maximaler Sensitivität – jeder minimale Abstand wird bestraft.
+              Das führt zu <strong>Overfitting</strong>!<br><br>
+              <span class="ans-correct">Richtig:</span> ε kontrolliert den Trade-off zwischen Modellkomplexität und Genauigkeit.
+              Ein sinnvolles ε (z.B. 0.1–1.5) erlaubt kleine Residuen ohne Strafe → bessere Generalisierung.
+              ε via Cross-Validation bestimmen.
+            </div>
+          </details>
+        </div>
+
+        <!-- Falle 4 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge falle">🪤</div>
+            <div class="q-content">
+              <span class="q-category falle">Falle</span>
+              <span class="q-text">Labels y bei SVM müssen {0, 1} sein (sklearn-Standard). Wahr oder falsch für die Mathematik?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-wrong">TEILWEISE FALSCH</span> – es kommt auf den Kontext an!<br><br>
+              <strong>In sklearn:</strong> SVC akzeptiert {0, 1} oder jede ganze Zahl. sklearn konvertiert intern automatisch.<br><br>
+              <strong>In der Mathematik</strong> (Vorlesung): Labels müssen <strong>{−1, +1}</strong> sein!
+              Die Formel y_i(⟨w,x_i⟩+b) ≥ 1 funktioniert nur mit {−1, +1}.<br><br>
+              <span class="ans-correct">In from-Scratch-Code:</span> Labels müssen manuell umgerechnet werden:
+              <code>y = np.where(y == 1, 1, -1)</code>
+            </div>
+          </details>
+        </div>
+
+        <!-- Falle 5 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge falle">🪤</div>
+            <div class="q-content">
+              <span class="q-category falle">Falle</span>
+              <span class="q-text">„kernel='rbf' ist immer besser als kernel='linear' für nicht-lineare Daten." Wahr oder falsch?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              <span class="ans-wrong">FALSCH! → No-Free-Lunch</span><br><br>
+              RBF kann bei falschen Hyperparametern C und gamma <strong>schlechter als linear</strong> sein!
+              Beispiel: Bei sehr hohem C (C=1E10) und kleinem gamma: Overfitting.<br><br>
+              <span class="ans-correct">Richtige Aussage:</span> kernel='rbf' kann nicht-lineare Probleme lösen, die linear nicht lösbar sind.
+              Aber nur mit <strong>richtig gewählten C und gamma</strong> via Cross-Validation → GridSearchCV oder cross_val_score.
+            </div>
+          </details>
+        </div>
+
+        <!-- Falle 6 -->
+        <div class="quiz-item">
+          <div class="quiz-q">
+            <div class="q-badge falle">🪤</div>
+            <div class="q-content">
+              <span class="q-category falle">Falle</span>
+              <span class="q-text">Im Gradientenabstieg: Wenn decision_function(x) = 0.3, wird ∇_w = w oder ∇_w = w − C·y·x genutzt?</span>
+            </div>
+          </div>
+          <details>
+            <summary></summary>
+            <div class="q-answer">
+              Zuerst prüfen: Ist y·f(x) &lt; 1? (Margin-Bruch-Bedingung)<br><br>
+              decision_function(x) gibt f(x) = ⟨w,x⟩+b zurück. Wir brauchen das Label y!<br><br>
+              <strong>Fall 1:</strong> y = +1, f(x) = 0.3: t = y·f(x) = +1·0.3 = 0.3 &lt; 1 → <span class="ans-formula">∇_w = w − C·y·x</span> (Margin-Bruch!)<br>
+              <strong>Fall 2:</strong> y = −1, f(x) = 0.3: t = −1·0.3 = −0.3 &lt; 1 → <span class="ans-formula">∇_w = w − C·y·x</span> (Auch Bruch!)<br><br>
+              <span class="ans-correct">Merke:</span> Die Bedingung ist y·f(x) &lt; 1, nicht nur f(x) &lt; 1!
+              Ein Punkt auf der falschen Seite (y=−1 aber f(x)=0.3&gt;0) hat IMMER einen Margin-Bruch.
+            </div>
+          </details>
+        </div>
+
+      </div><!-- /quiz-block fallen -->
+
+
+      <!-- ABSCHLUSS -->
+      <div style="margin-top:var(--space-8); padding:var(--space-5);
+                  background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2));
+                  border:1.5px solid color-mix(in oklab,var(--color-success) 20%,var(--color-border));
+                  border-radius:var(--radius-xl); text-align:center;">
+        <p style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-2)">
+          🎉 Alle 26 Fragen bearbeitet!
+        </p>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-4)">
+          Alle Antworten unsicher? Zurück zu den Seiten für Wiederholung.
+          Alles klar? Du bist bereit für die Prüfung!
+        </p>
+        <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+          <a href="PageCheatsheet.html" style="padding:var(--space-2) var(--space-5);border-radius:var(--radius-full);background:var(--color-primary);color:#fff;text-decoration:none;font-size:var(--text-xs);font-weight:700">📋 Cheatsheet öffnen</a>
+          <a href="Page03.html" style="padding:var(--space-2) var(--space-5);border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);text-decoration:none;font-size:var(--text-xs);font-weight:700">← Mathe wiederholen</a>
+          <a href="Kapitel3.html" style="padding:var(--space-2) var(--space-5);border-radius:var(--radius-full);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);text-decoration:none;font-size:var(--text-xs);font-weight:700">↑ Kapitelübersicht</a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+</body>
+</html>

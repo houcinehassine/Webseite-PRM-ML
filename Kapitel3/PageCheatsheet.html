@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Cheatsheet SVM · Kapitel 3</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── QUICK-NAV BAR ───────────────────────────── */
+    .quick-nav {
+      display: flex; flex-wrap: wrap; gap: var(--space-2);
+      padding: var(--space-4) var(--space-6);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      margin-bottom: var(--space-6);
+    }
+    .qn-label { font-size:.62rem; font-weight:800; letter-spacing:.1em;
+      text-transform:uppercase; color:var(--color-text-faint);
+      align-self:center; margin-right:var(--space-2); white-space:nowrap; }
+    .qn-link {
+      padding:.25rem .75rem; border-radius:var(--radius-full);
+      background:var(--color-surface); border:1px solid var(--color-border);
+      font-size:.68rem; font-weight:700; text-decoration:none;
+      color:var(--color-text-muted); transition:all .12s; white-space:nowrap;
+    }
+    .qn-link:hover { border-color:var(--color-primary); color:var(--color-primary); }
+    .qn-link.primary { background:var(--color-primary); color:#fff; border-color:var(--color-primary); }
+
+    /* ── FORMULA BLOCK COMPACT ───────────────────── */
+    .formula-block {
+      background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2));
+      border:1px solid color-mix(in oklab,var(--color-primary) 20%,var(--color-border));
+      border-radius:var(--radius-xl); padding:var(--space-4) var(--space-5);
+      margin:var(--space-3) 0; text-align:center; overflow-x:auto;
+    }
+    .formula-block .formula-label { font-size:.62rem; font-weight:800; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-primary); margin-bottom:var(--space-2); }
+    .formula-block .formula-math { font-size:clamp(.88rem,2vw,1.05rem);
+      font-weight:700; color:var(--color-text); line-height:1.9; }
+
+    /* ── DENSE FORMULAS GRID ─────────────────────── */
+    .formulas-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--space-3); margin: var(--space-4) 0;
+    }
+    @media(max-width:700px){.formulas-grid{grid-template-columns:1fr;}}
+
+    /* ── PARAM TABLE ─────────────────────────────── */
+    .param-table {
+      width:100%; border-collapse:collapse; font-size:var(--text-xs);
+      margin:var(--space-4) 0;
+    }
+    .param-table th {
+      background:var(--color-surface-offset); padding:var(--space-2) var(--space-3);
+      text-align:left; font-weight:800; font-size:.65rem; letter-spacing:.07em;
+      text-transform:uppercase; border:1px solid var(--color-border);
+    }
+    .param-table td {
+      padding:var(--space-2) var(--space-3);
+      border:1px solid var(--color-divider);
+      vertical-align:top; line-height:1.5;
+    }
+    .param-table tr:nth-child(even) td { background:var(--color-surface-2); }
+    .param-table code { font-size:.68rem; color:var(--color-primary); font-weight:700; }
+
+    /* ── CODE TEMPLATE BLOCK ─────────────────────── */
+    .code-templates { display:flex; flex-direction:column; gap:var(--space-4); }
+    .ct-block { background:var(--color-surface-2); border:1px solid var(--color-border);
+      border-radius:var(--radius-lg); overflow:hidden; }
+    .ct-header { background:var(--color-surface-offset); padding:var(--space-2) var(--space-4);
+      font-size:.65rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+      color:var(--color-primary); border-bottom:1px solid var(--color-border); }
+    .ct-block pre { margin:0; padding:var(--space-3) var(--space-4);
+      font-size:.72rem; line-height:1.6; overflow-x:auto; }
+    .ct-block code { font-family:var(--font-mono); }
+
+    /* ── FALLEN (Prüfungsfallen) ─────────────────── */
+    .pf-list { display:flex; flex-direction:column; gap:var(--space-2); margin:var(--space-4) 0; }
+    .pf-item { border:1px solid var(--color-border); border-radius:var(--radius-lg); overflow:hidden; }
+    .pf-q { display:grid; grid-template-columns:36px 1fr auto;
+      align-items:center; gap:var(--space-3);
+      padding:var(--space-3) var(--space-4);
+      background:var(--color-surface-2); cursor:pointer;
+      transition:background .12s; }
+    .pf-q:hover { background:var(--color-surface-offset); }
+    .pf-q-num { width:28px; height:28px; border-radius:50%;
+      display:grid; place-items:center; font-size:.65rem; font-weight:800;
+      background:color-mix(in oklab,var(--color-warning) 15%,var(--color-surface));
+      color:color-mix(in oklab,var(--color-warning) 80%,#000); flex-shrink:0; }
+    .pf-q-text { font-size:var(--text-xs); font-weight:700; }
+    .pf-toggle { font-size:.75rem; color:var(--color-text-faint); transition:transform .2s; }
+    .pf-item.open .pf-toggle { transform:rotate(180deg); }
+    .pf-a { display:none; padding:var(--space-4); font-size:var(--text-xs);
+      line-height:1.7; color:var(--color-text-muted);
+      border-top:1px solid var(--color-divider);
+      background:color-mix(in oklab,var(--color-warning) 3%,var(--color-surface)); }
+    .pf-item.open .pf-a { display:block; }
+    .pf-a strong { color:var(--color-text); }
+    .pf-a .correct { color:var(--color-success); font-weight:700; }
+    .pf-a .wrong   { color:#ef4444; font-weight:700; }
+
+    /* ── MERKZEICHEN ─────────────────────────────── */
+    .merksatz {
+      padding:var(--space-3) var(--space-4);
+      background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2));
+      border-left:3px solid var(--color-primary);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      margin:var(--space-2) 0; font-size:var(--text-xs); line-height:1.6;
+    }
+    .merksatz strong { color:var(--color-primary); }
+
+    /* ── KERNEL TABLE ────────────────────────────── */
+    .kernel-row {
+      display:grid; grid-template-columns:120px 1fr 1fr;
+      gap:var(--space-3); padding:var(--space-3) var(--space-4);
+      border-bottom:1px solid var(--color-divider);
+      font-size:var(--text-xs); align-items:center;
+    }
+    .kernel-row:last-child { border-bottom:none; }
+    .kernel-row.header { background:var(--color-surface-offset);
+      font-weight:800; text-transform:uppercase; letter-spacing:.06em;
+      font-size:.62rem; color:var(--color-text-faint); }
+    .kernel-name { font-family:var(--font-mono); font-weight:700; color:var(--color-primary); }
+    .kernel-table { background:var(--color-surface-2);
+      border:1px solid var(--color-border); border-radius:var(--radius-xl);
+      overflow:hidden; margin:var(--space-4) 0; }
+
+    /* ── ENTSCHEIDUNGS-GUIDE ─────────────────────── */
+    .decision-row {
+      display:grid; grid-template-columns:160px 1fr;
+      gap:var(--space-3); padding:var(--space-3) var(--space-4);
+      border-bottom:1px solid var(--color-divider); font-size:var(--text-xs);
+    }
+    .decision-row:last-child { border-bottom:none; }
+    .decision-table { background:var(--color-surface-2);
+      border:1px solid var(--color-border); border-radius:var(--radius-xl);
+      overflow:hidden; margin:var(--space-4) 0; }
+    .dr-wenn { font-weight:700; color:var(--color-text); line-height:1.5; }
+    .dr-dann { color:var(--color-text-muted); line-height:1.5; }
+
+    /* Compact section heads */
+    .cs-head { font-size:var(--text-sm); font-weight:800; color:var(--color-text);
+      margin:var(--space-5) 0 var(--space-2); display:flex; align-items:center; gap:var(--space-2); }
+    .cs-head::after { content:''; flex:1; height:1px; background:var(--color-border); }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · Cheatsheet SVM"></site-header>
+  <div class="layout">
+    <site-sidebar active="cheatsheet"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Prüfungsvorbereitung</span>
+            <h1>SVM <span class="key" style="--key-color:var(--color-primary)">Cheatsheet</span></h1>
+            <p>Alle Formeln · sklearn API · Code-Templates · Parameter-Effekte ·
+               Kernel-Übersicht · Fallen · Merksätze – kompakt auf einer Seite.</p>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-base)">📌 Prüfungs-Tipp</h2>
+            <ul style="font-size:var(--text-xs)">
+              <li>Abschnitte über Quick-Nav direkt anspringen</li>
+              <li>Fallen-Fragen klappbar → testen!</li>
+              <li>Code-Templates kopierbereit</li>
+              <li>Merksätze auswendig lernen</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+      <!-- QUICK NAV -->
+      <div class="quick-nav">
+        <span class="qn-label">Springe zu:</span>
+        <a href="#formeln"     class="qn-link primary">📐 Formeln</a>
+        <a href="#gradients"   class="qn-link">∇ Gradienten</a>
+        <a href="#svr"         class="qn-link">📈 SVR</a>
+        <a href="#api"         class="qn-link">⚙️ sklearn API</a>
+        <a href="#parameter"   class="qn-link">🎛️ Parameter</a>
+        <a href="#kernel"      class="qn-link">🌀 Kernel</a>
+        <a href="#code"        class="qn-link">💻 Code</a>
+        <a href="#entscheidung" class="qn-link">🎯 Wann was?</a>
+        <a href="#fallen"      class="qn-link">🪤 Fallen</a>
+        <a href="#merksaetze"  class="qn-link">💡 Merksätze</a>
+        <a href="#pruefungsfragen" class="qn-link">❓ Fragen</a>
+      </div>
+
+
+      <!-- ════════════════════════════════════════════════
+           1. ALLE FORMELN
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="formeln">
+        <div class="section-head"><h2>📐 Alle Formeln auf einen Blick</h2></div>
+
+        <div class="formulas-grid">
+
+          <div class="formula-block">
+            <div class="formula-label">Hard-Margin (Folie 15)</div>
+            <div class="formula-math">
+              \[\min_{\mathbf{w},b}\;\tfrac{1}{2}\|\mathbf{w}\|^2\]
+              \[y_i(\langle\mathbf{w},x_i\rangle+b)\geq 1 \;\;\forall i\]
+            </div>
+          </div>
+
+          <div class="formula-block">
+            <div class="formula-label">Soft-Margin (Folie 17)</div>
+            <div class="formula-math">
+              \[\min_{\mathbf{w},b,\boldsymbol{\xi}}\;\tfrac{1}{2}\|\mathbf{w}\|^2 + C\sum_i\xi_i\]
+              \[y_i(\langle\mathbf{w},x_i\rangle+b)\geq 1-\xi_i,\;\xi_i\geq 0\]
+            </div>
+          </div>
+
+          <div class="formula-block">
+            <div class="formula-label">Hinge Loss (Folie 19)</div>
+            <div class="formula-math">
+              \[L(t)=\max\{0,\,1-t\},\quad t=y\cdot f(x)\]
+              \[\min\;\tfrac{1}{2}\|\mathbf{w}\|^2+C\sum_i\max\{0,1-y_i(\langle\mathbf{w},x_i\rangle+b)\}\]
+            </div>
+          </div>
+
+          <div class="formula-block">
+            <div class="formula-label">SVR Kostenfunktion (Folie 34)</div>
+            <div class="formula-math">
+              \[\min\;\tfrac{1}{2}\|\mathbf{w}\|^2+C\sum_i\max\!\left\{0,|y_i-\hat{y}_i|-\varepsilon\right\}\]
+            </div>
+          </div>
+
+          <div class="formula-block">
+            <div class="formula-label">Hyperebene & Modell (Folie 12–13)</div>
+            <div class="formula-math">
+              \[\langle\mathbf{w},x\rangle+b=0\qquad\hat{y}=\text{sgn}(\langle\mathbf{w},x\rangle+b)\]
+              \[r=\frac{1}{\|\mathbf{w}\|}\;(\text{Margin-Radius})\]
+            </div>
+          </div>
+
+          <div class="formula-block">
+            <div class="formula-label">RBF & OvO (Folie 28, 30)</div>
+            <div class="formula-math">
+              \[r=e^{-\|x\|^2},\qquad K(x_i,x_j)=e^{-\gamma\|x_i-x_j\|^2}\]
+              \[\text{OvO-SVMs}=\frac{N(N-1)}{2}\]
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           2. GRADIENTEN
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="gradients">
+        <div class="section-head"><h2>∇ Gradienten (Folie 21)</h2></div>
+
+        <div class="card-grid">
+          <article class="card" style="border-color:var(--color-success)">
+            <h3 style="color:var(--color-success)">✅ Kein Margin-Bruch: \(y_i(\langle\mathbf{w},x_i\rangle+b)\geq 1\)</h3>
+            <div style="font-family:var(--font-mono); font-size:var(--text-sm); padding:var(--space-3) 0">
+              \(\nabla_\mathbf{w}\,E = \mathbf{w}\)<br>
+              \(\nabla_b\,E = 0\)
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted)">Nur Regularisierungsterm ½‖w‖² trägt bei</p>
+          </article>
+          <article class="card" style="border-color:var(--color-warning)">
+            <h3 style="color:color-mix(in oklab,var(--color-warning) 80%,#000)">⚠️ Margin-Bruch: \(y_i(\langle\mathbf{w},x_i\rangle+b)< 1\)</h3>
+            <div style="font-family:var(--font-mono); font-size:var(--text-sm); padding:var(--space-3) 0">
+              \(\nabla_\mathbf{w}\,E = \mathbf{w} - C\sum_i y_i x_i\)<br>
+              \(\nabla_b\,E = -C\sum_i y_i\)
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted)">Regularisierung + Hinge-Term tragen bei</p>
+          </article>
+        </div>
+
+        <div class="merksatz">
+          <strong>Update:</strong> \(\mathbf{w}^{(t+1)}=\mathbf{w}^{(t)}-\eta\cdot\nabla_\mathbf{w}E\) &nbsp;|&nbsp;
+          \(b^{(t+1)}=b^{(t)}-\eta\cdot\nabla_b E\) &nbsp;|&nbsp; η = Lernrate
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           3. SVR KURZREFERENZ
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="svr">
+        <div class="section-head"><h2>📈 SVR – Kurzreferenz</h2></div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>SVC vs SVR – der Kernunterschied</h3>
+            <table class="param-table">
+              <tr><th></th><th>SVC</th><th>SVR</th></tr>
+              <tr><td><strong>Ziel</strong></td><td>Punkte <em>außerhalb</em> Margin</td><td>Punkte <em>innerhalb</em> ε-Tube</td></tr>
+              <tr><td><strong>Strafe</strong></td><td>Punkte im Margin</td><td>Punkte außerhalb Tube</td></tr>
+              <tr><td><strong>Output</strong></td><td>Klassen-Label</td><td>Kontinuierlicher Wert</td></tr>
+              <tr><td><strong>Extra-Param</strong></td><td>—</td><td>ε (Tube-Breite)</td></tr>
+            </table>
+          </article>
+          <article class="card">
+            <h3>ε-Effekt (SVR)</h3>
+            <ul>
+              <li><strong>ε groß</strong> → breiter Tube → viele Punkte kostenlos → glattes Modell → Underfitting-Risiko</li>
+              <li><strong>ε klein</strong> → schmaler Tube → wenige kostenlos → enger Fit → Overfitting-Risiko</li>
+              <li>Default: <code>epsilon=0.1</code></li>
+              <li>Via Cross-Validation wählen!</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           4. SKLEARN API
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="api">
+        <div class="section-head"><h2>⚙️ sklearn API – vollständige Referenz</h2></div>
+
+        <table class="param-table">
+          <tr><th>Klasse</th><th>Import</th><th>Hauptparameter</th><th>Methoden</th><th>Attribute</th></tr>
+          <tr>
+            <td><code>SVC</code></td>
+            <td><code>from sklearn.svm import SVC</code></td>
+            <td><code>kernel, C, gamma, degree</code></td>
+            <td><code>.fit(X,y)</code> <code>.predict(X)</code> <code>.score(X,y)</code> <code>.decision_function(X)</code></td>
+            <td><code>.support_vectors_</code> <code>.coef_</code> <code>.intercept_</code></td>
+          </tr>
+          <tr>
+            <td><code>LinearSVR</code></td>
+            <td><code>from sklearn.svm import LinearSVR</code></td>
+            <td><code>epsilon, C, max_iter</code></td>
+            <td><code>.fit(X,y)</code> <code>.predict(X)</code></td>
+            <td><code>.coef_</code> <code>.intercept_</code></td>
+          </tr>
+          <tr>
+            <td><code>SVR</code></td>
+            <td><code>from sklearn.svm import SVR</code></td>
+            <td><code>kernel, C, epsilon, gamma</code></td>
+            <td><code>.fit(X,y)</code> <code>.predict(X)</code></td>
+            <td><code>.support_vectors_</code></td>
+          </tr>
+          <tr>
+            <td><code>PCA+SVC</code></td>
+            <td><code>from sklearn.pipeline import make_pipeline</code></td>
+            <td>via PCA: <code>n_components, whiten</code></td>
+            <td><code>.fit(X,y)</code> <code>.predict(X)</code></td>
+            <td>—</td>
+          </tr>
+        </table>
+
+        <div class="cs-head">Wichtige Funktionen aus sklearn</div>
+        <table class="param-table">
+          <tr><th>Funktion</th><th>Import</th><th>Verwendung</th></tr>
+          <tr><td><code>accuracy_score</code></td><td><code>sklearn.metrics</code></td><td><code>accuracy_score(y_true, y_pred)</code> → Anteil korrekt</td></tr>
+          <tr><td><code>train_test_split</code></td><td><code>sklearn.model_selection</code></td><td><code>X_tr,X_te,y_tr,y_te = train_test_split(X, y, test_size=0.2)</code></td></tr>
+          <tr><td><code>cross_val_score</code></td><td><code>sklearn.model_selection</code></td><td><code>cross_val_score(model, X, y, cv=5).mean()</code></td></tr>
+          <tr><td><code>make_blobs</code></td><td><code>sklearn.datasets</code></td><td><code>X,y = make_blobs(n_samples, centers, cluster_std)</code></td></tr>
+          <tr><td><code>make_circles</code></td><td><code>sklearn.datasets</code></td><td><code>X,y = make_circles(n, factor, noise)</code></td></tr>
+          <tr><td><code>load_digits</code></td><td><code>sklearn.datasets</code></td><td><code>digits = load_digits()</code> → 1797×64, 10 Klassen</td></tr>
+          <tr><td><code>fetch_lfw_people</code></td><td><code>sklearn.datasets</code></td><td><code>faces = fetch_lfw_people(min_faces_per_person=60)</code></td></tr>
+          <tr><td><code>StandardScaler</code></td><td><code>sklearn.preprocessing</code></td><td><code>scaler.fit_transform(X)</code> → für RBF zwingend!</td></tr>
+        </table>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           5. PARAMETER-EFFEKTE
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="parameter">
+        <div class="section-head"><h2>🎛️ Parameter-Effekte im Überblick</h2></div>
+
+        <table class="param-table">
+          <tr><th>Parameter</th><th>Groß →</th><th>Klein →</th><th>Default</th><th>Gilt für</th></tr>
+          <tr>
+            <td><code>C</code></td>
+            <td>Hard-Margin, wenige SVs, enger Fit, <span style="color:#ef4444">Overfitting</span></td>
+            <td>Soft-Margin, viele SVs, glatter, <span style="color:var(--color-warning)">Underfitting</span></td>
+            <td><code>1.0</code></td>
+            <td>SVC, SVR, LinearSVR</td>
+          </tr>
+          <tr>
+            <td><code>epsilon (ε)</code></td>
+            <td>Breiter Tube, mehr kostenlos, glattes SVR-Modell</td>
+            <td>Schmaler Tube, enger Fit</td>
+            <td><code>0.1</code></td>
+            <td>SVR, LinearSVR</td>
+          </tr>
+          <tr>
+            <td><code>gamma</code></td>
+            <td>Enger Einflussbereich, komplexe Grenze, <span style="color:#ef4444">Overfitting</span></td>
+            <td>Weiter Einflussbereich, glattere Grenze</td>
+            <td><code>'scale'</code></td>
+            <td>SVC (rbf/poly)</td>
+          </tr>
+          <tr>
+            <td><code>degree</code></td>
+            <td>Komplexere polynomiale Grenze</td>
+            <td>Einfachere polynomiale Grenze</td>
+            <td><code>3</code></td>
+            <td>SVC (poly)</td>
+          </tr>
+        </table>
+
+        <div class="merksatz">
+          <strong>Faustregel:</strong> C↑ = Overfitting ↑ = Bias↓ Variance↑ &nbsp;|&nbsp;
+          C↓ = Underfitting ↑ = Bias↑ Variance↓ &nbsp;|&nbsp;
+          Optimales C: Cross-Validation-Maximum des Validation-Scores
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           6. KERNEL-ÜBERSICHT
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="kernel">
+        <div class="section-head"><h2>🌀 Kernel-Übersicht</h2></div>
+
+        <div class="kernel-table">
+          <div class="kernel-row header">
+            <span>Kernel</span><span>Wann verwenden</span><span>Entscheidungsgrenze</span>
+          </div>
+          <div class="kernel-row">
+            <span class="kernel-name">kernel='linear'</span>
+            <span>Linear trennbare Daten · Viele Features (Text!) · Schnell</span>
+            <span>Gerade Linie / Hyperebene</span>
+          </div>
+          <div class="kernel-row" style="background:color-mix(in oklab,var(--color-primary) 3%,var(--color-surface))">
+            <span class="kernel-name">kernel='rbf' ⭐</span>
+            <span><strong>Standard-Wahl</strong> · Nicht-lineare Probleme · make_circles · Default</span>
+            <span>Elliptisch / kreisförmig</span>
+          </div>
+          <div class="kernel-row">
+            <span class="kernel-name">kernel='poly'</span>
+            <span>Polynomiale Beziehungen · degree=2 für Parabeln</span>
+            <span>Polynomiale Kurve</span>
+          </div>
+          <div class="kernel-row">
+            <span class="kernel-name">kernel='sigmoid'</span>
+            <span>Selten · ähnlich neuronalen Netzen</span>
+            <span>Sigmoid-förmig</span>
+          </div>
+        </div>
+
+        <div class="merksatz">
+          <strong>RBF Kernel-Funktion:</strong> \(K(x_i,x_j)=e^{-\gamma\|x_i-x_j\|^2}\) &nbsp;|&nbsp;
+          γ = <code>1/(n_features · X.var())</code> bei gamma='scale'
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           7. CODE-TEMPLATES
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="code">
+        <div class="section-head"><h2>💻 Code-Templates (kopierbereit)</h2></div>
+
+        <div class="code-templates">
+
+          <div class="ct-block">
+            <div class="ct-header">1 · Basis-SVC (linear, 2 Klassen)</div>
+            <pre><code>from sklearn.svm import SVC
+from sklearn.datasets import make_blobs
+from sklearn.model_selection import train_test_split
+
+X, y = make_blobs(n_samples=100, centers=2, random_state=0)
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = SVC(kernel='linear', C=1.0)
+model.fit(X_tr, y_tr)
+print(f"Accuracy: {model.score(X_te, y_te):.3f}")
+print(f"Support Vectors: {len(model.support_vectors_)}")
+print(f"decision_function SVs: {model.decision_function(model.support_vectors_[:3]).round(3)}")</code></pre>
+          </div>
+
+          <div class="ct-block">
+            <div class="ct-header">2 · Multi-Class SVC (OvO, Digits)</div>
+            <pre><code>from sklearn.svm import SVC
+from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+
+digits = load_digits()
+X_tr, X_te, y_tr, y_te = train_test_split(
+    digits.data, digits.target, test_size=0.2, random_state=42)
+
+# OvO: intern 10·9/2 = 45 SVMs
+model = SVC(kernel='rbf', C=10, gamma=0.001)
+model.fit(X_tr, y_tr)
+print(f"Accuracy: {model.score(X_te, y_te):.3f}")</code></pre>
+          </div>
+
+          <div class="ct-block">
+            <div class="ct-header">3 · RBF (make_circles, nicht-linear)</div>
+            <pre><code>from sklearn.svm import SVC
+from sklearn.datasets import make_circles
+
+X, y = make_circles(100, factor=0.1, noise=0.1)
+
+clf = SVC(kernel='rbf', C=1E6)
+clf.fit(X, y)
+print(f"Score: {clf.score(X, y):.3f}")  # ≈ 1.0</code></pre>
+          </div>
+
+          <div class="ct-block">
+            <div class="ct-header">4 · PCA + SVC Pipeline (Face Recognition)</div>
+            <pre><code>from sklearn.decomposition import PCA
+from sklearn.pipeline import make_pipeline
+from sklearn.svm import SVC
+from sklearn.datasets import fetch_lfw_people
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+faces = fetch_lfw_people(min_faces_per_person=60)
+model = make_pipeline(
+    PCA(n_components=150, whiten=True, random_state=42),
+    SVC(kernel='rbf', C=10, gamma=0.001)
+)
+X_tr, X_te, y_tr, y_te = train_test_split(
+    faces.data, faces.target, random_state=42)
+model.fit(X_tr, y_tr)
+print(f"Accuracy: {accuracy_score(y_te, model.predict(X_te)):.3f}")</code></pre>
+          </div>
+
+          <div class="ct-block">
+            <div class="ct-header">5 · LinearSVR + SVR (Regression)</div>
+            <pre><code>import numpy as np
+from sklearn.svm import LinearSVR, SVR
+
+np.random.seed(42)
+X = 2 * np.random.rand(50, 1)
+y = (4 + 3*X + np.random.randn(50, 1)).ravel()
+
+# Linear
+lin = LinearSVR(epsilon=1.5, random_state=42).fit(X, y)
+
+# Nicht-linear
+nl = SVR(kernel='rbf', C=100, epsilon=0.1).fit(X, y)
+print(f"LinearSVR ε=1.5: {lin.score(X, y):.3f}")
+print(f"SVR rbf C=100:   {nl.score(X, y):.3f}")</code></pre>
+          </div>
+
+          <div class="ct-block">
+            <div class="ct-header">6 · Cross-Validation für C (Hyperparameter-Tuning)</div>
+            <pre><code>from sklearn.svm import SVC
+from sklearn.model_selection import cross_val_score
+import numpy as np
+
+C_values = [0.01, 0.1, 1, 10, 100, 1000]
+for C in C_values:
+    model = SVC(kernel='rbf', C=C, gamma='scale')
+    scores = cross_val_score(model, X, y, cv=5)
+    print(f"C={C:6}: {scores.mean():.3f} ± {scores.std():.3f}")</code></pre>
+          </div>
+
+          <div class="ct-block">
+            <div class="ct-header">7 · SVM from Scratch (kompakt)</div>
+            <pre><code>import numpy as np
+
+def svm_loss(X, y, w, b, C):
+    s = y * (X @ w + b)
+    return 0.5*np.dot(w,w) + C*np.maximum(0, 1-s).sum()
+
+def svm_gradients(X, y, w, b, C):
+    mask = y * (X @ w + b) < 1
+    dw = w - C*(y[mask,None]*X[mask]).sum(axis=0)
+    db = -C*y[mask].sum()
+    return dw, db
+
+def svm_train(X, y, C=1.0, lr=0.001, epochs=500):
+    w, b = np.zeros(X.shape[1]), 0.0
+    losses = []
+    for _ in range(epochs):
+        dw, db = svm_gradients(X, y, w, b, C)
+        w -= lr*dw; b -= lr*db
+        losses.append(svm_loss(X, y, w, b, C))
+    return w, b, losses</code></pre>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           8. ENTSCHEIDUNGS-GUIDE
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="entscheidung">
+        <div class="section-head"><h2>🎯 Entscheidungs-Guide: Wann was?</h2></div>
+
+        <div class="decision-table">
+          <div class="decision-row" style="background:var(--color-surface-offset); font-weight:700; font-size:.62rem; text-transform:uppercase; letter-spacing:.07em; color:var(--color-text-faint)">
+            <span>Situation</span><span>Empfehlung</span>
+          </div>
+          <div class="decision-row">
+            <span class="dr-wenn">Daten linear trennbar</span>
+            <span class="dr-dann"><code>SVC(kernel='linear', C=1E10)</code> → Hard-Margin</span>
+          </div>
+          <div class="decision-row" style="background:color-mix(in oklab,var(--color-primary) 3%,var(--color-surface))">
+            <span class="dr-wenn">Daten nicht linear trennbar (Ringe, Spiralen)</span>
+            <span class="dr-dann"><code>SVC(kernel='rbf', C=?)</code> → C via Cross-Validation</span>
+          </div>
+          <div class="decision-row">
+            <span class="dr-wenn">Viele Features, wenig Daten (Text)</span>
+            <span class="dr-dann"><code>SVC(kernel='linear')</code> oder <code>LinearSVC</code></span>
+          </div>
+          <div class="decision-row">
+            <span class="dr-wenn">Multi-Class (N>2 Klassen)</span>
+            <span class="dr-dann"><code>SVC()</code> → sklearn macht OvO automatisch (N(N-1)/2 SVMs)</span>
+          </div>
+          <div class="decision-row">
+            <span class="dr-wenn">Regression statt Klassifikation</span>
+            <span class="dr-dann"><code>LinearSVR(epsilon=?)</code> oder <code>SVR(kernel='rbf')</code></span>
+          </div>
+          <div class="decision-row" style="background:color-mix(in oklab,var(--color-primary) 3%,var(--color-surface))">
+            <span class="dr-wenn">Hochdimensionale Bilddaten (Face, Digits)</span>
+            <span class="dr-dann"><code>make_pipeline(PCA(n_components=150), SVC(kernel='rbf'))</code></span>
+          </div>
+          <div class="decision-row">
+            <span class="dr-wenn">Daten mit Rauschen / Überlappung</span>
+            <span class="dr-dann"><code>SVC(kernel='rbf', C=1.0)</code> → kleineres C für mehr Toleranz</span>
+          </div>
+          <div class="decision-row">
+            <span class="dr-wenn">Sehr großer Datensatz (>100k)</span>
+            <span class="dr-dann">SVM zu langsam → besser Random Forest oder Gradient Boosting</span>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           9. TYPISCHE FALLEN
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="fallen">
+        <div class="section-head"><h2>🪤 Typische Prüfungsfallen</h2></div>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Klicke auf eine Frage, um die Antwort zu sehen.
+        </p>
+
+        <div class="pf-list">
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F1</span>
+              <span class="pf-q-text">Welche Aussage ist FALSCH: „Das SVM-Modell hängt von allen Trainingspunkten ab."</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <span class="wrong">FALSCH!</span> Das SVM-Modell hängt <strong>nur von den Support Vectors</strong> ab.
+              Alle anderen Punkte könnten entfernt werden und das Modell wäre identisch.
+              Das ist die fundamentale Eigenschaft von SVMs: Sparsity.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F2</span>
+              <span class="pf-q-text">Ein großes C bei SVC bedeutet: Overfitting oder Underfitting?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <span class="correct">Overfitting!</span> Großes C = hohe Strafe für Margin-Verletzungen = Hard-Margin =
+              enger Margin = Modell passt sich sehr stark an Trainingsdaten an.
+              <br>Merksatz: C↑ = Komplexität↑ = Overfitting↑ (wie bei allen Regularisierungsparametern: C ist die INVERSE Regularisierung)
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F3</span>
+              <span class="pf-q-text">Was ergibt <code>model.decision_function(model.support_vectors_)</code>?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <span class="correct">Werte ≈ ±1!</span> Support Vectors liegen exakt auf den Margin-Grenzen.
+              Die Decision Function gibt dort ±1 zurück (positiv für Klasse +1, negativ für Klasse −1).
+              <br>Normale Punkte: |decision_function| > 1. Punkte im Margin (Soft): |decision_function| < 1.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F4</span>
+              <span class="pf-q-text">Wie viele SVMs braucht OvO für 5 Klassen?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <span class="correct">10 SVMs!</span> N(N−1)/2 = 5·4/2 = 10. Nicht 5 (das wäre OvR = One-vs-Rest).
+              <br>sklearn SVC nutzt OvO. Für 10 Klassen: 45 SVMs, für 100 Klassen: 4950 SVMs!
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F5</span>
+              <span class="pf-q-text">Worin unterscheiden sich SVC und SVR bei der Optimierungsbedingung?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <span class="correct">Umgekehrte Logik!</span><br>
+              SVC: Punkte sollen <strong>außerhalb</strong> des Margins → Verletzungen innen werden bestraft.<br>
+              SVR: Punkte sollen <strong>innerhalb</strong> des ε-Tubes → Verletzungen außen werden bestraft.<br>
+              SVR hat keinen echten "Margin", sondern einen Toleranzbereich (Tube).
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F6</span>
+              <span class="pf-q-text">Was passiert mit N=120 vs N=60 Punkten beim SVM-Training? (gleiche Verteilung)</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <span class="correct">Trennlinie identisch!</span> SVMs sind robust gegenüber Punkten weit weg von der Grenze.
+              Mehr Datenpunkte in der Ferne ändern die Support Vectors nicht.
+              Nur neue Punkte nah an der Margin-Grenze könnten das Modell ändern.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F7</span>
+              <span class="pf-q-text">Warum heißt es „Kernel-Trick"? Was ist der Trick dabei?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <span class="correct">Implizite Projektion!</span> Der Trick: man berechnet die Skalarprodukte im hochdimensionalen Raum,
+              OHNE die Punkte explizit dorthin zu projizieren.
+              K(xᵢ, xⱼ) = ⟨Φ(xᵢ), Φ(xⱼ)⟩ wird direkt berechnet. Φ(x) muss nie ausgewertet werden.
+              Das macht den Kernel-Trick extrem effizient.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">F8</span>
+              <span class="pf-q-text">Muss man bei SVMs zwingend skalieren (StandardScaler)?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <span class="correct">Ja, für RBF dringend empfohlen!</span> SVMs mit RBF-Kernel sind stark von der Skalierung abhängig.
+              Features mit großem Wertebereich dominieren den Abstand ‖xᵢ−xⱼ‖².
+              Bei linearem Kernel: weniger kritisch, aber immer noch gut.
+              StandardScaler (Mittelwert=0, Std=1) ist Standard.
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           10. MERKSÄTZE
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="merksaetze">
+        <div class="section-head"><h2>💡 Merksätze – auswendig lernen!</h2></div>
+
+        <div class="merksatz">
+          <strong>Support Vectors:</strong> Die wenigen Punkte, die auf den Margin-Grenzen liegen.
+          Das Modell hängt NUR von ihnen ab. <code>decision_function(SVs) = ±1</code>
+        </div>
+        <div class="merksatz">
+          <strong>C groß:</strong> Hard-Margin (wie C→∞) · wenige SVs · enger Margin · Overfitting-Risiko
+          <br><strong>C klein:</strong> Soft-Margin · viele SVs · breiter Margin · Underfitting-Risiko
+        </div>
+        <div class="merksatz">
+          <strong>Margin r = 1/‖w‖:</strong> Großes ‖w‖ = kleiner Margin. Deshalb: min ½‖w‖² = max Margin
+        </div>
+        <div class="merksatz">
+          <strong>Hinge Loss:</strong> L(t) = max{0, 1−t}. Für t ≥ 1 (außerhalb Margin): 0 Kosten. Für t < 1: Kosten steigen linear.
+        </div>
+        <div class="merksatz">
+          <strong>Kernel-Trick:</strong> Implizite N-dim. Projektion. kernel='rbf' → elliptische Grenze im 2D-Raum.
+          r = exp(−‖x‖²) projiziert Innenring oben, Außenring unten.
+        </div>
+        <div class="merksatz">
+          <strong>SVR vs SVC:</strong> SVR will Punkte INNERHALB Tube (umgekehrte Logik). ε = Tube-Breite.
+          Außenliegende Punkte werden bestraft, nicht innenliegende.
+        </div>
+        <div class="merksatz">
+          <strong>OvO:</strong> N(N−1)/2 SVMs für N Klassen. sklearn macht das automatisch in <code>SVC</code>.
+        </div>
+        <div class="merksatz">
+          <strong>No-Free-Lunch:</strong> Kein Algorithmus ist immer optimal. C, gamma, epsilon via Cross-Validation wählen.
+          Immer mehrere Modelle vergleichen!
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           11. PRÜFUNGSFRAGEN
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="pruefungsfragen">
+        <div class="section-head"><h2>❓ Typische Prüfungsfragen mit Musterantworten</h2></div>
+
+        <div class="pf-list">
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">P1</span>
+              <span class="pf-q-text">Erkläre das Konzept eines „Maximum Margin Estimators".</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              Ein Maximum Margin Estimator sucht unter allen möglichen Hyperebenen, die die Klassen korrekt trennen,
+              diejenige mit dem <strong>größten Abstand</strong> (Margin) zu den nächstgelegenen Datenpunkten beider Klassen.
+              Der Margin r = 1/‖w‖ wird maximiert, was equivalent zum Minimieren von ½‖w‖² ist.
+              Die nächstgelegenen Punkte heißen Support Vectors.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">P2</span>
+              <span class="pf-q-text">Was ist der Unterschied zwischen Hard-Margin und Soft-Margin SVM?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <strong>Hard-Margin:</strong> Kein Datenpunkt darf innerhalb des Margins liegen. Bedingung: y_i(⟨w,x_i⟩+b) ≥ 1.
+              Funktioniert nur bei perfekt linear separierbaren Daten.<br><br>
+              <strong>Soft-Margin:</strong> Punkte dürfen mit einer Strafe (Slack-Variable ξ_i) den Margin verletzen.
+              Zusatzterm: C·Σξ_i in der Kostenfunktion. C steuert den Trade-off.
+              Funktioniert auch bei verrauschten, überlappenden Daten.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">P3</span>
+              <span class="pf-q-text">Gegeben: N=6 Klassen. Wie viele SVMs trainiert sklearn beim Aufruf von SVC().fit(X, y)?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              N(N−1)/2 = 6·5/2 = <strong>15 SVMs</strong>. sklearn nutzt One-vs-One (OvO).
+              Jede der 15 SVMs lernt, zwei Klassen zu unterscheiden.
+              Ein neuer Punkt wird von allen 15 SVMs klassifiziert – die Klasse mit den meisten Stimmen gewinnt.
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">P4</span>
+              <span class="pf-q-text">Was ist eine Hyperebene? Wie wird sie mathematisch beschrieben?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              Eine Hyperebene ist ein (n−1)-dimensionaler Teilraum in einem n-dimensionalen Raum.
+              In 2D: eine Gerade. In 3D: eine Ebene. In nD: eine Hyperebene.<br><br>
+              <strong>Gleichung:</strong> ⟨w, x⟩ + b = 0<br>
+              w = Normalenvektor (steht senkrecht auf der Hyperebene), b = Bias (Verschiebung vom Ursprung).<br>
+              In sklearn: w = <code>model.coef_[0]</code>, b = <code>model.intercept_[0]</code>
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">P5</span>
+              <span class="pf-q-text">Wie funktioniert die Klassifikation bei SVMs? Was ist decision_function()?</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              <strong>Klassifikation:</strong> y = sgn(⟨w, x⟩ + b). Positives Skalarprodukt → Klasse +1, negatives → Klasse −1.<br><br>
+              <strong>decision_function(X):</strong> Gibt den vorzeichenbehafteten Abstand jedes Punktes zur Entscheidungsgrenze zurück.
+              Positiv = Klasse +1 (Seite von w), negativ = Klasse −1.
+              |decision_function| gibt die "Sicherheit" der Klassifikation an.
+              Support Vectors: decision_function = ±1 (exakt auf der Margin-Grenze).
+            </div>
+          </div>
+
+          <div class="pf-item">
+            <div class="pf-q" onclick="this.parentElement.classList.toggle('open')">
+              <span class="pf-q-num">P6</span>
+              <span class="pf-q-text">Erkläre den Kernel-Trick anhand von make_circles.</span>
+              <span class="pf-toggle">▼</span>
+            </div>
+            <div class="pf-a">
+              make_circles erzeugt zwei konzentrische Ringe – linear nicht trennbar.<br><br>
+              <strong>Lösung:</strong> Neue Dimension r = exp(−‖x‖²) hinzufügen.
+              Innenring: nah am Ursprung → ‖x‖² klein → r ≈ 1 (hoher Wert).
+              Außenring: weit weg → ‖x‖² groß → r ≈ 0 (tiefer Wert).
+              Im 3D-Raum (x₁, x₂, r): Klassen auf verschiedener Höhe → linear trennbar!<br><br>
+              <strong>Kernel-Trick:</strong> kernel='rbf' macht das implizit für N Dimensionen,
+              ohne die Projektion je explizit zu berechnen. K(xᵢ,xⱼ) = e^(−γ‖xᵢ−xⱼ‖²)
+            </div>
+          </div>
+
+        </div>
+
+        <div style="margin-top:var(--space-6); padding:var(--space-4);
+                    background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2));
+                    border-radius:var(--radius-xl); text-align:center;">
+          <p style="font-size:var(--text-sm); margin:0">
+            <strong>Bereit für den Selbsttest?</strong> &nbsp;
+            <a href="PageQuiz.html" style="color:var(--color-primary); font-weight:700">→ Zum interaktiven Quiz</a>
+            &nbsp;·&nbsp;
+            <a href="Kapitel3.html" style="color:var(--color-text-muted)">↑ Kapitelübersicht</a>
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

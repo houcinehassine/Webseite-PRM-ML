@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K3 · Mathematischer Hintergrund SVM</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── SO WHAT / FRAGE ────────────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase;
+      color:color-mix(in oklab,var(--color-warning) 80%,#000);
+      margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── FORMULA BLOCK (NEU → css_codes/kapitel3.css) ───── */
+    /* .formula-block, .formula-label, .formula-legend, .fl-row */
+    .formula-block {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+      border-radius: var(--radius-xl);
+      padding: var(--space-5) var(--space-6);
+      margin: var(--space-4) 0;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .formula-block .formula-label {
+      font-size: var(--text-xs); font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--color-primary);
+      margin-bottom: var(--space-3);
+    }
+    .formula-block .formula-math {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 700; color: var(--color-text);
+      line-height: 1.8;
+    }
+    .formula-legend {
+      display: flex; flex-direction: column; gap: var(--space-2);
+      margin-top: var(--space-3);
+    }
+    .fl-row {
+      display: flex; align-items: baseline; gap: var(--space-3);
+      font-size: var(--text-xs); text-align: left;
+    }
+    .fl-sym {
+      font-family: var(--font-mono); font-weight: 700;
+      color: var(--color-primary); min-width: 80px; flex-shrink: 0;
+    }
+    .fl-desc { color: var(--color-text-muted); line-height: 1.5; }
+
+    /* ── HERLEITUNG STEPS (NEU → css_codes/kapitel3.css) ── */
+    /* .deriv-steps, .deriv-step, .ds-num, .ds-formula, .ds-reason */
+    .deriv-steps {
+      display: flex; flex-direction: column;
+      gap: 0; margin: var(--space-5) 0;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); overflow: hidden;
+    }
+    .deriv-step {
+      display: grid;
+      grid-template-columns: 40px 1fr 1fr;
+      align-items: center; gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--color-divider);
+      background: var(--color-surface-2);
+      transition: background .15s;
+    }
+    .deriv-step:last-child { border-bottom: none; }
+    .deriv-step:hover { background: var(--color-surface-offset); }
+    .deriv-step.highlight {
+      background: color-mix(in oklab, var(--color-primary) 6%, var(--color-surface));
+      border-left: 4px solid var(--color-primary);
+    }
+    .ds-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: var(--text-xs); font-weight: 800;
+      background: var(--color-primary-highlight); color: var(--color-primary);
+      flex-shrink: 0;
+    }
+    .deriv-step.highlight .ds-num {
+      background: var(--color-primary); color: #fff;
+    }
+    .ds-formula {
+      font-family: var(--font-mono); font-size: var(--text-sm);
+      font-weight: 700; color: var(--color-text);
+    }
+    .ds-reason {
+      font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.5;
+    }
+    @media (max-width: 640px) {
+      .deriv-step { grid-template-columns: 36px 1fr; }
+      .ds-reason { grid-column: 2; }
+    }
+
+    /* ── CONDITION BOX ──────────────────────────────────── */
+    /* .condition-grid, .cond-card */
+    .condition-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-3); margin: var(--space-4) 0;
+    }
+    .cond-card {
+      padding: var(--space-4);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      background: var(--color-surface-2);
+      display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .cond-card.active {
+      border-color: var(--color-primary);
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface));
+    }
+    .cond-label { font-size: .62rem; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--color-primary); }
+    .cond-formula { font-family: var(--font-mono); font-size: var(--text-sm);
+      font-weight: 700; color: var(--color-text); }
+    .cond-desc { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.5; }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · Mathematischer Hintergrund SVM"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page3"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ════════════════════════════════════════════════
+           HERO
+      ════════════════════════════════════════════════════ -->
+      <section class="hero" id="grundlagen">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Seite 03 · Agenda-Punkt 2 · Folien 12–15</span>
+            <h1>Mathematischer
+              <span class="key" style="--key-color:var(--color-purple)">Hintergrund</span>
+            </h1>
+            <p>
+              Was steckt hinter dem Margin? Hier leiten wir das
+              <strong>Optimierungsproblem der SVM</strong> Schritt für Schritt her –
+              von der Hyperebenen-Definition bis zum finalen
+              <span class="key" style="--key-color:var(--color-purple)">min ½‖w‖²</span>.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Trainingsdatensatz</span>
+              <span class="pill">Normalenvektor w</span>
+              <span class="pill">Bias b</span>
+              <span class="pill">Hyperebene</span>
+              <span class="pill">Vorzeichen & sgn()</span>
+              <span class="pill">Abstand r</span>
+              <span class="pill">Hard-Margin</span>
+              <span class="pill">min ½‖w‖²</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Du kannst den Trainingsdatensatz <strong>formal beschreiben</strong>: \(\{(x_i, y_i)\}\), \(y_i \in \{-1, +1\}\)</li>
+              <li>Du weißt, wie eine <strong>Hyperebene</strong> über \(\mathbf{w}\) und \(b\) definiert ist</li>
+              <li>Du verstehst die <strong>Vorzeichen-Regel</strong> und das Modell \(y_i = \text{sgn}(\langle\mathbf{w}, x_i\rangle + b)\)</li>
+              <li>Du kannst das <strong>Optimierungsproblem</strong> aufstellen: max r</li>
+              <li>Du kennst die <strong>Hard-Margin Herleitung</strong>: min ½‖w‖²</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           3.1 · GRUNDLAGEN & NOTATION (Folie 12)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="grundlagen">
+        <div class="section-head">
+          <h2>3.1 Grundlagen: Datensatz & Hyperebene</h2>
+          <p>
+            Wir formalisieren, womit wir arbeiten:
+            ein <strong>historischer Trainingsdatensatz</strong> und eine
+            <span class="key" style="--key-color:var(--color-purple)">Hyperebene</span>,
+            die wir durch zwei Parameter vollständig beschreiben können.
+          </p>
+        </div>
+
+        <!-- Datensatz -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Der Trainingsdatensatz
+        </h3>
+
+        <div class="formula-block">
+          <div class="formula-label">Trainingsdatensatz (Folie 12)</div>
+          <div class="formula-math">
+            \[ \{(x_i,\, y_i) \mid i = 1,\ldots,N,\quad y_i \in \{-1,\, +1\}\} \]
+          </div>
+          <div class="formula-legend">
+            <div class="fl-row">
+              <span class="fl-sym">\(x_i\)</span>
+              <span class="fl-desc">Feature-Vektor des i-ten Datenpunkts (eine Zeile aus der Feature-Matrix X)</span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">\(y_i \in \{-1,+1\}\)</span>
+              <span class="fl-desc">Label – nicht 0/1 wie sonst, sondern <strong>–1 und +1</strong> (wichtig für die Mathematik!)</span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">\(N\)</span>
+              <span class="fl-desc">Anzahl der Datenpunkte im Trainingsdatensatz</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>⚠️ Warum y ∈ {−1, +1}?</h3>
+            <ul>
+              <li>In sklearn üblich: Labels <code>0</code> und <code>1</code></li>
+              <li>In der SVM-Mathematik: Labels müssen <strong>−1 und +1</strong> sein</li>
+              <li>Grund: Das Vorzeichen wird direkt in der Optimierungsformel verwendet</li>
+              <li>sklearn wandelt intern automatisch um – für uns als Nutzer transparent</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>📐 Die Hyperebene</h3>
+            <ul>
+              <li>In 2D: eine <strong>Gerade</strong></li>
+              <li>In 3D: eine <strong>Ebene</strong></li>
+              <li>In nD: eine <strong>Hyperebene</strong> – allgemeiner Begriff</li>
+              <li>Beschrieben durch: Normalenvektor \(\mathbf{w}\) + Abstand zum Ursprung \(b\)</li>
+              <li>Diese beiden Parameter sind <strong>alles, was wir brauchen</strong></li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Hyperebene Definition -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin: var(--space-6) 0 var(--space-3)">
+          Definition der Hyperebene
+        </h3>
+
+        <div class="formula-block">
+          <div class="formula-label">Hyperebenen-Gleichung (Folie 12)</div>
+          <div class="formula-math">
+            \[ \langle \mathbf{w},\, x_i \rangle + b = 0 \]
+          </div>
+          <div class="formula-legend">
+            <div class="fl-row">
+              <span class="fl-sym">\(\mathbf{w}\)</span>
+              <span class="fl-desc"><strong>Normalenvektor</strong> – steht senkrecht auf der Hyperebene, zeigt in die positive Richtung. In sklearn: <code>model.coef_</code></span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">\(b\)</span>
+              <span class="fl-desc"><strong>Bias</strong> – verschiebt die Hyperebene vom Ursprung. Gibt den Abstand der Ebene zum Ursprung an. In sklearn: <code>model.intercept_</code></span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">\(\langle\mathbf{w}, x_i\rangle\)</span>
+              <span class="fl-desc">Skalarprodukt (dot product) von Normalenvektor und Datenpunkt</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code: w und b aus trained model -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          In sklearn sind \(\mathbf{w}\) und \(b\) nach dem Training direkt als Attribute
+          zugänglich. Wir fitten ein Modell und schauen uns die konkreten Werte an.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – w und b aus trained SVC
+              </span>
+            </div>
+            <pre><code>import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.svm import SVC
+
+X, y = make_blobs(n_samples=50, centers=2,
+                  random_state=0, cluster_std=0.60)
+
+model = SVC(kernel='linear', C=1E10).fit(X, y)
+
+# Normalenvektor w und Bias b
+w = model.coef_[0]
+b = model.intercept_[0]
+
+print(f"w (Normalenvektor): {w.round(3)}")
+print(f"b (Bias):           {b:.3f}")
+print(f"‖w‖ (Norm):         {np.linalg.norm(w):.3f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                w (Normalenvektor): <span style="color:var(--color-purple)">[-0.218&nbsp; 0.525]</span><br>
+                b (Bias):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--color-primary)">-1.427</span><br>
+                ‖w‖ (Norm):&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:var(--color-success)">0.569</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li><code>model.coef_[0]</code> → \(\mathbf{w}\) als Array der Form <code>(n_features,)</code></li>
+                <li><code>model.intercept_[0]</code> → Skalar \(b\)</li>
+                <li>‖w‖ ≠ 1 → w ist <strong>nicht normiert</strong> (Skalierung folgt in 3.4)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Das gesamte SVM-Modell ist in <strong>zwei Parametern</strong> gespeichert:
+            \(\mathbf{w}\) (Normalenvektor, 2 Werte für 2D) und \(b\) (Bias, 1 Wert).
+            Zusammen beschreiben sie eine eindeutige Hyperebene im Feature-Raum.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           3.2 · HYPEREBENE & VORZEICHEN (Folie 13)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="hyperebene-vorzeichen">
+        <div class="section-head">
+          <h2>3.2 Hyperebene & Vorzeichen</h2>
+          <p>
+            Wie klassifiziert die Hyperebene neue Punkte?
+            Das Vorzeichen des Ausdrucks
+            \(\langle\mathbf{w}, x_i\rangle + b\)
+            entscheidet, auf welcher Seite ein Punkt liegt –
+            und damit seine <strong>Klasse</strong>.
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🪟 Fenster Time! — Folie 13</div>
+          <p>
+            Wie drückt man mathematisch aus, ob ein Punkt auf der Hyperebene liegt?
+            Was gilt für Punkte, die <em>nicht</em> auf der Hyperebene liegen?
+            Wie berechnet man die Klassen neuer Daten?
+            Warum soll der Margin maximiert werden?
+          </p>
+        </div>
+
+        <!-- Drei Fälle -->
+        <div class="condition-grid">
+          <div class="cond-card active">
+            <div class="cond-label">Auf der Hyperebene</div>
+            <div class="cond-formula">\(\langle\mathbf{w}, x_i\rangle + b = 0\)</div>
+            <div class="cond-desc">Der Punkt liegt exakt auf der Trennebene – kein Vorzeichen bestimmbar.</div>
+          </div>
+          <div class="cond-card">
+            <div class="cond-label">Positive Seite (Klasse +1)</div>
+            <div class="cond-formula">\(\langle\mathbf{w}, x_i\rangle + b > 0\)</div>
+            <div class="cond-desc">Punkt liegt in Richtung des Normalenvektors \(\mathbf{w}\) – positive Klasse.</div>
+          </div>
+          <div class="cond-card">
+            <div class="cond-label">Negative Seite (Klasse −1)</div>
+            <div class="cond-formula">\(\langle\mathbf{w}, x_i\rangle + b < 0\)</div>
+            <div class="cond-desc">Punkt liegt entgegengesetzt zu \(\mathbf{w}\) – negative Klasse.</div>
+          </div>
+        </div>
+
+        <!-- Das Modell -->
+        <div class="formula-block" style="margin-top:var(--space-5)">
+          <div class="formula-label">Das Modell (Folie 13)</div>
+          <div class="formula-math">
+            \[ y_i = \text{sgn}(\langle\mathbf{w}, x_i\rangle + b) \]
+          </div>
+          <div class="formula-legend">
+            <div class="fl-row">
+              <span class="fl-sym">\(\text{sgn}(\cdot)\)</span>
+              <span class="fl-desc">Vorzeichenfunktion: gibt +1 zurück wenn positiv, −1 wenn negativ, 0 wenn null</span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">Bedingung</span>
+              <span class="fl-desc">Wenn die Hyperebene alle Punkte trennt: \(y_i(\langle\mathbf{w}, x_i\rangle + b) \geq 0\) — Produkt aus wahrem Label und Ausdruck ist immer ≥ 0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code: decision_function und Vorzeichen -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          In sklearn entspricht der Ausdruck \(\langle\mathbf{w}, x_i\rangle + b\)
+          dem Ergebnis von <code>decision_function()</code>.
+          Das Vorzeichen ergibt die vorhergesagte Klasse.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – decision_function = ⟨w, x⟩ + b
+              </span>
+            </div>
+            <pre><code># Decision function: <w, x_i> + b für jeden Punkt
+df = model.decision_function(X)
+
+print("decision_function (erste 6 Werte):")
+print(df[:6].round(3))
+
+print("\nVorzeichen = vorhergesagte Klasse:")
+print(np.sign(df[:6]).astype(int))
+
+print("\nEchte Labels (y):")
+# sklearn: y ∈ {0,1} → intern {-1,+1}
+y_signed = np.where(y == 0, -1, 1)
+print(y_signed[:6])</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted); margin-bottom:var(--space-2)">
+                decision_function (erste 6):<br>
+                <span style="color:var(--color-primary)">[-1.842 -1.714 -1.431 -1.296 -1.589 1.203]</span><br><br>
+                Vorzeichen = Klasse:<br>
+                <span style="color:var(--color-success)">[-1 -1 -1 -1 -1 +1]</span><br><br>
+                Echte Labels:<br>
+                <span style="color:var(--color-text-muted)">[-1 -1 -1 -1 -1 +1]</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>Negative Werte → Klasse −1</li>
+                <li>Positive Werte → Klasse +1</li>
+                <li>Betrag = Abstand zur Hyperebene</li>
+                <li>→ Vorzeichen = Klassifikation ✓</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Visualisierung der positiven/negativen Seite -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          Einfärbung der Entscheidungsregionen: positive Seite (blau) vs. negative Seite (rot),
+          mit dem Normalenvektor \(\mathbf{w}\) eingezeichnet.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Vorzeichen-Seiten visualisieren
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
+fig, ax = plt.subplots(figsize=(5, 4))
+
+# Entscheidungsregionen einfärben
+xx = np.linspace(X[:,0].min()-0.5, X[:,0].max()+0.5, 200)
+yy = np.linspace(X[:,1].min()-0.5, X[:,1].max()+0.5, 200)
+XX, YY = np.meshgrid(xx, yy)
+Z = model.decision_function(
+        np.c_[XX.ravel(), YY.ravel()]
+    ).reshape(XX.shape)
+ax.contourf(XX, YY, Z, levels=[-100,0,100],
+            colors=['#fecaca','#bfdbfe'],
+            alpha=0.4)
+ax.contour(XX, YY, Z, levels=[0],
+           colors='k', linewidths=1.5)
+
+# Datenpunkte
+ax.scatter(X[:,0], X[:,1], c=y, s=40,
+           cmap='autumn', edgecolors='gray')
+
+# Normalenvektor w einzeichnen
+cx, cy = X.mean(axis=0)
+ax.annotate('', xy=(cx+w[0], cy+w[1]),
+            xytext=(cx, cy),
+            arrowprops=dict(arrowstyle='->',
+                            color='navy', lw=2))
+ax.text(cx+w[0]+0.1, cy+w[1], 'w',
+        fontsize=12, color='navy', fontweight='bold')
+
+ax.set_title('Vorzeichen: rot=−1, blau=+1')
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>🔴 Rote Region: \(\langle\mathbf{w}, x\rangle + b < 0\) → Klasse −1</li>
+                <li>🔵 Blaue Region: \(\langle\mathbf{w}, x\rangle + b > 0\) → Klasse +1</li>
+                <li>Schwarze Linie: Hyperebene (\(= 0\))</li>
+                <li>Blauer Pfeil: Normalenvektor <code>w</code></li>
+                <li>Pfeil zeigt immer in die <strong>positive Richtung</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Das Modell ist einfach: <strong>berechne \(\langle\mathbf{w}, x\rangle + b\)</strong>,
+            nimm das Vorzeichen – fertig. Positiv = eine Klasse, negativ = andere Klasse.
+            Der Betrag gibt sogar an, wie "sicher" die Zuordnung ist (großer Betrag = weit weg von der Grenze).
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           3.3 · OPTIMIERUNGSPROBLEM (Folie 14)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="optimierungsproblem">
+        <div class="section-head">
+          <h2>3.3 Das Optimierungsproblem</h2>
+          <p>
+            Aus unendlich vielen Hyperebenen wählen wir diejenige mit dem
+            <span class="key" style="--key-color:var(--color-purple)">größten Abstand r</span>
+            zu den nächsten Datenpunkten. Das formalisieren wir als
+            <strong>Optimierungsproblem</strong>.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>📏 Was ist der Abstand r?</h3>
+            <ul>
+              <li>Der Abstand eines Punktes \(x_1\) zur Hyperebene</li>
+              <li>Geometrisch: senkrechter Abstand in Richtung \(\mathbf{w}\)</li>
+              <li>Formel: \(x_1 = x'_1 + r \cdot \frac{\mathbf{w}}{\|\mathbf{w}\|}\)</li>
+              <li>\(x'_1\) ist die Projektion von \(x_1\) auf die Hyperebene</li>
+              <li>r ist der <strong>halbe Margin</strong> – wir maximieren ihn</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🔧 Bedingungen des Problems</h3>
+            <ul>
+              <li>\(y_i(\langle\mathbf{w}, x_i\rangle + b) \geq r\) — alle Punkte korrekt klassifiziert, mindestens Abstand r</li>
+              <li>\(\|\mathbf{w}\| = 1\) — Normalenvektor ist normiert (Einheitsvektor)</li>
+              <li>\(r > 0\) — Abstand ist positiv</li>
+              <li>Zusammen: <strong>3 Bedingungen</strong></li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Formales Optimierungsproblem -->
+        <div class="formula-block" style="margin-top:var(--space-5)">
+          <div class="formula-label">Optimierungsproblem (Folie 14)</div>
+          <div class="formula-math">
+            \[ \max_{\mathbf{w},\, b,\, r}\; r \]
+            \[ \text{unter den Bedingungen:}\quad y_i(\langle\mathbf{w}, x_i\rangle + b) \geq r,\quad \|\mathbf{w}\| = 1,\quad r > 0 \]
+          </div>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🧠 Frage — Folie 14</div>
+          <p>
+            Warum soll der Margin maximiert werden?
+            Was bedeutet ein größerer Margin für neue, unbekannte Datenpunkte?
+            Und warum muss \(\|\mathbf{w}\| = 1\) gelten?
+          </p>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Dieses Optimierungsproblem hat drei freie Parameter: \(\mathbf{w}\), \(b\), \(r\).
+            Die Nebenbedingung \(\|\mathbf{w}\|=1\) macht das Problem aber
+            schwer zu lösen (nicht-konvex).
+            → Im nächsten Schritt vereinfachen wir es durch eine clevere <strong>Skalierung</strong>.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           3.4 · HARD-MARGIN HERLEITUNG (Folie 15)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="hard-margin">
+        <div class="section-head">
+          <h2>3.4 Hard-Margin Herleitung</h2>
+          <p>
+            Durch eine clevere Skalierung lässt sich das Optimierungsproblem
+            drastisch vereinfachen. Das Ergebnis ist das kanonische SVM-Problem:
+            <span class="key" style="--key-color:var(--color-purple)">min ½‖w‖²</span>.
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🧠 Frage — Folie 15</div>
+          <p>
+            Warum heißen diese Bedingungen "Hard Margin"?
+            Was würde passieren, wenn Datenpunkte innerhalb des Margins liegen dürften?
+            (Antwort: das wäre Soft-Margin → Seite 04)
+          </p>
+        </div>
+
+        <!-- Schritt-für-Schritt Herleitung -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin: var(--space-5) 0 var(--space-3)">
+          Schritt-für-Schritt: Von max r → min ½‖w‖²
+        </h3>
+
+        <div class="deriv-steps">
+
+          <div class="deriv-step">
+            <div class="ds-num">1</div>
+            <div class="ds-formula">
+              \(\|\mathbf{w}\| = 1\) aufgeben
+            </div>
+            <div class="ds-reason">
+              Der Normalenvektor \(\mathbf{w}\) muss <strong>nicht mehr normiert</strong> sein.
+              Stattdessen skalieren wir das Problem so, dass die Support Vectors
+              einen bestimmten Wert annehmen.
+            </div>
+          </div>
+
+          <div class="deriv-step">
+            <div class="ds-num">2</div>
+            <div class="ds-formula">
+              \(\langle\mathbf{w}, x_a\rangle + b = 1\)
+            </div>
+            <div class="ds-reason">
+              Wir skalieren \(\mathbf{w}\) und \(b\) so, dass der nächste Punkt
+              \(x_a\) (= Support Vector) den Wert <strong>exakt 1</strong> ergibt.
+              Das ist immer möglich – nur eine Skalierung.
+            </div>
+          </div>
+
+          <div class="deriv-step">
+            <div class="ds-num">3</div>
+            <div class="ds-formula">
+              \(r = \dfrac{1}{\|\mathbf{w}\|}\)
+            </div>
+            <div class="ds-reason">
+              Aus der Skalierung folgt direkt: der Abstand r des Support Vectors
+              zur Hyperebene ist <strong>1/‖w‖</strong>.
+              Beweis: einsetzen in die Abstandsformel aus Folie 14.
+            </div>
+          </div>
+
+          <div class="deriv-step">
+            <div class="ds-num">4</div>
+            <div class="ds-formula">
+              \(y_i(\langle\mathbf{w}, x_i\rangle + b) \geq 1\)
+            </div>
+            <div class="ds-reason">
+              Die Bedingung \(y_i(\ldots) \geq r\) wird zu \(\geq 1\)
+              (durch die Skalierung). Das ist die <strong>Hard-Margin-Bedingung</strong>.
+              Kein Punkt darf innerhalb des Margins liegen.
+            </div>
+          </div>
+
+          <div class="deriv-step highlight">
+            <div class="ds-num">5</div>
+            <div class="ds-formula">
+              \(\min \tfrac{1}{2}\|\mathbf{w}\|^2\)
+            </div>
+            <div class="ds-reason">
+              max r = max 1/‖w‖ ≡ <strong>min ‖w‖ ≡ min ½‖w‖²</strong>
+              (½ erleichtert die Ableitung – mathematisch äquivalent).
+              Das ist das <strong>finale, lösbare Optimierungsproblem</strong>!
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Finales Problem -->
+        <div class="formula-block">
+          <div class="formula-label">Hard-Margin SVM – Finales Optimierungsproblem (Folie 15)</div>
+          <div class="formula-math">
+            \[ \min_{\mathbf{w},\, b}\; \tfrac{1}{2}\|\mathbf{w}\|^2 \]
+            \[ \text{unter der Bedingung:}\quad y_i(\langle\mathbf{w}, x_i\rangle + b) \geq 1 \quad \forall\, i \]
+          </div>
+          <div class="formula-legend">
+            <div class="fl-row">
+              <span class="fl-sym">½‖w‖²</span>
+              <span class="fl-desc">Quadrat der Norm von w – minimieren = Margin maximieren (⅟‖w‖ = r)</span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">Bedingung</span>
+              <span class="fl-desc">Alle Punkte müssen korrekt klassifiziert sein UND mindestens Abstand 1 haben (Hard: keine Verletzungen erlaubt)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code: ‖w‖ und Margin aus trainiertem Modell -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir können \(r = 1/\|\mathbf{w}\|\) direkt aus dem trainierten Modell berechnen
+          und mit dem geometrischen Abstand der Support Vectors vergleichen.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – r = 1/‖w‖ und Margin-Breite
+              </span>
+            </div>
+            <pre><code># Hard-Margin Mathematik verifizieren
+norm_w = np.linalg.norm(w)
+r = 1 / norm_w  # Abstand Support Vector → Hyperebene
+
+print(f"‖w‖   = {norm_w:.4f}")
+print(f"r = 1/‖w‖ = {r:.4f}  (halber Margin)")
+print(f"Margin = 2r = {2*r:.4f}")
+
+# Verifikation: decision_function der SVs = ±1
+sv_vals = model.decision_function(
+              model.support_vectors_)
+print(f"\nDecision function an Support Vectors:")
+print(sv_vals.round(4))
+print("→ Sollte betragsmäßig ≈ 1 sein!")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted); margin-bottom:var(--space-2)">
+                ‖w‖&nbsp;&nbsp; = <span style="color:var(--color-primary)">0.5686</span><br>
+                r = 1/‖w‖ = <span style="color:var(--color-success)">1.7587</span><br>
+                Margin = 2r = <span style="color:var(--color-success)">3.5175</span><br><br>
+                Decision function an SVs:<br>
+                <span style="color:var(--color-purple)">[-1.&nbsp;1.&nbsp;-1.]</span><br>
+                → Sollte betragsmäßig ≈ 1 sein! ✓
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>Support Vectors liegen <strong>exakt auf</strong> den Margin-Grenzen</li>
+                <li>decision_function(SV) = ±1 → Herleitung korrekt!</li>
+                <li>Margin = 2r (von −1 bis +1 Ebene)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zusammenfassung der Mathematik -->
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>📌 Was ist Hard-Margin?</h3>
+            <ul>
+              <li>Bedingung: <strong>kein Punkt darf im Margin sein</strong></li>
+              <li>Alle Punkte: \(y_i(\langle\mathbf{w}, x_i\rangle + b) \geq 1\)</li>
+              <li>Funktioniert nur bei <strong>linear separierbaren</strong> Daten</li>
+              <li>Bei Rauschen oder Überlappung: → Soft-Margin (Seite 04)</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🔄 Warum ½‖w‖² statt ‖w‖?</h3>
+            <ul>
+              <li>Mathematisch äquivalent: min ‖w‖ ≡ min ½‖w‖²</li>
+              <li>Der Faktor ½ erleichtert die <strong>Ableitung</strong> des Problems</li>
+              <li>Ableitung von ½‖w‖² nach w = w (kein störender Faktor)</li>
+              <li>Standard in der Optimierung für quadratische Probleme</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🎯 Was bedeutet das praktisch?</h3>
+            <ul>
+              <li>min ½‖w‖² = max Margin (äquivalent)</li>
+              <li>Das ist ein <strong>quadratisches Optimierungsproblem</strong> mit linearen Nebenbedingungen (QP)</li>
+              <li>QP hat eine <strong>eindeutige globale Lösung</strong> → kein lokales Minimum</li>
+              <li>sklearn löst dieses Problem intern (via LIBSVM)</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? — Zusammenfassung Seite 03</div>
+          <p>
+            Die Mathematik hinter SVMs ist elegant: aus dem intuitiven "Margin maximieren"
+            wird ein sauberes Optimierungsproblem
+            <strong>min ½‖w‖²</strong> mit Bedingung \(y_i(\langle\mathbf{w}, x_i\rangle + b) \geq 1\).
+            Das ist das <em>Hard-Margin</em>-Problem – es funktioniert nur wenn die Klassen
+            <strong>perfekt trennbar</strong> sind. Was wenn nicht? →
+            <span class="key" style="--key-color:var(--color-purple)">Soft-Margin auf Seite 04</span>.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

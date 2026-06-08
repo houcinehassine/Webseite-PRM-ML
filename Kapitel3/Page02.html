@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K3 · Margin Maximierung & Support Vectors</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── SO WHAT ────────────────────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+
+    /* ── FRAGE BOX ──────────────────────────────────────── */
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase;
+      color:color-mix(in oklab,var(--color-warning) 80%,#000);
+      margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── MARGIN VISUAL (NEU → css_codes/kapitel3.css) ──── */
+    /* .margin-concept-grid */
+    .margin-concept-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-4);
+      margin: var(--space-5) 0;
+    }
+    @media (max-width: 700px) { .margin-concept-grid { grid-template-columns: 1fr; } }
+    .margin-step-card {
+      padding: var(--space-4) var(--space-5);
+      background: var(--color-surface-2);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .margin-step-card.highlight {
+      border-color: var(--color-primary);
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface));
+    }
+    .ms-num {
+      font-size: 0.62rem; font-weight: 800; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--color-primary);
+    }
+    .ms-icon { font-size: 1.8rem; }
+    .ms-title { font-size: var(--text-sm); font-weight: 700; }
+    .ms-desc  { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.6; }
+
+    /* ── SUPPORT VECTOR HIGHLIGHT ───────────────────────── */
+    /* .sv-array-box */
+    .sv-array-box {
+      background: var(--color-surface-offset);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4) var(--space-5);
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      margin: var(--space-4) 0;
+      overflow-x: auto;
+    }
+    .sv-array-box .sv-label {
+      font-size: var(--text-xs); font-weight: 700; letter-spacing: .07em;
+      text-transform: uppercase; color: var(--color-primary);
+      margin-bottom: var(--space-2); font-family: var(--font-body);
+    }
+    .sv-value { color: var(--color-primary); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · Margin Maximierung & Support Vectors"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page2"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ════════════════════════════════════════════════
+           HERO
+      ════════════════════════════════════════════════════ -->
+      <section class="hero" id="klassifikatoren">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Seite 02 · Agenda-Punkt 1 · Folien 5–11</span>
+            <h1>Margin Maximierung &
+              <span class="key" style="--key-color:var(--color-primary)">Support Vectors</span>
+            </h1>
+            <p>
+              Warum gibt es unendlich viele Trennlinien – und welche ist die <em>beste</em>?
+              SVMs antworten: die mit dem
+              <strong>größten Margin</strong>. Hier bauen wir genau dieses Konzept
+              von der Intuition bis zum trainierten Modell auf.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Mehrere Geraden</span>
+              <span class="pill">Margin-Band</span>
+              <span class="pill">Maximum Margin Estimator</span>
+              <span class="pill">SVC.fit()</span>
+              <span class="pill">support_vectors_</span>
+              <span class="pill">Hyperebene</span>
+              <span class="pill">Robustheit</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Du verstehst, warum es <strong>unendlich viele</strong> Trenngeraden gibt</li>
+              <li>Du kannst erklären, was ein <span class="key" style="--key-color:var(--color-primary)">Margin</span> ist</li>
+              <li>Du weißt, was <span class="key" style="--key-color:var(--color-primary)">Support Vectors</span> sind
+                und warum <em>nur sie</em> das Modell definieren</li>
+              <li>Du kannst ein SVM-Modell mit <code>SVC</code> fitten und visualisieren</li>
+              <li>Du verstehst die <strong>Robustheit</strong> von SVMs (N=60 vs. N=120)</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           2.1 · WIR ALS KLASSIFIKATOREN (Folie 5)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="klassifikatoren">
+        <div class="section-head">
+          <h2>2.1 Wir als Klassifikatoren</h2>
+          <p>
+            Bevor wir die Mathe sehen: Denke selbst wie ein Klassifikator.
+            Gegeben ist ein Scatter-Plot mit zwei Klassen –
+            wo würdest du die <strong>optimale Trennlinie</strong> einzeichnen?
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🧠 Interaktive Frage — Folie 5</div>
+          <p>
+            Stell dir vor, du siehst rote und gelbe Punkte auf einem Koordinatensystem.
+            Wo würdest du – als Klassifikator – eine optimale Trennlinie einzeichnen?
+            Was macht eine Linie <em>besser</em> als eine andere?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>🎯 Die Ausgangssituation</h3>
+            <ul>
+              <li>Zwei Klassen im 2D-Feature-Raum (rote / gelbe Punkte)</li>
+              <li>Ziel: eine <strong>Trennlinie</strong> finden, die neue Datenpunkte korrekt klassifiziert</li>
+              <li>Problem: Es gibt <strong>beliebig viele</strong> solcher Linien</li>
+              <li>Alle können die Trainingsdaten korrekt trennen</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>❓ Was macht eine Linie „besser"?</h3>
+            <ul>
+              <li>Eine Linie, die <strong>knapp</strong> an den Punkten vorbeiläuft, ist riskant</li>
+              <li>Neue Datenpunkte könnten dann falsch klassifiziert werden</li>
+              <li>Intuitiv: die beste Linie liegt <strong>möglichst weit weg</strong> von allen Punkten</li>
+              <li>→ Genau das macht SVMs: <span class="key" style="--key-color:var(--color-primary)">Margin Maximierung</span></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           2.2 · MEHRERE GERADEN (Folie 6)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="mehrere-geraden">
+        <div class="section-head">
+          <h2>2.2 Das Problem: Unendlich viele Trenngeraden</h2>
+          <p>
+            Wir können beliebig viele Geraden einzeichnen, die unsere Klassen trennen –
+            alle korrekt, aber mit
+            <span class="key" style="--key-color:var(--color-warning)">unterschiedlichen Konsequenzen</span>
+            für neue Datenpunkte.
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🧠 Frage — Folie 6</div>
+          <p>
+            Alle drei Geraden separieren die Klassen quasi ideal –
+            wie würden Sie einen neuen Datenpunkt (das X) je nach Gerade zuordnen?
+            Wie entscheiden Sie intuitiv, welche Gerade die beste ist?
+          </p>
+        </div>
+
+        <!-- Schritt 1: Datensatz & mehrere Geraden -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Datensatz erstellen und
+          <strong>drei verschiedene Trenngeraden</strong> einzeichnen.
+          Alle drei trennen korrekt – aber je nach Gerade wird ein neuer Punkt anders klassifiziert.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Mehrere Geraden (Folie 6)
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_blobs
+
+X, y = make_blobs(n_samples=50, centers=2,
+                  random_state=0, cluster_std=0.60)
+
+x_fit = np.linspace(-1, 3.5)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X[:, 0], X[:, 1], c=y, s=50,
+           cmap='autumn', edgecolors='gray')
+
+# Drei verschiedene Trenngeraden
+for m, b in [(1, 0.65), (0.5, 1.6), (-0.2, 2.9)]:
+    ax.plot(x_fit, m * x_fit + b, '-k', linewidth=0.8)
+
+# Neuer Datenpunkt X
+ax.plot(0.6, 2.1, 'kx', ms=10, mew=2)
+ax.set_title('3 Trenngeraden – alle korrekt!')
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 Scatter: 50 Punkte, 2 Klassen</li>
+                <li>3 schwarze Trenngeraden – alle trennen korrekt</li>
+                <li>Das <strong>X</strong> = neuer Datenpunkt</li>
+                <li>Je nach Gerade: unterschiedliche Klassifikation!</li>
+                <li>→ Welche Gerade ist die <strong>sicherste</strong>?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Alle drei Geraden sind im Sinne der Trainingsdaten <em>gleichwertig</em>.
+            Für neue Datenpunkte kann die Wahl der Gerade aber
+            <strong>entscheidenden Einfluss</strong> haben.
+            Das Problem: Ohne weiteres Kriterium ist keine Gerade besser als die andere.
+            → SVMs lösen das mit dem <span class="key" style="--key-color:var(--color-primary)">Margin</span>.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           2.3 · MARGIN MAXIMIERUNG (Folie 7)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="margin-max">
+        <div class="section-head">
+          <h2>2.3 Lösung: Margin Maximierung</h2>
+          <p>
+            Anstatt nur eine bloße Trennlinie zu nutzen, legt die SVM ein
+            <span class="key" style="--key-color:var(--color-primary)">Margin-Band</span>
+            um die Gerade – und wählt die Gerade mit dem <strong>größten Margin</strong>.
+          </p>
+        </div>
+
+        <!-- Drei-Schritt-Erklärung -->
+        <div class="margin-concept-grid">
+          <div class="margin-step-card">
+            <span class="ms-num">Schritt 01</span>
+            <span class="ms-icon">✏️</span>
+            <div class="ms-title">Trennlinie einzeichnen</div>
+            <div class="ms-desc">
+              Für jede mögliche Trennlinie legen wir ein
+              symmetrisches Band (Margin) um sie herum.
+            </div>
+          </div>
+          <div class="margin-step-card">
+            <span class="ms-num">Schritt 02</span>
+            <span class="ms-icon">↔️</span>
+            <div class="ms-title">Margin bis zu den nächsten Punkten</div>
+            <div class="ms-desc">
+              Das Band wird bis zu den
+              <strong>nächstgelegenen Datenpunkten</strong>
+              der jeweiligen Klasse erweitert.
+              Diese Punkte heißen später: <em>Support Vectors</em>.
+            </div>
+          </div>
+          <div class="margin-step-card highlight">
+            <span class="ms-num">Schritt 03</span>
+            <span class="ms-icon">🏆</span>
+            <div class="ms-title">Breitestes Band gewinnt</div>
+            <div class="ms-desc">
+              Die optimale Gerade ist diejenige mit dem
+              <strong>größten Margin</strong>.
+              → SVMs sind sog.
+              <span class="key" style="--key-color:var(--color-primary)">Maximum Margin Estimators</span>.
+            </div>
+          </div>
+        </div>
+
+        <!-- Code: Margin-Bänder visualisieren -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 2</strong> — Margin-Bänder um alle drei Geraden visualisieren.
+          Die Breite des Bandes variiert – die <strong>breiteste Gerade gewinnt</strong>.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Margin-Bänder (Folie 7)
+              </span>
+            </div>
+            <pre><code>fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X[:, 0], X[:, 1], c=y, s=50,
+           cmap='autumn', edgecolors='gray')
+
+# (m, b, d) = Steigung, Achsenabschnitt, Margin-Breite
+for m, b, d in [(1, 0.65, 0.33),
+                (0.5, 1.6, 0.55),
+                (-0.2, 2.9, 0.2)]:
+    yfit = m * x_fit + b
+    ax.plot(x_fit, yfit, '-k', linewidth=0.8)
+    ax.fill_between(x_fit,
+                    yfit - d, yfit + d,
+                    alpha=0.25)
+
+ax.set_title('Margin-Bänder – breitestes gewinnt!')
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 Jede Gerade hat ein <strong>grau-transparentes Band</strong></li>
+                <li>Die <strong>mittlere Gerade</strong> hat den breitesten Margin</li>
+                <li>Parameter <code>d</code> = halbe Margin-Breite</li>
+                <li><code>fill_between()</code> zeichnet das Band</li>
+                <li>→ SVM wählt diese Gerade automatisch</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Der Margin ist ein <strong>Sicherheitsabstand</strong> zwischen Trennlinie und Datenpunkten.
+            Je breiter, desto robuster das Modell gegenüber neuen, unbekannten Datenpunkten.
+            SVMs maximieren diesen Abstand → daher: <em>Maximum Margin Estimator</em>.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           2.4 · FITTING & TRAINING (Folie 8)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="fitting-training">
+        <div class="section-head">
+          <h2>2.4 SVM: Fitting & Training</h2>
+          <p>
+            Mit sklearn ist das Training eines SVMs einfach:
+            <code>SVC()</code> instanziieren, <code>.fit()</code> aufrufen –
+            und das Modell findet automatisch die optimale Trennlinie mit maximalem Margin.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>⚙️ <code style="color:var(--color-primary)">SVC()</code> – Parameter</h3>
+            <ul>
+              <li><code>kernel</code> → Typ des Kernels (z.B. <code>'linear'</code>, <code>'rbf'</code>)</li>
+              <li><code>C</code> → Regularisierungsparameter (mehr dazu auf Seite 04)</li>
+              <li><code>C=1E10</code> → sehr groß = <strong>Hard-Margin</strong> (keine Fehler erlaubt)</li>
+              <li><code>SVC</code> = <strong>Support Vector Classifier</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🔧 <code style="color:var(--color-primary)">.fit(X, y)</code> – Was passiert?</h3>
+            <ul>
+              <li>Modell passt sich an <code>X</code> (Features) und <code>y</code> (Labels) an</li>
+              <li>Sucht die Hyperebene mit <strong>maximalem Margin</strong></li>
+              <li>Identifiziert die <strong>Support Vectors</strong></li>
+              <li>Ergebnis: optimale Trennlinie für unsere 2 Klassen</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Schritt 1: SVC instanziieren & fitten -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 1</strong> — <code>SVC</code> instanziieren und auf den Datensatz fitten.
+          <code>C=1E10</code> erzwingt einen harten Margin (keine Margin-Verletzungen erlaubt).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – SVC instanziieren & fitten (Folie 8)
+              </span>
+            </div>
+            <pre><code>from sklearn.svm import SVC
+
+# SVM instanziieren und trainieren
+model = SVC(kernel='linear', C=1E10)
+model.fit(X, y)
+
+print("Modell trainiert!")
+print(f"Kernel: {model.kernel}")
+print(f"C:      {model.C}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Modell trainiert!<br>
+                Kernel: linear<br>
+                C:      10000000000.0
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-3) 0 0; padding-left:1rem; line-height:1.9">
+                <li><code>kernel='linear'</code> → gerade Trennlinie</li>
+                <li><code>C=1E10</code> → Hard-Margin</li>
+                <li>Modell kennt jetzt: Trennlinie + Support Vectors</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Visualisieren -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Ergebnis visualisieren: Trennlinie, Margin-Bänder
+          und Support Vectors (blaue Kreise) einzeichnen.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Trennlinie & Margin visualisieren
+              </span>
+            </div>
+            <pre><code>fig, ax = plt.subplots(figsize=(5, 4))
+
+# Scatter + Entscheidungsgrenze
+ax.scatter(X[:, 0], X[:, 1], c=y, s=50,
+           cmap='autumn', edgecolors='gray')
+plot_svc_decision_function(model, ax)
+
+# Support Vectors hervorheben (blau)
+ax.scatter(model.support_vectors_[:, 0],
+           model.support_vectors_[:, 1],
+           s=300, lw=1.5,
+           facecolors='none',
+           edgecolors='blue')
+ax.set_title('SVM: Optimale Trennlinie')
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 Scatter mit Trennlinie (durchgezogen)</li>
+                <li>Zwei <strong>gestrichelte Linien</strong> = Margin-Grenzen</li>
+                <li><strong>Blaue Kreise</strong> = Support Vectors</li>
+                <li>Alle anderen Punkte: irrelevant für das Modell!</li>
+                <li><code>plot_svc_decision_function()</code> aus Cell 2</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Das SVM-Modell ist vollständig durch
+            <span class="key" style="--key-color:var(--color-primary)">drei Datenpunkte</span> definiert –
+            die Support Vectors. Alle anderen 47 Punkte könnten entfernt werden,
+            und das Modell bliebe <strong>identisch</strong>. Das ist keine Überraschung –
+            das ist <em>das Herzstück</em> von SVMs.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           2.5 · SUPPORT VECTORS: KONZEPT & ATTRIBUT (Folie 9)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="support-vectors">
+        <div class="section-head">
+          <h2>2.5 Support Vectors: Konzept & Attribut</h2>
+          <p>
+            Die Support Vectors sind die
+            <span class="key" style="--key-color:var(--color-primary)">entscheidenden Datenpunkte</span>
+            des Modells. <strong>Nur sie</strong> definieren die Position der Hyperebene –
+            alle anderen Punkte spielen keine Rolle.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>📍 Was sind Support Vectors?</h3>
+            <ul>
+              <li>Die Datenpunkte, die <strong>am nächsten</strong> an der Trennlinie liegen</li>
+              <li>Einer aus jeder Klasse – mindestens einer pro Klasse</li>
+              <li>Sie <strong>stützen</strong> (engl. support) den Margin von beiden Seiten</li>
+              <li>→ Daher der Name: <em>Support Vector Machine</em></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🔑 Was bedeutet das für das Modell?</h3>
+            <ul>
+              <li>Der <strong>Fit des Modells hängt nur von diesen Punkten ab</strong></li>
+              <li>Entfernt man alle anderen Punkte → identisches Modell</li>
+              <li>In höheren Dimensionen: keine Geraden mehr, sondern <strong>Hyperebenen</strong></li>
+              <li>Zugriff via Attribut: <code style="color:var(--color-primary)">.support_vectors_</code></li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Support Vectors ausgeben -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          Mit dem Attribut <code>.support_vectors_</code> können die Koordinaten der
+          Support Vectors direkt abgerufen werden – ein Array mit Form <code>(n_sv, n_features)</code>.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Support Vectors ausgeben (Folie 9, Cell 6)
+              </span>
+            </div>
+            <pre><code># Support Vectors abrufen
+sv = model.support_vectors_
+print(f"Anzahl Support Vectors: {len(sv)}")
+print(f"Form (n_sv, n_features): {sv.shape}")
+print("\nKoordinaten:")
+print(sv)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted); margin-bottom:var(--space-2)">
+                Anzahl Support Vectors: 3<br>
+                Form (n_sv, n_features): (3, 2)<br><br>
+                Koordinaten:<br>
+                <span style="color:var(--color-primary)">[[0.44359863, 3.11530945]<br>
+                &nbsp;[2.33812285, 3.43116792]<br>
+                &nbsp;[2.06156753, 1.96918596]]</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:1.9">
+                <li>3 Support Vectors für diesen Datensatz</li>
+                <li>Jeder: 2 Koordinaten (Feature 1, Feature 2)</li>
+                <li>→ Das gesamte Modell steckt in diesen 6 Zahlen!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🧠 Frage — Folie 9</div>
+          <p>
+            Wie sieht unser Modell in höheren Dimensionen aus?
+            Von was hängt der Fit des Modells ab – und was ändert sich, wenn wir
+            statt 2 Features plötzlich 100 Features haben?
+          </p>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            In höherdimensionalen Räumen spricht man nicht mehr von <em>Geraden</em>,
+            sondern von <strong>Hyperebenen</strong>.
+            Die Idee bleibt dieselbe: eine Ebene, die den Raum in zwei Hälften teilt –
+            mit maximalem Margin zu den Support Vectors beider Klassen.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           2.6 · SUPPORT VECTORS: ROBUSTHEIT (Folie 10)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="robustheit">
+        <div class="section-head">
+          <h2>2.6 Support Vectors: Robustheit</h2>
+          <p>
+            Was passiert, wenn wir die Datenmenge verdoppeln?
+            Die Support Vectors – und damit die Trennlinie –
+            bleiben <strong>nahezu identisch</strong>.
+            Das ist eine der großen Stärken von SVMs.
+          </p>
+        </div>
+
+        <div class="card-grid" style="margin-bottom:var(--space-5)">
+          <article class="card">
+            <h3>✅ Stärke: Unempfindlichkeit</h3>
+            <ul>
+              <li>Punkte <strong>weit weg</strong> von der Trennlinie beeinflussen das Modell <strong>nicht</strong></li>
+              <li>Nur die Support Vectors zählen – alles andere ist irrelevant</li>
+              <li>→ Doppelt so viele Punkte ≠ anderes Modell</li>
+              <li>Fachbegriff: <strong>Sparsity</strong> des Modells</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>📊 N=60 vs. N=120</h3>
+            <ul>
+              <li>Linker Plot: <code>N=60</code> – Trennlinie + 3 Support Vectors</li>
+              <li>Rechter Plot: <code>N=120</code> – doppelt so viele Punkte</li>
+              <li>Ergebnis: <strong>Trennlinie und Support Vectors exakt identisch</strong></li>
+              <li>→ Nur entfernte Punkte kommen hinzu – ändern nichts</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Code: N=60 vs N=120 (vertikal!) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Vergleich: SVM mit <code>N=60</code> vs. <code>N=120</code> Datenpunkten.
+          Die Plots sind <strong>vertikal gestapelt</strong> – Trennlinie und Support Vectors
+          sind in beiden identisch.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Robustheit: N=60 vs. N=120 (Folie 10)
+              </span>
+            </div>
+            <pre><code># Vertikal: 2 Zeilen, 1 Spalte
+fig, axes = plt.subplots(2, 1, figsize=(5, 9))
+
+for ax, N in zip(axes, [60, 120]):
+    Xn, yn = make_blobs(n_samples=N, centers=2,
+                        random_state=0,
+                        cluster_std=0.60)
+    m = SVC(kernel='linear', C=1E10).fit(Xn, yn)
+
+    ax.scatter(Xn[:, 0], Xn[:, 1], c=yn,
+               s=40, cmap='autumn', edgecolors='gray')
+    plot_svc_decision_function(m, ax)
+
+    ax.scatter(m.support_vectors_[:, 0],
+               m.support_vectors_[:, 1],
+               s=300, lw=1.5,
+               facecolors='none', edgecolors='blue')
+    ax.set_title(f'N = {N}')
+    ax.set_xlim(-1, 4); ax.set_ylim(-1, 6)
+
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 <strong>Oben (N=60):</strong> 60 Punkte, 3 Support Vectors</li>
+                <li>📊 <strong>Unten (N=120):</strong> 120 Punkte, 3 Support Vectors</li>
+                <li>Trennlinie: <strong>exakt identisch</strong> in beiden Plots</li>
+                <li>Support Vectors: <strong>exakt dieselben Punkte</strong></li>
+                <li><code>figsize=(5, 9)</code> → vertikal gestapelt</li>
+                <li>→ Mehr Daten ändern das Modell <strong>nicht!</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Diese Unempfindlichkeit des Modells auf <strong>weit entfernte Punkte</strong>
+            ist eine der Stärken von SVMs. In der Praxis bedeutet das:
+            mehr Trainingsdaten helfen nur dann, wenn die neuen Punkte
+            <em>in der Nähe der Entscheidungsgrenze</em> liegen.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           2.7 · WIR ALS KLASSIFIKATOREN 2.0 (Folie 11)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="klassifikatoren-2">
+        <div class="section-head">
+          <h2>2.7 Wir als Klassifikatoren 2.0</h2>
+          <p>
+            Jetzt mit echtem SVM-Wissen: Ein neuer, etwas schwierigerer Datensatz –
+            diesmal sehen wir auch die Lösung des Modells mit eingezeichneten
+            Support Vectors.
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🧠 Interaktive Frage — Folie 11</div>
+          <p>
+            Du siehst jetzt rote und gelbe Punkte mit einer horizontalen Trennlinie und
+            Margin-Grenzen. Welche Punkte sind die Support Vectors?
+            Kannst du sie einzeichnen, bevor du den Code ausführst?
+          </p>
+        </div>
+
+        <!-- Schritt 1: Datensatz (Cell 4) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Neuen, etwas schwierigeren Datensatz erstellen
+          (<code>cluster_std=1.2</code> statt 0.6 → stärkere Streuung).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Neuer Datensatz (Cell 4)
+              </span>
+            </div>
+            <pre><code># Breiterer Datensatz (mehr Streuung)
+X2, y2 = make_blobs(n_samples=100, centers=2,
+                    random_state=2,
+                    cluster_std=1.2)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X2[:, 0], X2[:, 1], c=y2, s=50,
+           cmap='autumn', edgecolors='gray')
+ax.set_title('Klassifikatoren 2.0 – wo wäre deine Linie?')
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 100 Punkte, stärker verstreut (<code>std=1.2</code>)</li>
+                <li>Klassen überlappen leicht am Rand</li>
+                <li>Horizontal trennbar – aber wo genau?</li>
+                <li>→ Deine Aufgabe: Linie einzeichnen!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: SVM-Lösung (Cell 5) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Die SVM-Lösung: Modell fitten und mit
+          Support Vectors (blaue Kreise) visualisieren.
+          Vergleiche mit deiner eingezeichneten Linie!
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – SVM-Lösung (Cell 5)
+              </span>
+            </div>
+            <pre><code># Modell fitten
+model2 = SVC(kernel='linear').fit(X2, y2)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X2[:, 0], X2[:, 1], c=y2, s=50,
+           cmap='autumn', edgecolors='gray')
+plot_svc_decision_function(model2, ax)
+
+# Support Vectors einzeichnen (blau)
+ax.scatter(model2.support_vectors_[:, 0],
+           model2.support_vectors_[:, 1],
+           s=300, lw=1.5,
+           facecolors='none',
+           edgecolors='blue')
+ax.set_title('SVM-Lösung mit Support Vectors')
+plt.tight_layout(); plt.show()
+
+# Anzahl Support Vectors
+print(f"Anzahl SVs: {len(model2.support_vectors_)}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 Trennlinie + Margin-Bänder</li>
+                <li>Blaue Kreise = Support Vectors</li>
+                <li>Wie viele Support Vectors bei <code>std=1.2</code>?</li>
+                <li>→ Mehr Streuung = mehr Punkte nah an der Grenze</li>
+                <li>Hat deine Linie den gleichen Ort?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? — Zusammenfassung Seite 02</div>
+          <p>
+            SVMs finden die optimale Trennlinie durch
+            <span class="key" style="--key-color:var(--color-primary)">Margin-Maximierung</span>.
+            Nur die <strong>Support Vectors</strong> (nächstgelegene Punkte zur Grenze)
+            definieren das Modell. In höheren Dimensionen: <strong>Hyperebene</strong> statt Gerade.
+            Das Modell ist robust gegenüber zusätzlichen Punkten weit weg von der Grenze.
+            Als nächstes: die <strong>Mathematik</strong> dahinter → Seite 03.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K3 · Einführung SVM</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── AGENDA KARTEN (4-er Grid) ───────────────────────── */
+    .agenda-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-3);
+      margin-top: var(--space-5);
+    }
+    @media (max-width: 860px) { .agenda-row { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .agenda-row { grid-template-columns: 1fr; } }
+
+    .agenda-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: var(--space-4) var(--space-4);
+      background: var(--color-surface-2);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      text-decoration: none;
+      color: var(--color-text);
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+    }
+    .agenda-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+    .agenda-card.current {
+      border-color: color-mix(in oklab, var(--color-primary) 40%, var(--color-border));
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface));
+    }
+    .ag-num {
+      font-size: 0.62rem; font-weight: 800;
+      letter-spacing: .1em; text-transform: uppercase;
+      color: var(--color-primary);
+    }
+    .ag-icon { font-size: 1.6rem; line-height: 1; }
+    .ag-title { font-size: var(--text-sm); font-weight: 700; line-height: 1.3; }
+    .ag-sub   { font-size: 0.7rem; color: var(--color-text-muted); line-height: 1.45; }
+    .ag-pages {
+      margin-top: auto; padding-top: var(--space-2);
+      font-size: 0.62rem; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--color-primary); opacity: 0.75;
+    }
+
+    /* ── ML-TAXONOMIE VISUAL ────────────────────────────── */
+    /* NEU → css_codes/kapitel3.css  .taxonomy-visual */
+    .taxonomy-visual {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      margin-top: var(--space-5);
+    }
+    .tax-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+    .tax-node {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      border: 1.5px solid var(--color-border);
+      background: var(--color-surface);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-text-muted);
+      box-shadow: var(--shadow-sm);
+      white-space: nowrap;
+    }
+    .tax-node.root {
+      font-size: var(--text-sm);
+      background: var(--color-surface-offset);
+      color: var(--color-text);
+      border-color: var(--color-divider);
+    }
+    .tax-node.active {
+      background: var(--color-primary-highlight);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .tax-node.leaf {
+      background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      font-weight: 800;
+    }
+    .tax-node.dim {
+      opacity: 0.45;
+    }
+    .tax-arrow {
+      color: var(--color-text-faint);
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .tax-badge {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: var(--radius-full);
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      background: var(--color-primary);
+      color: #fff;
+      margin-left: var(--space-1);
+    }
+
+    /* ── NAV GRID (Alle Seiten) ─────────────────────────── */
+    .nav-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: var(--space-3);
+      margin-top: var(--space-4);
+    }
+    .nav-card {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      text-decoration: none;
+      color: var(--color-text);
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .nav-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-card-icon { font-size: 1.3rem; flex-shrink: 0; }
+    .nav-card-body { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+    .nav-card-num  { font-size: 0.62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-faint); }
+    .nav-card-title { font-size: var(--text-sm); font-weight: 700; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nav-card-sub   { font-size: 0.68rem; color: var(--color-text-muted); line-height: 1.3; }
+    .nav-card.purple:hover { border-color: var(--color-purple); }
+    .nav-card.purple .nav-card-num { color: var(--color-purple); }
+    .nav-card.orange:hover  { border-color: var(--color-warning); }
+    .nav-card.orange .nav-card-num  { color: color-mix(in oklab, var(--color-warning) 80%, #000); }
+    .nav-card.green:hover   { border-color: var(--color-success); }
+    .nav-card.green .nav-card-num   { color: var(--color-success); }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · SVM · Einführung"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page1"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ════════════════════════════════════════════════
+           HERO
+      ════════════════════════════════════════════════════ -->
+      <section class="hero" id="wo-befinden-wir-uns">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Seite 01 · Woche 4</span>
+            <h1>Einführung
+              <span class="key" style="--key-color:var(--color-primary)">Support Vector Machines</span>
+            </h1>
+            <p>
+              Wo stehen SVMs im ML-Universum? Diese Seite gibt dir den vollständigen
+              Überblick: ML-Taxonomie, die 4 Agenda-Punkte als klickbare Roadmap
+              und den ersten Kontakt mit dem Konzept der
+              <strong>diskriminativen Klassifikatoren</strong>.
+            </p>
+            <div class="pill-row">
+              <span class="pill">ML-Taxonomie</span>
+              <span class="pill">SVC vs. SVR</span>
+              <span class="pill">4 Agenda-Punkte</span>
+              <span class="pill">Diskriminativer Klassifikator</span>
+              <span class="pill">Standard-Setup</span>
+              <span class="pill">Navigation</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Du weißt, <strong>wo SVMs im ML-Kontext</strong> einzuordnen sind</li>
+              <li>Du kennst die <strong>4 Themenblöcke</strong> des Kapitels</li>
+              <li>Du verstehst den Unterschied zwischen
+                <span class="key" style="--key-color:var(--color-primary)">SVC</span> und
+                <span class="key" style="--key-color:var(--color-success)">SVR</span></li>
+              <li>Du weißt, was einen <strong>diskriminativen Klassifikator</strong> ausmacht</li>
+              <li>Du hast das Standard-Setup aus <code>03_core.ipynb</code> parat</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           1.1 · WO BEFINDEN WIR UNS? (Folie 3)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="wo-befinden-wir-uns">
+        <div class="section-head">
+          <h2>1.1 SVM: Wo befinden wir uns?</h2>
+          <p>
+            SVMs sind ein <strong>Supervised-Learning-Verfahren</strong>
+            – sie können sowohl für
+            <span class="key" style="--key-color:var(--color-primary)">Klassifikation</span> (SVC)
+            als auch für
+            <span class="key" style="--key-color:var(--color-success)">Regression</span> (SVR) eingesetzt werden.
+            Das folgende Diagramm zeigt die Einordnung in die ML-Taxonomie.
+          </p>
+        </div>
+
+        <!-- Taxonomie-Diagramm (Folie 3) -->
+        <div class="taxonomy-visual">
+
+          <!-- Zeile 1: Root -->
+          <div class="tax-row">
+            <span class="tax-node root">🤖 Machine Learning</span>
+          </div>
+
+          <!-- Zeile 2: Drei Kategorien -->
+          <div class="tax-row" style="padding-left:var(--space-6)">
+            <span class="tax-arrow">└─</span>
+            <span class="tax-node active">📊 Supervised Learning <span class="tax-badge">Wir sind hier</span></span>
+            <span class="tax-arrow" style="margin-left:var(--space-4)">└─</span>
+            <span class="tax-node dim">🔍 Unsupervised Learning</span>
+            <span class="tax-arrow" style="margin-left:var(--space-4)">└─</span>
+            <span class="tax-node dim">🎮 Reinforcement Learning</span>
+          </div>
+
+          <!-- Zeile 3: Supervised → Klassifikation & Regression -->
+          <div class="tax-row" style="padding-left:calc(var(--space-6) * 2)">
+            <span class="tax-arrow">├─</span>
+            <span class="tax-node active">🏷️ Klassifikation</span>
+            <span class="tax-arrow">→</span>
+            <span class="tax-node leaf">SVC – Support Vector Classifier</span>
+
+            <span class="tax-arrow" style="margin-left:var(--space-6)">└─</span>
+            <span class="tax-node" style="border-color:var(--color-success); color:var(--color-success); background:color-mix(in oklab,var(--color-success) 8%,var(--color-surface))">
+              📈 Regression
+            </span>
+            <span class="tax-arrow">→</span>
+            <span class="tax-node" style="border-color:var(--color-success); color:var(--color-success); background:color-mix(in oklab,var(--color-success) 10%,var(--color-surface)); font-weight:800">
+              SVR – Support Vector Regressor
+            </span>
+          </div>
+
+        </div>
+
+        <div class="so-what" style="margin-top:var(--space-6)">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            SVMs sind <strong>flexibel</strong>: Dasselbe Grundprinzip (Margin-Maximierung)
+            ermöglicht sowohl Klassifikation (<code>SVC</code>) als auch Regression (<code>SVR</code>).
+            In diesem Kapitel liegt der Fokus auf dem <strong>Classifier</strong> –
+            SVR kommt auf Seite 08.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           1.2 · AGENDA – 4 HAUPTTHEMEN (Folie 2)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="agenda">
+        <div class="section-head">
+          <h2>1.2 Die 4 Agenda-Punkte</h2>
+          <p>
+            Das Kapitel ist in <strong>4 thematische Blöcke</strong> gegliedert –
+            direkt aus der Agenda der Vorlesung. Klicke auf eine Karte,
+            um direkt dorthin zu springen.
+          </p>
+        </div>
+
+        <div class="agenda-row">
+
+          <!-- Punkt 1 -->
+          <a href="Page02.html" class="agenda-card">
+            <span class="ag-num">Agenda · 01</span>
+            <span class="ag-icon">↔️</span>
+            <div class="ag-title">Margin Maximierung & Support Vectors</div>
+            <div class="ag-sub">
+              Intuition · Mehrere Geraden · Maximum Margin Estimator ·
+              Support Vectors · Robustheit
+            </div>
+            <div class="ag-pages">→ Seite 02</div>
+          </a>
+
+          <!-- Punkt 2 -->
+          <a href="Page03.html" class="agenda-card">
+            <span class="ag-num">Agenda · 02</span>
+            <span class="ag-icon">📐</span>
+            <div class="ag-title">Mathematischer Hintergrund zu SVMs</div>
+            <div class="ag-sub">
+              Hyperebene · Normalenvektor w · Bias b ·
+              Optimierungsproblem · Hard-Margin Herleitung
+            </div>
+            <div class="ag-pages">→ Seite 03</div>
+          </a>
+
+          <!-- Punkt 3 -->
+          <a href="Page04.html" class="agenda-card">
+            <span class="ag-num">Agenda · 03</span>
+            <span class="ag-icon">⚖️</span>
+            <div class="ag-title">Soft-Margin SVM & Optimierung</div>
+            <div class="ag-sub">
+              C-Parameter · Slack-Variable ξ ·
+              Hinge Loss · Gradientenabstieg
+            </div>
+            <div class="ag-pages">→ Seiten 04 – 05</div>
+          </a>
+
+          <!-- Punkt 4 -->
+          <a href="Page06.html" class="agenda-card">
+            <span class="ag-num">Agenda · 04</span>
+            <span class="ag-icon">🌀</span>
+            <div class="ag-title">Nicht-lineare Probleme & Kernel-Trick</div>
+            <div class="ag-sub">
+              RBF · 3D-Projektion · Kernel-Trick ·
+              kernel='rbf' · Multi-Class
+            </div>
+            <div class="ag-pages">→ Seiten 06 – 07</div>
+          </a>
+
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           1.3 · SVM: ALLGEMEIN (Folie 4)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="svm-allgemein">
+        <div class="section-head">
+          <h2>1.3 SVM: Allgemein</h2>
+          <p>
+            Was sind SVMs – und warum sind sie relevant?
+            Vier Kernaussagen aus der Vorlesung auf einen Blick.
+          </p>
+        </div>
+
+        <div class="card-grid">
+
+          <article class="card">
+            <h3>🏷️ Bekanntheit & Einsatzbereich</h3>
+            <ul>
+              <li>Einer der <strong>bekanntesten Algorithmen</strong> im Machine Learning</li>
+              <li>Besonders stark bei <strong>klein- und mittelgroßen Datensätzen</strong></li>
+              <li>Weniger geeignet bei sehr großen Datensätzen (→ Kernel-Matrix wird zu groß)</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>🎯 Diskriminativer Klassifikator</h3>
+            <ul>
+              <li>SVMs sind <span class="key" style="--key-color:var(--color-primary)">diskriminativ</span>:
+                sie modellieren direkt die <strong>Grenze zwischen Klassen</strong></li>
+              <li>Im Gegensatz zu <em>generativen</em> Modellen (z.B. GMM), die die
+                Datenverteilung modellieren</li>
+              <li>Frage: <strong>„Wo liegt die Trennlinie?"</strong> – nicht „Wie entstehen die Daten?"</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>🔧 Flexibilität</h3>
+            <ul>
+              <li>SVMs können für
+                <span class="key" style="--key-color:var(--color-primary)">Klassifikation</span>
+                (<code>SVC</code>) eingesetzt werden</li>
+              <li>… und für
+                <span class="key" style="--key-color:var(--color-success)">Regression</span>
+                (<code>SVR</code>)</li>
+              <li>Durch den <strong>Kernel-Trick</strong> auch für
+                nicht-lineare Probleme geeignet</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3>❓ Das Ausgangsproblem</h3>
+            <ul>
+              <li>Gegeben: Zwei Klassen im 2D-Feature-Raum</li>
+              <li>Gesucht: Eine <strong>optimale Trennlinie</strong>
+                (Hyperebene in höheren Dimensionen)</li>
+              <li>Problem: Es gibt <strong>unendlich viele</strong> mögliche Trennlinien –
+                welche ist die beste?</li>
+              <li>→ <strong>Antwort gibt der Margin!</strong></li>
+            </ul>
+          </article>
+
+        </div>
+
+        <!-- Code: Ausgangssituation visualisieren (Folie 4 + Cell 4) -->
+        <h3 style="font-size:var(--text-base); font-weight:700;
+                   margin: var(--space-6) 0 var(--space-2)">
+          Ausgangssituation: Zwei Klassen im 2D-Featureraum
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Wir erstellen einen einfachen Datensatz mit
+          <code>make_blobs()</code> und visualisieren ihn –
+          genau das ist unser Startpunkt für das gesamte Kapitel.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Datensatz erstellen & plotten
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_blobs
+import seaborn as sns; sns.set()
+
+# Datensatz: 2 Klassen, 50 Punkte
+X, y = make_blobs(n_samples=50, centers=2,
+                  random_state=0, cluster_std=0.60)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X[:, 0], X[:, 1], c=y, s=50,
+           cmap='autumn', edgecolors='gray')
+ax.set_xlabel('Feature 1')
+ax.set_ylabel('Feature 2')
+ax.set_title('Ausgangssituation: 2 Klassen')
+plt.tight_layout()
+plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted);
+                         margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 Scatter-Plot: 50 Punkte, 2 Klassen (rot / gelb)</li>
+                <li><code>random_state=0</code> → reproduzierbar</li>
+                <li><code>cluster_std=0.60</code> → geringe Streuung</li>
+                <li>Klassen sind <strong>linear trennbar</strong></li>
+                <li>Frage: <strong>Welche Trennlinie ist optimal?</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Dieses einfache Szenario – zwei trennbare Klassen – ist
+            unser Startpunkt. <strong>Beliebig viele Geraden</strong> könnten die Klassen
+            trennen. SVMs wählen die <em>beste</em> durch
+            <span class="key" style="--key-color:var(--color-primary)">Margin-Maximierung</span>.
+            Was genau das bedeutet, sehen wir auf Seite 02.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           1.4 · STANDARD-SETUP (Folie 1 + Cell 1)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="svm-allgemein">
+        <div class="section-head">
+          <h2>1.4 Standard-Setup für dieses Kapitel</h2>
+          <p>
+            Diese Imports bilden die Grundlage aller Code-Beispiele –
+            direkt aus <code>03_core.ipynb</code> (Cell 1).
+            Einmal ausführen, für das gesamte Notebook gültig.
+          </p>
+        </div>
+
+        <!-- Code: Standard-Imports -->
+        <div class="code-cell">
+          <div class="code-cell-header">
+            <span class="cell-lang">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+              </svg>
+              Python – Standard-Imports Kapitel 3 (Cell 1)
+            </span>
+          </div>
+          <pre><code># ── Standard-Imports für Kapitel 3 ──────────────────────────
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_circles, make_blobs
+from sklearn.svm import SVC
+import seaborn as sns; sns.set()</code></pre>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-4)">
+
+          <article class="card">
+            <h3><code style="color:var(--color-primary)">matplotlib.pyplot</code></h3>
+            <ul>
+              <li>Visualisierung der <strong>Scatter Plots</strong></li>
+              <li>Einzeichnen von Trennlinien & Margin-Bändern</li>
+              <li>Darstellung der Entscheidungsgrenzen</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><code style="color:var(--color-success)">numpy</code></h3>
+            <ul>
+              <li>Numerische Berechnungen: Arrays & Matrizen</li>
+              <li>Feature-Matrix <code>X</code> mit Form <code>(N, 2)</code></li>
+              <li>Linspace für Gitter der Entscheidungsgrenze</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><code style="color:var(--color-warning)">make_blobs / make_circles</code></h3>
+            <ul>
+              <li><code>make_blobs</code> → linear trennbare Testdaten (Seite 02–05)</li>
+              <li><code>make_circles</code> → <strong>nicht-lineares</strong> Problem (Seite 06)</li>
+              <li>Beide aus <code>sklearn.datasets</code></li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <h3><code style="color:var(--color-purple)">SVC</code></h3>
+            <ul>
+              <li><strong>Support Vector Classifier</strong> aus <code>sklearn.svm</code></li>
+              <li>Parameter: <code>kernel</code>, <code>C</code></li>
+              <li>Methoden: <code>.fit(X, y)</code>, <code>.predict(X)</code>,
+                <code>.support_vectors_</code></li>
+            </ul>
+          </article>
+
+        </div>
+
+        <!-- Code: plot_svc_decision_function (Cell 2) -->
+        <h3 style="font-size:var(--text-base); font-weight:700;
+                   margin: var(--space-6) 0 var(--space-2)">
+          Hilfsfunktion: <code>plot_svc_decision_function()</code>
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Diese Hilfsfunktion aus Cell 2 zeichnet die
+          <strong>Entscheidungsgrenze</strong> und die
+          <strong>Margin-Linien</strong> eines trainierten SVM-Modells.
+          Sie wird in fast jeder Code-Zelle des Notebooks wiederverwendet.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/>
+                  <polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Hilfsfunktion (Cell 2)
+              </span>
+            </div>
+            <pre><code>def plot_svc_decision_function(model,
+                               ax=None,
+                               plot_support=True):
+    """Entscheidungsgrenze für 2D-SVC plotten."""
+    if ax is None:
+        ax = plt.gca()
+    xlim = ax.get_xlim()
+    ylim = ax.get_ylim()
+
+    # Gitter für das Modell erstellen
+    x = np.linspace(xlim[0], xlim[1], 30)
+    y = np.linspace(ylim[0], ylim[1], 30)
+    Y, X = np.meshgrid(y, x)
+    xy = np.vstack([X.ravel(), Y.ravel()]).T
+    P = model.decision_function(xy).reshape(X.shape)
+
+    # Trennlinie + Margin-Linien (-1, 0, +1)
+    ax.contour(X, Y, P, colors='k',
+               levels=[-1, 0, 1], alpha=0.5,
+               linestyles=['--', '-', '--'])
+
+    # Support Vectors einzeichnen
+    if plot_support:
+        ax.scatter(model.support_vectors_[:, 0],
+                   model.support_vectors_[:, 1],
+                   s=300, linewidth=1,
+                   facecolors='none')
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">Was diese Funktion macht</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted);
+                         margin:0; padding-left:1rem; line-height:2.0">
+                <li><code>decision_function()</code> → Abstand jedes Gitterpunkts zur Hyperebene</li>
+                <li><code>levels=[-1, 0, 1]</code> → 3 Linien:
+                  <strong>–1</strong> (neg. Margin),
+                  <strong>0</strong> (Trennlinie),
+                  <strong>+1</strong> (pos. Margin)</li>
+                <li><code>linestyles=['--', '-', '--']</code> →
+                  Margin gestrichelt, Trennlinie durchgezogen</li>
+                <li><code>plot_support=True</code> → Support Vectors als
+                  leere Kreise einzeichnen</li>
+                <li>Wird auf jeder Folgeseite genutzt →
+                  <strong>einmal definieren, immer verwenden</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           1.5 · ALLE SEITEN – Direktnavigation
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="alle-seiten">
+        <div class="section-head">
+          <h2>1.5 Alle Seiten auf einen Blick</h2>
+          <p>
+            Direkt zum Thema springen – oder der Reihe nach durcharbeiten.
+            Seiten 02–05 bauen das Fundament und die Implementierung,
+            06–07 erweitern auf Kernel und Praxis, 08 schließt mit SVR ab.
+          </p>
+        </div>
+
+        <!-- Gruppe: Intuition & Mathematik -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-3)">
+          🚀 Intuition & Mathematik
+        </p>
+        <div class="nav-grid" style="margin-bottom:var(--space-6)">
+
+          <a href="Page02.html" class="nav-card">
+            <span class="nav-card-icon">↔️</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 02</span>
+              <span class="nav-card-title">Margin Maximierung & Support Vectors</span>
+              <span class="nav-card-sub">Intuition · SVC · support_vectors_ · Robustheit</span>
+            </div>
+          </a>
+
+          <a href="Page03.html" class="nav-card purple">
+            <span class="nav-card-icon">🧮</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 03</span>
+              <span class="nav-card-title">Mathematischer Hintergrund</span>
+              <span class="nav-card-sub">Hyperebene · w + b · Hard-Margin Herleitung</span>
+            </div>
+          </a>
+
+          <a href="Page04.html" class="nav-card purple">
+            <span class="nav-card-icon">⚖️</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 04</span>
+              <span class="nav-card-title">Soft-Margin & Optimierung</span>
+              <span class="nav-card-sub">C · Slack-Variable · Hinge Loss · Gradienten</span>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Gruppe: Implementierung -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-3)">
+          💻 Implementierung from Scratch
+        </p>
+        <div class="nav-grid" style="margin-bottom:var(--space-6)">
+
+          <a href="Page05.html" class="nav-card orange">
+            <span class="nav-card-icon">🔨</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 05</span>
+              <span class="nav-card-title">SVM from Scratch</span>
+              <span class="nav-card-sub">svm_gradients() · svm_train() · Visualisierung</span>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Gruppe: Kernel & Anwendungen -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-3)">
+          🌀 Kernel-Trick & Anwendungen
+        </p>
+        <div class="nav-grid" style="margin-bottom:var(--space-6)">
+
+          <a href="Page06.html" class="nav-card">
+            <span class="nav-card-icon">🌀</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 06</span>
+              <span class="nav-card-title">Nicht-lineare Probleme & Kernel-Trick</span>
+              <span class="nav-card-sub">RBF · 3D-Projektion · kernel='rbf'</span>
+            </div>
+          </a>
+
+          <a href="Page07.html" class="nav-card green">
+            <span class="nav-card-icon">🏭</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 07</span>
+              <span class="nav-card-title">Multi-Class & Praxis-Anwendungen</span>
+              <span class="nav-card-sub">OvO · Handschrift · Face Rec. · Kugellager</span>
+            </div>
+          </a>
+
+        </div>
+
+        <!-- Gruppe: Abschluss -->
+        <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+                  text-transform:uppercase; color:var(--color-text-faint);
+                  margin-bottom:var(--space-3)">
+          📈 SVR & Abschluss
+        </p>
+        <div class="nav-grid">
+
+          <a href="Page08.html" class="nav-card">
+            <span class="nav-card-icon">📈</span>
+            <div class="nav-card-body">
+              <span class="nav-card-num">Seite 08</span>
+              <span class="nav-card-title">SVR & Zusammenfassung</span>
+              <span class="nav-card-sub">SVR · epsilon · Pros &amp; Cons · No-Free-Lunch</span>
+            </div>
+          </a>
+
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

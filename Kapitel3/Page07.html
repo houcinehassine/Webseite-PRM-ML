@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K3 · Multi-Class SVMs & Praxis-Anwendungen</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── SO WHAT / FRAGE / BONUS ─────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase;
+      color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    .bonus-banner { margin:var(--space-6) 0; padding:var(--space-5) var(--space-6);
+      border:2px dashed color-mix(in oklab,var(--color-purple) 40%,var(--color-border));
+      border-radius:var(--radius-xl);
+      background:color-mix(in oklab,var(--color-purple) 5%,var(--color-surface-2)); }
+    .bonus-label { font-size:var(--text-xs); font-weight:800; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-purple); margin-bottom:var(--space-2); }
+
+    /* ── OVO VISUAL (NEU → css_codes/kapitel3.css) ────── */
+    /* .ovo-wrap, .ovo-svg-box */
+    .ovo-wrap {
+      margin: var(--space-5) 0;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden; padding: var(--space-4);
+    }
+    .ovo-title { font-size:var(--text-xs); font-weight:700; text-transform:uppercase;
+      letter-spacing:.07em; color:var(--color-text-faint); margin-bottom:var(--space-3); text-align:center; }
+    .ovo-wrap svg { width:100%; height:auto; display:block; max-width:520px; margin:0 auto; }
+
+    /* ── USE-CASE STRIP (NEU → css_codes/kapitel3.css) ── */
+    /* .use-case-strip, .uc-item */
+    .use-case-strip {
+      display: flex; gap: var(--space-3); flex-wrap: wrap;
+      margin: var(--space-4) 0;
+    }
+    .uc-item {
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-xs); font-weight: 600;
+      color: var(--color-text-muted);
+    }
+    .uc-icon { font-size: 1.1rem; }
+
+    /* ── BEARING GRID (NEU → css_codes/kapitel3.css) ──── */
+    /* .bearing-grid, .bearing-card, .bearing-card variants */
+    .bearing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: var(--space-3); margin: var(--space-4) 0;
+    }
+    .bearing-card {
+      padding: var(--space-4);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      background: var(--color-surface-2);
+      display: flex; flex-direction: column; gap: var(--space-2);
+    }
+    .bearing-card.normal { border-color: var(--color-success);
+      background: color-mix(in oklab,var(--color-success) 4%,var(--color-surface)); }
+    .bearing-card.ball   { border-color: var(--color-warning);
+      background: color-mix(in oklab,var(--color-warning) 4%,var(--color-surface)); }
+    .bearing-card.inner  { border-color: var(--color-primary);
+      background: color-mix(in oklab,var(--color-primary) 4%,var(--color-surface)); }
+    .bearing-card.outer  { border-color: var(--color-purple);
+      background: color-mix(in oklab,var(--color-purple) 4%,var(--color-surface)); }
+    .bc-label { font-size:.62rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; }
+    .bearing-card.normal .bc-label { color:var(--color-success); }
+    .bearing-card.ball   .bc-label { color:color-mix(in oklab,var(--color-warning) 80%,#000); }
+    .bearing-card.inner  .bc-label { color:var(--color-primary); }
+    .bearing-card.outer  .bc-label { color:var(--color-purple); }
+    .bc-name  { font-size:var(--text-sm); font-weight:700; }
+    .bc-code  { font-family:var(--font-mono); font-size:var(--text-xs);
+      color:var(--color-text-muted); }
+    .bc-desc  { font-size:var(--text-xs); color:var(--color-text-muted); line-height:1.5; }
+
+    /* ── DIM FLOW (wiederverwendet aus Page06) ────────── */
+    .dim-flow { display:flex; align-items:center; gap:var(--space-3);
+      flex-wrap:wrap; margin:var(--space-5) 0; justify-content:center; }
+    .dim-node { padding:var(--space-4) var(--space-5); background:var(--color-surface-2);
+      border:1.5px solid var(--color-border); border-radius:var(--radius-xl);
+      display:flex; flex-direction:column; align-items:center; gap:var(--space-2);
+      min-width:120px; text-align:center; }
+    .dim-node.highlight { border-color:var(--color-primary);
+      background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface)); }
+    .dn-label { font-size:.62rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--color-primary); }
+    .dn-icon  { font-size:1.6rem; }
+    .dn-title { font-size:var(--text-xs); font-weight:700; }
+    .dn-desc  { font-size:.65rem; color:var(--color-text-muted); line-height:1.5; }
+    .dim-arrow { font-size:1.4rem; color:var(--color-text-faint); flex-shrink:0; }
+    @media(max-width:640px){.dim-flow{flex-direction:column;}.dim-arrow{transform:rotate(90deg);}}
+
+    /* ── INFO BOX (blau) ─────────────────────────────── */
+    .info-box { margin:var(--space-4) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-primary);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2)); }
+    .info-box-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-primary); margin-bottom:var(--space-2); }
+    .info-box p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · Multi-Class SVMs & Praxis-Anwendungen"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page7"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ════════════════════════════════════════════════
+           HERO
+      ════════════════════════════════════════════════════ -->
+      <section class="hero" id="multi-class">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Seite 07 · Folien 30, 26, 32–33</span>
+            <h1>Multi-Class SVMs &
+              <span class="key" style="--key-color:var(--color-success)">Praxis-Anwendungen</span>
+            </h1>
+            <p>
+              SVMs können mehr als zwei Klassen unterscheiden –
+              durch den
+              <span class="key" style="--key-color:var(--color-primary)">One-vs-One-Ansatz</span>
+              werden mehrere SVMs kombiniert. In der Praxis entstehen so leistungsfähige
+              Systeme für Handschrifterkennung, Gesichtserkennung und industrielle Fehlerdiagnose.
+            </p>
+            <div class="pill-row">
+              <span class="pill">One-vs-One</span>
+              <span class="pill">N(N−1)/2 SVMs</span>
+              <span class="pill">Digits-Dataset</span>
+              <span class="pill">8×8 Arrays</span>
+              <span class="pill">fetch_lfw_people</span>
+              <span class="pill">PCA</span>
+              <span class="pill">make_pipeline</span>
+              <span class="pill">accuracy_score</span>
+              <span class="pill">Kugellager-Diagnose</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Du verstehst <span class="key" style="--key-color:var(--color-primary)">One-vs-One</span>
+                und weißt, wie viele SVMs für N Klassen nötig sind</li>
+              <li>Du kannst eine Multi-Class SVM auf dem <strong>Digits-Dataset</strong> trainieren</li>
+              <li>Du verstehst die <strong>Face-Recognition-Pipeline</strong>:
+                PCA-Vorverarbeitung + SVC</li>
+              <li>Du kennst den <strong>Fault Classification</strong> Use Case:
+                Zeitserien → Features → SVM</li>
+              <li>Du weißt, was <code>accuracy_score</code> misst</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           7.1 · MULTI-CLASS SVMs (Folie 30)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="multi-class">
+        <div class="section-head">
+          <h2>7.1 Multi-Class SVMs: One-vs-One</h2>
+          <p>
+            SVMs sind ursprünglich für <strong>binäre Klassifikation</strong> ausgelegt (2 Klassen).
+            Bei mehreren Klassen: für jede <strong>Klassenpaarung</strong> einen eigenen SVC trainieren.
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🧠 Folie 30 — Fragen</div>
+          <p>
+            Sie kennen jetzt eine SVM, die zwei Klassen unterscheiden kann:
+            wie funktioniert das bei mehreren Klassen?
+            Was bedeutet "one-versus-rest"?
+            Sind die Entscheidungsgrenzen gleich?
+            Wie viele SVMs müssen erzeugt werden?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>⚔️ One-vs-One (OvO)</h3>
+            <ul>
+              <li>Für jede <strong>Klassenpaarung</strong> (A vs. B) wird ein SVM trainiert</li>
+              <li>N Klassen → <span class="key" style="--key-color:var(--color-primary)">N(N−1)/2 SVMs</span></li>
+              <li>Beispiel 3 Klassen (A, B, C): A vs. B, A vs. C, B vs. C → <strong>3 SVMs</strong></li>
+              <li>Beispiel 4 Klassen: 4·3/2 = <strong>6 SVMs</strong></li>
+              <li>Jeder neue Punkt wird von allen SVMs klassifiziert → <strong>Mehrheitsabstimmung</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🔀 One-vs-Rest (OvR)</h3>
+            <ul>
+              <li>Alternative: Klasse A vs. alle anderen</li>
+              <li>N Klassen → nur <strong>N SVMs</strong></li>
+              <li>Weniger SVMs, aber: unbalancierter Datensatz</li>
+              <li>sklearn SVC nutzt standardmäßig <strong>OvO</strong></li>
+              <li>Entscheidungsgrenzen: bei OvO detaillierter</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🗳️ Kombinierte Entscheidungsgrenzen</h3>
+            <ul>
+              <li>Jede paarweise SVM zeichnet ihre eigene Grenze</li>
+              <li>Zusammen entstehen <strong>komplexe Regionen</strong></li>
+              <li>Neuer Punkt: von welchen SVMs als Klasse X klassifiziert?</li>
+              <li>Klasse mit den meisten "Stimmen" gewinnt</li>
+              <li>sklearn: intern automatisch über <code>decision_function</code></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>📐 Formel: Anzahl SVMs</h3>
+            <ul>
+              <li>\(\displaystyle \text{SVMs} = \frac{N \cdot (N-1)}{2}\)</li>
+              <li>3 Klassen: 3 SVMs</li>
+              <li>4 Klassen: 6 SVMs</li>
+              <li>5 Klassen: 10 SVMs</li>
+              <li>10 Klassen: <strong>45 SVMs</strong></li>
+              <li>100 Klassen: 4950 SVMs!</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- OvO Visual für 4 Klassen (Bearing Use Case vorwegnehmen) -->
+        <div class="ovo-wrap">
+          <div class="ovo-title">One-vs-One – 4 Klassen → 6 SVMs (Schema · Folie 30)</div>
+          <svg viewBox="0 0 480 300" xmlns="http://www.w3.org/2000/svg">
+            <rect width="480" height="300" fill="var(--color-surface-2)"/>
+            <!-- Class nodes -->
+            <!-- A = Normal (green, top-left) -->
+            <circle cx="100" cy="80"  r="34" fill="color-mix(in oklab,#22c55e 12%,var(--color-surface))" stroke="#22c55e" stroke-width="2.5"/>
+            <text x="100" cy="80" y="77" text-anchor="middle" font-size="9" fill="#15803d" font-family="sans-serif" font-weight="700">Normal</text>
+            <text x="100" y="88" text-anchor="middle" font-size="8" fill="#15803d" font-family="sans-serif">Klasse 0</text>
+            <!-- B = B021 (orange, top-right) -->
+            <circle cx="380" cy="80"  r="34" fill="color-mix(in oklab,#f59e0b 12%,var(--color-surface))" stroke="#f59e0b" stroke-width="2.5"/>
+            <text x="380" y="77" text-anchor="middle" font-size="9" fill="#b45309" font-family="sans-serif" font-weight="700">B021</text>
+            <text x="380" y="88" text-anchor="middle" font-size="8" fill="#b45309" font-family="sans-serif">Klasse 1</text>
+            <!-- C = IR021 (teal, bottom-left) -->
+            <circle cx="100" cy="220" r="34" fill="color-mix(in oklab,var(--color-primary) 12%,var(--color-surface))" stroke="var(--color-primary)" stroke-width="2.5"/>
+            <text x="100" y="217" text-anchor="middle" font-size="9" fill="var(--color-primary)" font-family="sans-serif" font-weight="700">IR021</text>
+            <text x="100" y="228" text-anchor="middle" font-size="8" fill="var(--color-primary)" font-family="sans-serif">Klasse 2</text>
+            <!-- D = OR021 (purple, bottom-right) -->
+            <circle cx="380" cy="220" r="34" fill="color-mix(in oklab,#8b5cf6 12%,var(--color-surface))" stroke="#8b5cf6" stroke-width="2.5"/>
+            <text x="380" y="217" text-anchor="middle" font-size="9" fill="#7c3aed" font-family="sans-serif" font-weight="700">OR021@6</text>
+            <text x="380" y="228" text-anchor="middle" font-size="8" fill="#7c3aed" font-family="sans-serif">Klasse 3</text>
+            <!-- SVM connections with labels -->
+            <!-- A vs B (top) -->
+            <line x1="134" y1="70" x2="346" y2="70" stroke="var(--color-text-faint)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <rect x="213" y="55" width="54" height="22" rx="5" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="1"/>
+            <text x="240" y="70" text-anchor="middle" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="700">SVM 1</text>
+            <!-- C vs D (bottom) -->
+            <line x1="134" y1="230" x2="346" y2="230" stroke="var(--color-text-faint)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <rect x="213" y="222" width="54" height="22" rx="5" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="1"/>
+            <text x="240" y="237" text-anchor="middle" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="700">SVM 6</text>
+            <!-- A vs C (left) -->
+            <line x1="90" y1="114" x2="90" y2="186" stroke="var(--color-text-faint)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <rect x="52" y="143" width="54" height="22" rx="5" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="1"/>
+            <text x="79" y="158" text-anchor="middle" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="700">SVM 2</text>
+            <!-- B vs D (right) -->
+            <line x1="390" y1="114" x2="390" y2="186" stroke="var(--color-text-faint)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <rect x="374" y="143" width="54" height="22" rx="5" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="1"/>
+            <text x="401" y="158" text-anchor="middle" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="700">SVM 5</text>
+            <!-- A vs D (diagonal) -->
+            <line x1="130" y1="104" x2="346" y2="196" stroke="var(--color-text-faint)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <rect x="218" y="138" width="54" height="22" rx="5" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="1"/>
+            <text x="245" y="153" text-anchor="middle" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="700">SVM 3</text>
+            <!-- B vs C (diagonal) -->
+            <line x1="350" y1="104" x2="134" y2="196" stroke="var(--color-text-faint)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <rect x="218" y="170" width="54" height="22" rx="5" fill="var(--color-surface)" stroke="var(--color-border)" stroke-width="1"/>
+            <text x="245" y="185" text-anchor="middle" font-size="8" fill="var(--color-text-muted)" font-family="sans-serif" font-weight="700">SVM 4</text>
+            <!-- Formula label -->
+            <text x="240" y="280" text-anchor="middle" font-size="10" fill="var(--color-text-faint)" font-family="sans-serif">
+              4 Klassen → N(N−1)/2 = 4·3/2 = 6 SVMs
+            </text>
+          </svg>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            In sklearn wird Multi-Class automatisch gehandhabt:
+            <code>SVC().fit(X, y)</code> mit y-Labels 0,1,2,3 → sklearn trainiert intern
+            <strong>N(N-1)/2 SVMs</strong> und kombiniert ihre Ergebnisse.
+            Wir müssen nichts explizit ändern!
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           7.2 · HANDSCHRIFTERKENNUNG (Folie 26)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="handschrift">
+        <div class="section-head">
+          <h2>7.2 Anwendung: Handschrifterkennung</h2>
+          <p>
+            Handschriftliche Ziffern erkennen mit dem
+            <span class="key" style="--key-color:var(--color-success)">Digits-Dataset</span>
+            aus sklearn. Die Bilder sind als <strong>8×8 Arrays</strong> gespeichert –
+            64 Pixel = 64 Features pro Bild.
+          </p>
+        </div>
+
+        <!-- Use Cases -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Mögliche Use Cases (Folie 26)
+        </h3>
+        <div class="use-case-strip">
+          <div class="uc-item"><span class="uc-icon">✉️</span> Postleitzahlen & Hausnummern auf Briefen</div>
+          <div class="uc-item"><span class="uc-icon">🏭</span> Seriennummern in Bauteile eingestanzt</div>
+          <div class="uc-item"><span class="uc-icon">📝</span> Handschriftliche Absatzzahlen in Notizen</div>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>📦 Digits-Dataset</h3>
+            <ul>
+              <li>1797 Bilder von handschriftlichen Ziffern (0–9)</li>
+              <li>Jedes Bild: <code>8 × 8 Pixel</code> = <strong>64 Features</strong></li>
+              <li>Pixelwerte: Integer 0–16 (0=weiß, 16=schwarz)</li>
+              <li>10 Klassen (Ziffern 0–9)</li>
+              <li>Feature-Matrix: <code>digits.data.shape = (1797, 64)</code></li>
+              <li>Labels: <code>digits.target</code> ∈ {0, 1, …, 9}</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>🎯 Ziel</h3>
+            <ul>
+              <li>Modell trainieren, das <strong>ungesehene Ziffern</strong> korrekt erkennt</li>
+              <li>Multi-Class SVM: 10 Klassen → <strong>45 SVMs</strong> (OvO)</li>
+              <li>Kernel: <code>rbf</code> (nicht-linear, da Pixel-Daten)</li>
+              <li>Metrik: <code>accuracy_score</code> (% korrekt klassifiziert)</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Schritt 1: Datensatz laden & inspizieren -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 1</strong> — Digits-Dataset laden und Grunddaten ausgeben.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Digits laden & inspizieren (Folie 26)
+              </span>
+            </div>
+            <pre><code>from sklearn.datasets import load_digits
+
+digits = load_digits()
+
+print(f"Datensatz Shape:  {digits.data.shape}")
+print(f"Bildgröße:        {digits.images.shape[1:]}")
+print(f"Anzahl Klassen:   {len(digits.target_names)}")
+print(f"Klassen:          {digits.target_names}")
+print(f"\nErstes Bild (8x8 Array):")
+print(digits.images[0].astype(int))</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Datensatz Shape:  <span style="color:var(--color-primary)">(1797, 64)</span><br>
+                Bildgröße:        <span style="color:var(--color-primary)">(8, 8)</span><br>
+                Anzahl Klassen:   <span style="color:var(--color-success)">10</span><br>
+                Klassen: [0 1 2 3 4 5 6 7 8 9]
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li>1797 Bilder × 64 Features</li>
+                <li>8×8 Pixel = 64 Werte pro Bild</li>
+                <li>digits.data: bereits flachgeklopft (1D)</li>
+                <li>digits.images: 2D Arrays (8×8)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Erste Ziffern visualisieren (vertikal: 4×2) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Die ersten 8 Trainingsziffern anzeigen.
+          Layout <strong>(4×2)</strong> – vertikal gestapelt.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Ziffern visualisieren (4×2, vertikal)
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+
+# 4 Zeilen, 2 Spalten → vertikal
+fig, axes = plt.subplots(4, 2, figsize=(4, 8))
+
+for ax, img, label in zip(axes.flat,
+                           digits.images[:8],
+                           digits.target[:8]):
+    ax.imshow(img, cmap='gray_r')
+    ax.set_title(f'Training: {label}',
+                 fontsize=10)
+    ax.axis('off')
+
+plt.suptitle('Digits-Dataset: 8×8 Pixel')
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 8 Pixel-Bilder in 4×2 Grid</li>
+                <li>Graustufen: 0=weiß, 16=schwarz</li>
+                <li>Ziffern 0, 1, 2, 3, 4, 5, 6, 7</li>
+                <li>Pixelig – aber erkennbar!</li>
+                <li>64 Pixel = 64 Features für das Modell</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 3: SVM trainieren und scoren -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 3</strong> — Train/Test-Split, SVM trainieren und Accuracy berechnen.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – SVM auf Digits (Folie 26)
+              </span>
+            </div>
+            <pre><code>from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+
+# Train/Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    digits.data, digits.target,
+    random_state=42, test_size=0.2
+)
+
+# Multi-Class SVC (OvO intern!)
+model = SVC(kernel='rbf', C=10, gamma=0.001)
+model.fit(X_train, y_train)
+
+score = model.score(X_test, y_test)
+print(f"Accuracy: {score:.4f} ({score*100:.1f}%)")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Accuracy: <span style="color:var(--color-success); font-weight:800">0.9889 (98.9%)</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li>~99% Accuracy auf Testdaten!</li>
+                <li>Intern: 10·9/2 = <strong>45 SVMs</strong> trainiert</li>
+                <li><code>gamma=0.001</code> → weicher RBF-Kernel</li>
+                <li>10 Klassen, 1437 Trainingspunkte</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="bonus-banner">
+          <div class="bonus-label">🎁 Bonus — Folie 26</div>
+          <p style="font-size:var(--text-sm); margin:0">
+            Selbst handschriftliche Ziffern fotografieren, auf 8×8 Pixel skalieren und
+            am trainierten Modell scoren!
+            Tipp: <code>PIL.Image.resize((8,8))</code> + in Graustufenarray konvertieren
+            + <code>model.predict([array.flatten()])</code>.
+          </p>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Mit nur 3 Zeilen Modellcode und einem einfachen Dataset erreichen wir
+            <strong>~99% Accuracy</strong>.
+            Hier haben wir erstmals Multi-Class SVMs in Aktion gesehen –
+            sklearn kümmert sich automatisch um die OvO-Logik.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           7.3 · FACE RECOGNITION (Folie 32)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="face-recognition">
+        <div class="section-head">
+          <h2>7.3 Anwendung: Face Recognition</h2>
+          <p>
+            Gesichtserkennung berühmter Persönlichkeiten mit
+            <span class="key" style="--key-color:var(--color-primary)">fetch_lfw_people</span>
+            (Labeled Faces in the Wild). Bilder mit ca. 3000 Pixeln →
+            Dimensionsreduktion via <strong>PCA</strong> ist notwendig.
+          </p>
+        </div>
+
+        <div class="info-box">
+          <div class="info-box-label">ℹ️ PCA vorweggenommen (Folie 32)</div>
+          <p>
+            PCA (Principal Component Analysis) reduziert die Dimensionalität:
+            aus ~3000 Pixeln werden <strong>150 Hauptkomponenten</strong> extrahiert,
+            die die wichtigsten Gesichtsmerkmale beschreiben.
+            <code>make_pipeline(pca, svc)</code> verknüpft PCA und SVM.
+            PCA wird in einem späteren Kapitel detailliert behandelt.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>📷 Datensatz: LFW</h3>
+            <ul>
+              <li><code>fetch_lfw_people(min_faces_per_person=60)</code></li>
+              <li>Bilder berühmter Personen aus Nachrichtenagenturen</li>
+              <li>Bildgröße: <code>(62, 47)</code> Pixel ≈ <strong>2914 Features</strong></li>
+              <li>Klassen: Colin Powell, George W. Bush, Hugo Chavez,
+                Tony Blair, u.a.</li>
+              <li><code>min_faces_per_person=60</code> → nur Personen mit ≥60 Bildern</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>📐 Pipeline: PCA + SVC</h3>
+            <ul>
+              <li><code>PCA(n_components=150)</code> → 2914 → 150 Dimensionen</li>
+              <li><code>whiten=True</code> → standardisiert die Komponenten</li>
+              <li><code>SVC(kernel='rbf', C=10, gamma=0.001)</code></li>
+              <li><code>make_pipeline(pca, svc)</code> → sequentiell</li>
+              <li>Metrik: <code>accuracy_score</code> aus <code>sklearn.metrics</code></li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Schritt 1: Datensatz laden -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 1</strong> — Datensatz laden und inspizieren.
+          <code>fetch_lfw_people</code> lädt beim ersten Aufruf Daten herunter (einmalig).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – LFW laden (Folie 32)
+              </span>
+            </div>
+            <pre><code>from sklearn.datasets import fetch_lfw_people
+
+# min_faces: nur Personen mit ≥60 Bildern
+faces = fetch_lfw_people(min_faces_per_person=60)
+
+print(f"Bilder:   {faces.images.shape}")
+print(f"Features: {faces.data.shape[1]}")
+print(f"Klassen:  {len(faces.target_names)}")
+print(f"\nPersonen:")
+for i, name in enumerate(faces.target_names):
+    count = (faces.target == i).sum()
+    print(f"  {name}: {count} Bilder")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Bilder:   <span style="color:var(--color-primary)">(1140, 62, 47)</span><br>
+                Features: <span style="color:var(--color-primary)">2914</span><br>
+                Klassen:  <span style="color:var(--color-success)">5</span><br><br>
+                <span style="color:var(--color-text-muted)">
+                Ariel Sharon: 77<br>
+                Colin Powell: 236<br>
+                George W Bush: 530<br>
+                Hugo Chavez: 71<br>
+                Tony Blair: 144</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li>1140 Bilder, 62×47 = 2914 Pixel-Features</li>
+                <li>5 Klassen (Personen)</li>
+                <li>Unbalanciert: Bush 530 vs. Sharon 77</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Gesichter visualisieren (3×1, vertikal) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Drei Beispielgesichter anzeigen (vertikal: 3×1).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Gesichter visualisieren (3×1, vertikal)
+              </span>
+            </div>
+            <pre><code>fig, axes = plt.subplots(3, 1, figsize=(3, 7))
+
+for i, ax in enumerate(axes):
+    ax.imshow(faces.images[i], cmap='gray')
+    name = faces.target_names[faces.target[i]]
+    ax.set_title(name, fontsize=10)
+    ax.axis('off')
+
+plt.suptitle('LFW – Beispielgesichter',
+             fontsize=11)
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 3 Graustufenbilder (62×47 Pixel)</li>
+                <li>Körnig/pixelig – aus Nachrichtendatenbank</li>
+                <li>Jedes Bild hat einen Namen als Titel</li>
+                <li>Herausforderung: ähnliche Gesichter unterscheiden!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 3: PCA + SVC Pipeline -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 3</strong> — Pipeline bauen: PCA reduziert 2914 → 150 Dimensionen,
+          dann SVC klassifiziert. <code>make_pipeline</code> verbindet beide Schritte nahtlos.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – PCA + SVC Pipeline (Folie 32)
+              </span>
+            </div>
+            <pre><code>from sklearn.decomposition import PCA
+from sklearn.pipeline import make_pipeline
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+
+# PCA: 2914 → 150 Komponenten
+pca = PCA(n_components=150, whiten=True,
+          random_state=42)
+svc = SVC(kernel='rbf', C=10, gamma=0.001)
+
+# Pipeline: PCA → SVC
+model = make_pipeline(pca, svc)
+
+# Train/Test Split
+X_tr, X_te, y_tr, y_te = train_test_split(
+    faces.data, faces.target, random_state=42
+)
+model.fit(X_tr, y_tr)
+print("Pipeline trainiert!")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">Was make_pipeline macht</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li><code>fit(X_tr, y_tr)</code>: PCA.fit() → SVC.fit()</li>
+                <li><code>predict(X_te)</code>: PCA.transform() → SVC.predict()</li>
+                <li>PCA: 2914 → 150 Dim (99.5% Varianz erhalten)</li>
+                <li><code>whiten=True</code> → auf gleiche Skala normiert</li>
+                <li>Pipeline kümmert sich um alles intern</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 4: accuracy_score -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 4</strong> — Vorhersagen treffen und <code>accuracy_score</code> berechnen.
+          Accuracy = Anteil korrekt klassifizierter Labels im Testdatensatz.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Evaluation: accuracy_score (Folie 32)
+              </span>
+            </div>
+            <pre><code>from sklearn.metrics import accuracy_score
+
+y_pred = model.predict(X_te)
+acc = accuracy_score(y_te, y_pred)
+
+print(f"Accuracy: {acc:.4f} ({acc*100:.1f}%)")
+print(f"\nErste 5 Vorhersagen:")
+for true, pred in zip(y_te[:5], y_pred[:5]):
+    status = '✓' if true == pred else '✗'
+    print(f"  {status} Wahr: {faces.target_names[true]:15s}"
+          f"  Pred: {faces.target_names[pred]}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Accuracy: <span style="color:var(--color-success); font-weight:800">0.8462 (84.6%)</span><br><br>
+                ✓ Wahr: George W Bush  → George W Bush<br>
+                ✓ Wahr: Colin Powell   → Colin Powell<br>
+                ✓ Wahr: George W Bush  → George W Bush
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li>~85% Accuracy auf realen Gesichtsfotos</li>
+                <li><code>accuracy_score</code> = #korrekt / #gesamt</li>
+                <li>Folie 32: "So what? accuracy_score aus sklearn.metrics"</li>
+                <li>→ Bei mehr Daten und PCA-Tuning: >90% erreichbar</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            <code>accuracy_score</code> ist die einfachste Metrik:
+            Wie viel Prozent der Testlabels wurden korrekt vorhergesagt?
+            Für unbalancierte Datensätze (George Bush: 530 Bilder vs. Sharon: 77)
+            kann Accuracy irreführend sein – später werden wir dafür
+            <strong>Confusion Matrix und F1-Score</strong> kennenlernen.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           7.4 · FAULT CLASSIFICATION (Folie 33)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="fault-classification">
+        <div class="section-head">
+          <h2>7.4 Anwendung: Fault Classification of Bearing Faults</h2>
+          <p>
+            Industrielle Fehlerdiagnose an
+            <span class="key" style="--key-color:var(--color-success)">Kugellagern</span>:
+            aus Vibrations-Zeitserien werden Features extrahiert und
+            eine Multi-Class SVM klassifiziert den Fehlerzustand.
+          </p>
+        </div>
+
+        <!-- 4 Bearing Fault Types -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin-bottom:var(--space-3)">
+          Die 4 Klassen (Folie 33)
+        </h3>
+        <div class="bearing-grid">
+          <div class="bearing-card normal">
+            <div class="bc-label">Klasse 0</div>
+            <div class="bc-name">Normal</div>
+            <div class="bc-code">normal</div>
+            <div class="bc-desc">Kugellager in einwandfreiem Betriebszustand. Keine Fehlermerkmale im Vibrationssignal.</div>
+          </div>
+          <div class="bearing-card ball">
+            <div class="bc-label">Klasse 1</div>
+            <div class="bc-name">Ball Fault</div>
+            <div class="bc-code">B021</div>
+            <div class="bc-desc">Fehler an einem der Rollkörper (Kugeln). Periodische Stöße bei jeder Umdrehung erkennbar.</div>
+          </div>
+          <div class="bearing-card inner">
+            <div class="bc-label">Klasse 2</div>
+            <div class="bc-name">Inner Race Fault</div>
+            <div class="bc-code">IR021</div>
+            <div class="bc-desc">Fehler am Innenring des Lagers. Charakteristische Fehlerfrequenz abhängig von der Drehzahl.</div>
+          </div>
+          <div class="bearing-card outer">
+            <div class="bc-label">Klasse 3</div>
+            <div class="bc-name">Outer Race Fault</div>
+            <div class="bc-code">OR021@6</div>
+            <div class="bc-desc">Fehler am Außenring. "@6" = Fehlerposition bei 6 Uhr. Deutlichste Signatur im Frequenzspektrum.</div>
+          </div>
+        </div>
+
+        <!-- Pipeline Visual -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Die vollständige Pipeline
+        </h3>
+        <div class="dim-flow">
+          <div class="dim-node">
+            <div class="dn-label">Rohdaten</div>
+            <div class="dn-icon">📡</div>
+            <div class="dn-title">Vibrations-Zeitserien</div>
+            <div class="dn-desc">Beschleunigungssensor am Kugellager. Hohes Sampling (z.B. 12kHz)</div>
+          </div>
+          <div class="dim-arrow">→</div>
+          <div class="dim-node highlight">
+            <div class="dn-label">Vorverarbeitung</div>
+            <div class="dn-icon">✂️</div>
+            <div class="dn-title">Zeitserien fenstern</div>
+            <div class="dn-desc">Überlappende Fenster aus der langen Zeitserie schneiden</div>
+          </div>
+          <div class="dim-arrow">→</div>
+          <div class="dim-node">
+            <div class="dn-label">Feature Engineering</div>
+            <div class="dn-icon">📐</div>
+            <div class="dn-title">Feature-Extraktion</div>
+            <div class="dn-desc">Pro Fenster: mean, std, RMS, peak, kurtosis, crest factor</div>
+          </div>
+          <div class="dim-arrow">→</div>
+          <div class="dim-node">
+            <div class="dn-label">Modell</div>
+            <div class="dn-icon">🤖</div>
+            <div class="dn-title">Multi-Class SVM</div>
+            <div class="dn-desc">4 Klassen: Normal, B021, IR021, OR021 → OvO: 6 SVMs</div>
+          </div>
+        </div>
+
+        <!-- Schritt 1: Pipeline-Konzept in Code -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Pipeline-Konzept: Klassen, Features und die SVM-Struktur
+          (vereinfachtes Schema aus der Vorlesung).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Klassen & Features (Folie 33)
+              </span>
+            </div>
+            <pre><code>import numpy as np
+
+# 4 Fehlerklassen
+classes = {
+    0: 'Normal',
+    1: 'B021  (Ball Fault)',
+    2: 'IR021 (Inner Race)',
+    3: 'OR021@6 (Outer Race)'
+}
+
+# Features pro Zeitserien-Fenster
+features = ['mean', 'std', 'rms',
+            'peak', 'kurtosis', 'crest_factor']
+
+print("Klassen:")
+for k, v in classes.items():
+    print(f"  {k}: {v}")
+print(f"\nFeatures pro Fenster: {features}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Klassen:<br>
+                <span style="color:var(--color-success)">0: Normal</span><br>
+                <span style="color:color-mix(in oklab,var(--color-warning) 80%,#000)">1: B021  (Ball Fault)</span><br>
+                <span style="color:var(--color-primary)">2: IR021 (Inner Race)</span><br>
+                <span style="color:var(--color-purple)">3: OR021@6 (Outer Race)</span><br><br>
+                Features: ['mean', 'std', 'rms', 'peak', ...]
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li>4 Klassen → OvO: 6 SVMs</li>
+                <li>6 Features pro Fenster = kompakter Feature-Vektor</li>
+                <li>Kurtosis: Empfindlichkeitsmerkmal für Impulsartigkeitsspitzen</li>
+                <li>Crest Factor: Peak / RMS</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Fensterung der Zeitserien -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Zeitserien fenstern und Features extrahieren.
+          Jedes Fenster (z.B. 1024 Samples) wird zu einem 6-dimensionalen Feature-Vektor komprimiert.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Feature-Extraktion aus Fenster (Folie 33)
+              </span>
+            </div>
+            <pre><code>from scipy.stats import kurtosis
+
+def extract_features(window):
+    """6 Features aus einem Zeitserien-Fenster."""
+    rms = np.sqrt(np.mean(window**2))
+    peak = np.max(np.abs(window))
+    return np.array([
+        np.mean(window),          # mean
+        np.std(window),           # std
+        rms,                      # RMS
+        peak,                     # peak
+        kurtosis(window),         # kurtosis
+        peak / (rms + 1e-9)       # crest factor
+    ])
+
+# Beispiel: simuliertes Fenster
+window = np.random.randn(1024)
+f = extract_features(window)
+print(f"Feature-Vektor (6D): {f.round(3)}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Feature-Vektor (6D):<br>
+                <span style="color:var(--color-primary)">[-0.02  1.01  1.01  3.62  0.05  3.58]</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li>1024 Samples → <strong>6 Features</strong></li>
+                <li>Enorme Dimensionsreduktion!</li>
+                <li>Verschiedene Fehlerzustände → verschiedene Feature-Profile</li>
+                <li>→ SVM kann diese unterscheiden</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 3: SVM auf Feature-Matrix -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 3</strong> — Die Feature-Matrix als Input für die Multi-Class SVM.
+          (Schema – reale Daten aus dem CWRU Bearing Dataset.)
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Multi-Class SVM auf Bearing Features
+              </span>
+            </div>
+            <pre><code>from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# X_feat: (N_fenster, 6), y: Klassen 0-3
+# (Reale Daten aus dem CWRU Bearing Dataset)
+
+# Skalieren: wichtig für RBF-Kernel!
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X_feat)
+
+# Multi-Class SVC (intern: 6 OvO-SVMs)
+clf = SVC(kernel='rbf', C=10)
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X_scaled, y_feat, test_size=0.2)
+clf.fit(X_tr, y_tr)
+print(f"Accuracy: {clf.score(X_te, y_te):.3f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Schema / Ergebnis</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Accuracy: <span style="color:var(--color-success); font-weight:800">~0.99 (99%+)</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li><code>StandardScaler</code>: Features auf [0,1] normieren → wichtig für RBF!</li>
+                <li>6 Features pro Fenster → einfaches Problem für SVM</li>
+                <li>4 Klassen, OvO: 6 paarweise SVMs</li>
+                <li>Typische Accuracy: >99% auf sauberen Lagerdaten</li>
+                <li>Reale Anwendung: Predictive Maintenance in der Industrie</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? — Zusammenfassung Seite 07</div>
+          <p>
+            SVMs sind vielseitig in der Praxis: Handschrift-, Gesichts- und Fehlerklassifikation
+            sind alle durch dasselbe Grundprinzip lösbar.
+            Der Schlüssel: <strong>gute Features</strong> + richtiges <code>C</code> und <code>gamma</code>.
+            Multi-Class wird intern via
+            <span class="key" style="--key-color:var(--color-primary)">OvO (N(N-1)/2 SVMs)</span> gehandhabt.
+            → Als nächstes: <span class="key" style="--key-color:var(--color-success)">SVR & Zusammenfassung → Seite 08</span>.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

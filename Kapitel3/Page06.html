@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K3 · Nicht-lineare Probleme & Kernel-Trick</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── SO WHAT / FRAGE ─────────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase;
+      color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── PROBLEM BOX (rot) ───────────────────────────── */
+    .problem-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid #ef4444;
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,#ef4444 5%,var(--color-surface-2)); }
+    .problem-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:#ef4444; margin-bottom:var(--space-2); }
+    .problem-box p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+
+    /* ── FORMULA BLOCK (aus kapitel3.css) ───────────── */
+    .formula-block {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+      border-radius: var(--radius-xl); padding: var(--space-5) var(--space-6);
+      margin: var(--space-4) 0; text-align: center; overflow-x: auto;
+    }
+    .formula-block .formula-label {
+      font-size: var(--text-xs); font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--color-primary); margin-bottom: var(--space-3);
+    }
+    .formula-block .formula-math {
+      font-size: clamp(0.95rem, 2.2vw, 1.15rem);
+      font-weight: 700; color: var(--color-text); line-height: 1.9;
+    }
+    .fl-row { display:flex; align-items:baseline; gap:var(--space-3);
+      font-size:var(--text-xs); text-align:left; margin-top:var(--space-2); }
+    .fl-sym { font-family:var(--font-mono); font-weight:700;
+      color:var(--color-primary); min-width:110px; flex-shrink:0; }
+    .fl-desc { color:var(--color-text-muted); line-height:1.5; }
+
+    /* ── DIM FLOW (NEU → css_codes/kapitel3.css) ────── */
+    /* .dim-flow, .dim-node, .dim-arrow, .dim-node.highlight */
+    .dim-flow {
+      display: flex; align-items: center; gap: var(--space-3);
+      flex-wrap: wrap; margin: var(--space-5) 0; justify-content: center;
+    }
+    .dim-node {
+      padding: var(--space-4) var(--space-5);
+      background: var(--color-surface-2);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      display: flex; flex-direction: column;
+      align-items: center; gap: var(--space-2);
+      min-width: 140px; text-align: center;
+    }
+    .dim-node.highlight {
+      border-color: var(--color-primary);
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface));
+    }
+    .dim-node.dim-2d { border-color: #ef4444; background: color-mix(in oklab,#ef4444 5%,var(--color-surface)); }
+    .dim-node.dim-3d { border-color: var(--color-success); background: color-mix(in oklab,var(--color-success) 5%,var(--color-surface)); }
+    .dn-label { font-size:.62rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .dim-node.dim-2d .dn-label { color:#ef4444; }
+    .dim-node.dim-3d .dn-label { color:var(--color-success); }
+    .dim-node.highlight .dn-label { color:var(--color-primary); }
+    .dn-icon  { font-size:1.8rem; }
+    .dn-title { font-size:var(--text-sm); font-weight:700; }
+    .dn-desc  { font-size:var(--text-xs); color:var(--color-text-muted); line-height:1.5; }
+    .dim-arrow { font-size:1.5rem; color:var(--color-text-faint); flex-shrink:0; }
+    @media (max-width:640px) {
+      .dim-flow { flex-direction:column; }
+      .dim-arrow { transform: rotate(90deg); }
+    }
+
+    /* ── KERNEL COMPARE (NEU → css_codes/kapitel3.css) ─ */
+    /* .kernel-compare, .kc-side, .kc-divider */
+    .kernel-compare {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      gap: var(--space-4); align-items: start; margin: var(--space-5) 0;
+    }
+    @media (max-width:640px) {
+      .kernel-compare { grid-template-columns:1fr; }
+      .kc-divider { display:none; }
+    }
+    .kc-side {
+      padding: var(--space-5);
+      border-radius: var(--radius-xl); border: 1.5px solid var(--color-border);
+      background: var(--color-surface-2);
+    }
+    .kc-side.fail { border-color:#ef4444; background:color-mix(in oklab,#ef4444 4%,var(--color-surface)); }
+    .kc-side.win  { border-color:var(--color-success); background:color-mix(in oklab,var(--color-success) 4%,var(--color-surface)); }
+    .kc-label { font-size:.62rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; margin-bottom:var(--space-3); }
+    .kc-side.fail .kc-label { color:#ef4444; }
+    .kc-side.win  .kc-label { color:var(--color-success); }
+    .kc-divider {
+      display:flex; align-items:center; justify-content:center; padding-top:var(--space-8);
+      font-size:var(--text-lg); font-weight:900; color:var(--color-text-faint);
+    }
+
+    /* ── CIRCLES VISUAL ─────────────────────────────── */
+    .circles-visual-wrap {
+      margin: var(--space-4) 0; background: var(--color-surface-2);
+      border: 1px solid var(--color-border); border-radius: var(--radius-xl);
+      overflow: hidden; padding: var(--space-4);
+    }
+    .circles-visual-wrap svg { width:100%; height:auto; display:block; max-width:400px; margin:0 auto; }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · Nicht-lineare Probleme & Kernel-Trick"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page6"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ════════════════════════════════════════════════
+           HERO
+      ════════════════════════════════════════════════════ -->
+      <section class="hero" id="nicht-linear-intro">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Seite 06 · Agenda-Punkt 4 · Folien 27–29</span>
+            <h1>Nicht-lineare Probleme &
+              <span class="key" style="--key-color:var(--color-primary)">Kernel-Trick</span>
+            </h1>
+            <p>
+              Was passiert, wenn Klassen gar nicht linear trennbar sind?
+              SVMs haben eine elegante Antwort:
+              <span class="key" style="--key-color:var(--color-primary)">Daten in höhere Dimensionen projizieren</span> –
+              und das so effizient, dass die Projektion nie wirklich berechnet wird.
+            </p>
+            <div class="pill-row">
+              <span class="pill">make_circles</span>
+              <span class="pill">linear nicht trennbar</span>
+              <span class="pill">Radial Basis Function</span>
+              <span class="pill">r = exp(−‖x‖²)</span>
+              <span class="pill">2D→3D Projektion</span>
+              <span class="pill">Kernel-Trick</span>
+              <span class="pill">kernel='rbf'</span>
+              <span class="pill">Elliptische Grenze</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Du erkennst ein <strong>nicht-lineares Problem</strong> und weißt, warum linearer SVC scheitert</li>
+              <li>Du verstehst <span class="key" style="--key-color:var(--color-primary)">Radial Basis Functions (RBF)</span>:
+                warum \(r = e^{-\|x\|^2}\) funktioniert</li>
+              <li>Du weißt, wie <strong>2D→3D Projektion</strong> lineare Separierbarkeit herstellt</li>
+              <li>Du kennst den
+                <span class="key" style="--key-color:var(--color-primary)">Kernel-Trick</span>:
+                implizite Projektion mit <code>kernel='rbf'</code></li>
+              <li>Du kannst das Ergebnis: <strong>elliptische Entscheidungsgrenze</strong> interpretieren</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           6.1 · NICHT-LINEARE PROBLEME (Folie 27)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="nicht-linear-intro">
+        <div class="section-head">
+          <h2>6.1 Das Problem: Nicht-linear separierbar</h2>
+          <p>
+            Bisher haben wir angenommen, dass eine gerade Hyperebene die Klassen trennen kann.
+            Was wenn das <span class="key" style="--key-color:#ef4444">grundsätzlich unmöglich</span> ist?
+          </p>
+        </div>
+
+        <!-- Konzentrische Kreise Visual -->
+        <div class="circles-visual-wrap">
+          <svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
+            <!-- Background -->
+            <rect width="320" height="280" fill="var(--color-surface-2)"/>
+            <!-- Grid lines (subtle) -->
+            <line x1="160" y1="20" x2="160" y2="260" stroke="var(--color-border)" stroke-width="0.5" opacity="0.5"/>
+            <line x1="20" y1="140" x2="300" y2="140" stroke="var(--color-border)" stroke-width="0.5" opacity="0.5"/>
+            <!-- Outer ring: red points -->
+            <circle cx="160" cy="55"  r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="210" cy="68"  r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="248" cy="98"  r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="263" cy="140" r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="250" cy="182" r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="213" cy="212" r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="160" cy="225" r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="107" cy="212" r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="70"  cy="182" r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="57"  cy="140" r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="72"  cy="98"  r="6" fill="#ef4444" opacity="0.85"/>
+            <circle cx="110" cy="68"  r="6" fill="#ef4444" opacity="0.85"/>
+            <!-- Inner ring: yellow/gold points -->
+            <circle cx="160" cy="110" r="6" fill="#f59e0b" opacity="0.85"/>
+            <circle cx="185" cy="118" r="6" fill="#f59e0b" opacity="0.85"/>
+            <circle cx="200" cy="140" r="6" fill="#f59e0b" opacity="0.85"/>
+            <circle cx="185" cy="162" r="6" fill="#f59e0b" opacity="0.85"/>
+            <circle cx="160" cy="170" r="6" fill="#f59e0b" opacity="0.85"/>
+            <circle cx="135" cy="162" r="6" fill="#f59e0b" opacity="0.85"/>
+            <circle cx="120" cy="140" r="6" fill="#f59e0b" opacity="0.85"/>
+            <circle cx="135" cy="118" r="6" fill="#f59e0b" opacity="0.85"/>
+            <!-- Failed linear separator -->
+            <line x1="60" y1="80" x2="280" y2="200" stroke="#4b5563" stroke-width="2" stroke-dasharray="6,3"/>
+            <text x="248" y="195" font-size="9" fill="#4b5563" font-family="sans-serif" font-weight="700">Linear SVC</text>
+            <text x="248" y="207" font-size="8" fill="#ef4444" font-family="sans-serif">❌ Versagt!</text>
+            <!-- Legend -->
+            <circle cx="30" cy="255" r="5" fill="#ef4444"/>
+            <text x="40" y="259" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif">Klasse 1 (außen)</text>
+            <circle cx="155" cy="255" r="5" fill="#f59e0b"/>
+            <text x="165" y="259" font-size="9" fill="var(--color-text-muted)" font-family="sans-serif">Klasse 2 (innen)</text>
+          </svg>
+        </div>
+
+        <div class="problem-box">
+          <div class="problem-label">❌ Das Problem — Folie 27</div>
+          <p>
+            Konzentrische Ringe: Klasse 2 (gelb, innen) ist vollständig von Klasse 1 (rot, außen) umschlossen.
+            <strong>Keine gerade Linie</strong> kann diese Klassen jemals trennen – egal wo wir sie ziehen.
+            Das ist ein nicht-linear separierbares Problem.
+          </p>
+        </div>
+
+        <!-- Code: make_circles + Linear SVC scheitert -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Datensatz erstellen und linearen SVC versuchen.
+          <code>make_circles()</code> erzeugt zwei konzentrische Ringe.
+          Der lineare SVC zeichnet nur eine gerade Linie – er scheitert hier fundamental.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – make_circles + Linear SVC (Folie 27, Cell 9)
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_circles
+from sklearn.svm import SVC
+
+# Konzentrische Ringe: linear nicht trennbar!
+X, y = make_circles(100, factor=0.1, noise=0.1)
+
+# Linearer SVC – wird scheitern
+clf_linear = SVC(kernel='linear').fit(X, y)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X[:, 0], X[:, 1], c=y, s=50,
+           cmap='autumn', edgecolors='gray')
+plot_svc_decision_function(clf_linear, ax,
+                            plot_support=False)
+ax.set_title('Linear SVC: Grundlegendes Versagen!')
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 Konzentrische Ringe: gelb (innen), rot (außen)</li>
+                <li>Gerade Linie schneidet <strong>beide Klassen</strong></li>
+                <li>Egal wie wir die Linie legen: immer falsch</li>
+                <li><code>factor=0.1</code>: kleiner Innenring</li>
+                <li><code>noise=0.1</code>: etwas Rauschen</li>
+                <li>→ Kein linearer Klassifikator kann das lösen!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>🔍 Was denken Sie? — Folie 27</h3>
+            <ul>
+              <li>Wie würden <em>Sie</em> dieses Problem lösen?</li>
+              <li>Welche geometrische Form würde die Klassen trennen?</li>
+              <li>Warum versagt eine Gerade hier fundamental?</li>
+              <li>→ Idee: die Daten in einen <strong>höheren Raum projizieren</strong>!</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>💡 Die Schlüsselidee</h3>
+            <ul>
+              <li>In 2D: Klassen sind <strong>nicht linear trennbar</strong></li>
+              <li>Was wenn wir eine <strong>3. Dimension hinzufügen</strong>?</li>
+              <li>In 3D könnten die Klassen <strong>auf unterschiedlicher Höhe</strong> liegen</li>
+              <li>Dann wäre eine <strong>horizontale Ebene</strong> die Trennlinie!</li>
+              <li>→ Lineare Separierbarkeit durch Dimensionserhöhung</li>
+            </ul>
+          </article>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            SVMs sind in der Lage, nicht-linear separierbare Probleme zu lösen.
+            Die Lösung: <strong>Projektion der Daten in einen höherdimensionalen Raum</strong>,
+            wo lineare Separierbarkeit wiederhergestellt wird.
+            Wie? → Radial Basis Functions.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           6.2 · RBF & 3D-PROJEKTION (Folie 28)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="rbf-3d-projektion">
+        <div class="section-head">
+          <h2>6.2 Lösung: RBF & 3D-Projektion</h2>
+          <p>
+            Eine Möglichkeit, eine neue Dimension hinzuzufügen:
+            <span class="key" style="--key-color:var(--color-primary)">Radial Basis Functions (RBFs)</span> verwenden.
+            Sie transformieren jeden 2D-Punkt in einen 3D-Punkt –
+            und die neue Dimension macht die Klassen trennbar.
+          </p>
+        </div>
+
+        <!-- Dimensions-Flow Visual -->
+        <div class="dim-flow">
+          <div class="dim-node dim-2d">
+            <div class="dn-label">Start</div>
+            <div class="dn-icon">⭕</div>
+            <div class="dn-title">2D-Datensatz</div>
+            <div class="dn-desc">
+              (x₁, x₂) für jeden Punkt.<br>
+              Konzentrische Ringe.<br>
+              <strong>Nicht trennbar!</strong>
+            </div>
+          </div>
+          <div class="dim-arrow">→</div>
+          <div class="dim-node highlight">
+            <div class="dn-label">RBF</div>
+            <div class="dn-icon">📐</div>
+            <div class="dn-title">r = exp(−‖x‖²)</div>
+            <div class="dn-desc">
+              Neue Dimension basierend<br>
+              auf dem Abstand vom Ursprung.<br>
+              Innen: r hoch. Außen: r tief.
+            </div>
+          </div>
+          <div class="dim-arrow">→</div>
+          <div class="dim-node dim-3d">
+            <div class="dn-label">Ergebnis</div>
+            <div class="dn-icon">🧊</div>
+            <div class="dn-title">3D-Datensatz</div>
+            <div class="dn-desc">
+              (x₁, x₂, r) für jeden Punkt.<br>
+              Innen-Punkte oben (r≈1).<br>
+              <strong>Linear trennbar!</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- RBF Formel -->
+        <div class="formula-block">
+          <div class="formula-label">Radial Basis Function (Folie 28)</div>
+          <div class="formula-math">
+            \[ r = e^{-\|x\|^2} = e^{-(x_1^2 + x_2^2)} \]
+          </div>
+          <div class="fl-row">
+            <span class="fl-sym">\(\|x\|^2\)</span>
+            <span class="fl-desc">Quadratischer Abstand vom Ursprung: x₁² + x₂² (je weiter weg, desto größer)</span>
+          </div>
+          <div class="fl-row">
+            <span class="fl-sym">\(e^{-\|x\|^2}\)</span>
+            <span class="fl-desc">Exponential: nah am Ursprung → r nahe 1. Weit weg → r nahe 0. Nur vom Abstand abhängig!</span>
+          </div>
+          <div class="fl-row">
+            <span class="fl-sym">Innenring</span>
+            <span class="fl-desc">Punkte nah am Ursprung → ‖x‖² klein → r ≈ 1 (hoher r-Wert)</span>
+          </div>
+          <div class="fl-row">
+            <span class="fl-sym">Außenring</span>
+            <span class="fl-desc">Punkte weit vom Ursprung → ‖x‖² groß → r ≈ 0 (tiefer r-Wert)</span>
+          </div>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🧠 Frage — Folie 28</div>
+          <p>
+            Warum hängt r nur vom Abstand zum Ursprung ab?
+            Was passiert geometrisch, wenn wir r als dritte Achse einführen?
+            Welches Problem sehen wir generell bei dieser manuellen Projektion?
+          </p>
+        </div>
+
+        <!-- Schritt-für-Schritt: r Formel verstehen (Cells 10-13) -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin:var(--space-6) 0 var(--space-3)">
+          Schritt-für-Schritt: Die r-Formel verstehen
+        </h3>
+
+        <!-- Schritt 1: Squared features -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Rohdaten und quadrierte Features inspizieren.
+          Jedes Feature wird einzeln quadriert: x₁² und x₂².
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Rohdaten & x² (Cells 11–12)
+              </span>
+            </div>
+            <pre><code>print("X[:5] — Rohdaten (x₁, x₂):")
+print(X[:5].round(3))
+
+print("\n(X**2)[:5] — Quadriert (x₁², x₂²):")
+print((X**2)[:5].round(3))</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                X[:5]:<br>
+                <span style="color:var(--color-primary)">[[0.001 -0.060]<br>
+                &nbsp;[0.178  0.144]<br>
+                &nbsp;[-0.370  0.869]...]</span><br><br>
+                (X**2)[:5]:<br>
+                <span style="color:var(--color-success)">[[0.000 0.004]<br>
+                &nbsp;[0.032 0.021]<br>
+                &nbsp;[0.137 0.755]...]</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li><code>X**2</code> = elementweise Quadrierung</li>
+                <li>Jede Zeile: [x₁², x₂²]</li>
+                <li>→ Noch 2-spaltig, nächster Schritt: summieren</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: Sum = distance² from origin -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Quadrate summieren = ‖x‖² (quadratischer Abstand vom Ursprung)
+          und den RBF-Wert r berechnen.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – ‖x‖² summieren & r berechnen (Cells 13, 10)
+              </span>
+            </div>
+            <pre><code># Summe der Quadrate = ||x||² = x₁² + x₂²
+dist_sq = (X**2).sum(axis=1)
+print("||x||² (erste 5):")
+print(dist_sq[:5].round(3))
+
+# RBF: r = exp(-||x||²)
+r = np.exp(-dist_sq)
+print("\nr = exp(-||x||²) (erste 5):")
+print(r[:5].round(3))
+print(f"\nMin r: {r.min():.3f}, Max r: {r.max():.3f}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                ||x||²:<br>
+                <span style="color:var(--color-primary)">[0.004 0.052 0.892 1.117 0.944]</span><br><br>
+                r:<br>
+                <span style="color:var(--color-success)">[0.996 0.949 0.410 0.327 0.389]</span><br><br>
+                Min: <span style="color:var(--color-warning)">0.007</span>&nbsp;
+                Max: <span style="color:var(--color-success)">0.998</span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li><code>axis=1</code> = Summe pro Zeile (über Features)</li>
+                <li>Innenring: ‖x‖² klein → r ≈ 1 (hoher Wert)</li>
+                <li>Außenring: ‖x‖² groß → r ≈ 0 (tiefer Wert)</li>
+                <li>→ Die zwei Klassen sind jetzt auf verschiedener Höhe!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 3: 3D-Datensatz zeigen -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 3</strong> — Die dritte Dimension r anhängen und den 3D-Datensatz inspizieren.
+          Jetzt hat jeder Punkt 3 Features: (x₁, x₂, r).
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – 3D-Datensatz (Cell 15)
+              </span>
+            </div>
+            <pre><code># r als neue Dimension anhängen
+X_3d = np.concatenate((X, r.reshape(-1, 1)),
+                       axis=1)
+
+print(f"2D Form: {X.shape}")
+print(f"3D Form: {X_3d.shape}")
+print("\nErste 3 Punkte (x₁, x₂, r):")
+print(X_3d[:3].round(3))</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                2D Form: (100, 2)<br>
+                3D Form: <span style="color:var(--color-primary)">(100, 3)</span><br><br>
+                Punkte (x₁, x₂, r):<br>
+                <span style="color:var(--color-success)">
+                [[ 0.001 -0.060  0.996]<br>
+                &nbsp;[ 0.178  0.144  0.949]<br>
+                &nbsp;[-0.370  0.869  0.410]]
+                </span>
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li><code>reshape(-1, 1)</code> → Spaltenvektor aus r</li>
+                <li><code>concatenate</code> → fügt Spalten zusammen</li>
+                <li>Innenring: r ≈ 0.996 (hohe Werte)</li>
+                <li>Außenring: r ≈ 0.41 (tiefere Werte)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 4: plot_3D -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 4</strong> — Den 3D-Datensatz visualisieren.
+          Im 3D-Raum liegen die Innenring-Punkte (gelb) <strong>oben</strong>
+          und die Außenring-Punkte (rot) <strong>unten</strong> –
+          eine horizontale Ebene trennt sie perfekt.
+          (Demo – Interaktiv im Jupyter Notebook)
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – plot_3D Funktion & Aufruf (Cell 14)
+              </span>
+            </div>
+            <pre><code>from mpl_toolkits.mplot3d import Axes3D
+
+def plot_3D(elev=30, azim=30, X=X, y=y):
+    ax = plt.subplot(projection='3d')
+    ax.scatter(X[:, 0], X[:, 1], r,
+               c=y, s=50, cmap='autumn',
+               edgecolors='gray')
+    ax.view_init(elev=elev, azim=azim)
+    ax.set_xlabel('x₁')
+    ax.set_ylabel('x₂')
+    ax.set_zlabel('r')
+
+fig = plt.figure(figsize=(6, 5))
+plot_3D()
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ 3D-Plot Beschreibung</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 3D-Scatter: Achsen x₁, x₂, r</li>
+                <li>🟡 Gelbe Punkte: <strong>oben</strong> (r ≈ 1)</li>
+                <li>🔴 Rote Punkte: <strong>unten</strong> (r ≈ 0)</li>
+                <li>→ <strong>Horizontal trennbar!</strong></li>
+                <li><code>view_init()</code> → Blickwinkel änderbar</li>
+                <li>Im Jupyter: interaktiv rotieren!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Im 3D-Raum sind die Klassen <strong>linear separierbar</strong>!
+            Eine horizontale Ebene bei z ≈ 0.5 trennt sie perfekt.
+            Das Problem: Wir haben die Projektion manuell und explizit berechnet.
+            Was wenn wir 10, 100 oder 1000 neue Dimensionen brauchen?
+            → <span class="key" style="--key-color:var(--color-primary)">Der Kernel-Trick löst das elegant!</span>
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           6.3 · KERNEL-TRICK (Folie 29)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="kernel-trick">
+        <div class="section-head">
+          <h2>6.3 Der Kernel-Trick</h2>
+          <p>
+            Der Kernel-Trick treibt die Idee der Projektion auf die Spitze:
+            Man kann implizit an jeden der N Datenpunkte
+            <strong>eine zusätzliche Dimension</strong> anfügen –
+            ohne diese Projektion wirklich durchzuführen.
+          </p>
+        </div>
+
+        <!-- Linear vs. RBF Vergleich -->
+        <div class="kernel-compare">
+          <div class="kc-side fail">
+            <div class="kc-label">❌ Linear (kernel='linear')</div>
+            <ul style="font-size:var(--text-sm); margin:0; padding-left:1rem; line-height:1.9">
+              <li>Sucht eine gerade Hyperebene</li>
+              <li>Funktioniert nur für linear trennbare Daten</li>
+              <li>Entscheidungsgrenze: <strong>gerade Linie</strong></li>
+              <li>Versagt bei konzentrischen Ringen</li>
+            </ul>
+          </div>
+          <div class="kc-divider">vs.</div>
+          <div class="kc-side win">
+            <div class="kc-label">✅ RBF (kernel='rbf')</div>
+            <ul style="font-size:var(--text-sm); margin:0; padding-left:1rem; line-height:1.9">
+              <li>Projiziert implizit in N-dimensionalen Raum</li>
+              <li>Findet dort eine gerade Hyperebene</li>
+              <li>Entscheidungsgrenze: <strong>elliptische/kreisförmige Kurve</strong></li>
+              <li>Löst konzentrische Ringe perfekt!</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card-grid" style="margin-top:var(--space-5)">
+          <article class="card">
+            <h3>🔮 Was ist der Kernel-Trick genau?</h3>
+            <ul>
+              <li>Statt Φ(x) zu berechnen (teuer!), nutzt man die <strong>Kernel-Funktion</strong></li>
+              <li>RBF-Kernel: \(K(x_i, x_j) = e^{-\gamma\|x_i - x_j\|^2}\)</li>
+              <li>K berechnet den Skalar-Wert, den ⟨Φ(xᵢ), Φ(xⱼ)⟩ hätte – <em>ohne Φ zu berechnen</em></li>
+              <li>→ Implizit: jeder Datenpunkt in einem N-dim. Raum</li>
+              <li>→ Explizit: nur eine Zahl (Skalar) wird berechnet</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>⚙️ In sklearn: <code>kernel='rbf'</code></h3>
+            <ul>
+              <li>Hyperparameter: <code>kernel='rbf'</code> → RBF-Kernel aktivieren</li>
+              <li>Weiterer Parameter: <code>C</code> → Regularisierung (wie bisher)</li>
+              <li><code>gamma</code> → steuert die "Breite" der RBF (hier: automatisch)</li>
+              <li>Ergebnis: <strong>nicht-lineare Entscheidungsgrenze</strong> im 2D-Raum</li>
+              <li>→ Im Original-Raum: <strong>elliptische/kreisförmige Kurve</strong></li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Code: RBF SVC fitten -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 1</strong> — <code>SVC(kernel='rbf')</code> fitten.
+          <code>C=1E6</code> für sehr harten Margin (Daten sind perfekt trennbar).
+          Das ist Cell 17 aus dem Notebook.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – SVC(kernel='rbf') (Folie 29, Cell 17)
+              </span>
+            </div>
+            <pre><code># RBF Kernel – Kernel-Trick!
+clf = SVC(kernel='rbf', C=1E6)
+clf.fit(X, y)
+
+print(f"Kernel:             {clf.kernel}")
+print(f"C:                  {clf.C}")
+print(f"Support Vectors:    {len(clf.support_vectors_)}")
+print(f"Klassen:            {clf.classes_}")</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <div style="font-family:var(--font-mono); font-size:var(--text-xs);
+                          background:var(--color-surface-offset); padding:var(--space-3);
+                          border-radius:var(--radius-md); color:var(--color-text-muted)">
+                Kernel: <span style="color:var(--color-primary); font-weight:700">'rbf'</span><br>
+                C: 1000000.0<br>
+                Support Vectors: <span style="color:var(--color-success)">~17</span><br>
+                Klassen: [0, 1]
+              </div>
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:var(--space-2) 0 0; padding-left:1rem; line-height:1.9">
+                <li><code>kernel='rbf'</code> → rot umrandet in der Vorlesung!</li>
+                <li>Modell trainiert in Sekunden</li>
+                <li>~17 Support Vectors (an der Grenze)</li>
+                <li>C=1E6 → sehr harter Margin</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code: Visualisierung mit elliptischer Grenze -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Das Ergebnis visualisieren.
+          Die Entscheidungsgrenze ist jetzt <strong>kreisförmig/elliptisch</strong> –
+          sie umschließt die inneren gelben Punkte perfekt. (Cell 18)
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Elliptische Grenze (Cell 18)
+              </span>
+            </div>
+            <pre><code>fig, ax = plt.subplots(figsize=(5, 4))
+
+# Scatter + Entscheidungsgrenze
+ax.scatter(X[:, 0], X[:, 1], c=y, s=50,
+           cmap='autumn', edgecolors='gray')
+plot_svc_decision_function(clf, ax)
+
+# Support Vectors hervorheben
+ax.scatter(clf.support_vectors_[:, 0],
+           clf.support_vectors_[:, 1],
+           s=300, lw=1.5,
+           facecolors='none',
+           edgecolors='blue')
+ax.set_title("kernel='rbf': Elliptische Grenze ✓")
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 Scatter: gelb (innen), rot (außen)</li>
+                <li><strong>Kreisförmige Linie</strong> umschließt die gelben Punkte</li>
+                <li>Zwei <strong>gestrichelte Kreise</strong> = Margin-Grenzen</li>
+                <li>Blaue Kreise = Support Vectors</li>
+                <li>→ Perfekte Trennung trotz nicht-linearer Struktur!</li>
+                <li>Lineare Hyperebene im N-dim. Raum = Kreis im 2D-Raum</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vergleich Linear vs RBF -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 3</strong> — Direktvergleich: Linear SVC (scheitert) vs.
+          RBF SVC (löst das Problem). <strong>Vertikal gestapelt</strong>.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Vergleich linear vs. rbf (vertikal)
+              </span>
+            </div>
+            <pre><code>fig, axes = plt.subplots(2, 1, figsize=(5, 9))
+
+for ax, (kernel, C) in zip(axes, [
+    ('linear', 1.0),
+    ('rbf',    1E6)
+]):
+    clf_cmp = SVC(kernel=kernel, C=C).fit(X, y)
+    ax.scatter(X[:,0], X[:,1], c=y, s=40,
+               cmap='autumn', edgecolors='gray')
+    plot_svc_decision_function(clf_cmp, ax)
+    label = '❌ Versagt' if kernel=='linear' else '✅ Perfekt!'
+    ax.set_title(f"kernel='{kernel}' {label}")
+
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 <strong>Oben:</strong> linear – gerade Linie, trennt schlecht</li>
+                <li>📊 <strong>Unten:</strong> rbf – Kreislinie, trennt perfekt</li>
+                <li><code>figsize=(5, 9)</code> → vertikal gestapelt</li>
+                <li>Selber Datensatz, anderer Kernel</li>
+                <li>→ Der Kernel macht den Unterschied!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? — Zusammenfassung Seite 06</div>
+          <p>
+            Der Kernel-Trick ist das eleganteste Konzept der SVMs:
+            durch <span class="key" style="--key-color:var(--color-primary)">kernel='rbf'</span>
+            wird jeder Datenpunkt <em>implizit</em> in einen N-dimensionalen Raum projiziert –
+            ohne diese Projektion je explizit berechnen zu müssen.
+            Im Original-2D-Raum erscheint die Entscheidungsgrenze als
+            <strong>nicht-lineare Kurve</strong> (Ellipse/Kreis).
+            Als nächstes: <span class="key" style="--key-color:var(--color-success)">Multi-Class SVMs & Praxis-Anwendungen → Seite 07</span>.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

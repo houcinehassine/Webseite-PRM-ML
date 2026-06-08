@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – K3 · Soft-Margin & Optimierung</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="Sidebar.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── SO WHAT / FRAGE ────────────────────────────────── */
+    .so-what { margin:var(--space-6) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-success);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface-2)); }
+    .so-what-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase; color:var(--color-success); margin-bottom:var(--space-2); }
+    .so-what p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+
+    .frage-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
+      border-left:3px solid var(--color-warning);
+      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
+      background:color-mix(in oklab,var(--color-warning) 6%,var(--color-surface-2)); }
+    .frage-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
+      text-transform:uppercase;
+      color:color-mix(in oklab,var(--color-warning) 80%,#000); margin-bottom:var(--space-2); }
+    .frage-box p { font-size:var(--text-sm); margin:0; line-height:1.7; font-style:italic; }
+
+    /* ── FORMULA BLOCK (aus kapitel3.css) ───────────────── */
+    .formula-block {
+      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface-2));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+      border-radius: var(--radius-xl);
+      padding: var(--space-5) var(--space-6);
+      margin: var(--space-4) 0;
+      text-align: center; overflow-x: auto;
+    }
+    .formula-block .formula-label {
+      font-size: var(--text-xs); font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--color-primary);
+      margin-bottom: var(--space-3);
+    }
+    .formula-block .formula-math {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      font-weight: 700; color: var(--color-text); line-height: 1.9;
+    }
+    .formula-legend { display: flex; flex-direction: column;
+      gap: var(--space-2); margin-top: var(--space-3); }
+    .fl-row { display: flex; align-items: baseline;
+      gap: var(--space-3); font-size: var(--text-xs); text-align: left; }
+    .fl-sym { font-family: var(--font-mono); font-weight: 700;
+      color: var(--color-primary); min-width: 90px; flex-shrink: 0; }
+    .fl-desc { color: var(--color-text-muted); line-height: 1.5; }
+
+    /* ── C-TRADE-OFF SLIDER (NEU → css_codes/kapitel3.css) ─ */
+    /* .c-spectrum, .c-track, .c-label-row, .c-point */
+    .c-spectrum {
+      margin: var(--space-5) 0;
+      padding: var(--space-5);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+    }
+    .c-track {
+      position: relative; height: 12px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(to right,
+        color-mix(in oklab, var(--color-success) 40%, var(--color-surface-offset)),
+        color-mix(in oklab, var(--color-warning) 50%, var(--color-surface-offset)));
+      margin: var(--space-5) 0 var(--space-3);
+    }
+    .c-point {
+      position: absolute; top: 50%; transform: translate(-50%, -50%);
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2.5px solid #fff; box-shadow: 0 0 0 2px var(--color-border);
+      cursor: default;
+    }
+    .c-label-row {
+      display: flex; justify-content: space-between;
+      font-size: var(--text-xs); font-weight: 700;
+    }
+    .c-label-left { color: var(--color-success); }
+    .c-label-right { color: var(--color-warning); }
+    .c-examples {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--space-3); margin-top: var(--space-4);
+    }
+    .c-card {
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg); border: 1.5px solid var(--color-border);
+      font-size: var(--text-xs);
+    }
+    .c-card.soft { border-color: var(--color-success);
+      background: color-mix(in oklab, var(--color-success) 5%, var(--color-surface)); }
+    .c-card.hard { border-color: var(--color-warning);
+      background: color-mix(in oklab, var(--color-warning) 5%, var(--color-surface)); }
+    .c-card-title { font-weight: 800; margin-bottom: var(--space-1); }
+    .c-card.soft .c-card-title { color: var(--color-success); }
+    .c-card.hard .c-card-title { color: color-mix(in oklab, var(--color-warning) 80%, #000); }
+
+    /* ── GRADIENT PIECEWISE (NEU → css_codes/kapitel3.css) ─ */
+    /* .gradient-split, .grad-case */
+    .gradient-split {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: var(--space-4); margin: var(--space-5) 0;
+    }
+    @media (max-width: 640px) { .gradient-split { grid-template-columns: 1fr; } }
+    .grad-case {
+      padding: var(--space-5);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      background: var(--color-surface-2);
+    }
+    .grad-case.no-violation {
+      border-color: var(--color-success);
+      background: color-mix(in oklab, var(--color-success) 4%, var(--color-surface));
+    }
+    .grad-case.violation {
+      border-color: var(--color-warning);
+      background: color-mix(in oklab, var(--color-warning) 5%, var(--color-surface));
+    }
+    .grad-case-label {
+      font-size: .62rem; font-weight: 800; letter-spacing: .09em;
+      text-transform: uppercase; margin-bottom: var(--space-2);
+    }
+    .grad-case.no-violation .grad-case-label { color: var(--color-success); }
+    .grad-case.violation    .grad-case-label { color: color-mix(in oklab, var(--color-warning) 80%, #000); }
+    .grad-condition {
+      font-family: var(--font-mono); font-size: var(--text-xs);
+      color: var(--color-text-muted); margin-bottom: var(--space-3);
+      padding: var(--space-2) var(--space-3);
+      background: var(--color-surface-offset);
+      border-radius: var(--radius-md);
+    }
+    .grad-formula {
+      font-family: var(--font-mono); font-size: var(--text-sm);
+      font-weight: 700; color: var(--color-text);
+      margin-bottom: var(--space-1); line-height: 1.7;
+    }
+    .grad-desc { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.5; }
+
+    /* ── VAL CURVE WRAP ─────────────────────────────────── */
+    .val-curve-wrap { margin: var(--space-5) 0;
+      background: var(--color-surface-2); border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl); overflow: hidden; padding: var(--space-4); }
+    .val-curve-title { font-size: var(--text-xs); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--color-text-faint); margin-bottom: var(--space-3); text-align: center; }
+    .val-curve-wrap svg { width:100%; height:auto; display:block; }
+  </style>
+</head>
+<body>
+
+  <site-header active="page3" title="Kapitel 3 · Soft-Margin & Optimierung"></site-header>
+
+  <div class="layout">
+    <site-sidebar active="page4"></site-sidebar>
+
+    <main class="content" id="main-content">
+
+      <!-- ════════════════════════════════════════════════
+           HERO
+      ════════════════════════════════════════════════════ -->
+      <section class="hero" id="soft-margin-intro">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 3 · Seite 04 · Agenda-Punkt 3 · Folien 16–19, 21</span>
+            <h1>Soft-Margin &
+              <span class="key" style="--key-color:var(--color-purple)">Optimierung</span>
+            </h1>
+            <p>
+              Reale Daten sind selten perfekt trennbar. Der
+              <span class="key" style="--key-color:var(--color-purple)">C-Parameter</span>
+              kontrolliert, wie viel Toleranz wir zulassen –
+              von hartem Hard-Margin bis zu flexiblem Soft-Margin.
+              Dazu kommt der
+              <span class="key" style="--key-color:var(--color-warning)">Hinge Loss</span>
+              als elegante kontinuierliche Kostenfunktion.
+            </p>
+            <div class="pill-row">
+              <span class="pill">Hard- vs. Soft-Margin</span>
+              <span class="pill">C-Parameter</span>
+              <span class="pill">Slack-Variable ξ</span>
+              <span class="pill">Regularisierung</span>
+              <span class="pill">Hinge Loss</span>
+              <span class="pill">Gradienten ∇w, ∇b</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Lernfokus dieser Seite</h2>
+            <ul>
+              <li>Du verstehst den Unterschied zwischen
+                <span class="key" style="--key-color:var(--color-warning)">Hard-</span> und
+                <span class="key" style="--key-color:var(--color-success)">Soft-Margin</span></li>
+              <li>Du kannst erklären, was <strong>C</strong> bewirkt (groß = hard, klein = soft)</li>
+              <li>Du kennst die <strong>Slack-Variable ξ_i</strong> und ihre Rolle</li>
+              <li>Du verstehst den
+                <span class="key" style="--key-color:var(--color-warning)">Hinge Loss</span>
+                und warum er bevorzugt wird</li>
+              <li>Du kannst die abschnittsweisen <strong>Gradienten</strong> aufschreiben</li>
+            </ul>
+          </aside>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           4.1 · HARD- VS. SOFT-MARGIN EINFÜHRUNG (Folie 16)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="soft-margin-intro">
+        <div class="section-head">
+          <h2>4.1 Hard- vs. Soft-Margin: Einführung</h2>
+          <p>
+            Bei SVMs kann man den Margin entweder
+            <span class="key" style="--key-color:var(--color-warning)">starr (hard)</span>
+            oder
+            <span class="key" style="--key-color:var(--color-success)">weich (soft)</span>
+            definieren – je nachdem, ob Datenpunkte
+            <strong>innerhalb</strong> des Margins erlaubt sind.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>😤 Das Problem mit Hard-Margin</h3>
+            <ul>
+              <li>In der Praxis sind Klassen <strong>selten perfekt trennbar</strong></li>
+              <li>Bei Rauschen oder Überlappung: Hard-Margin schlägt fehl</li>
+              <li>Sehr <strong>enger Margin</strong> → Overfitting-Risiko</li>
+              <li>Kleine Störungen in den Daten → komplett andere Trennlinie</li>
+              <li>→ Hard-Margin ist zu rigide für reale Daten</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>✅ Die Lösung: Soft-Margin</h3>
+            <ul>
+              <li>Soft-Margin <strong>erlaubt Punkte innerhalb des Margins</strong></li>
+              <li>Leitfrage: wie viele und zu welchem Ausmaß?</li>
+              <li>Kontrolliert durch den Hyperparameter
+                <code style="color:var(--color-primary)">C</code></li>
+              <li>Große C → Hard-Margin (wenig Toleranz)</li>
+              <li>Kleine C → Soft-Margin (viel Toleranz)</li>
+              <li>Optimalen C-Wert: via
+                <span class="key" style="--key-color:var(--color-primary)">Cross-Validation</span> finden</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- C-Spektrum Visual -->
+        <div class="c-spectrum">
+          <p style="font-size:var(--text-xs); font-weight:700; letter-spacing:.07em;
+                    text-transform:uppercase; color:var(--color-text-faint); margin-bottom:var(--space-2)">
+            C-Parameter Spektrum
+          </p>
+          <div class="c-track">
+            <!-- Small C point -->
+            <div class="c-point" style="left:10%; background:var(--color-success)"></div>
+            <!-- C=0.1 -->
+            <div class="c-point" style="left:25%; background:color-mix(in oklab,var(--color-success) 60%,var(--color-warning))"></div>
+            <!-- C=1 -->
+            <div class="c-point" style="left:50%; background:var(--color-primary)"></div>
+            <!-- C=10 -->
+            <div class="c-point" style="left:75%; background:color-mix(in oklab,var(--color-warning) 70%,var(--color-text-faint))"></div>
+            <!-- Large C -->
+            <div class="c-point" style="left:90%; background:var(--color-warning)"></div>
+          </div>
+          <div class="c-label-row">
+            <span class="c-label-left">← C klein: Soft-Margin (breiter Margin, viele SVs)</span>
+            <span class="c-label-right">C groß: Hard-Margin (enger Margin, wenige SVs) →</span>
+          </div>
+          <div class="c-examples">
+            <div class="c-card soft">
+              <div class="c-card-title">C = 0.1 → Soft-Margin</div>
+              <ul style="margin:0; padding-left:1rem; line-height:1.8">
+                <li>Breiter Margin</li>
+                <li>Viele Support Vectors</li>
+                <li>Mehr Punkte im Margin erlaubt</li>
+                <li>Höhere Regularisierung</li>
+                <li>Eher Underfitting-Risiko</li>
+              </ul>
+            </div>
+            <div class="c-card hard">
+              <div class="c-card-title">C = 10 → Hard(er)-Margin</div>
+              <ul style="margin:0; padding-left:1rem; line-height:1.8">
+                <li>Enger Margin</li>
+                <li>Wenige Support Vectors</li>
+                <li>Kaum Punkte im Margin erlaubt</li>
+                <li>Wenig Regularisierung</li>
+                <li>Eher Overfitting-Risiko</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Der optimale Wert von <code>C</code> hängt vom Datensatz ab
+            und muss via z.B. <strong>Cross-Validation</strong> bestimmt werden.
+            Es gibt kein universell bestes C – das ist das
+            <em>No-Free-Lunch-Theorem</em> in der Praxis.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           4.2 · SOFT-MARGIN MATHEMATIK (Folie 17)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="soft-margin-mathe">
+        <div class="section-head">
+          <h2>4.2 Soft-Margin: Mathematik</h2>
+          <p>
+            Wir erweitern das Hard-Margin-Problem durch die
+            <span class="key" style="--key-color:var(--color-purple)">Slack-Variable ξ_i</span>
+            – sie quantifiziert, wie stark ein Punkt den Margin verletzt.
+          </p>
+        </div>
+
+        <div class="frage-box">
+          <div class="frage-label">🧠 Frage — Folie 17</div>
+          <p>
+            Was ändern wir an unseren Formulierungen aus der Hard-Margin-Herleitung?
+            Wie können wir Verletzungen des Margins quantifizieren –
+            und wie bestrafen wir sie?
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>📏 Was ist die Slack-Variable ξ_i?</h3>
+            <ul>
+              <li>\(\xi_i = 0\): Punkt liegt korrekt <strong>außerhalb</strong> des Margins</li>
+              <li>\(0 < \xi_i \leq 1\): Punkt liegt <strong>im Margin</strong> (richtige Seite)</li>
+              <li>\(\xi_i > 1\): Punkt liegt auf der <strong>falschen Seite</strong> (Fehler)</li>
+              <li>Jeder Datenpunkt hat seine eigene Slack-Variable</li>
+              <li>→ Sie misst die <strong>Margin-Verletzung</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>⚖️ Der Trade-Off</h3>
+            <ul>
+              <li>Ohne C: alle ξ_i werden 0 gesetzt → nur Hard-Margin möglich</li>
+              <li>Mit C: wir bestrafen Verletzungen mit Gewicht <strong>C</strong></li>
+              <li>Großes C → Verletzungen teuer → Modell versucht Hard-Margin</li>
+              <li>Kleines C → Verletzungen günstig → Modell akzeptiert weichen Margin</li>
+              <li>→ <code>C</code> heißt auch
+                <span class="key" style="--key-color:var(--color-primary)">Regularisierungsparameter</span></li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Soft-Margin Formeln -->
+        <div class="formula-block">
+          <div class="formula-label">Soft-Margin SVM – Optimierungsproblem (Folie 17)</div>
+          <div class="formula-math">
+            \[ \min_{\mathbf{w},\, b,\, \boldsymbol{\xi}}\; \tfrac{1}{2}\|\mathbf{w}\|^2 + C \cdot \sum_{i=1}^N \xi_i \]
+          </div>
+          <div style="margin-top:var(--space-3); font-size:var(--text-sm); color:var(--color-text-muted)">
+            unter den Bedingungen:
+          </div>
+          <div class="formula-math" style="margin-top:var(--space-2)">
+            \[ y_i(\langle\mathbf{w}, x_i\rangle + b) \geq 1 - \xi_i \qquad \text{und} \qquad \xi_i \geq 0 \quad \forall\, i \]
+          </div>
+          <div class="formula-legend">
+            <div class="fl-row">
+              <span class="fl-sym">\(\xi_i \geq 0\)</span>
+              <span class="fl-desc">Slack-Variable: misst die Margin-Verletzung des i-ten Punkts (0 = keine Verletzung)</span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">\(C \cdot \sum \xi_i\)</span>
+              <span class="fl-desc">Summe aller Verletzungen, gewichtet mit C – dieser Term bestraft Verletzungen</span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">\(\geq 1 - \xi_i\)</span>
+              <span class="fl-desc">Relaxierte Bedingung: statt ≥ 1 ist jetzt ≥ 1 − ξ_i erlaubt (Hard: ξ_i = 0)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Das Soft-Margin-Problem ist eine direkte Erweiterung des Hard-Margin:
+            wir addieren den Straf-Term <strong>C·Σξ_i</strong>.
+            Mit C → ∞ erhalten wir Hard-Margin zurück (alle ξ_i = 0 erzwungen).
+            C heißt <span class="key" style="--key-color:var(--color-primary)">Regularisierungsparameter</span>,
+            weil er den Trade-Off zwischen Margin-Größe und Fehlertoleranz kontrolliert.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           4.3 · C-VERGLEICH & VALIDATION CURVE (Folie 18)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="vergleich-c">
+        <div class="section-head">
+          <h2>4.3 Vergleich C=10 vs. C=0.1</h2>
+          <p>
+            Wir trainieren zwei SVMs auf demselben Datensatz mit unterschiedlichem C –
+            und sehen den direkten Effekt auf Margin-Breite und Support-Vector-Anzahl.
+          </p>
+        </div>
+
+        <!-- Schritt 1: Datensatz (Cell 20) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          <strong>Schritt 1</strong> — Datensatz erstellen. Wir verwenden
+          <code>cluster_std=0.8</code> (mehr Streuung als bisher) –
+          die Klassen überlappen leicht.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Datensatz mit Überlappung (Cell 20)
+              </span>
+            </div>
+            <pre><code>import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.svm import SVC
+
+# Mehr Streuung → Klassen überlappen
+X, y = make_blobs(n_samples=100, centers=2,
+                  random_state=0, cluster_std=0.8)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.scatter(X[:, 0], X[:, 1], c=y, s=50,
+           cmap='autumn', edgecolors='gray')
+ax.set_title('Datensatz: cluster_std=0.8')
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 100 Punkte mit <code>std=0.8</code></li>
+                <li>Klassen überlappen am Rand</li>
+                <li>Hard-Margin würde hier sehr engen Margin erzeugen</li>
+                <li>→ Idealer Testfall für Soft-Margin!</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schritt 2: C-Vergleich VERTIKAL (Cell 21) -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); margin-top:var(--space-5)">
+          <strong>Schritt 2</strong> — Zwei SVMs trainieren: <code>C=10</code> (enger Margin)
+          vs. <code>C=0.1</code> (weiter Margin). Plots <strong>vertikal</strong> gestapelt
+          für direkten Vergleich. (Basiert auf Cell 21 aus <code>03_core.ipynb</code>)
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – C=10 vs. C=0.1 vertikal (Cell 21)
+              </span>
+            </div>
+            <pre><code># Vertikal: 2 Zeilen, 1 Spalte
+fig, axes = plt.subplots(2, 1, figsize=(5, 9))
+
+for ax, C in zip(axes, [10.0, 0.1]):
+    model = SVC(kernel='linear', C=C).fit(X, y)
+
+    ax.scatter(X[:, 0], X[:, 1], c=y, s=50,
+               cmap='autumn', edgecolors='gray')
+    plot_svc_decision_function(model, ax)
+
+    # Support Vectors hervorheben
+    ax.scatter(model.support_vectors_[:, 0],
+               model.support_vectors_[:, 1],
+               s=300, lw=1, facecolors='none',
+               edgecolors='blue')
+    n_sv = len(model.support_vectors_)
+    ax.set_title(f'C = {C} — {n_sv} Support Vectors',
+                 size=13)
+
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 <strong>Oben (C=10):</strong> enger Margin, <strong>wenige</strong> Support Vectors (~3–4)</li>
+                <li>📊 <strong>Unten (C=0.1):</strong> breiter Margin, <strong>viele</strong> Support Vectors (>10)</li>
+                <li>Mehr SVs = mehr Punkte erlaubt im Margin-Band</li>
+                <li><code>figsize=(5, 9)</code> → vertikal gestapelt</li>
+                <li>→ Welches C passt besser zum Datensatz?</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Validation Curve Schema für C -->
+        <h3 style="font-size:var(--text-base); font-weight:700; margin: var(--space-6) 0 var(--space-3)">
+          Validation Curve Schema: C als Modellkomplexität
+        </h3>
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          In der Validation Curve entspricht <strong>C</strong> der Modellkomplexität:
+          kleines C (links) = Soft-Margin = Underfitting,
+          großes C (rechts) = Hard-Margin = Overfitting-Risiko. (Folie 18)
+        </p>
+
+        <div class="val-curve-wrap">
+          <div class="val-curve-title">Validation Curve – C-Parameter (Schema · Folie 18)</div>
+          <svg viewBox="0 0 520 270" xmlns="http://www.w3.org/2000/svg">
+            <!-- Zones -->
+            <rect x="45" y="20" width="150" height="215" fill="color-mix(in oklab,#3b82f6 5%,transparent)" rx="4"/>
+            <rect x="315" y="20" width="160" height="215" fill="color-mix(in oklab,#ef4444 5%,transparent)" rx="4"/>
+            <rect x="195" y="20" width="120" height="215" fill="color-mix(in oklab,var(--color-success) 8%,transparent)" rx="4"/>
+            <!-- Axes -->
+            <line x1="45" y1="235" x2="490" y2="235" stroke="var(--color-text-muted)" stroke-width="2"/>
+            <line x1="45" y1="235" x2="45"  y2="20"  stroke="var(--color-text-muted)" stroke-width="2"/>
+            <!-- Arrows -->
+            <polygon points="490,235 480,230 480,240" fill="var(--color-text-muted)"/>
+            <polygon points="45,20 40,30 50,30" fill="var(--color-text-muted)"/>
+            <!-- Axis labels -->
+            <text x="490" y="250" text-anchor="middle" font-size="11" fill="var(--color-text-muted)" font-family="sans-serif">C →</text>
+            <text x="25" y="130" text-anchor="middle" font-size="11" fill="var(--color-text-muted)" font-family="sans-serif" transform="rotate(-90 25 130)">model score</text>
+            <!-- C axis labels -->
+            <text x="55"  y="255" font-size="9" fill="var(--color-success)"  font-family="sans-serif" font-weight="700">C=0.01</text>
+            <text x="235" y="255" text-anchor="middle" font-size="9" fill="var(--color-primary)" font-family="sans-serif" font-weight="700">C=1</text>
+            <text x="445" y="255" text-anchor="end"   font-size="9" fill="var(--color-warning)"  font-family="sans-serif" font-weight="700">C=100</text>
+            <!-- Training Score curve (blue, monotone rising) -->
+            <path d="M55,205 C80,185 120,160 160,140 S220,115 270,100 S340,85 400,75 S450,70 475,68"
+                  fill="none" stroke="#3b82f6" stroke-width="2.5"/>
+            <!-- Validation Score curve (red, peaks then falls) -->
+            <path d="M55,225 C80,195 120,155 155,125 S200,90 255,82 S295,82 315,90 S360,120 395,150 S440,175 475,195"
+                  fill="none" stroke="#ef4444" stroke-width="2.5"/>
+            <!-- Best Model -->
+            <circle cx="255" cy="82" r="7" fill="var(--color-success)" stroke="#fff" stroke-width="2"/>
+            <line x1="255" y1="82" x2="255" y2="30" stroke="var(--color-success)" stroke-width="1.5" stroke-dasharray="4,3"/>
+            <text x="255" y="25" text-anchor="middle" font-size="10" fill="var(--color-success)" font-family="sans-serif" font-weight="800">Best Model</text>
+            <!-- Zone labels -->
+            <text x="120" y="45" text-anchor="middle" font-size="10" fill="#3b82f6" font-family="sans-serif" font-weight="700">High Bias</text>
+            <text x="120" y="57" text-anchor="middle" font-size="9"  fill="#3b82f6" font-family="sans-serif">(Soft, Underfitting)</text>
+            <text x="395" y="45" text-anchor="middle" font-size="10" fill="#ef4444" font-family="sans-serif" font-weight="700">High Variance</text>
+            <text x="395" y="57" text-anchor="middle" font-size="9"  fill="#ef4444" font-family="sans-serif">(Hard, Overfitting)</text>
+            <!-- Legend -->
+            <line x1="340" y1="210" x2="365" y2="210" stroke="#3b82f6" stroke-width="2.5"/>
+            <text x="370" y="214" font-size="9" fill="#3b82f6" font-family="sans-serif">training_score</text>
+            <line x1="340" y1="225" x2="365" y2="225" stroke="#ef4444" stroke-width="2.5"/>
+            <text x="370" y="229" font-size="9" fill="#ef4444" font-family="sans-serif">validation_score</text>
+          </svg>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what?</div>
+          <p>
+            Großes C = hohe Modellkomplexität = Overfitting-Risiko.
+            Kleines C = niedrige Modellkomplexität = Underfitting-Risiko.
+            Den optimalen C-Wert findet man am <strong>Maximum des Validation-Scores</strong> –
+            typischerweise mit <code>GridSearchCV</code> oder <code>cross_val_score</code>.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           4.4 · HINGE LOSS FUNCTION (Folie 19)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="hinge-loss">
+        <div class="section-head">
+          <h2>4.4 Hinge Loss Function</h2>
+          <p>
+            Die Slack-Variable lässt sich eliminieren – durch den
+            <span class="key" style="--key-color:var(--color-warning)">Hinge Loss</span>.
+            Das ergibt eine elegante, <strong>kontinuierlich differenzierbare</strong>
+            Kostenfunktion, die mit Gradientenabstieg optimiert werden kann.
+          </p>
+        </div>
+
+        <div class="card-grid">
+          <article class="card">
+            <h3>❌ Warum nicht Accuracy?</h3>
+            <ul>
+              <li>Accuracy (0-1-Loss) wäre die naheliegendste Verlustfunktion</li>
+              <li>Problem: <strong>nicht differenzierbar</strong> (Sprünge bei ganzzahligen Fehlern)</li>
+              <li>Gradientenabstieg braucht aber einen <strong>glatten Verlauf</strong></li>
+              <li>→ Ein kombinatorisches Optimierungsproblem – nicht handhabbar</li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>✅ Warum Hinge Loss?</h3>
+            <ul>
+              <li><strong>Kontinuierlich</strong>: keine Sprünge</li>
+              <li><strong>Linear</strong> für t &lt; 1 → Ableitung ist konstant</li>
+              <li><strong>Null</strong> für t ≥ 1 → korrekt klassifizierte Punkte außerhalb des Margins = 0 Kosten</li>
+              <li>Direkte Verbindung zur Slack-Variable: \(\xi_i = \max\{0, 1-t_i\}\)</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Hinge Loss Formel -->
+        <div class="formula-block">
+          <div class="formula-label">Hinge Loss (Folie 19)</div>
+          <div class="formula-math">
+            \[ L(t) = \max\{0,\; 1 - t\} \qquad \text{mit} \qquad t = y \cdot f(x) = y(\langle\mathbf{w}, x\rangle + b) \]
+          </div>
+          <div class="formula-legend">
+            <div class="fl-row">
+              <span class="fl-sym">\(t = y\cdot f(x)\)</span>
+              <span class="fl-desc">Wenn t &gt; 1: korrekt & außerhalb Margin → L = 0 (kein Verlust). Wenn t &lt; 1: Margin-Verletzung → L &gt; 0</span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">\(\max\{0, 1-t\}\)</span>
+              <span class="fl-desc">Für t ≥ 1: immer 0. Für t &lt; 1: wächst linear. Entspricht exakt der Slack-Variable ξ_i</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hinge Loss visualisieren -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Vergleich von 0-1-Loss (nicht differenzierbar, orange gestrichelt) und
+          Hinge Loss (durchgezogen, orange) – beide erfassen dasselbe Prinzip,
+          aber der Hinge Loss ist optimierbar.
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Hinge Loss visualisieren (Folie 19)
+              </span>
+            </div>
+            <pre><code>t = np.linspace(-0.5, 2.5, 300)
+
+# Hinge Loss: max(0, 1-t)
+hinge = np.maximum(0, 1 - t)
+
+# 0-1 Loss (vereinfacht)
+zero_one = (t < 1).astype(float)
+
+fig, ax = plt.subplots(figsize=(5, 4))
+ax.plot(t, zero_one, 'k--', lw=2,
+        label='0-1 Loss (nicht differenzierbar)')
+ax.plot(t, hinge, color='darkorange', lw=2.5,
+        label='Hinge Loss: max{0, 1−t}')
+
+ax.axvline(x=1, color='gray', ls=':', alpha=0.6)
+ax.axhline(y=0, color='gray', alpha=0.3)
+ax.set_xlabel('t = y · f(x)')
+ax.set_ylabel('L(t)')
+ax.set_title('Hinge Loss vs. 0-1 Loss')
+ax.set_ylim(-0.1, 1.5)
+ax.legend(fontsize=9)
+plt.tight_layout(); plt.show()</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">▶ Ausgabe</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>📊 X-Achse: t = y·f(x) – das "Score × Label"</li>
+                <li>Bei t=1: Knick-Punkt (Support Vector liegt hier!)</li>
+                <li>Links von t=1: Hinge Loss &gt; 0 (Verlust)</li>
+                <li>Rechts von t=1: Hinge Loss = 0 (kein Verlust)</li>
+                <li>0-1 Loss: Sprung → <strong>nicht differenzierbar</strong></li>
+                <li>Hinge Loss: stetige Kurve → <strong>differenzierbar</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Finales Optimierungsproblem -->
+        <div class="formula-block" style="margin-top:var(--space-5)">
+          <div class="formula-label">Finales Soft-Margin-Problem mit Hinge Loss (Folie 19)</div>
+          <div class="formula-math">
+            \[ \min_{\mathbf{w},\, b}\; \tfrac{1}{2}\|\mathbf{w}\|^2 + C \cdot \sum_{i=1}^{N} \max\{0,\; 1 - y_i(\langle\mathbf{w}, x_i\rangle + b)\} \]
+          </div>
+          <div style="margin-top:var(--space-3); font-size:var(--text-xs); color:var(--color-text-muted); text-align:left">
+            Die Slack-Variablen ξ_i wurden durch den Hinge-Loss-Term ersetzt.
+            Die Formulierung ist jetzt <strong>vollständig vereinfacht</strong>
+            und direkt per Gradientenabstieg optimierbar.
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? — Regularisierung = Margin-Maximierung</div>
+          <p>
+            Der Term ½‖w‖² ist gleichzeitig <strong>Regularisierung</strong> (verhindert Overfitting)
+            und <strong>Margin-Maximierung</strong> (‖w‖ klein → 1/‖w‖ groß → Margin groß).
+            SVMs vereinen also Klassifikation und Regularisierung in <em>einem</em> Optimierungsproblem.
+          </p>
+        </div>
+      </section>
+
+
+      <!-- ════════════════════════════════════════════════
+           4.5 · GRADIENTEN (Folie 21)
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="gradienten">
+        <div class="section-head">
+          <h2>4.5 Gradienten der Loss Function</h2>
+          <p>
+            Um Gradientenabstieg anzuwenden, brauchen wir die Gradienten der
+            Kostenfunktion nach <strong>w</strong> und <strong>b</strong>.
+            Da der Hinge Loss einen Knick bei t=1 hat, sind die Gradienten
+            <span class="key" style="--key-color:var(--color-purple)">abschnittsweise</span> definiert.
+          </p>
+        </div>
+
+        <div class="card-grid" style="margin-bottom:var(--space-5)">
+          <article class="card">
+            <h3>🔀 Warum abschnittsweise?</h3>
+            <ul>
+              <li>Der Hinge Loss hat bei t=1 einen <strong>Knick</strong> (nicht glatt, aber differenzierbar)</li>
+              <li>Links: \(L(t) = 1-t\) → Steigung = −1</li>
+              <li>Rechts: \(L(t) = 0\) → Steigung = 0</li>
+              <li>→ Gradient hängt davon ab, ob ein Punkt den Margin <strong>verletzt oder nicht</strong></li>
+            </ul>
+          </article>
+          <article class="card">
+            <h3>📋 Die zwei Fälle</h3>
+            <ul>
+              <li><strong>Kein Margin-Bruch:</strong> \(y_i(\langle\mathbf{w}, x_i\rangle+b) \geq 1\)</li>
+              <li>→ Hinge Loss = 0, nur der Regularisierungsterm ½‖w‖² trägt bei</li>
+              <li><strong>Margin-Bruch:</strong> \(y_i(\langle\mathbf{w}, x_i\rangle+b) < 1\)</li>
+              <li>→ Hinge Loss &gt; 0, beide Terme tragen zum Gradienten bei</li>
+            </ul>
+          </article>
+        </div>
+
+        <!-- Gradient Cases -->
+        <div class="gradient-split">
+          <div class="grad-case no-violation">
+            <div class="grad-case-label">✅ Kein Margin-Bruch</div>
+            <div class="grad-condition">\(y_i(\langle\mathbf{w}, x_i\rangle + b) \geq 1\)</div>
+            <div class="grad-formula">
+              \(\nabla_{\mathbf{w}}\, E = \mathbf{w}\)
+            </div>
+            <div class="grad-formula" style="margin-top:var(--space-2)">
+              \(\nabla_{b}\, E = 0\)
+            </div>
+            <div class="grad-desc" style="margin-top:var(--space-3)">
+              Nur der Regularisierungsterm ½‖w‖² trägt bei.
+              Gradient von ½‖w‖² nach w ist einfach <strong>w</strong> –
+              kein Einfluss auf b.
+            </div>
+          </div>
+
+          <div class="grad-case violation">
+            <div class="grad-case-label">⚠️ Margin-Bruch</div>
+            <div class="grad-condition">\(y_i(\langle\mathbf{w}, x_i\rangle + b) < 1\)</div>
+            <div class="grad-formula">
+              \(\nabla_{\mathbf{w}}\, E = \mathbf{w} - C \sum_i y_i \cdot x_i\)
+            </div>
+            <div class="grad-formula" style="margin-top:var(--space-2)">
+              \(\nabla_{b}\, E = -C \sum_i y_i\)
+            </div>
+            <div class="grad-desc" style="margin-top:var(--space-3)">
+              Regularisierungs- <strong>und</strong> Hinge-Loss-Term tragen bei.
+              Der Hinge-Loss zieht w und b in Richtung korrekterer Klassifikation.
+            </div>
+          </div>
+        </div>
+
+        <!-- Gradient Update Formel -->
+        <div class="formula-block" style="margin-top:var(--space-5)">
+          <div class="formula-label">Gradientenabstieg – Update-Regel</div>
+          <div class="formula-math">
+            \[ \mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} - \eta \cdot \nabla_{\mathbf{w}} E \]
+            \[ b^{(t+1)} = b^{(t)} - \eta \cdot \nabla_b E \]
+          </div>
+          <div class="formula-legend">
+            <div class="fl-row">
+              <span class="fl-sym">\(\eta\)</span>
+              <span class="fl-desc">Lernrate (learning rate) – kontrolliert die Schrittgröße beim Update</span>
+            </div>
+            <div class="fl-row">
+              <span class="fl-sym">\(E\)</span>
+              <span class="fl-desc">Kostenfunktion: min ½‖w‖² + C·Σmax{0, 1-y_i(⟨w,x_i⟩+b)}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Code: Gradienten in Python -->
+        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3)">
+          Die Gradienten können wir direkt in Python übersetzen –
+          genau das tun wir auf <strong>Seite 05 (SVM from Scratch)</strong>.
+          Hier als Vorschau die Logik in Pseudocode:
+        </p>
+
+        <div class="code-cell-split">
+          <div class="code-side">
+            <div class="code-side-header">
+              <span class="cell-lang">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                </svg>
+                Python – Gradient Logik (Vorschau auf Seite 05)
+              </span>
+            </div>
+            <pre><code>def compute_gradient(X, y, w, b, C):
+    """Abschnittsweise Gradienten des Hinge Loss."""
+    dw = np.zeros_like(w)
+    db = 0.0
+
+    for xi, yi in zip(X, y):
+        # yi ∈ {-1, +1}: intern umrechnen
+        yi_signed = 1 if yi == 1 else -1
+
+        # Bedingung prüfen
+        margin = yi_signed * (np.dot(w, xi) + b)
+
+        if margin >= 1:
+            # Kein Margin-Bruch
+            dw += w
+            db += 0
+        else:
+            # Margin-Bruch
+            dw += w - C * yi_signed * xi
+            db += -C * yi_signed
+
+    return dw / len(X), db / len(X)</code></pre>
+          </div>
+          <div class="output-side">
+            <div class="output-side-header">
+              <span class="cell-lang">Was dieser Code macht</span>
+            </div>
+            <div class="output-side-body">
+              <ul style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0; padding-left:1rem; line-height:2.0">
+                <li>Schleife über alle Punkte (xi, yi)</li>
+                <li>Bedingung: margin = yi·(⟨w,xi⟩+b)</li>
+                <li>≥ 1: nur Regularisierungs-Gradient</li>
+                <li>&lt; 1: Regularisierung + Hinge-Gradient</li>
+                <li>Division durch N → Mittelwert über Batch</li>
+                <li>→ Vollständige Implementierung auf <strong>Seite 05</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="so-what">
+          <div class="so-what-label">💡 So what? — Zusammenfassung Seite 04</div>
+          <p>
+            Soft-Margin SVMs sind eine Erweiterung des Hard-Margin-Problems durch die
+            <span class="key" style="--key-color:var(--color-purple)">Slack-Variable ξ_i</span>.
+            Der Hinge Loss fasst das elegant zusammen: er ist 0 für korrekt klassifizierte Punkte
+            außerhalb des Margins und wächst linear für Verletzungen.
+            Die abschnittsweisen Gradienten ermöglichen Gradientenabstieg.
+            → Alles zusammen → <span class="key" style="--key-color:var(--color-warning)">SVM from Scratch auf Seite 05</span>.
+          </p>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

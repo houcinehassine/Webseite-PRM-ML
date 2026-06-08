@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Kapitel 3 · Support Vector Machines</title>
+  <script type="module" src="../header.js"></script>
+  <link rel="stylesheet" href="../style.css">
+
+  <style>
+    /* ── K3-HERO ─────────────────────────────────────────── */
+    .k3-hero {
+      padding: clamp(3rem, 10vw, 5rem) 0 clamp(2rem, 6vw, 3rem);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Subtiles Dot-Grid im Hintergrund */
+    .k3-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(
+        circle,
+        color-mix(in oklab, var(--color-primary) 18%, transparent) 1px,
+        transparent 1px
+      );
+      background-size: 28px 28px;
+      opacity: 0.25;
+      pointer-events: none;
+    }
+    .k3-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 80% 60% at 50% 50%,
+        transparent 40%,
+        var(--color-bg) 100%
+      );
+      pointer-events: none;
+    }
+    .k3-hero > * { position: relative; z-index: 1; }
+    .k3-hero .eyebrow { margin-bottom: var(--space-4); }
+    .k3-hero h1 {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl);
+      line-height: 1.08;
+      text-transform: none;
+      margin: var(--space-4) auto var(--space-4);
+      max-width: 22ch;
+    }
+    .k3-hero p {
+      color: var(--color-text-muted);
+      font-size: var(--text-base);
+      max-width: 62ch;
+      margin-inline: auto;
+    }
+
+    /* ── SECTION-LABEL MIT ICON & LINE ───────────────────── */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      max-width: 1120px;
+      margin: var(--space-10) auto var(--space-2);
+      padding: 0 var(--space-8);
+    }
+    .section-label-icon { font-size: 1rem; flex-shrink: 0; }
+    .section-label-text {
+      font-size: var(--text-xs);
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--color-text-faint);
+      white-space: nowrap;
+    }
+    .section-label-line {
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+    .section-label-desc {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      max-width: 1120px;
+      margin: var(--space-1) auto var(--space-5);
+      padding: 0 var(--space-8);
+    }
+
+    /* ── PAGES GRID ──────────────────────────────────────── */
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-5);
+      max-width: 1120px;
+      margin: var(--space-3) auto 0;
+      padding: 0 var(--space-8) var(--space-10);
+    }
+    .pages-grid.two-col {
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    }
+
+    /* ── PAGE CARD ───────────────────────────────────────── */
+    .page-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--color-text);
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .page-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: color-mix(in oklab, var(--color-primary) 30%, var(--color-border));
+    }
+
+    /* Banner */
+    .card-banner {
+      width: 100%;
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-5);
+      font-size: 2.8rem;
+      position: relative;
+    }
+    .card-num {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-full);
+      background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));
+      color: var(--color-primary);
+      position: absolute;
+      top: var(--space-3);
+      left: var(--space-4);
+    }
+
+    /* Body */
+    .card-body {
+      padding: var(--space-5);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+    .card-subtitle {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: var(--space-1);
+    }
+    .card-titel {
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--color-text);
+    }
+    .card-desc {
+      font-size: var(--text-xs);
+      line-height: 1.65;
+      color: var(--color-text-muted);
+      flex: 1;
+    }
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-1);
+      margin-top: var(--space-2);
+    }
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      color: var(--color-text-muted);
+    }
+
+    /* Footer */
+    .card-footer {
+      padding: var(--space-3) var(--space-5);
+      border-top: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: var(--text-xs);
+      color: var(--color-text-faint);
+    }
+    .card-arrow {
+      font-size: 1rem;
+      color: var(--color-primary);
+      transition: transform 0.15s;
+    }
+    .page-card:hover .card-arrow { transform: translateX(4px); }
+
+    /* Pruefungs-Grid */
+    .pages-grid.pruefung-grid {
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      margin-top: 0;
+    }
+
+    @media (max-width: 640px) {
+      .pages-grid { grid-template-columns: 1fr; padding: 0 var(--space-4) var(--space-8); }
+      .card-banner { height: 100px; font-size: 2.2rem; }
+      .section-label { padding: 0 var(--space-4); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ SITE-HEADER ════════════════════════════════════════ -->
+  <site-header active="page3" title="Kapitel 3 · Support Vector Machines"></site-header>
+
+  <!-- ══ MAIN ══════════════════════════════════════════════ -->
+  <main id="main-content">
+    <div class="container">
+
+      <!-- ══════════════════════════════════════════════════
+           HERO
+      ══════════════════════════════════════════════════════ -->
+      <section class="k3-hero">
+        <span class="eyebrow">✦ Kapitel 3 · Supervised Learning</span>
+        <h1>Support Vector Machines</h1>
+        <p>
+          Von der Margin-Intuition über die harte Mathematik bis zum
+          Kernel-Trick – SVMs geometrisch, mathematisch und in Python verstehen.
+        </p>
+
+        <!-- Themen-Überblick als Pills -->
+        <div class="overview-strip">
+          <span class="overview-pill">↔️ Margin Maximierung</span>
+          <span class="overview-pill">📍 Support Vectors</span>
+          <span class="overview-pill">📐 Hyperebene & Optimierung</span>
+          <span class="overview-pill">⚖️ Soft-Margin & C</span>
+          <span class="overview-pill">📉 Hinge Loss</span>
+          <span class="overview-pill">💻 SVM from Scratch</span>
+          <span class="overview-pill">🌀 Kernel-Trick</span>
+          <span class="overview-pill">🎯 Multi-Class SVMs</span>
+          <span class="overview-pill">📈 SVR</span>
+        </div>
+
+        <!-- Status Pills -->
+        <div class="status-bar">
+          <span class="status-pill active"><span class="dot"></span>8 Seiten verfügbar</span>
+          <span class="status-pill"><span class="dot"></span>35 Vorlesungsfolien</span>
+          <span class="status-pill">sklearn · numpy · matplotlib</span>
+        </div>
+      </section>
+
+    </div><!-- /container -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         SEKTION 1 · Einführung & Intuition
+    ═══════════════════════════════════════════════════════ -->
+    <div class="section-label">
+      <span class="section-label-icon">🚀</span>
+      <span class="section-label-text">Einführung & Intuition</span>
+      <span class="section-label-line"></span>
+    </div>
+    <div class="pages-grid">
+
+      <!-- Page 01 ─────────────────────────────────────── -->
+      <a class="page-card" href="Page01.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-primary)  4%, var(--color-surface-offset)));">
+          🗺️
+          <span class="card-num">Seite 01</span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle">Einstieg</div>
+          <div class="card-titel">Einführung: Was dich erwartet</div>
+          <div class="card-desc">
+            Wo stehen SVMs im ML-Kontext? ML-Taxonomie:
+            Supervised Learning → SVC &amp; SVR. Die 4 Agenda-Punkte
+            als klickbare Navigation. Erster Überblick: diskriminativer
+            Klassifikator, geeignet für klein- &amp; mittelgroße Datensätze.
+          </div>
+          <div class="card-tags">
+            <span class="tag">ML-Taxonomie</span>
+            <span class="tag">SVC vs. SVR</span>
+            <span class="tag">Agenda</span>
+            <span class="tag">Überblick</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Einstieg · 4 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 02 ─────────────────────────────────────── -->
+      <a class="page-card" href="Page02.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-primary) 16%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-primary)  6%, var(--color-surface-offset)));">
+          ↔️
+          <span class="card-num">Seite 02</span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle">Agenda-Punkt 1</div>
+          <div class="card-titel">Margin Maximierung & Support Vectors</div>
+          <div class="card-desc">
+            Warum gibt es unendlich viele Trenngeraden – und welche ist
+            die beste? Margin-Band, Maximum Margin Estimator.
+            <code>SVC(kernel='linear')</code> + <code>.fit()</code>.
+            Support Vectors: Modell hängt nur von diesen ab.
+            Robustheitstest N=60 vs. N=120.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Margin</span>
+            <span class="tag">SVC</span>
+            <span class="tag">support_vectors_</span>
+            <span class="tag">Robustheit</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Intuition · 6 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div><!-- /pages-grid Einführung -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         SEKTION 2 · Mathematik & Optimierung
+    ═══════════════════════════════════════════════════════ -->
+    <div class="section-label">
+      <span class="section-label-icon">📐</span>
+      <span class="section-label-text">Mathematik & Optimierung</span>
+      <span class="section-label-line"></span>
+    </div>
+    <div class="pages-grid">
+
+      <!-- Page 03 ─────────────────────────────────────── -->
+      <a class="page-card" href="Page03.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-purple) 12%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-purple)  4%, var(--color-surface-offset)));">
+          🧮
+          <span class="card-num"
+                style="color:var(--color-purple);
+                       background:color-mix(in oklab,var(--color-purple) 10%,var(--color-surface))">
+            Seite 03
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle" style="color:var(--color-purple)">Agenda-Punkt 2</div>
+          <div class="card-titel">Mathematischer Hintergrund</div>
+          <div class="card-desc">
+            Trainingsdatensatz <code>{(xᵢ, yᵢ)}</code>, yᵢ ∈ {−1, 1}.
+            Hyperebene über Normalenvektor w + Bias b.
+            Vorzeichen-Regel &amp; Modell: yᵢ = sgn(⟨w, xᵢ⟩ + b).
+            Optimierungsproblem: max r. Hard-Margin Herleitung:
+            min ½‖w‖² mit Bedingung yᵢ(⟨w, xᵢ⟩ + b) ≥ 1.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Hyperebene</span>
+            <span class="tag">Normalenvektor w</span>
+            <span class="tag">Hard-Margin</span>
+            <span class="tag">Optimierung</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie · 4 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 04 ─────────────────────────────────────── -->
+      <a class="page-card" href="Page04.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-purple) 14%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-purple)  5%, var(--color-surface-offset)));">
+          ⚖️
+          <span class="card-num"
+                style="color:var(--color-purple);
+                       background:color-mix(in oklab,var(--color-purple) 10%,var(--color-surface))">
+            Seite 04
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle" style="color:var(--color-purple)">Agenda-Punkt 3</div>
+          <div class="card-titel">Soft-Margin & Optimierung</div>
+          <div class="card-desc">
+            Hyperparameter C: groß = Hard-Margin, klein = Soft-Margin.
+            Slack-Variable ξᵢ: Verletzungen des Margins werden bestraft.
+            Regularisierung: min ½‖w‖² + C·Σξᵢ.
+            Hinge Loss L(t) = max{0, 1−t}. Abschnittsweise Gradienten ∇w, ∇b.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Soft-Margin</span>
+            <span class="tag">C-Parameter</span>
+            <span class="tag">Slack-Variable</span>
+            <span class="tag">Hinge Loss</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie · 5 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div><!-- /pages-grid Mathematik -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         SEKTION 3 · Implementierung from Scratch
+    ═══════════════════════════════════════════════════════ -->
+    <div class="section-label">
+      <span class="section-label-icon">💻</span>
+      <span class="section-label-text">Implementierung from Scratch</span>
+      <span class="section-label-line"></span>
+    </div>
+    <p class="section-label-desc">
+      Eine eigenständige Coding-Session: Loss Function → Gradienten → Gradientenabstieg → Visualisierung.
+    </p>
+    <div class="pages-grid two-col">
+
+      <!-- Page 05 ─────────────────────────────────────── -->
+      <a class="page-card" href="Page05.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-warning) 14%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-warning)  5%, var(--color-surface-offset)));">
+          🔨
+          <span class="card-num"
+                style="color:var(--color-warning);
+                       background:color-mix(in oklab,var(--color-warning) 12%,var(--color-surface))">
+            Seite 05
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle" style="color:var(--color-warning)">Code & Übungen</div>
+          <div class="card-titel">SVM from Scratch</div>
+          <div class="card-desc">
+            Loss Function in Python abbilden. <code>svm_gradients(X, y, w, b, C)</code> –
+            abschnittsweise Gradienten implementieren.
+            Gradientenabstieg-Algorithmus: Initialisierung → Update w(i+1) = w(i) − η·∇Λ.
+            <code>svm_train()</code> mit Loss-Tracking.
+            <code>visualize_svm_training(w, b)</code> + Bonus: Animation.
+          </div>
+          <div class="card-tags">
+            <span class="tag">svm_gradients()</span>
+            <span class="tag">svm_train()</span>
+            <span class="tag">Gradientenabstieg</span>
+            <span class="tag">Loss-Kurve</span>
+            <span class="tag">Visualisierung</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Code · 5 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div><!-- /pages-grid from Scratch -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         SEKTION 4 · Kernel-Trick & Anwendungen
+    ═══════════════════════════════════════════════════════ -->
+    <div class="section-label">
+      <span class="section-label-icon">🌀</span>
+      <span class="section-label-text">Kernel-Trick & Anwendungen</span>
+      <span class="section-label-line"></span>
+    </div>
+    <div class="pages-grid">
+
+      <!-- Page 06 ─────────────────────────────────────── -->
+      <a class="page-card" href="Page06.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-primary) 14%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-primary)  5%, var(--color-surface-offset)));">
+          🌀
+          <span class="card-num">Seite 06</span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle">Agenda-Punkt 4</div>
+          <div class="card-titel">Nicht-lineare Probleme & Kernel-Trick</div>
+          <div class="card-desc">
+            <code>make_circles()</code>: linear nicht trennbar.
+            Lösung: Radial Basis Functions (RBF) – r = exp(−‖x‖²) →
+            2D→3D-Projektion. Kernel-Trick: implizite N-dimensionale
+            Projektion mit <code>kernel='rbf'</code>.
+            Elliptische Entscheidungsgrenze im 2D-Raum.
+          </div>
+          <div class="card-tags">
+            <span class="tag">RBF</span>
+            <span class="tag">3D-Projektion</span>
+            <span class="tag">Kernel-Trick</span>
+            <span class="tag">kernel='rbf'</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code · 3 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Page 07 ─────────────────────────────────────── -->
+      <a class="page-card" href="Page07.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-success) 14%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-success)  5%, var(--color-surface-offset)));">
+          🏭
+          <span class="card-num"
+                style="color:var(--color-success);
+                       background:color-mix(in oklab,var(--color-success) 10%,var(--color-surface))">
+            Seite 07
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle" style="color:var(--color-success)">Praxis</div>
+          <div class="card-titel">Multi-Class SVMs & Praxis-Anwendungen</div>
+          <div class="card-desc">
+            One-versus-One: N(N−1)/2 SVMs für N Klassen.
+            Drei Anwendungsbeispiele: Handschrifterkennung (Digits-Dataset 8×8),
+            Face Recognition (<code>fetch_lfw_people</code>, PCA),
+            Fault Classification von Kugellagern (Vibrationsdaten, B021/IR021/OR021).
+          </div>
+          <div class="card-tags">
+            <span class="tag">Multi-Class</span>
+            <span class="tag">Digits-Dataset</span>
+            <span class="tag">Face Recognition</span>
+            <span class="tag">Fault Classification</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Praxis · 4 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div><!-- /pages-grid Kernel -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         SEKTION 5 · SVR & Zusammenfassung
+    ═══════════════════════════════════════════════════════ -->
+    <div class="section-label">
+      <span class="section-label-icon">📈</span>
+      <span class="section-label-text">SVR & Zusammenfassung</span>
+      <span class="section-label-line"></span>
+    </div>
+    <div class="pages-grid two-col">
+
+      <!-- Page 08 ─────────────────────────────────────── -->
+      <a class="page-card" href="Page08.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-primary) 10%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-primary)  3%, var(--color-surface-offset)));">
+          📈
+          <span class="card-num">Seite 08</span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle">Abschluss</div>
+          <div class="card-titel">SVR & Zusammenfassung</div>
+          <div class="card-desc">
+            Support Vector Regression: umgekehrte Optimierung –
+            Punkte <em>innerhalb</em> des ε-Margins strafenfrei.
+            <code>SVR(kernel, C, epsilon)</code>: linear &amp; nicht-linear.
+            Vergleich ε=1.5 vs. ε=0.5, C=100 vs. C=0.01.
+            Pros &amp; Cons, No-Free-Lunch Theorem.
+          </div>
+          <div class="card-tags">
+            <span class="tag">SVR</span>
+            <span class="tag">epsilon</span>
+            <span class="tag">LinearSVR</span>
+            <span class="tag">Pros &amp; Cons</span>
+            <span class="tag">No-Free-Lunch</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Theorie + Code · 4 Abschnitte</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div><!-- /pages-grid SVR -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         SEKTION 6 · Prüfungsvorbereitung
+    ═══════════════════════════════════════════════════════ -->
+    <div class="section-label">
+      <span class="section-label-icon">📋</span>
+      <span class="section-label-text">Prüfungsvorbereitung</span>
+      <span class="section-label-line"></span>
+    </div>
+    <p class="section-label-desc">Schnellreferenz und Selbsttest – ideal kurz vor der Prüfung.</p>
+    <div class="pages-grid pruefung-grid">
+
+      <!-- Cheatsheet ────────────────────────────────────── -->
+      <a class="page-card" href="PageCheatsheet.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-warning) 12%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-warning)  4%, var(--color-surface-offset)));">
+          📋
+          <span class="card-num"
+                style="color: color-mix(in oklab, var(--color-warning) 80%, #000);
+                       background: color-mix(in oklab, var(--color-warning) 12%, var(--color-surface))">
+            Referenz
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle"
+               style="color: color-mix(in oklab, var(--color-warning) 80%, #000)">
+            Schnellreferenz
+          </div>
+          <div class="card-titel">Cheatsheet SVM</div>
+          <div class="card-desc">
+            Alle Formeln kompakt: Hyperebene, Hard-/Soft-Margin,
+            Hinge Loss, Gradienten. Kernel-Übersicht (linear, RBF, poly).
+            Hyperparameter C &amp; ε. Vollständige sklearn API.
+            Typische Prüfungsfallen &amp; Merksätze.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Formeln</span>
+            <span class="tag">Kernel-Übersicht</span>
+            <span class="tag">sklearn API</span>
+            <span class="tag">Merksätze</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Alle Formeln &amp; Code</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Quiz ──────────────────────────────────────────── -->
+      <a class="page-card" href="PageQuiz.html">
+        <div class="card-banner"
+             style="background: linear-gradient(135deg,
+               color-mix(in oklab, var(--color-warning) 12%, var(--color-surface-2)),
+               color-mix(in oklab, var(--color-warning)  4%, var(--color-surface-offset)));">
+          🧠
+          <span class="card-num"
+                style="color: color-mix(in oklab, var(--color-warning) 80%, #000);
+                       background: color-mix(in oklab, var(--color-warning) 12%, var(--color-surface))">
+            Quiz
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="card-subtitle"
+               style="color: color-mix(in oklab, var(--color-warning) 80%, #000)">
+            Selbsttest
+          </div>
+          <div class="card-titel">Quiz SVM</div>
+          <div class="card-desc">
+            Konzept-, Formel- und Code-Fragen zu SVMs.
+            Was sind Support Vectors? Wann Hard- vs. Soft-Margin?
+            Wie wirkt C auf den Margin? Warum funktioniert der Kernel-Trick?
+            Klassische Prüfungsfallen und Fallen-Fragen.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Konzeptfragen</span>
+            <span class="tag">Formelfragen</span>
+            <span class="tag">Code-Fragen</span>
+            <span class="tag">🪤 Fallen</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span>Selbsttest</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div><!-- /pages-grid Prüfung -->
+
+  </main>
+
+</body>
+</html>
