@@ -1419,3 +1419,26 @@ site-sidebar {
    SHARED: Eyebrow  (K3, K7)
    ═══════════════════════════════════════════════════════════ */
 .eyebrow { margin-bottom: var(--space-4); }
+
+/* ═══════════════════════════════════════════════════════════
+   SHARED: Primary-Button-Farbe  (K2, K3)
+   ═══════════════════════════════════════════════════════════ */
+.primary       { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+.primary:hover { background: var(--color-primary-hover); opacity: .9; }
+
+/* ═══════════════════════════════════════════════════════════
+   SHARED: Matrix-Tabelle  (K5, K7)
+   ═══════════════════════════════════════════════════════════ */
+.matrix        { border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--color-border); font-size: var(--text-sm); }
+.matrix-header { display: grid; grid-template-columns: 150px 1fr 1fr; background: var(--color-text); color: #fff; font-weight: 700; font-size: var(--text-xs); letter-spacing: .05em; }
+
+/* ═══════════════════════════════════════════════════════════
+   SHARED: Print-/Druckansicht Fixes  (K5, K7)
+   ═══════════════════════════════════════════════════════════ */
+.layout  { display: block !important; }
+.content { padding: 0 !important; }
+
+/* ═══════════════════════════════════════════════════════════
+   SHARED: Fallen-Icon  (K5, K6)
+   ═══════════════════════════════════════════════════════════ */
+.fallen-icon { font-size: 1.1rem; line-height: 1.5; padding-top: 2px; }
