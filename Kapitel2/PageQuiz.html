@@ -2,6 +2,7 @@
 <html lang="de" data-theme="light">
 <head>
   <meta charset="UTF-8" />
+  <meta name="description" content="K2 · Quiz: Teste dein Wissen zu Neuronalen Netzen und Deep Learning.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PRM – K2 · Quiz</title>
   <script type="module" src="../header.js"></script>
@@ -84,10 +85,7 @@
       line-height: 1.6;
     }
     .quiz-feedback.show { display: block; }
-    .quiz-feedback.ok {
-      background: color-mix(in oklab, var(--color-success) 8%, var(--color-surface-2));
-      border: 1px solid color-mix(in oklab, var(--color-success) 30%, var(--color-border));
-    }
+    .quiz-feedback
     .quiz-feedback.err {
       background: color-mix(in oklab, #ef4444 8%, var(--color-surface-2));
       border: 1px solid color-mix(in oklab, #ef4444 30%, var(--color-border));
@@ -142,7 +140,7 @@
     .quiz-dot {
       width: 14px; height: 14px; border-radius: 50%;
     }
-    .quiz-dot.ok   { background: var(--color-success); }
+    .quiz-dot
     .quiz-dot.err  { background: #ef4444; }
   </style>
 </head>

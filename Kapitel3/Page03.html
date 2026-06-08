@@ -2,6 +2,7 @@
 <html lang="de" data-theme="light">
 <head>
   <meta charset="UTF-8" />
+  <meta name="description" content="K3 · Mathematischer Hintergrund: Optimierungsproblem und Hard-Margin-Herleitung.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PRM – K3 · Mathematischer Hintergrund SVM</title>
   <script type="module" src="../header.js"></script>
@@ -38,10 +39,7 @@
     }
     .deriv-step:last-child { border-bottom: none; }
     .deriv-step:hover { background: var(--color-surface-offset); }
-    .deriv-step.highlight {
-      background: color-mix(in oklab, var(--color-primary) 6%, var(--color-surface));
-      border-left: 4px solid var(--color-primary);
-    }
+    .deriv-step
     .ds-num {
       width: 36px; height: 36px; border-radius: 50%;
       display: grid; place-items: center;
@@ -49,9 +47,7 @@
       background: var(--color-primary-highlight); color: var(--color-primary);
       flex-shrink: 0;
     }
-    .deriv-step.highlight .ds-num {
-      background: var(--color-primary); color: #fff;
-    }
+    .deriv-step
     .ds-formula {
       font-family: var(--font-mono); font-size: var(--text-sm);
       font-weight: 700; color: var(--color-text);

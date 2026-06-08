@@ -2,6 +2,7 @@
 <html lang="de" data-theme="light">
 <head>
   <meta charset="UTF-8" />
+  <meta name="description" content="K1 · Datenvorbereitung: Feature-Matrix, Labels und Daten-Split im ML-Workflow.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PRM – Von Daten zu Features</title>
   <script type="module" src="../header.js"></script>
@@ -91,12 +92,7 @@
       margin-top: var(--space-6);
       overflow-x: auto;
     }
-    .matrix-wrap {
-      display: inline-flex;
-      flex-direction: column;
-      gap: 0;
-      min-width: 480px;
-    }
+    
     .matrix-label-row {
       display: flex;
       gap: 0;
@@ -189,7 +185,7 @@
       flex-shrink: 0;
       text-align: center;
     }
-    .pf-arrow { font-size: 1.1rem; color: var(--color-text-faint); }
+    
     .pf-process-label {
       font-size: 0.65rem;
       font-weight: 700;

@@ -2,6 +2,7 @@
 <html lang="de" data-theme="light">
 <head>
   <meta charset="UTF-8" />
+  <meta name="description" content="K3 · Kernel-Trick: RBF-Kernel, Projektion und nicht-lineare Klassifikation.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PRM – K3 · Nicht-lineare Probleme & Kernel-Trick</title>
   <script type="module" src="../header.js"></script>
@@ -10,13 +11,9 @@
   <link rel="stylesheet" href="../assets/style.css">
 
   <style>/* ── PROBLEM BOX (rot) ───────────────────────────── */
-    .problem-box { margin:var(--space-5) 0; padding:var(--space-4) var(--space-5);
-      border-left:3px solid #ef4444;
-      border-radius:0 var(--radius-lg) var(--radius-lg) 0;
-      background:color-mix(in oklab,#ef4444 5%,var(--color-surface-2)); }
-    .problem-label { font-size:var(--text-xs); font-weight:700; letter-spacing:.08em;
-      text-transform:uppercase; color:#ef4444; margin-bottom:var(--space-2); }
-    .problem-box p { font-size:var(--text-sm); margin:0; line-height:1.7; }
+    
+    
+    
     .fl-row { display:flex; align-items:baseline; gap:var(--space-3);
       font-size:var(--text-xs); text-align:left; margin-top:var(--space-2); }
     .fl-sym { font-family:var(--font-mono); font-weight:700;
@@ -38,23 +35,20 @@
       align-items: center; gap: var(--space-2);
       min-width: 140px; text-align: center;
     }
-    .dim-node.highlight {
-      border-color: var(--color-primary);
-      background: color-mix(in oklab, var(--color-primary) 5%, var(--color-surface));
-    }
+    .dim-node
     .dim-node.dim-2d { border-color: #ef4444; background: color-mix(in oklab,#ef4444 5%,var(--color-surface)); }
     .dim-node.dim-3d { border-color: var(--color-success); background: color-mix(in oklab,var(--color-success) 5%,var(--color-surface)); }
     .dn-label { font-size:.62rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
     .dim-node.dim-2d .dn-label { color:#ef4444; }
     .dim-node.dim-3d .dn-label { color:var(--color-success); }
-    .dim-node.highlight .dn-label { color:var(--color-primary); }
+    .dim-node
     .dn-icon  { font-size:1.8rem; }
     .dn-title { font-size:var(--text-sm); font-weight:700; }
     .dn-desc  { font-size:var(--text-xs); color:var(--color-text-muted); line-height:1.5; }
-    .dim-arrow { font-size:1.5rem; color:var(--color-text-faint); flex-shrink:0; }
+    
     @media (max-width:640px) {
       .dim-flow { flex-direction:column; }
-      .dim-arrow { transform: rotate(90deg); }
+      
     }
 
     /* ── KERNEL COMPARE (NEU → css_codes/kapitel3.css) ─ */
@@ -72,10 +66,10 @@
       border-radius: var(--radius-xl); border: 1.5px solid var(--color-border);
       background: var(--color-surface-2);
     }
-    .kc-side.fail { border-color:#ef4444; background:color-mix(in oklab,#ef4444 4%,var(--color-surface)); }
+    .kc-side
     .kc-side.win  { border-color:var(--color-success); background:color-mix(in oklab,var(--color-success) 4%,var(--color-surface)); }
     .kc-label { font-size:.62rem; font-weight:800; letter-spacing:.09em; text-transform:uppercase; margin-bottom:var(--space-3); }
-    .kc-side.fail .kc-label { color:#ef4444; }
+    .kc-side
     .kc-side.win  .kc-label { color:var(--color-success); }
     .kc-divider {
       display:flex; align-items:center; justify-content:center; padding-top:var(--space-8);
