@@ -1,6 +1,5 @@
 // ─────────────────────────────────────────────────────────
-//  sidebar-core.js  –  Gemeinsame Sidebar-Logik für alle Kapitel
-//  Pfad: V4/js_codes/sidebar-core.js
+// Gemeinsame Sidebar-Logik für alle Kapitel
 // ─────────────────────────────────────────────────────────
 
 
