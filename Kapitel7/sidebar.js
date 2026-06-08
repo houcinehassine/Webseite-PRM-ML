@@ -13,43 +13,49 @@ const chapter = {
       href: 'Einführung.html',
       title: 'Einführung – Evaluation',
       sections: [
-        { href: '#ueberblick',   title: 'Überblick'          },
-        { href: '#lernziele',    title: 'Lernziele'          }
+        { href: '#kontext',  title: 'Kontext & Einordnung' },
+        { href: '#warum',    title: 'Warum Evaluation?' },
+        { href: '#fragen',   title: 'Leitfragen' },
+        { href: '#roadmap',  title: 'Roadmap' }
       ]
     },
 
-    // ── Confusion Matrix ──────────────────────────────────
+    // ── Confusion Matrix Grundlagen ───────────────────────
     {
       id: 'page1',
       href: 'Page01.html',
       title: '1. Confusion Matrix Grundlagen',
       sections: [
-        { href: '#confusion-matrix',  title: 'Was ist die CM?'        },
-        { href: '#tp-tn-fp-fn',       title: 'TP / TN / FP / FN'      },
-        { href: '#accuracy',          title: 'Accuracy'                }
+        { href: '#motivation',     title: 'Motivation' },
+        { href: '#vier-felder',    title: 'Die vier Felder' },
+        { href: '#tpr-fpr',        title: 'TPR & FPR' },
+        { href: '#korrupter-arzt', title: 'Beispiel: Korrupter Arzt' }
       ]
     },
 
-    // ── ROC Curves ───────────────────────────────────────
+    // ── ROC Curves Theorie ────────────────────────────────
     {
       id: 'page2',
       href: 'Page02.html',
       title: '2. ROC Curves Theorie',
       sections: [
-        { href: '#roc-idee',       title: 'Idee der ROC-Kurve'   },
-        { href: '#tpr-fpr',        title: 'TPR & FPR'            },
-        { href: '#auc',            title: 'AUC-Wert'             }
+        { href: '#drei-szenarien',   title: 'Drei Szenarien' },
+        { href: '#koordinatensystem', title: 'Koordinatensystem' },
+        { href: '#ideal-vs-zufall',  title: 'Ideal vs. Zufall' },
+        { href: '#tradeoff',         title: 'Trade-off' }
       ]
     },
 
+    // ── ROC Curves in sklearn ─────────────────────────────
     {
       id: 'page3',
       href: 'Page03.html',
       title: '3. ROC Curves in sklearn',
       sections: [
-        { href: '#roc-sklearn',    title: 'roc_curve()'         },
-        { href: '#auc-sklearn',    title: 'roc_auc_score()'     },
-        { href: '#beispiel',       title: 'Praxisbeispiel'      }
+        { href: '#api-uebersicht', title: 'API-Übersicht' },
+        { href: '#erstes-beispiel', title: 'Erstes Beispiel' },
+        { href: '#std-variieren',  title: 'std variieren' },
+        { href: '#integrale',      title: 'AUC & Integrale' }
       ]
     },
 
@@ -59,20 +65,23 @@ const chapter = {
       href: 'Page04.html',
       title: '4. Decision Threshold',
       sections: [
-        { href: '#threshold',      title: 'Schwellenwert'       },
-        { href: '#auswirkung',     title: 'Auswirkung auf CM'   },
-        { href: '#optimierung',    title: 'Threshold optimieren' }
+        { href: '#was-ist-threshold', title: 'Was ist der Threshold?' },
+        { href: '#use-cases',         title: 'Use Cases' },
+        { href: '#adjusted-predict',  title: 'adjusted_predict()' },
+        { href: '#hinweise',          title: 'Wichtige Hinweise' }
       ]
     },
 
-    // ── CM sklearn & AUC ─────────────────────────────────
+    // ── Confusion Matrix sklearn & AUC ────────────────────
     {
       id: 'page5',
       href: 'Page05.html',
       title: '5. Confusion Matrix sklearn & AUC',
       sections: [
-        { href: '#cm-sklearn',     title: 'confusion_matrix()'  },
-        { href: '#auc-vergleich',  title: 'AUC-Vergleich'       }
+        { href: '#confusion-matrix',  title: 'Confusion Matrix' },
+        { href: '#auc',               title: 'AUC-Score' },
+        { href: '#youden',            title: 'Youden-Index' },
+        { href: '#praxis-beispiele',  title: 'Praxisbeispiele' }
       ]
     },
 
@@ -82,10 +91,10 @@ const chapter = {
       href: 'Page06.html',
       title: '6. Precision-Recall & F1',
       sections: [
-        { href: '#precision',      title: 'Precision'           },
-        { href: '#recall',         title: 'Recall'              },
-        { href: '#f1',             title: 'F1-Score'            },
-        { href: '#pr-kurve',       title: 'PR-Kurve'            }
+        { href: '#warum-nicht-roc', title: 'Warum nicht ROC?' },
+        { href: '#precision-recall', title: 'Precision & Recall' },
+        { href: '#pr-kurve',        title: 'PR-Kurve' },
+        { href: '#f1-score',        title: 'F1-Score' }
       ]
     },
 
@@ -95,9 +104,10 @@ const chapter = {
       href: 'Page07.html',
       title: '7. Multi-Class ROC',
       sections: [
-        { href: '#ovr',            title: 'One-vs-Rest'         },
-        { href: '#ovo',            title: 'One-vs-One'          },
-        { href: '#macro-micro',    title: 'Macro / Micro AUC'   }
+        { href: '#warum-schwieriger', title: 'Warum schwieriger?' },
+        { href: '#averaging',         title: 'Macro / Micro Averaging' },
+        { href: '#code-beispiel',     title: 'Code-Beispiel' },
+        { href: '#zusammenfassung',   title: 'Zusammenfassung' }
       ]
     },
 
@@ -107,8 +117,10 @@ const chapter = {
       href: 'Pagebeispiel.html',
       title: '🔧 Praxisbeispiel: Kugellager',
       sections: [
-        { href: '#aufgabe',        title: 'Aufgabenstellung'    },
-        { href: '#loesung',        title: 'Lösung'              }
+        { href: '#aufgabe',      title: 'Aufgabenstellung' },
+        { href: '#daten-modell', title: 'Daten & Modell' },
+        { href: '#loesung',      title: 'Lösung' },
+        { href: '#anwendung',    title: 'Anwendung' }
       ]
     },
 
@@ -125,12 +137,12 @@ const chapter = {
       title: '📋 Cheatsheet',
       pruefung: true,
       sections: [
-        { href: '#confusion-matrix', title: 'Confusion Matrix'   },
-        { href: '#formeln',          title: 'Alle Formeln'        },
-        { href: '#api',              title: 'sklearn API'         },
-        { href: '#wann-was',         title: 'Wann was?'           },
-        { href: '#fallen',           title: 'Typische Fallen'     },
-        { href: '#merksaetze',       title: 'Merksätze'           }
+        { href: '#confusion-matrix', title: 'Confusion Matrix' },
+        { href: '#formeln',          title: 'Alle Formeln' },
+        { href: '#api',              title: 'sklearn API' },
+        { href: '#wann-was',         title: 'Wann was?' },
+        { href: '#fallen',           title: 'Typische Fallen' },
+        { href: '#merksaetze',       title: 'Merksätze' }
       ]
     },
 
@@ -140,9 +152,10 @@ const chapter = {
       title: '🧠 Quiz',
       pruefung: true,
       sections: [
-        { href: '#konzept-fragen',  title: 'Konzeptfragen'       },
-        { href: '#formel-fragen',   title: 'Formelfragen'        },
-        { href: '#code-fragen',     title: 'Code-Fragen'         }
+        { href: '#konzept-fragen', title: 'Konzeptfragen' },
+        { href: '#formel-fragen',  title: 'Formelfragen' },
+        { href: '#code-fragen',    title: 'Code-Fragen' },
+        { href: '#fallen-fragen',  title: '🪤 Fallen' }
       ]
     }
 
