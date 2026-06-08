@@ -3,8 +3,14 @@ class SiteFooter extends HTMLElement {
     const caption = this.getAttribute('caption') ?? 'PRM Prüfungsvorbereitung';
     this.innerHTML = `
       <footer class="footer">
-        <div class="container">
-          <small>${caption}</small>
+        <div class="container footer-inner">
+          <small class="footer-caption">${caption}</small>
+          <small class="footer-attribution">
+            Inhalt basiert auf der Vorlesungsgrundlage von
+            <strong>Prof. Goldenhacker</strong> –
+            Fach <em>Predictive Maintenance</em>,
+            Studiengang Produktions- und Automatisierungstechnik · OTH
+          </small>
         </div>
       </footer>
     `;

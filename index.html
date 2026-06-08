@@ -2,37 +2,543 @@
 <html lang="de" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="description" content="PRM Prüfungsvorbereitung – Maschinelles Lernen. 7 Kapitel mit Lernseiten, Cheatsheets und Quizzes.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PRM – Home Page</title>
+  <title>PRM – Prüfungsvorbereitung · Maschinelles Lernen</title>
   <script type="module" src="header.js"></script>
   <script type="module" src="footer.js"></script>
   <link rel="stylesheet" href="assets/style.css">
   <style>
-    .index-hero { padding: clamp(3rem, 8vw, 5rem) 0 clamp(2rem, 5vw, 3rem); text-align: center; }
-    .index-hero .eyebrow { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-full); background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface-2)); color: var(--color-primary); font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-    .index-hero h1 { font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.08; margin: var(--space-5) auto var(--space-4); max-width: 14ch; text-transform: none; font-weight: 700; }
-    .index-hero p { max-width: 56ch; margin: 0 auto; color: var(--color-text-muted); font-size: var(--text-base); }
-    .kapitel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-5); max-width: 1120px; margin: 0 auto; padding: 0 var(--space-8) var(--space-16); }
-    .kapitel-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); overflow: hidden; text-decoration: none; color: var(--color-text); box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; }
-    .kapitel-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: color-mix(in oklab, var(--color-primary) 20%, var(--color-border)); }
-    .kapitel-card .card-img { height: 150px; display: grid; place-items: center; font-size: 3rem; background: linear-gradient(135deg, color-mix(in oklab, var(--color-primary) 10%, var(--color-surface-2)), var(--color-surface-offset)); }
-    .kapitel-card .card-body { padding: var(--space-5); }
-    .kapitel-card .card-nummer { font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-primary); margin-bottom: 0.25rem; }
-    .kapitel-card .card-titel { font-size: var(--text-base); font-weight: 700; margin-bottom: var(--space-2); }
-    .kapitel-card .card-desc { font-size: var(--text-xs); line-height: 1.5; color: var(--color-text-muted); }
-    .kapitel-card.locked { opacity: 0.55; pointer-events: none; cursor: not-allowed; }
-    .kapitel-card.locked .card-img::after { content: "🔒"; font-size: 2rem; }
+
+    /* ═══════════════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════════════ */
+
+    .home-hero {
+      position: relative;
+      padding: clamp(5rem, 12vw, 8rem) 0 clamp(3rem, 7vw, 5rem);
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Animated colour-mesh background */
+    .home-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 15% 10%,
+          color-mix(in oklab, var(--color-primary) 18%, transparent), transparent 65%),
+        radial-gradient(ellipse 60% 50% at 85% 90%,
+          color-mix(in oklab, var(--color-primary) 12%, transparent), transparent 60%),
+        radial-gradient(ellipse 50% 40% at 70% 5%,
+          color-mix(in oklab, var(--color-success) 9%, transparent), transparent 55%);
+      animation: hero-breathe 10s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+
+    /* Dot grid overlay */
+    .home-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle,
+          color-mix(in oklab, var(--color-primary) 25%, transparent) 1px,
+          transparent 1px);
+      background-size: 30px 30px;
+      opacity: 0.18;
+      -webkit-mask-image:
+        radial-gradient(ellipse 90% 70% at 50% 50%, black 30%, transparent 80%);
+      mask-image:
+        radial-gradient(ellipse 90% 70% at 50% 50%, black 30%, transparent 80%);
+      pointer-events: none;
+    }
+
+    @keyframes hero-breathe {
+      from { opacity: 0.7; }
+      to   { opacity: 1.0; }
+    }
+
+    .home-hero > * { position: relative; z-index: 1; }
+
+    /* Hero eyebrow pill */
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 0.3rem var(--space-5);
+      border-radius: var(--radius-full);
+      background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 22%, var(--color-border));
+      color: var(--color-primary);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: var(--space-7);
+    }
+
+    /* Hero title */
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 6.5vw, 5.5rem);
+      line-height: 1.03;
+      font-weight: 700;
+      max-width: 14ch;
+      margin: 0 auto var(--space-6);
+      text-transform: none;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-title .line-accent {
+      color: var(--color-primary);
+    }
+
+    /* Hero subtitle */
+    .hero-subtitle {
+      max-width: 56ch;
+      margin: 0 auto var(--space-10);
+      color: var(--color-text-muted);
+      font-size: var(--text-base);
+      line-height: 1.75;
+    }
+
+    /* ── STAT STRIP ────────────────────────────────────── */
+    .home-stats {
+      display: inline-flex;
+      align-items: stretch;
+      gap: 0;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+
+    .home-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.2rem;
+      padding: var(--space-5) var(--space-7);
+      border-right: 1px solid var(--color-border);
+      min-width: 90px;
+    }
+    .home-stat:last-child { border-right: none; }
+
+    .home-stat-value {
+      font-family: var(--font-display);
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1;
+    }
+
+    .home-stat-label {
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       INTRO CARD
+    ═══════════════════════════════════════════════════════ */
+    .intro-section {
+      max-width: 1120px;
+      margin: var(--space-12) auto 0;
+      padding: 0 var(--space-8);
+    }
+
+    .intro-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8) var(--space-10);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: var(--space-8);
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* decorative stripe on left */
+    .intro-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg,
+        var(--color-primary),
+        color-mix(in oklab, var(--color-primary) 50%, var(--color-success)));
+    }
+
+    .intro-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(145deg,
+        color-mix(in oklab, var(--color-primary) 14%, var(--color-surface-2)),
+        var(--color-surface-offset));
+      border: 1px solid var(--color-border);
+      display: grid;
+      place-items: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .intro-content h2 {
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      font-weight: 700;
+      margin-bottom: var(--space-3);
+      text-align: left;
+    }
+
+    .intro-content p {
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      max-width: 72ch;
+      margin: 0;
+      line-height: 1.75;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       SECTION HEADING
+    ═══════════════════════════════════════════════════════ */
+    .section-heading {
+      max-width: 1120px;
+      margin: var(--space-12) auto var(--space-6);
+      padding: 0 var(--space-8);
+      display: flex;
+      align-items: center;
+      gap: var(--space-5);
+    }
+
+    .section-heading-text {
+      font-size: var(--text-xs);
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-text-faint);
+      white-space: nowrap;
+    }
+
+    .section-heading-line {
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+
+    .section-heading-count {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--color-primary);
+      background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 20%, var(--color-border));
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-full);
+      letter-spacing: 0.04em;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       KAPITEL GRID
+    ═══════════════════════════════════════════════════════ */
+    .kapitel-grid-home {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: var(--space-5);
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 var(--space-8) var(--space-16);
+    }
+
+    /* ── Card ── */
+    .kcard {
+      display: flex;
+      flex-direction: column;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--color-text);
+      box-shadow: var(--shadow-sm);
+      transition:
+        transform   0.22s ease,
+        box-shadow  0.22s ease,
+        border-color 0.22s ease;
+      position: relative;
+    }
+
+    /* Top accent bar on hover */
+    .kcard::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg,
+        var(--color-primary),
+        color-mix(in oklab, var(--color-primary) 55%, var(--color-success)));
+      opacity: 0;
+      transition: opacity 0.22s ease;
+      z-index: 1;
+    }
+
+    .kcard:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-md);
+      border-color: color-mix(in oklab, var(--color-primary) 30%, var(--color-border));
+    }
+
+    .kcard:hover::before { opacity: 1; }
+
+    /* Card header */
+    .kcard-header {
+      padding: var(--space-6) var(--space-6) var(--space-3);
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-4);
+    }
+
+    /* Big decorative chapter number */
+    .kcard-num {
+      font-family: var(--font-display);
+      font-size: 2.8rem;
+      font-weight: 700;
+      line-height: 1;
+      color: color-mix(in oklab, var(--color-primary) 18%, var(--color-border));
+      flex-shrink: 0;
+      letter-spacing: -0.03em;
+      user-select: none;
+      margin-top: -0.1rem;
+      transition: color 0.22s ease;
+    }
+
+    .kcard:hover .kcard-num {
+      color: color-mix(in oklab, var(--color-primary) 35%, var(--color-border));
+    }
+
+    .kcard-title-group { flex: 1; }
+
+    .kcard-label {
+      font-size: 0.66rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      margin-bottom: 0.25rem;
+      opacity: 0.85;
+    }
+
+    .kcard-title {
+      font-family: var(--font-display);
+      font-size: var(--text-base);
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--color-text);
+    }
+
+    /* Description */
+    .kcard-desc {
+      padding: 0 var(--space-6) var(--space-4);
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+      line-height: 1.65;
+      flex: 1;
+    }
+
+    /* Topic pills */
+    .kcard-topics {
+      padding: 0 var(--space-6) var(--space-5);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .kcard-topic {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 0.18rem 0.52rem;
+      border-radius: var(--radius-full);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      letter-spacing: 0.02em;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .kcard:hover .kcard-topic {
+      background: color-mix(in oklab, var(--color-primary) 6%, var(--color-surface));
+      border-color: color-mix(in oklab, var(--color-primary) 15%, var(--color-border));
+      color: color-mix(in oklab, var(--color-primary) 70%, var(--color-text-muted));
+    }
+
+    /* Card footer */
+    .kcard-footer {
+      padding: var(--space-3) var(--space-6);
+      border-top: 1px solid var(--color-border);
+      background: var(--color-surface-2);
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .kcard-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.18rem 0.52rem;
+      border-radius: var(--radius-full);
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .kcard-badge.pages {
+      background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));
+      border: 1px solid color-mix(in oklab, var(--color-primary) 22%, var(--color-border));
+      color: var(--color-primary);
+    }
+
+    .kcard-badge.cheatsheet {
+      background: color-mix(in oklab, var(--color-warning) 10%, var(--color-surface));
+      border: 1px solid color-mix(in oklab, var(--color-warning) 22%, var(--color-border));
+      color: var(--color-warning);
+    }
+
+    .kcard-badge.quiz {
+      background: color-mix(in oklab, var(--color-purple) 10%, var(--color-surface));
+      border: 1px solid color-mix(in oklab, var(--color-purple) 22%, var(--color-border));
+      color: var(--color-purple);
+    }
+
+    .kcard-badge.praxis {
+      background: color-mix(in oklab, var(--color-success) 10%, var(--color-surface));
+      border: 1px solid color-mix(in oklab, var(--color-success) 22%, var(--color-border));
+      color: var(--color-success);
+    }
+
+    /* Arrow icon in footer */
+    .kcard-arrow {
+      margin-left: auto;
+      color: var(--color-text-faint);
+      font-size: 1rem;
+      transition: transform 0.22s ease, color 0.22s ease;
+      line-height: 1;
+    }
+
+    .kcard:hover .kcard-arrow {
+      transform: translateX(4px);
+      color: var(--color-primary);
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       FOOTER SPACING
+    ═══════════════════════════════════════════════════════ */
+    .home-footer-spacer { height: var(--space-4); }
+
+    /* ═══════════════════════════════════════════════════════
+       ENTRY ANIMATIONS
+    ═══════════════════════════════════════════════════════ */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+
+    .home-hero > * {
+      animation: fade-up 0.6s ease both;
+    }
+    .home-hero > *:nth-child(1) { animation-delay: 0.05s; }
+    .home-hero > *:nth-child(2) { animation-delay: 0.18s; }
+    .home-hero > *:nth-child(3) { animation-delay: 0.30s; }
+    .home-hero > *:nth-child(4) { animation-delay: 0.42s; }
+
+    .intro-card  { animation: fade-up 0.55s 0.3s ease both; }
+    .section-heading { animation: fade-up 0.5s 0.4s ease both; }
+
+    .kcard { animation: fade-up 0.5s ease both; }
+    .kcard:nth-child(1) { animation-delay: 0.45s; }
+    .kcard:nth-child(2) { animation-delay: 0.52s; }
+    .kcard:nth-child(3) { animation-delay: 0.59s; }
+    .kcard:nth-child(4) { animation-delay: 0.66s; }
+    .kcard:nth-child(5) { animation-delay: 0.73s; }
+    .kcard:nth-child(6) { animation-delay: 0.80s; }
+    .kcard:nth-child(7) { animation-delay: 0.87s; }
+
+    /* ═══════════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 700px) {
+      .kapitel-grid-home {
+        grid-template-columns: 1fr;
+        padding: 0 var(--space-5) var(--space-12);
+      }
+      .section-heading { padding: 0 var(--space-5); }
+      .intro-section { padding: 0 var(--space-5); }
+      .intro-card {
+        grid-template-columns: 1fr;
+        gap: var(--space-5);
+        padding: var(--space-6) var(--space-6) var(--space-6) var(--space-8);
+      }
+      .home-stats {
+        flex-wrap: wrap;
+        max-width: 320px;
+        margin: 0 auto;
+      }
+      .home-stat {
+        min-width: 44%;
+        border-right: none;
+        border-bottom: 1px solid var(--color-border);
+      }
+      .home-stat:nth-child(odd) { border-right: 1px solid var(--color-border); }
+      .home-stat:nth-last-child(-n+2) { border-bottom: none; }
+    }
+
+    @media (max-width: 480px) {
+      .kcard-footer { gap: var(--space-1); }
+    }
+
   </style>
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="PRM Prüfungsvorbereitung">
+  <meta property="og:title"       content="PRM Prüfungsvorbereitung – Maschinelles Lernen">
+  <meta property="og:description" content="Interaktive Lernseiten, Cheatsheets und Quizzes für die PRM-Prüfung in Predictive Maintenance an der OTH.">
+  <meta property="og:url"         content="https://houcinehassine.github.io/Webseite-PRM-ML/">
+  <meta property="og:image"       content="https://houcinehassine.github.io/Webseite-PRM-ML/assets/og-image.png">
+  <meta name="twitter:card"       content="summary">
+  <meta name="twitter:title"      content="PRM Prüfungsvorbereitung – Maschinelles Lernen">
+  <meta name="twitter:description" content="Interaktive Lernseiten, Cheatsheets und Quizzes für die PRM-Prüfung in Predictive Maintenance an der OTH.">
 </head>
 <body>
+
+  <!-- ══════════════════════════════════════════════════════
+       HEADER  (custom für Root-Ebene)
+  ═══════════════════════════════════════════════════════ -->
+  <a href="#main-content" class="skip-link">Zum Inhalt springen</a>
+
   <header class="header">
     <div class="header-inner container">
-      <a href="index.html" class="brand" title="Alle Kapitel">
+
+      <!-- Brand -->
+      <a href="index.html" class="brand" title="Home – Alle Kapitel">
         <div class="brand-mark">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="7" cy="12" r="2.5"/>
-            <circle cx="17" cy="7" r="2.5"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+               width="22" height="22">
+            <circle cx="7"  cy="12" r="2.5"/>
+            <circle cx="17" cy="7"  r="2.5"/>
             <circle cx="17" cy="17" r="2.5"/>
             <path d="M9.4 10.8l5.2-2.6M9.4 13.2l5.2 2.6"/>
           </svg>
@@ -43,98 +549,347 @@
         </div>
       </a>
 
-      <button class="theme-toggle" data-theme-toggle aria-label="Dark Mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
-          <circle cx="12" cy="12" r="4"/>
-          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41 M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
-        </svg>
+      <!-- Theme Toggle -->
+      <button class="theme-toggle" id="theme-btn" aria-label="Farbschema wechseln">
+        <!-- Icon wird per JS gesetzt -->
       </button>
+
     </div>
   </header>
 
+
+  <!-- ══════════════════════════════════════════════════════
+       MAIN
+  ═══════════════════════════════════════════════════════ -->
   <main id="main-content">
+
+    <!-- ── HERO ─────────────────────────────────────────── -->
     <div class="container">
-      <section class="index-hero">
-        <span class="eyebrow">✦ Maschinelles Lernen</span>
-        <h1>Willkommen zur PRM-Prüfungsvorbereitung</h1>
-        <p>Wähle ein Kapitel aus, um mit dem Lernen zu beginnen. Theorie, Mathematik und Code – alles an einem Ort.</p>
+      <section class="home-hero">
 
-        <div class="status-bar">
-          <span class="status-pill active"><span class="dot"></span>2 Kapitel verfügbar</span>
-          <span class="status-pill"><span class="dot"></span>5 in Bearbeitung</span>
-          <span class="status-pill">7 Kapitel gesamt</span>
+        <span class="hero-eyebrow">✦ PRM · Maschinelles Lernen · Prüfungsvorbereitung</span>
+
+        <h1 class="hero-title">
+          Theorie. Code.<br>
+          <span class="line-accent">Prüfungsreif.</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          7 vollständige Kapitel – von rohen Daten über klassische Algorithmen
+          bis zur ehrlichen Modellbewertung. Jedes Kapitel enthält
+          Lernseiten mit sklearn‑Code, ein kompaktes Cheatsheet
+          und ein interaktives Quiz.
+        </p>
+
+        <!-- Stats -->
+        <div class="home-stats">
+          <div class="home-stat">
+            <span class="home-stat-value">7</span>
+            <span class="home-stat-label">Kapitel</span>
+          </div>
+          <div class="home-stat">
+            <span class="home-stat-value">60+</span>
+            <span class="home-stat-label">Seiten</span>
+          </div>
+          <div class="home-stat">
+            <span class="home-stat-value">6</span>
+            <span class="home-stat-label">Cheatsheets</span>
+          </div>
+          <div class="home-stat">
+            <span class="home-stat-value">7</span>
+            <span class="home-stat-label">Quizze</span>
+          </div>
         </div>
+
       </section>
+    </div>
 
-      <p class="section-label">Alle Kapitel</p>
-
-      <div class="kapitel-grid">
-        <a class="kapitel-card" href="Kapitel1/Kapitel1.html">
-          <div class="card-img">📖</div>
-          <div class="card-body">
-            <div class="card-nummer">Kapitel 1</div>
-            <div class="card-titel">Data Preparation & Feature Engineering</div>
-            <div class="card-desc"> </div>
-          </div>
-        </a>
-
-        <a class="kapitel-card" href="Kapitel2/Kapitel2.html">
-          <div class="card-img">📈</div>
-          <div class="card-body">
-            <div class="card-nummer">Kapitel 2</div>
-            <div class="card-titel">Einführung in Machine Learning</div>
-            <div class="card-desc"> </div>
-          </div>
-        </a>
-
-        <a class="kapitel-card" href="Kapitel3/Kapitel3.html">
-          <div class="card-img">🧠</div>
-          <div class="card-body">
-            <div class="card-nummer">Kapitel 3</div>
-            <div class="card-titel">Klassifikation</div>
-            <div class="card-desc">SVM, Entscheidungsbäume, kNN</div>
-          </div>
-        </a>
-
-        <a class="kapitel-card" href="Kapitel4/Kapitel4.html">
-          <div class="card-img">🔵</div>
-          <div class="card-body">
-            <div class="card-nummer">Kapitel 4</div>
-            <div class="card-titel">Clustering</div>
-            <div class="card-desc">k-Means, DBSCAN, Validierungsmaße und Anwendungen</div>
-          </div>
-        </a>
-
-        <a class="kapitel-card" href="Kapitel5/Kapitel5.html">
-          <div class="card-img">🌲</div>
-          <div class="card-body">
-            <div class="card-nummer">Kapitel 5</div>
-            <div class="card-titel">Random Forests</div>
-            <div class="card-desc">Random Forest, Boosting</div>
-          </div>
-        </a>
-
-        <a class="kapitel-card" href="Kapitel6/Kapitel6.html">
-          <div class="card-img">🤖</div>
-          <div class="card-body">
-            <div class="card-nummer">Kapitel 6</div>
-            <div class="card-titel">GMM - Gaussian Mixture Models</div>
-            <div class="card-desc"> </div>
-          </div>
-        </a>
-
-        <a class="kapitel-card" href="Kapitel7/Kapitel7.html">
-          <div class="card-img">📉</div>
-          <div class="card-body">
-            <div class="card-nummer">Kapitel 7</div>
-            <div class="card-titel">Evaluation von Klassifikatoren</div>
-            <div class="card-desc"> </div>
-          </div>
-        </a>
+    <!-- ── INTRO CARD ────────────────────────────────────── -->
+    <div class="intro-section">
+      <div class="intro-card">
+        <div class="intro-icon">🎓</div>
+        <div class="intro-content">
+          <h2>Was ist das hier?</h2>
+          <p>
+            Diese Seite ist meine persönliche Lernressource für die PRM-Vorlesung –
+            strukturiert, vollständig und prüfungsorientiert. Jedes Kapitel folgt dem
+            gleichen Aufbau: Einführung und Kontext, Theorie mit Python-Code, ein
+            Cheatsheet mit allen Formeln und Fallen, und ein Quiz zum Selbsttesten.
+            Kein Stoff bleibt unerklärt – von Feature Engineering bis Evaluation.
+          </p>
+        </div>
       </div>
     </div>
+
+
+    <!-- ── SECTION LABEL ─────────────────────────────────── -->
+    <div class="section-heading">
+      <span class="section-heading-text">Alle Kapitel</span>
+      <div class="section-heading-line"></div>
+      <span class="section-heading-count">7 / 7 ✓</span>
+    </div>
+
+
+    <!-- ── KAPITEL GRID ──────────────────────────────────── -->
+    <div class="kapitel-grid-home">
+
+      <!-- ─── K1 ─────────────────────────────────────────── -->
+      <a class="kcard" href="Kapitel1/Kapitel1.html">
+        <div class="kcard-header">
+          <span class="kcard-num">01</span>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Woche 2 · Fundament</div>
+            <div class="kcard-title">Data Preparation &amp;<br>Feature Engineering</div>
+          </div>
+        </div>
+        <div class="kcard-desc">
+          Von rohen Daten zu aussagekräftigen Features – das Fundament jedes
+          ML-Projekts. Feature-Extraktion aus Zeitserien, Skalierung,
+          One-Hot Encoding, t-SNE-Visualisierung und Autoencoder.
+        </div>
+        <div class="kcard-topics">
+          <span class="kcard-topic">📊 Feature-Matrix N×K</span>
+          <span class="kcard-topic">🔄 t-SNE</span>
+          <span class="kcard-topic">⚙️ StandardScaler</span>
+          <span class="kcard-topic">🕐 Zeitserien</span>
+          <span class="kcard-topic">🎨 One-Hot</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge pages">8 Seiten</span>
+          <span class="kcard-badge cheatsheet">📋 Cheatsheet</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- ─── K2 ─────────────────────────────────────────── -->
+      <a class="kcard" href="Kapitel2/Kapitel2.html">
+        <div class="kcard-header">
+          <span class="kcard-num">02</span>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Woche 3 · Überblick</div>
+            <div class="kcard-title">Einführung in<br>Machine Learning</div>
+          </div>
+        </div>
+        <div class="kcard-desc">
+          Die drei Kategorien des ML im Vergleich, der vollständige
+          ML-Trainingsprozess, Klassifikation vs. Regression und die
+          sklearn-Grundlagen für alle weiteren Kapitel.
+        </div>
+        <div class="kcard-topics">
+          <span class="kcard-topic">📐 Supervised Learning</span>
+          <span class="kcard-topic">🔵 Unsupervised</span>
+          <span class="kcard-topic">🔧 scikit-learn API</span>
+          <span class="kcard-topic">📈 Regression</span>
+          <span class="kcard-topic">🎯 Klassifikation</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge pages">6 Seiten</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- ─── K3 ─────────────────────────────────────────── -->
+      <a class="kcard" href="Kapitel3/Kapitel3.html">
+        <div class="kcard-header">
+          <span class="kcard-num">03</span>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Woche 4 · Supervised</div>
+            <div class="kcard-title">Klassifikation &amp;<br>Support Vector Machines</div>
+          </div>
+        </div>
+        <div class="kcard-desc">
+          Von der Margin-Maximierung zum Kernel-Trick – SVMs mathematisch
+          und praktisch. Vollständige Implementierung from Scratch,
+          35&nbsp;Vorlesungsfolien, Multi-Class SVM und SVR.
+        </div>
+        <div class="kcard-topics">
+          <span class="kcard-topic">↔️ Margin &amp; Hyperebene</span>
+          <span class="kcard-topic">🌀 Kernel-Trick</span>
+          <span class="kcard-topic">⚖️ Soft-Margin C</span>
+          <span class="kcard-topic">📉 Hinge Loss</span>
+          <span class="kcard-topic">📈 SVR</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge pages">8 Seiten</span>
+          <span class="kcard-badge cheatsheet">📋 Cheatsheet</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- ─── K4 ─────────────────────────────────────────── -->
+      <a class="kcard" href="Kapitel4/Kapitel4.html">
+        <div class="kcard-header">
+          <span class="kcard-num">04</span>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Woche 5 · Unsupervised</div>
+            <div class="kcard-title">Clustering &amp;<br>Unsupervised Learning</div>
+          </div>
+        </div>
+        <div class="kcard-desc">
+          Datenpunkte ohne Labels gruppieren: k-means, DBSCAN und
+          Spectral Clustering im Vergleich. Validierung mit Silhouette Score
+          und Elbow Plot, plus zwei industrielle Fallstudien.
+        </div>
+        <div class="kcard-topics">
+          <span class="kcard-topic">⚡ k-means</span>
+          <span class="kcard-topic">🌑 DBSCAN</span>
+          <span class="kcard-topic">📏 Silhouette Score</span>
+          <span class="kcard-topic">🕸️ Spectral Clustering</span>
+          <span class="kcard-topic">📊 Elbow Plot</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge pages">10 Seiten</span>
+          <span class="kcard-badge praxis">⚙️ 2 Fallstudien</span>
+          <span class="kcard-badge cheatsheet">📋 Cheatsheet</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- ─── K5 ─────────────────────────────────────────── -->
+      <a class="kcard" href="Kapitel5/Kapitel5.html">
+        <div class="kcard-header">
+          <span class="kcard-num">05</span>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Woche 6 · Ensemble</div>
+            <div class="kcard-title">Ensemble-Methoden &amp;<br>Random Forests</div>
+          </div>
+        </div>
+        <div class="kcard-desc">
+          Viele schwache Lerner – ein starkes Modell. Von Entscheidungsbäumen,
+          Gini Impurity und Bagging über Feature Importance
+          bis zu AdaBoost und Random Forest Regression.
+        </div>
+        <div class="kcard-topics">
+          <span class="kcard-topic">🌳 Entscheidungsbäume</span>
+          <span class="kcard-topic">🌲 Random Forest</span>
+          <span class="kcard-topic">📊 Feature Importance</span>
+          <span class="kcard-topic">🎲 Bagging</span>
+          <span class="kcard-topic">⚡ AdaBoost</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge pages">7 Seiten</span>
+          <span class="kcard-badge praxis">⚙️ 2 Praxisbeispiele</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- ─── K6 ─────────────────────────────────────────── -->
+      <a class="kcard" href="Kapitel6/Kapitel6.html">
+        <div class="kcard-header">
+          <span class="kcard-num">06</span>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Woche 7 · Probabilistisch</div>
+            <div class="kcard-title">Gaussian Mixture<br>Models</div>
+          </div>
+        </div>
+        <div class="kcard-desc">
+          Jenseits von k-means: probabilistisches Clustering mit GMMs.
+          EM-Algorithmus, Maximum Likelihood, covariance_type,
+          BIC &amp; AIC zur Modellwahl – und generative Modelle zum
+          Erzeugen neuer Datenpunkte.
+        </div>
+        <div class="kcard-topics">
+          <span class="kcard-topic">📐 GMM</span>
+          <span class="kcard-topic">🔄 EM-Algorithmus</span>
+          <span class="kcard-topic">📊 BIC &amp; AIC</span>
+          <span class="kcard-topic">🎲 Generativ</span>
+          <span class="kcard-topic">∑ Max. Likelihood</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge pages">5 Seiten</span>
+          <span class="kcard-badge cheatsheet">📋 Cheatsheet</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- ─── K7 ─────────────────────────────────────────── -->
+      <a class="kcard" href="Kapitel7/Kapitel7.html">
+        <div class="kcard-header">
+          <span class="kcard-num">07</span>
+          <div class="kcard-title-group">
+            <div class="kcard-label">Woche 8 · Evaluation</div>
+            <div class="kcard-title">Evaluation von<br>Klassifikatoren</div>
+          </div>
+        </div>
+        <div class="kcard-desc">
+          Accuracy reicht nicht: Confusion Matrix, ROC Curves, AUC und
+          F1-Score mathematisch und in sklearn. Decision Threshold,
+          Multi-Class ROC und eine vollständige Kugellager-Fallstudie.
+        </div>
+        <div class="kcard-topics">
+          <span class="kcard-topic">📋 Confusion Matrix</span>
+          <span class="kcard-topic">📈 ROC &amp; AUC</span>
+          <span class="kcard-topic">🎯 F1 &amp; Precision</span>
+          <span class="kcard-topic">🔧 Decision Threshold</span>
+          <span class="kcard-topic">🎓 Multi-Class ROC</span>
+        </div>
+        <div class="kcard-footer">
+          <span class="kcard-badge pages">9 Seiten</span>
+          <span class="kcard-badge praxis">⚙️ Fallstudie</span>
+          <span class="kcard-badge cheatsheet">📋 Cheatsheet</span>
+          <span class="kcard-badge quiz">🧠 Quiz</span>
+          <span class="kcard-arrow">→</span>
+        </div>
+      </a>
+
+    </div><!-- /kapitel-grid-home -->
+
+    <div class="home-footer-spacer"></div>
+
   </main>
 
-  <site-footer caption="PRM Prüfungsvorbereitung · Stand Mai 2026"></site-footer>
+  <!-- ══════════════════════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════════════════════ -->
+  <site-footer caption="PRM Prüfungsvorbereitung · 7 Kapitel · Stand Juni 2026"></site-footer>
+
+
+  <!-- ══════════════════════════════════════════════════════
+       THEME TOGGLE (inline – kein site-header auf Root-Ebene)
+  ═══════════════════════════════════════════════════════ -->
+  <script>
+    (function () {
+      const html = document.documentElement;
+      const btn  = document.getElementById('theme-btn');
+      if (!btn) return;
+
+      /* Gespeichertes Theme laden */
+      const saved = localStorage.getItem('prm-theme');
+      if (saved) html.dataset.theme = saved;
+
+      const moonSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+        width="18" height="18"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>`;
+
+      const sunSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+        width="18" height="18">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41
+                 M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`;
+
+      const update = () => {
+        const dark = html.dataset.theme === 'dark';
+        btn.innerHTML = dark ? sunSVG : moonSVG;
+        btn.setAttribute('aria-label', dark ? 'Hell-Modus' : 'Dark-Modus');
+      };
+
+      update();
+
+      btn.addEventListener('click', () => {
+        const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+        html.dataset.theme = next;
+        localStorage.setItem('prm-theme', next);
+        update();
+      });
+    })();
+  </script>
+
 </body>
 </html>

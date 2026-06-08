@@ -458,6 +458,23 @@ tr:last-child td { border-bottom: none; }
 }
 
 /* ── FOOTER ───────────────────────────────────────────────── */
+.footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.footer-caption {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+.footer-attribution {
+  font-size: .7rem;
+  color: var(--color-text-faint);
+  line-height: 1.5;
+}
+.footer-attribution strong { color: var(--color-text-muted); font-weight: 700; }
+.footer-attribution em { font-style: normal; color: var(--color-text-muted); }
+
 /* ── RESPONSIVE ───────────────────────────────────────────── */
 @media (min-width: 760px) {
   .hero-grid { grid-template-columns: 1.25fr .9fr; }
