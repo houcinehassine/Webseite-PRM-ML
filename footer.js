@@ -7,7 +7,7 @@ class SiteFooter extends HTMLElement {
           <small class="footer-caption">${caption}</small>
           <small class="footer-attribution">
             Inhalt basiert auf der Vorlesungsgrundlage von
-            <strong>Prof. Goldenhacker</strong> –
+            <strong>Prof. Dr. rer. nat. Markus Goldhacker</strong> –
             Fach <em>Predictive Maintenance</em>,
             Studiengang Produktions- und Automatisierungstechnik · OTH
           </small>

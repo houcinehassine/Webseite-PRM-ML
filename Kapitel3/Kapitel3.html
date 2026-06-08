@@ -10,55 +10,7 @@
   <link rel="stylesheet" href="../assets/style.css">
   <link rel="stylesheet" href="../assets/kapitel-overview.css">
 
-  <style>/* ── K3-HERO (Dot-Grid Hintergrund, K3-spezifisch) ───── */
-    .k3-hero {
-      padding: clamp(3rem, 10vw, 5rem) 0 clamp(2rem, 6vw, 3rem);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    /* Subtiles Dot-Grid im Hintergrund */
-    .k3-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: radial-gradient(
-        circle,
-        color-mix(in oklab, var(--color-primary) 18%, transparent) 1px,
-        transparent 1px
-      );
-      background-size: 28px 28px;
-      opacity: 0.25;
-      pointer-events: none;
-    }
-    .k3-hero::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(
-        ellipse 80% 60% at 50% 50%,
-        transparent 40%,
-        var(--color-bg) 100%
-      );
-      pointer-events: none;
-    }
-    .k3-hero > * { position: relative; z-index: 1; }
-    .k3-hero 
-    .k3-hero h1 {
-      font-family: var(--font-display);
-      font-size: var(--text-2xl);
-      line-height: 1.08;
-      text-transform: none;
-      margin: var(--space-4) auto var(--space-4);
-      max-width: 22ch;
-    }
-    .k3-hero p {
-      color: var(--color-text-muted);
-      font-size: var(--text-base);
-      max-width: 62ch;
-      margin-inline: auto;
-    }
-  </style>
+  <style>.k3-hero{padding:clamp(3rem,10vw,5rem) 0 clamp(2rem,6vw,3rem);text-align:center;position:relative;overflow:hidden}.k3-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient( circle,color-mix(in oklab,var(--color-primary) 18%,transparent) 1px,transparent 1px );background-size:28px 28px;opacity:0.25;pointer-events:none}.k3-hero::after{content:'';position:absolute;inset:0;background:radial-gradient( ellipse 80% 60% at 50% 50%,transparent 40%,var(--color-bg) 100% );pointer-events:none}.k3-hero > *{position:relative;z-index:1}.k3-hero .k3-hero h1{font-family:var(--font-display);font-size:var(--text-2xl);line-height:1.08;text-transform:none;margin:var(--space-4) auto var(--space-4);max-width:22ch}.k3-hero p{color:var(--color-text-muted);font-size:var(--text-base);max-width:62ch;margin-inline:auto}</style>
   <meta property="og:type"        content="website">
   <meta property="og:site_name"   content="PRM Prüfungsvorbereitung">
   <meta property="og:title"       content="K3 · Support Vector Machines – Übersicht">
@@ -68,6 +20,7 @@
   <meta name="twitter:card"       content="summary">
   <meta name="twitter:title"      content="K3 · Support Vector Machines – Übersicht">
   <meta name="twitter:description" content="Kapitel 3: SVMs – alle Lernseiten auf einen Blick.">
+  <link rel="canonical" href="https://houcinehassine.github.io/Webseite-PRM-ML/Kapitel3/Kapitel3.html">
 </head>
 <body>
 

@@ -10,42 +10,7 @@
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
   <link rel="stylesheet" href="../assets/quiz.css">
-  <style>.quiz-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: var(--space-4);
-      margin-top: var(--space-4);
-    }
-
-    /* K4 visual overrides for details.frage */
-    details.frage { background: var(--color-surface-2); border-radius: var(--radius-lg); overflow: hidden; }
-    details.frage summary { align-items: flex-start; padding: var(--space-4) var(--space-5); font-weight: 600; }
-    details.frage summary::before { display: none; }
-    details.frage[open] { border-color: var(--color-primary); }
-    details.frage[open] .quiz-q-num { background: var(--color-primary); color: #fff; }
-
-    .quiz-arrow {
-      margin-left: auto;
-      flex-shrink: 0;
-      transition: transform .2s;
-      color: var(--color-text-faint);
-    }
-    details.frage[open] .quiz-arrow {
-      transform: rotate(180deg);
-      color: var(--color-primary);
-    }
-
-    
-    .score-count {
-      font-size: var(--text-2xl);
-      font-weight: 800;
-      color: var(--color-primary);
-    }
-    .score-label {
-      font-size: var(--text-sm);
-      color: var(--color-text-muted);
-    }
-  </style>
+  <style>.quiz-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:var(--space-4);margin-top:var(--space-4)}details.frage{background:var(--color-surface-2);border-radius:var(--radius-lg);overflow:hidden}details.frage summary{align-items:flex-start;padding:var(--space-4) var(--space-5);font-weight:600}details.frage summary::before{display:none}details.frage[open]{border-color:var(--color-primary)}details.frage[open] .quiz-q-num{background:var(--color-primary);color:#fff}.quiz-arrow{margin-left:auto;flex-shrink:0;transition:transform .2s;color:var(--color-text-faint)}details.frage[open] .quiz-arrow{transform:rotate(180deg);color:var(--color-primary)}.score-count{font-size:var(--text-2xl);font-weight:800;color:var(--color-primary)}.score-label{font-size:var(--text-sm);color:var(--color-text-muted)}</style>
   <meta property="og:type"        content="website">
   <meta property="og:site_name"   content="PRM Prüfungsvorbereitung">
   <meta property="og:title"       content="K4 · Quiz – Entscheidungsbäume & Random Forests">
@@ -55,6 +20,7 @@
   <meta name="twitter:card"       content="summary">
   <meta name="twitter:title"      content="K4 · Quiz – Entscheidungsbäume & Random Forests">
   <meta name="twitter:description" content="Teste dein Wissen zu Bäumen, Boosting und Ensemble-Methoden.">
+  <link rel="canonical" href="https://houcinehassine.github.io/Webseite-PRM-ML/Kapitel4/PageQuiz.html">
 </head>
 <body>
   <site-header active="page4" title="Kapitel 4 · Quiz"></site-header>

@@ -10,103 +10,7 @@
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
 
-  <style>.qn-label { font-size:.62rem; font-weight:800; letter-spacing:.1em;
-      text-transform:uppercase; color:var(--color-text-faint);
-      align-self:center; margin-right:var(--space-2); white-space:nowrap; }
-    .qn-link {
-      padding:.25rem .75rem; border-radius:var(--radius-full);
-      background:var(--color-surface); border:1px solid var(--color-border);
-      font-size:.68rem; font-weight:700; text-decoration:none;
-      color:var(--color-text-muted); transition:all .12s; white-space:nowrap;
-    }
-    .qn-link:hover { border-color:var(--color-primary); color:var(--color-primary); }
-    .qn-link
-
-    
-    .formulas-grid {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: var(--space-3); margin: var(--space-4) 0;
-    }
-    @media(max-width:700px){.formulas-grid{grid-template-columns:1fr;}}
-
-    /* ── PARAM TABLE ─────────────────────────────── */
-    .param-table {
-      width:100%; border-collapse:collapse; font-size:var(--text-xs);
-      margin:var(--space-4) 0;
-    }
-    .param-table th {
-      background:var(--color-surface-offset); padding:var(--space-2) var(--space-3);
-      text-align:left; font-weight:800; font-size:.65rem; letter-spacing:.07em;
-      text-transform:uppercase; border:1px solid var(--color-border);
-    }
-    .param-table td {
-      padding:var(--space-2) var(--space-3);
-      border:1px solid var(--color-divider);
-      vertical-align:top; line-height:1.5;
-    }
-    .param-table tr:nth-child(even) td { background:var(--color-surface-2); }
-    .param-table code { font-size:.68rem; color:var(--color-primary); font-weight:700; }
-
-    /* ── CODE TEMPLATE BLOCK ─────────────────────── */
-    .code-templates { display:flex; flex-direction:column; gap:var(--space-4); }
-    .ct-block { background:var(--color-surface-2); border:1px solid var(--color-border);
-      border-radius:var(--radius-lg); overflow:hidden; }
-    .ct-header { background:var(--color-surface-offset); padding:var(--space-2) var(--space-4);
-      font-size:.65rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
-      color:var(--color-primary); border-bottom:1px solid var(--color-border); }
-    .ct-block pre { margin:0; padding:var(--space-3) var(--space-4);
-      font-size:.72rem; line-height:1.6; overflow-x:auto; }
-    .ct-block code { font-family:var(--font-mono); }
-
-    /* ── FALLEN (Prüfungsfallen) ─────────────────── */
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    /* ── MERKZEICHEN ─────────────────────────────── */
-    
-    
-
-    /* ── KERNEL TABLE ────────────────────────────── */
-    .kernel-row {
-      display:grid; grid-template-columns:120px 1fr 1fr;
-      gap:var(--space-3); padding:var(--space-3) var(--space-4);
-      border-bottom:1px solid var(--color-divider);
-      font-size:var(--text-xs); align-items:center;
-    }
-    .kernel-row:last-child { border-bottom:none; }
-    .kernel-row.header { background:var(--color-surface-offset);
-      font-weight:800; text-transform:uppercase; letter-spacing:.06em;
-      font-size:.62rem; color:var(--color-text-faint); }
-    .kernel-name { font-family:var(--font-mono); font-weight:700; color:var(--color-primary); }
-    .kernel-table { background:var(--color-surface-2);
-      border:1px solid var(--color-border); border-radius:var(--radius-xl);
-      overflow:hidden; margin:var(--space-4) 0; }
-
-    /* ── ENTSCHEIDUNGS-GUIDE ─────────────────────── */
-    
-    
-    .decision-table { background:var(--color-surface-2);
-      border:1px solid var(--color-border); border-radius:var(--radius-xl);
-      overflow:hidden; margin:var(--space-4) 0; }
-    .dr-wenn { font-weight:700; color:var(--color-text); line-height:1.5; }
-    .dr-dann { color:var(--color-text-muted); line-height:1.5; }
-
-    /* Compact section heads */
-    .cs-head { font-size:var(--text-sm); font-weight:800; color:var(--color-text);
-      margin:var(--space-5) 0 var(--space-2); display:flex; align-items:center; gap:var(--space-2); }
-    .cs-head::after { content:''; flex:1; height:1px; background:var(--color-border); }
-  </style>
+  <style>.qn-label{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--color-text-faint);align-self:center;margin-right:var(--space-2);white-space:nowrap}.qn-link{padding:.25rem .75rem;border-radius:var(--radius-full);background:var(--color-surface);border:1px solid var(--color-border);font-size:.68rem;font-weight:700;text-decoration:none;color:var(--color-text-muted);transition:all .12s;white-space:nowrap}.qn-link:hover{border-color:var(--color-primary);color:var(--color-primary)}.qn-link .formulas-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin:var(--space-4) 0}@media(max-width:700px){.formulas-grid{grid-template-columns:1fr}}.param-table{width:100%;border-collapse:collapse;font-size:var(--text-xs);margin:var(--space-4) 0}.param-table th{background:var(--color-surface-offset);padding:var(--space-2) var(--space-3);text-align:left;font-weight:800;font-size:.65rem;letter-spacing:.07em;text-transform:uppercase;border:1px solid var(--color-border)}.param-table td{padding:var(--space-2) var(--space-3);border:1px solid var(--color-divider);vertical-align:top;line-height:1.5}.param-table tr:nth-child(even) td{background:var(--color-surface-2)}.param-table code{font-size:.68rem;color:var(--color-primary);font-weight:700}.code-templates{display:flex;flex-direction:column;gap:var(--space-4)}.ct-block{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden}.ct-header{background:var(--color-surface-offset);padding:var(--space-2) var(--space-4);font-size:.65rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--color-primary);border-bottom:1px solid var(--color-border)}.ct-block pre{margin:0;padding:var(--space-3) var(--space-4);font-size:.72rem;line-height:1.6;overflow-x:auto}.ct-block code{font-family:var(--font-mono)}.kernel-row{display:grid;grid-template-columns:120px 1fr 1fr;gap:var(--space-3);padding:var(--space-3) var(--space-4);border-bottom:1px solid var(--color-divider);font-size:var(--text-xs);align-items:center}.kernel-row:last-child{border-bottom:none}.kernel-row.header{background:var(--color-surface-offset);font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:.62rem;color:var(--color-text-faint)}.kernel-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary)}.kernel-table{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;margin:var(--space-4) 0}.decision-table{background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;margin:var(--space-4) 0}.dr-wenn{font-weight:700;color:var(--color-text);line-height:1.5}.dr-dann{color:var(--color-text-muted);line-height:1.5}.cs-head{font-size:var(--text-sm);font-weight:800;color:var(--color-text);margin:var(--space-5) 0 var(--space-2);display:flex;align-items:center;gap:var(--space-2)}.cs-head::after{content:'';flex:1;height:1px;background:var(--color-border)}</style>
   <meta property="og:type"        content="website">
   <meta property="og:site_name"   content="PRM Prüfungsvorbereitung">
   <meta property="og:title"       content="K3 · Cheatsheet Support Vector Machines">
@@ -116,6 +20,7 @@
   <meta name="twitter:card"       content="summary">
   <meta name="twitter:title"      content="K3 · Cheatsheet Support Vector Machines">
   <meta name="twitter:description" content="Alle SVM-Formeln, Kernel-Typen und Hyperparameter kompakt.">
+  <link rel="canonical" href="https://houcinehassine.github.io/Webseite-PRM-ML/Kapitel3/PageCheatsheet.html">
 </head>
 <body>
 

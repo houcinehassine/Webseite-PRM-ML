@@ -10,101 +10,7 @@
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
 
-  <style>.fl-row { display: flex; align-items: baseline;
-      gap: var(--space-3); font-size: var(--text-xs); text-align: left; }
-    .fl-sym { font-family: var(--font-mono); font-weight: 700;
-      color: var(--color-primary); min-width: 90px; flex-shrink: 0; }
-    .fl-desc { color: var(--color-text-muted); line-height: 1.5; }
-
-    /* ── C-TRADE-OFF SLIDER (NEU → css_codes/kapitel3.css) ─ */
-    /* .c-spectrum, .c-track, .c-label-row, .c-point */
-    .c-spectrum {
-      margin: var(--space-5) 0;
-      padding: var(--space-5);
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-xl);
-    }
-    .c-track {
-      position: relative; height: 12px;
-      border-radius: var(--radius-full);
-      background: linear-gradient(to right,
-        color-mix(in oklab, var(--color-success) 40%, var(--color-surface-offset)),
-        color-mix(in oklab, var(--color-warning) 50%, var(--color-surface-offset)));
-      margin: var(--space-5) 0 var(--space-3);
-    }
-    .c-point {
-      position: absolute; top: 50%; transform: translate(-50%, -50%);
-      width: 20px; height: 20px; border-radius: 50%;
-      border: 2.5px solid #fff; box-shadow: 0 0 0 2px var(--color-border);
-      cursor: default;
-    }
-    .c-label-row {
-      display: flex; justify-content: space-between;
-      font-size: var(--text-xs); font-weight: 700;
-    }
-    .c-label-left { color: var(--color-success); }
-    .c-label-right { color: var(--color-warning); }
-    .c-examples {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: var(--space-3); margin-top: var(--space-4);
-    }
-    .c-card {
-      padding: var(--space-3) var(--space-4);
-      border-radius: var(--radius-lg); border: 1.5px solid var(--color-border);
-      font-size: var(--text-xs);
-    }
-    .c-card.soft { border-color: var(--color-success);
-      background: color-mix(in oklab, var(--color-success) 5%, var(--color-surface)); }
-    .c-card.hard { border-color: var(--color-warning);
-      background: color-mix(in oklab, var(--color-warning) 5%, var(--color-surface)); }
-    .c-card-title { font-weight: 800; margin-bottom: var(--space-1); }
-    .c-card.soft .c-card-title { color: var(--color-success); }
-    .c-card.hard .c-card-title { color: color-mix(in oklab, var(--color-warning) 80%, #000); }
-
-    /* ── GRADIENT PIECEWISE (NEU → css_codes/kapitel3.css) ─ */
-    /* .gradient-split, .grad-case */
-    .gradient-split {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: var(--space-4); margin: var(--space-5) 0;
-    }
-    @media (max-width: 640px) { .gradient-split { grid-template-columns: 1fr; } }
-    .grad-case {
-      padding: var(--space-5);
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-xl);
-      background: var(--color-surface-2);
-    }
-    .grad-case.no-violation {
-      border-color: var(--color-success);
-      background: color-mix(in oklab, var(--color-success) 4%, var(--color-surface));
-    }
-    .grad-case.violation {
-      border-color: var(--color-warning);
-      background: color-mix(in oklab, var(--color-warning) 5%, var(--color-surface));
-    }
-    .grad-case-label {
-      font-size: .62rem; font-weight: 800; letter-spacing: .09em;
-      text-transform: uppercase; margin-bottom: var(--space-2);
-    }
-    .grad-case.no-violation .grad-case-label { color: var(--color-success); }
-    .grad-case.violation    .grad-case-label { color: color-mix(in oklab, var(--color-warning) 80%, #000); }
-    .grad-condition {
-      font-family: var(--font-mono); font-size: var(--text-xs);
-      color: var(--color-text-muted); margin-bottom: var(--space-3);
-      padding: var(--space-2) var(--space-3);
-      background: var(--color-surface-offset);
-      border-radius: var(--radius-md);
-    }
-    .grad-formula {
-      font-family: var(--font-mono); font-size: var(--text-sm);
-      font-weight: 700; color: var(--color-text);
-      margin-bottom: var(--space-1); line-height: 1.7;
-    }
-    .grad-desc { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.5; }
-
-    /* ── VAL CURVE WRAP ─────────────────────────────────── */
-  </style>
+  <style>.fl-row{display:flex;align-items:baseline;gap:var(--space-3);font-size:var(--text-xs);text-align:left}.fl-sym{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);min-width:90px;flex-shrink:0}.fl-desc{color:var(--color-text-muted);line-height:1.5}.c-spectrum{margin:var(--space-5) 0;padding:var(--space-5);background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-xl)}.c-track{position:relative;height:12px;border-radius:var(--radius-full);background:linear-gradient(to right,color-mix(in oklab,var(--color-success) 40%,var(--color-surface-offset)),color-mix(in oklab,var(--color-warning) 50%,var(--color-surface-offset)));margin:var(--space-5) 0 var(--space-3)}.c-point{position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 0 2px var(--color-border);cursor:default}.c-label-row{display:flex;justify-content:space-between;font-size:var(--text-xs);font-weight:700}.c-label-left{color:var(--color-success)}.c-label-right{color:var(--color-warning)}.c-examples{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);margin-top:var(--space-4)}.c-card{padding:var(--space-3) var(--space-4);border-radius:var(--radius-lg);border:1.5px solid var(--color-border);font-size:var(--text-xs)}.c-card.soft{border-color:var(--color-success);background:color-mix(in oklab,var(--color-success) 5%,var(--color-surface))}.c-card.hard{border-color:var(--color-warning);background:color-mix(in oklab,var(--color-warning) 5%,var(--color-surface))}.c-card-title{font-weight:800;margin-bottom:var(--space-1)}.c-card.soft .c-card-title{color:var(--color-success)}.c-card.hard .c-card-title{color:color-mix(in oklab,var(--color-warning) 80%,#000)}.gradient-split{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);margin:var(--space-5) 0}@media (max-width:640px){.gradient-split{grid-template-columns:1fr}}.grad-case{padding:var(--space-5);border:1.5px solid var(--color-border);border-radius:var(--radius-xl);background:var(--color-surface-2)}.grad-case.no-violation{border-color:var(--color-success);background:color-mix(in oklab,var(--color-success) 4%,var(--color-surface))}.grad-case.violation{border-color:var(--color-warning);background:color-mix(in oklab,var(--color-warning) 5%,var(--color-surface))}.grad-case-label{font-size:.62rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;margin-bottom:var(--space-2)}.grad-case.no-violation .grad-case-label{color:var(--color-success)}.grad-case.violation .grad-case-label{color:color-mix(in oklab,var(--color-warning) 80%,#000)}.grad-condition{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);padding:var(--space-2) var(--space-3);background:var(--color-surface-offset);border-radius:var(--radius-md)}.grad-formula{font-family:var(--font-mono);font-size:var(--text-sm);font-weight:700;color:var(--color-text);margin-bottom:var(--space-1);line-height:1.7}.grad-desc{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.5}</style>
   <meta property="og:type"        content="website">
   <meta property="og:site_name"   content="PRM Prüfungsvorbereitung">
   <meta property="og:title"       content="K3 · Soft-Margin & Slack-Variablen">
@@ -114,6 +20,7 @@
   <meta name="twitter:card"       content="summary">
   <meta name="twitter:title"      content="K3 · Soft-Margin & Slack-Variablen">
   <meta name="twitter:description" content="Hinge Loss, C-Parameter und Soft-Margin-Optimierung.">
+  <link rel="canonical" href="https://houcinehassine.github.io/Webseite-PRM-ML/Kapitel3/Page04.html">
 </head>
 <body>
 
