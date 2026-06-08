@@ -126,7 +126,7 @@ const chapter = {
     },
     {
       id: 'cheatsheet_rf',
-      href: 'PageCheatsheet_RF.html',
+      href: 'PageCheatsheet.html',
       title: '📋 Cheatsheet RF & Boosting',
       sections: [
         { href: '#formeln',          title: 'Alle Formeln'        },
