@@ -96,7 +96,19 @@ class SiteHeader extends HTMLElement {
             <a href="../Kapitel7/Kapitel7.html" ${page === 'page7' ? 'class="active"' : ''}>7 - Reinforcement Learning</a>
           </nav>
 
-          <!-- RECHTS: Theme Toggle -->
+          <!-- RECHTS: Suche + Theme Toggle -->
+          <a href="../search.html" class="search-btn"
+             id="header-search-btn"
+             title="Suche (⌘K / Strg+K)"
+             aria-label="Suche öffnen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                 width="18" height="18">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+          </a>
+
           <button class="theme-toggle" data-theme-toggle aria-label="Farbschema wechseln">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
@@ -113,6 +125,14 @@ class SiteHeader extends HTMLElement {
 
     /* ── Theme Toggle Logik ── */
     this._initTheme();
+
+    /* ── Tastaturkürzel ⌘K / Strg+K → search.html ── */
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        window.location.href = '../search.html';
+      }
+    });
   }
 
   _initTheme() {
