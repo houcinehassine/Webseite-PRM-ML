@@ -8,9 +8,7 @@
   <script type="module" src="../footer.js"></script>
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
-  <style>
-
-    /* ═══════════════════════════════════════════════════════
+  <style>/* ═══════════════════════════════════════════════════════
        KATEGORIE-KARTEN (3 Hauptkategorien)
     ═══════════════════════════════════════════════════════ */
     .kat-grid {
@@ -61,9 +59,7 @@
       border-color: color-mix(in oklab, var(--kat-color, var(--color-primary)) 30%, transparent);
     }
 
-    /* ═══════════════════════════════════════════════════════
-       FEATURE-MATRIX VISUALISIERUNG
-    ═══════════════════════════════════════════════════════ */
+    
     .matrix-visual {
       display: flex;
       align-items: flex-start;
@@ -266,47 +262,6 @@
       color: var(--color-text-faint);
       flex-shrink: 0;
     }
-
-    /* ═══════════════════════════════════════════════════════
-       SO WHAT? BOX  (grün)
-    ═══════════════════════════════════════════════════════ */
-    .so-what {
-      margin: var(--space-6) 0;
-      padding: var(--space-4) var(--space-5);
-      border-left: 3px solid var(--color-success);
-      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-      background: color-mix(in oklab, var(--color-success) 5%, var(--color-surface-2));
-    }
-    .so-what-label {
-      font-size: var(--text-xs);
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--color-success);
-      margin-bottom: var(--space-2);
-    }
-    .so-what p { font-size: var(--text-sm); margin: 0; line-height: 1.7; }
-
-    /* ═══════════════════════════════════════════════════════
-       PROF FRAGE BOX  (gelb)
-    ═══════════════════════════════════════════════════════ */
-    .frage-box {
-      margin: var(--space-5) 0;
-      padding: var(--space-4) var(--space-5);
-      border-left: 3px solid var(--color-warning);
-      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-      background: color-mix(in oklab, var(--color-warning) 6%, var(--color-surface-2));
-    }
-    .frage-label {
-      font-size: var(--text-xs);
-      font-weight: 700;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: color-mix(in oklab, var(--color-warning) 80%, #000);
-      margin-bottom: var(--space-2);
-    }
-    .frage-box p { font-size: var(--text-sm); margin: 0; line-height: 1.7; font-style: italic; }
-
   </style>
 </head>
 <body>

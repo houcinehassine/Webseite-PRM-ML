@@ -9,17 +9,7 @@
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
 
-  <style>
-    /* ── QUICK-NAV BAR ───────────────────────────── */
-    .quick-nav {
-      display: flex; flex-wrap: wrap; gap: var(--space-2);
-      padding: var(--space-4) var(--space-6);
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-xl);
-      margin-bottom: var(--space-6);
-    }
-    .qn-label { font-size:.62rem; font-weight:800; letter-spacing:.1em;
+  <style>.qn-label { font-size:.62rem; font-weight:800; letter-spacing:.1em;
       text-transform:uppercase; color:var(--color-text-faint);
       align-self:center; margin-right:var(--space-2); white-space:nowrap; }
     .qn-link {
@@ -31,19 +21,7 @@
     .qn-link:hover { border-color:var(--color-primary); color:var(--color-primary); }
     .qn-link.primary { background:var(--color-primary); color:#fff; border-color:var(--color-primary); }
 
-    /* ── FORMULA BLOCK COMPACT ───────────────────── */
-    .formula-block {
-      background:color-mix(in oklab,var(--color-primary) 5%,var(--color-surface-2));
-      border:1px solid color-mix(in oklab,var(--color-primary) 20%,var(--color-border));
-      border-radius:var(--radius-xl); padding:var(--space-4) var(--space-5);
-      margin:var(--space-3) 0; text-align:center; overflow-x:auto;
-    }
-    .formula-block .formula-label { font-size:.62rem; font-weight:800; letter-spacing:.08em;
-      text-transform:uppercase; color:var(--color-primary); margin-bottom:var(--space-2); }
-    .formula-block .formula-math { font-size:clamp(.88rem,2vw,1.05rem);
-      font-weight:700; color:var(--color-text); line-height:1.9; }
-
-    /* ── DENSE FORMULAS GRID ─────────────────────── */
+    
     .formulas-grid {
       display: grid; grid-template-columns: 1fr 1fr;
       gap: var(--space-3); margin: var(--space-4) 0;

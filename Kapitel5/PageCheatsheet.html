@@ -9,8 +9,7 @@
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
     <link rel="stylesheet" href="style.css">
-  <style>
-    /* ── Nur minimale Ergänzungen zum bestehenden Stil ── */
+  <style>/* ── Nur minimale Ergänzungen zum bestehenden Stil ── */
 
     /* Formel-Zeile */
     .formula-row {
@@ -23,14 +22,6 @@
       font-size: var(--text-sm);
     }
     .formula-row:last-child { border-bottom: none; }
-    .formula-label {
-      font-weight: 700;
-      color: var(--color-primary);
-      font-size: var(--text-xs);
-      text-transform: uppercase;
-      letter-spacing: .05em;
-      padding-top: 3px;
-    }
 
     /* Inline Code-Snippet (Syntax-Farben) */
     .snippet {
@@ -79,21 +70,8 @@
     .merksatz.warning .m-nr { color: var(--color-warning); }
     .merksatz.danger  .m-nr { color: #e55; }
     .merksatz p { font-size: var(--text-sm); margin: 0; line-height: 1.6; }
-
-    /* Fallen-Item */
-    .fallen-item {
-      display: grid;
-      grid-template-columns: 2rem 1fr;
-      gap: var(--space-3);
-      align-items: start;
-      padding: var(--space-3) var(--space-4);
-      border-radius: var(--radius-md);
-      border: 1px solid color-mix(in srgb, #e55 30%, var(--color-border));
-      background: color-mix(in srgb, #e55 5%, var(--color-surface));
-      font-size: var(--text-sm);
-    }
     .fallen-icon { font-size: 1.1rem; line-height: 1.5; }
-    .fallen-item strong { display: block; margin-bottom: 2px; }
+    
 
     /* Aufklapp-Fragen */
     details.frage {
@@ -169,7 +147,7 @@
     .tag-down { background:#fee2e2; color:#991b1b; border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700; }
     .tag-note { background:#fef9c3; color:#854d0e; border-radius:99px; padding:1px 7px; font-size:10px; font-weight:700; }
 
-    /* Vergleichsmatrix */
+    
     .matrix {
       border-radius: var(--radius-lg);
       overflow: hidden;
@@ -193,46 +171,16 @@
     .matrix-row:nth-child(even) {
       background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
     }
-    .matrix-cell {
-      padding: var(--space-2) var(--space-3);
-      border-right: 1px solid var(--color-border);
-    }
-    .matrix-cell:last-child { border-right: none; }
-    .matrix-header .matrix-cell { padding: var(--space-2) var(--space-3); }
-
-    /* Quick-Nav Anker */
-    .quick-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-2);
-      margin-top: var(--space-4);
-    }
-    .quick-nav a {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: var(--space-1) var(--space-3);
-      border-radius: var(--radius-sm);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      font-size: var(--text-xs);
-      font-weight: 600;
-      color: var(--color-text);
-      text-decoration: none;
-      transition: background .15s, border-color .15s;
-    }
-    .quick-nav a:hover {
-      background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface));
-      border-color: var(--color-primary);
-      color: var(--color-primary);
-    }
+    .matrix-header 
+    
+    
 
     /* Print */
     @media print {
-      site-header, site-sidebar, .quick-nav { display: none !important; }
+      site-header, site-sidebar, 
       .layout { display: block !important; }
       .content { padding: 0 !important; }
-      .card, .merksatz, .fallen-item { break-inside: avoid; }
+      .card, .merksatz, 
       details.frage { break-inside: avoid; }
       details.frage .frage-answer { display: block !important; }
     }

@@ -8,9 +8,7 @@
   <script type="module" src="../footer.js"></script>
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
-  <style>
-
-    /* ═══════════════════════════════════════════════════════
+  <style>/* ═══════════════════════════════════════════════════════
        CHEATSHEET GLOBALS – kompakte Darstellung
     ═══════════════════════════════════════════════════════ */
     .cs-section {
@@ -195,13 +193,6 @@
       gap: var(--space-3);
     }
     @media (max-width: 700px) { .fallen-grid { grid-template-columns: 1fr; } }
-    .fallen-item {
-      display: flex; gap: var(--space-3);
-      padding: var(--space-3) var(--space-4);
-      border-radius: var(--radius-lg);
-      border: 1px solid color-mix(in oklab,var(--color-warning) 25%,var(--color-border));
-      background: color-mix(in oklab,var(--color-warning) 5%,var(--color-surface-2));
-    }
     .fi-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
     .fi-body { display: flex; flex-direction: column; gap: .2rem; }
     .fi-title { font-size: var(--text-xs); font-weight: 700; color: color-mix(in oklab,var(--color-warning) 80%,#000); }
@@ -327,7 +318,6 @@
       font-size: .9rem; color: var(--color-text-faint); padding: 0;
       background: var(--color-surface-2); display:none;
     }
-
   </style>
 </head>
 <body>
