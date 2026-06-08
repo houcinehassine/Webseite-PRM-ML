@@ -8,20 +8,11 @@
   <script type="module" src="../footer.js"></script>
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
-    <link rel="stylesheet" href="style.css">
   <style>/* ── Nur minimale Ergänzungen zum bestehenden Stil ── */
 
     /* Formel-Zeile */
-    .formula-row {
-      display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: var(--space-3);
-      align-items: start;
-      padding: var(--space-2) 0;
-      border-bottom: 1px solid var(--color-border);
-      font-size: var(--text-sm);
-    }
-    .formula-row:last-child { border-bottom: none; }
+    
+    
 
     /* Inline Code-Snippet (Syntax-Farben) */
     .snippet {
@@ -43,33 +34,16 @@
     .sc { color: #6c7086; } /* comment / gray    */
 
     /* Merksatz-Karte */
-    .merksatz-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: var(--space-3);
-    }
-    .merksatz {
-      border-left: 4px solid var(--color-primary);
-      padding: var(--space-3) var(--space-4);
-      background: var(--color-surface);
-      border-radius: 0 var(--radius-md) var(--radius-md) 0;
-      box-shadow: var(--shadow-sm);
-    }
-    .merksatz.success { border-color: var(--color-success); }
-    .merksatz.warning { border-color: var(--color-warning); }
-    .merksatz.danger  { border-color: #e55; }
-    .merksatz .m-nr {
-      font-size: var(--text-xs);
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .06em;
-      color: var(--color-primary);
-      margin-bottom: var(--space-1);
-    }
-    .merksatz.success .m-nr { color: var(--color-success); }
-    .merksatz.warning .m-nr { color: var(--color-warning); }
-    .merksatz.danger  .m-nr { color: #e55; }
-    .merksatz p { font-size: var(--text-sm); margin: 0; line-height: 1.6; }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     .fallen-icon { font-size: 1.1rem; line-height: 1.5; }
     
 
@@ -163,14 +137,8 @@
       font-size: var(--text-xs);
       letter-spacing: .05em;
     }
-    .matrix-row {
-      display: grid;
-      grid-template-columns: 150px 1fr 1fr;
-      border-top: 1px solid var(--color-border);
-    }
-    .matrix-row:nth-child(even) {
-      background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
-    }
+    
+    
     .matrix-header 
     
     
@@ -180,8 +148,7 @@
       site-header, site-sidebar, 
       .layout { display: block !important; }
       .content { padding: 0 !important; }
-      .card, .merksatz, 
-      details.frage { break-inside: avoid; }
+      .card, 
       details.frage .frage-answer { display: block !important; }
     }
   </style>
