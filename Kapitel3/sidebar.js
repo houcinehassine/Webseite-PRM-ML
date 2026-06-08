@@ -1,8 +1,7 @@
 // ─────────────────────────────────────────────────────────
-//  Kapitel3/Sidebar.js  –  Nur Daten, Logik kommt aus Core
-//  Pfad: V4/Kapitel3/Sidebar.js
+//  Kapitel3/sidebar.js  –  Nur Daten, Logik kommt aus Core
 // ─────────────────────────────────────────────────────────
-import { registerSidebar } from '../js_codes/sidebar-core.js';
+import { registerSidebar } from '../assets/script.js';
 
 const chapter = {
   title: 'Kapitel 3 · Support Vector Machines',
