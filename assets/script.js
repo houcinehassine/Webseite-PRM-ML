@@ -449,6 +449,34 @@ function initCopyButtons() {
       if (output) output.style.display = 'none';
     });
   });
+
+  // 3. Bare <pre><code> ohne Wrapper → Copy + Run als Overlay
+  document.querySelectorAll('pre').forEach(pre => {
+    if (pre.closest('.code-cell') || pre.closest('.code-cell-split') || pre.closest('.bare-code-wrap')) return;
+    const code = pre.querySelector('code');
+    if (!code) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'bare-code-wrap';
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'bare-code-toolbar';
+    wrap.appendChild(toolbar);
+
+    const outputDiv = document.createElement('div');
+    outputDiv.className = 'bare-code-output output-side-body';
+    wrap.appendChild(outputDiv);
+
+    const copyBtn = erstelleCopyButton();
+    toolbar.appendChild(copyBtn);
+    aktiviereCopyButton(copyBtn, pre, code);
+
+    const runBtn = erstelleRunButton();
+    toolbar.appendChild(runBtn);
+    aktiviereRunButton(runBtn, wrap);
+  });
 }
 
 /* ── COPY-LOGIK ──────────────────────────────────────────── */
