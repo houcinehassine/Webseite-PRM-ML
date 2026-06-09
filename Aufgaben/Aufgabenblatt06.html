@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgabenblatt 06 – Unsupervised Learning & GMM</title>
+<style>
+  :root {
+    --navy: #1a2e4a;
+    --navy-light: #2c4a6e;
+    --amber: #d97706;
+    --amber-light: #fef3c7;
+    --teal: #0d9488;
+    --teal-light: #ccfbf1;
+    --coral: #dc6b44;
+    --coral-light: #fdeee8;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-400: #94a3b8;
+    --gray-600: #475569;
+    --gray-800: #1e293b;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+    --code-keyword: #89b4fa;
+    --code-string: #a6e3a1;
+    --code-comment: #6c7086;
+    --code-func: #f38ba8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: var(--gray-50);
+    color: var(--gray-800);
+    line-height: 1.7;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── HEADER ── */
+  .sheet-header {
+    border-top: 4px solid var(--navy);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 28px 0 20px;
+    margin-bottom: 40px;
+  }
+  .sheet-meta {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-400);
+    margin-bottom: 10px;
+  }
+  .sheet-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 6px;
+    font-family: 'Georgia', serif;
+  }
+  .sheet-subtitle {
+    font-size: 14px;
+    color: var(--gray-600);
+    font-family: 'Helvetica Neue', sans-serif;
+    font-style: italic;
+  }
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 3px;
+  }
+  .badge-navy  { background: var(--navy);       color: #e2e8f0; }
+  .badge-amber { background: var(--amber-light); color: #92400e; border: 1px solid #fcd34d; }
+  .badge-teal  { background: var(--teal-light);  color: #115e59; border: 1px solid #5eead4; }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 48px;
+  }
+  .section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .section-number {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--navy);
+    padding: 4px 9px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+  .section-title {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--navy);
+    font-family: 'Georgia', serif;
+  }
+  .section-divider {
+    flex: 1;
+    height: 1px;
+    background: var(--gray-200);
+  }
+
+  /* ── TASK CARDS ── */
+  .task-card {
+    background: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .task-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px 12px;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .task-type {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .type-theory  { background: var(--blue-light);  color: #1d4ed8; }
+  .type-code    { background: #fef0ff;             color: #7e22ce; }
+  .type-analysis{ background: var(--teal-light);   color: #115e59; }
+  .type-warmup  { background: var(--amber-light);  color: #92400e; }
+  .type-bonus   { background: var(--coral-light);  color: #9a3412; }
+
+  .task-label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    flex: 1;
+  }
+  .task-points {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    color: var(--gray-400);
+    font-weight: 600;
+  }
+  .task-body {
+    padding: 16px 20px 18px;
+    font-size: 15px;
+    line-height: 1.75;
+  }
+  .task-body p { margin-bottom: 10px; }
+  .task-body p:last-child { margin-bottom: 0; }
+  .task-body ul, .task-body ol {
+    padding-left: 22px;
+    margin-bottom: 10px;
+  }
+  .task-body li { margin-bottom: 5px; font-size: 15px; }
+
+  /* ── HINT BOX ── */
+  .hint {
+    background: var(--amber-light);
+    border-left: 3px solid var(--amber);
+    border-radius: 0 4px 4px 0;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    color: #78350f;
+  }
+  .hint strong { font-weight: 700; }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 5px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    overflow-x: auto;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--code-text);
+  }
+  .code-block .kw   { color: var(--code-keyword); }
+  .code-block .str  { color: var(--code-string); }
+  .code-block .cmt  { color: var(--code-comment); font-style: italic; }
+  .code-block .fn   { color: var(--code-func); }
+  .code-block .num  { color: #fab387; }
+
+  /* ── INLINE CODE ── */
+  code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.88em;
+    background: var(--gray-100);
+    color: #7c3aed;
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid var(--gray-200);
+  }
+
+  /* ── MATH-STYLE BOX ── */
+  .definition {
+    background: var(--blue-light);
+    border-left: 3px solid var(--blue);
+    border-radius: 0 4px 4px 0;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: 'Georgia', serif;
+    font-size: 14px;
+    color: #1e3a5f;
+  }
+  .definition .def-title {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--blue);
+    margin-bottom: 5px;
+  }
+
+  /* ── WARMUP GRID ── */
+  .warmup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .warmup-item {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 5px;
+    padding: 12px 14px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+  }
+  .warmup-item .w-num {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  @media (max-width: 600px) {
+    .warmup-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── FOOTER ── */
+  .sheet-footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+    color: var(--gray-400);
+  }
+
+  /* ── POINTS TABLE ── */
+  .points-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+  .points-table th {
+    background: var(--navy);
+    color: #e2e8f0;
+    padding: 8px 14px;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .points-table td {
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--gray-200);
+    color: var(--gray-800);
+  }
+  .points-table tr:nth-child(even) td { background: var(--gray-50); }
+  .points-table .total td {
+    font-weight: 700;
+    border-top: 2px solid var(--navy);
+    background: var(--blue-light);
+    color: var(--navy);
+  }
+</style>
+  <!-- Site Navigation -->
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<site-header active="pageA" title="Aufgabenblatt 06 · GMM & Unsupervised"></site-header>
+<div class="layout">
+  <site-sidebar active="blatt06"></site-sidebar>
+  <main class="content" id="main-content" style="padding:0;overflow:visible;">
+
+<!-- ══════════════════ HEADER ══════════════════ -->
+<header class="sheet-header">
+  <div class="sheet-meta">Vorlesung Maschinelles Lernen &nbsp;·&nbsp; Aufgabenblatt 06</div>
+  <h1 class="sheet-title">Unsupervised Learning &amp; Gaussian Mixture Models</h1>
+  <p class="sheet-subtitle">Clustering, Dichteschätzung und generative Modellierung</p>
+  <div class="badge-row">
+    <span class="badge badge-navy">Abgabe: Ende der Übungsstunde</span>
+    <span class="badge badge-amber">Python · scikit-learn · matplotlib</span>
+    <span class="badge badge-teal">Einzelarbeit</span>
+  </div>
+</header>
+
+
+<!-- ══════════════════ SECTION 0 – WARMUP ══════════════════ -->
+<section class="section">
+  <div class="section-heading">
+    <span class="section-number">§ 0</span>
+    <h2 class="section-title">WarmUp – Stretching</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-warmup">Kleinstaufgaben</span>
+      <span class="task-label">Grundbegriffe &amp; kurze Codeausschnitte</span>
+      <span class="task-points">8 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Beantworten Sie die folgenden Kurzfragen in 1–3 Sätzen bzw. mit dem passenden Code-Snippet.</p>
+
+      <div class="warmup-grid">
+
+        <div class="warmup-item">
+          <div class="w-num">W-1 &nbsp;(2 P.)</div>
+          Welche zwei Hyperparameter steuern ein Gaussian Mixture Model in scikit-learn und welche Werte wählen Sie als Startpunkt?
+        </div>
+
+        <div class="warmup-item">
+          <div class="w-num">W-2 &nbsp;(2 P.)</div>
+          Schreiben Sie eine einzige Zeile Python-Code, die ein GMM mit <em>3 Komponenten</em> und <em>full</em> Kovarianzstruktur instanziiert und auf <code>X_train</code> fittet.
+        </div>
+
+        <div class="warmup-item">
+          <div class="w-num">W-3 &nbsp;(2 P.)</div>
+          Was ist der Unterschied zwischen <code>gmm.predict(X)</code> und <code>gmm.predict_proba(X)</code>? Wann nutzen Sie welche Methode?
+        </div>
+
+        <div class="warmup-item">
+          <div class="w-num">W-4 &nbsp;(2 P.)</div>
+          Nennen Sie einen Vorteil und einen Nachteil von k-Means gegenüber GMM beim Clustering von Maschinendaten.
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ SECTION 1 – BETRIEBSZUSTAND ══════════════════ -->
+<section class="section">
+  <div class="section-heading">
+    <span class="section-number">§ 1</span>
+    <h2 class="section-title">Betriebszustand einer Maschine 2.0</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <!-- Aufgabe 1a – Theorie -->
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-theory">Theorie</span>
+      <span class="task-label">Aufgabe 1a – Modellwahl begründen</span>
+      <span class="task-points">4 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Im Beispiel <em>„Bestimmung des Betriebszustandes von Brownfield-Maschinen"</em> wurde k-Means eingesetzt. Erklären Sie in eigenen Worten:</p>
+      <ol>
+        <li>Warum liefert k-Means im Featureraum kreisförmige Cluster, während GMM beliebig orientierte Ellipsen modellieren kann.</li>
+        <li>Welche Kovarianzstruktur (<code>full</code>, <code>tied</code>, <code>diag</code>, <code>spherical</code>) entspricht im Grenzfall dem k-Means-Algorithmus, und warum?</li>
+      </ol>
+
+      <div class="definition">
+        <div class="def-title">Erinnerung – Log-Likelihood eines GMM</div>
+        ℓ(θ) = Σᵢ log Σₖ πₖ · 𝒩(xᵢ | μₖ, Σₖ)
+        &nbsp;&nbsp; mit &nbsp;Σₖ πₖ = 1, πₖ ≥ 0
+      </div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 1b – Code -->
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-code">Implementierung</span>
+      <span class="task-label">Aufgabe 1b – k-Means durch GMM ersetzen</span>
+      <span class="task-points">8 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Passen Sie den bereitgestellten Code so an, dass anstelle von <code>KMeans</code> ein <code>GaussianMixture</code> trainiert wird.</p>
+      <ul>
+        <li>Ermitteln Sie experimentell eine geeignete Komponentenanzahl (Hyperparameter). Kommen Sie auf ein vergleichbares Ergebnis wie mit k-Means?</li>
+        <li>Visualisieren Sie das Ergebnis im <strong>Featureraum</strong>: Färben Sie die Datenpunkte entsprechend des zugewiesenen Labels ein.</li>
+        <li>Skalieren Sie zusätzlich die <strong>Punktgröße</strong> im Scatter-Plot proportional zur Zuordnungswahrscheinlichkeit <code>predict_proba(X).max(axis=1)</code>.</li>
+      </ul>
+
+      <div class="code-block"><span class="cmt"># Startgerüst – ergänzen und anpassen</span>
+<span class="kw">from</span> sklearn.mixture <span class="kw">import</span> GaussianMixture
+<span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt
+
+<span class="cmt"># TODO: GMM instanziieren und fitten</span>
+gmm = GaussianMixture(n_components=<span class="num">???</span>, covariance_type=<span class="str">'full'</span>, random_state=<span class="num">42</span>)
+<span class="cmt"># ...</span>
+
+<span class="cmt"># TODO: Zuordnungswahrscheinlichkeit für Punktgröße nutzen</span>
+proba = gmm.<span class="fn">predict_proba</span>(X_sensor).<span class="fn">max</span>(axis=<span class="num">1</span>)
+sizes = proba * <span class="num">200</span>   <span class="cmt"># Skalierungsfaktor anpassen</span></div>
+
+      <div class="hint">
+        <strong>Hinweis:</strong> Verwenden Sie <code>BIC</code> oder <code>AIC</code> (<code>gmm.bic(X)</code>), um die optimale Komponentenanzahl datengetrieben zu bestimmen. Plotten Sie beide Kriterien für k = 1 … 10.
+      </div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 1c – Analyse -->
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-analysis">Analyse</span>
+      <span class="task-label">Aufgabe 1c – Ergebnisinterpretation</span>
+      <span class="task-points">4 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Betrachten Sie Ihre Visualisierung und beantworten Sie:</p>
+      <ol>
+        <li>Welche Cluster weisen eine hohe mittlere Zuordnungswahrscheinlichkeit auf – und was sagt das über den jeweiligen Betriebszustand aus?</li>
+        <li>Gibt es Datenpunkte mit niedriger Zuordnungswahrscheinlichkeit? Beschreiben Sie, welche physikalische Bedeutung solche „Grenzregionen" haben könnten.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ SECTION 2 – FACE GENERATOR ══════════════════ -->
+<section class="section">
+  <div class="section-heading">
+    <span class="section-number">§ 2</span>
+    <h2 class="section-title">Face Generator mit GMM</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <!-- Aufgabe 2a – Theorie -->
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-theory">Theorie</span>
+      <span class="task-label">Aufgabe 2a – PCA + GMM Vorverarbeitung</span>
+      <span class="task-points">4 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Im Beispiel <em>„SVM and Face Recognition"</em> wurde PCA zur Dimensionsreduktion eingesetzt. Erklären Sie:</p>
+      <ol>
+        <li>Warum ist eine Dimensionsreduktion via PCA <em>vor</em> dem Training eines GMM auf dem Gesichtsdatensatz empfehlenswert? Welche zwei Probleme werden damit vermieden?</li>
+        <li>Was müssen Sie beim <strong>Sampling</strong> neuer Gesichter bzgl. der PCA beachten? Welcher Schritt darf nicht vergessen werden?</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Aufgabe 2b – Implementierung -->
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-code">Implementierung</span>
+      <span class="task-label">Aufgabe 2b – Gesichter generieren</span>
+      <span class="task-points">10 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Trainieren Sie ein GMM auf dem <em>Olivetti Faces</em>-Datensatz (PCA-komprimiert) und generieren Sie neue Gesichter.</p>
+      <ul>
+        <li>Bestimmen Sie die Anzahl der PCA-Komponenten so, dass ≥ 95 % der erklärten Varianz erhalten bleibt.</li>
+        <li>Wählen Sie die Komponentenanzahl des GMM über BIC.</li>
+        <li>Samplen Sie 12 neue Gesichter (<code>gmm.sample(12)</code>) und transformieren Sie diese zurück in den Pixelraum.</li>
+        <li>Zeigen Sie die 12 generierten Gesichter in einem <strong>3 × 4 Grid</strong> mit <code>plt.subplot</code>, ohne Achsenbeschriftungen.</li>
+      </ul>
+
+      <div class="code-block"><span class="kw">from</span> sklearn.datasets <span class="kw">import</span> fetch_olivetti_faces
+<span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> PCA
+<span class="kw">from</span> sklearn.mixture <span class="kw">import</span> GaussianMixture
+
+faces = <span class="fn">fetch_olivetti_faces</span>(shuffle=<span class="kw">True</span>)
+X = faces.data   <span class="cmt"># shape (400, 4096)</span>
+
+<span class="cmt"># TODO: PCA mit ausreichend erklärter Varianz</span>
+pca = PCA(n_components=<span class="num">???</span>, whiten=<span class="kw">True</span>)
+X_pca = pca.<span class="fn">fit_transform</span>(X)
+
+<span class="cmt"># TODO: GMM fitten und 12 Gesichter samplen + zurücktransformieren</span></div>
+
+      <div class="hint">
+        <strong>Hinweis:</strong> <code>pca.inverse_transform(samples)</code> überführt die gesampelten Vektoren zurück in den Bildraum. Clippen Sie die Pixelwerte anschließend auf [0, 1] mit <code>np.clip(..., 0, 1)</code>.
+      </div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 2c – Analyse -->
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-analysis">Analyse</span>
+      <span class="task-label">Aufgabe 2c – Qualitätsbewertung</span>
+      <span class="task-points">3 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Beurteilen Sie die Qualität der generierten Gesichter in 3–5 Sätzen:</p>
+      <ul>
+        <li>Sind die erzeugten Bilder als Gesichter erkennbar? Was fehlt oder wirkt unrealistisch?</li>
+        <li>Wie beeinflusst die Wahl der PCA-Komponentenanzahl die visuelle Qualität der Samples?</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ SECTION 3 – GEHIRNTUMOR ══════════════════ -->
+<section class="section">
+  <div class="section-heading">
+    <span class="section-number">§ 3</span>
+    <h2 class="section-title">Gehirntumorsegmentierung</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <!-- Aufgabe 3a – Theorie -->
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-theory">Theorie</span>
+      <span class="task-label">Aufgabe 3a – Segmentierung über Histogramme</span>
+      <span class="task-points">4 P.</span>
+    </div>
+    <div class="task-body">
+      <p>GMMs werden in der Medizintechnik zur Segmentierung von MRT-Bildern eingesetzt.</p>
+      <ol>
+        <li>Erläutern Sie, wie das Histogramm aller Voxelwerte eines MRT-Bildes als Eingabe für ein GMM dienen kann. Was repräsentieren die einzelnen Gaußkurven?</li>
+        <li>Welches Kriterium verwenden Sie, um die <em>optimale</em> Anzahl an Gaußkurven zu bestimmen? Begründen Sie Ihre Wahl mit Blick auf Über- und Unteranpassung.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Aufgabe 3b – Implementierung -->
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-code">Implementierung</span>
+      <span class="task-label">Aufgabe 3b – GMM auf MRT-Histogramm trainieren</span>
+      <span class="task-points">10 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Laden Sie das bereitgestellte MRT-Bild und segmentieren Sie es mit einem GMM.</p>
+      <ul>
+        <li>Extrahieren Sie alle Voxelwerte und berechnen Sie das Histogramm (<code>np.histogram</code> oder direkt als 1D-Array).</li>
+        <li>Trainieren Sie ein 1D-GMM (<code>X.reshape(-1, 1)</code>) und bestimmen Sie die optimale Komponentenanzahl.</li>
+        <li>Visualisieren Sie:
+          <ol>
+            <li>Das Histogramm mit den überlagerten Gaußkurven jeder Komponente.</li>
+            <li>Das segmentierte Bild, wobei jedes Segment eine andere Farbe erhält.</li>
+          </ol>
+        </li>
+      </ul>
+
+      <div class="code-block"><span class="kw">import</span> nibabel <span class="kw">as</span> nib   <span class="cmt"># MRT laden (alternativ: SimpleITK)</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.mixture <span class="kw">import</span> GaussianMixture
+
+img = nib.<span class="fn">load</span>(<span class="str">'brain_mrt.nii.gz'</span>)
+voxels = img.<span class="fn">get_fdata</span>().<span class="fn">flatten</span>()
+
+<span class="cmt"># Hintergrund ausblenden (Voxelwert > 0)</span>
+voxels_fg = voxels[voxels > <span class="num">0</span>]
+
+<span class="cmt"># TODO: 1D-GMM fitten, BIC für k = 2..8 plotten</span>
+X_1d = voxels_fg.<span class="fn">reshape</span>(-<span class="num">1</span>, <span class="num">1</span>)
+<span class="cmt"># ...</span></div>
+
+      <div class="hint">
+        <strong>Hinweis:</strong> Für die Visualisierung der Gaußkurven berechnen Sie für jede Komponente k: <code>weights[k] * scipy.stats.norm.pdf(x_range, means[k], std[k])</code> und summieren Sie alle Kurven auf.
+      </div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 3c – Analyse -->
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-analysis">Analyse</span>
+      <span class="task-label">Aufgabe 3c – Medizinische Interpretation</span>
+      <span class="task-points">4 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Interpretieren Sie Ihr Segmentierungsergebnis medizinisch und methodisch:</p>
+      <ol>
+        <li>Welches Segment entspricht mutmaßlich <em>Tumorgewebe</em>, welches <em>gesundem Gehirngewebe</em>, welches <em>Liquor (Gehirn-Rückenmarks-Flüssigkeit)</em>? Begründen Sie Ihre Zuordnung anhand der Gaußmittelwerte.</li>
+        <li>Welche Schwellwerte (Grenzen zwischen benachbarten Gaußkurven) würden Sie für eine binäre Klassifikation <em>Tumor vs. Nicht-Tumor</em> verwenden?</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ SECTION 4 – BONUS ══════════════════ -->
+<section class="section">
+  <div class="section-heading">
+    <span class="section-number">§ 4</span>
+    <h2 class="section-title">Bonus – Vergleich Clustering-Algorithmen</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <div class="task-card">
+    <div class="task-header">
+      <span class="task-type type-bonus">Bonus</span>
+      <span class="task-label">DBSCAN vs. GMM auf Moons-Datensatz</span>
+      <span class="task-points">+5 P.</span>
+    </div>
+    <div class="task-body">
+      <p>Wenden Sie sowohl <code>DBSCAN</code> als auch ein <code>GaussianMixture</code> auf den <code>make_moons</code>-Datensatz an (n = 500, noise = 0.08). Stellen Sie die Ergebnisse nebeneinander dar und diskutieren Sie in 4–6 Sätzen:</p>
+      <ul>
+        <li>Welcher Algorithmus findet die halbmondförmigen Cluster korrekt?</li>
+        <li>Was ist die fundamentale Grundannahme von GMM, die hier verletzt wird?</li>
+        <li>Nennen Sie einen Anwendungsfall, für den GMM trotzdem die bessere Wahl wäre.</li>
+      </ul>
+
+      <div class="code-block"><span class="kw">from</span> sklearn.datasets <span class="kw">import</span> make_moons
+<span class="kw">from</span> sklearn.cluster  <span class="kw">import</span> DBSCAN
+
+X_moons, _ = <span class="fn">make_moons</span>(n_samples=<span class="num">500</span>, noise=<span class="num">0.08</span>, random_state=<span class="num">0</span>)
+<span class="cmt"># TODO: DBSCAN und GMM anwenden, Plots nebeneinander</span></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════ PUNKTE-ÜBERSICHT ══════════════════ -->
+<section class="section">
+  <div class="section-heading">
+    <span class="section-number">Σ</span>
+    <h2 class="section-title">Punkte-Übersicht</h2>
+    <div class="section-divider"></div>
+  </div>
+
+  <table class="points-table">
+    <thead>
+      <tr>
+        <th>Abschnitt</th>
+        <th>Aufgaben</th>
+        <th style="text-align:right;">Punkte</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>§ 0 &nbsp;WarmUp</td><td>W-1 bis W-4</td><td style="text-align:right;">8</td></tr>
+      <tr><td>§ 1 &nbsp;Betriebszustand 2.0</td><td>1a (Theorie) · 1b (Code) · 1c (Analyse)</td><td style="text-align:right;">16</td></tr>
+      <tr><td>§ 2 &nbsp;Face Generator</td><td>2a (Theorie) · 2b (Code) · 2c (Analyse)</td><td style="text-align:right;">17</td></tr>
+      <tr><td>§ 3 &nbsp;Gehirntumor</td><td>3a (Theorie) · 3b (Code) · 3c (Analyse)</td><td style="text-align:right;">18</td></tr>
+    </tbody>
+    <tfoot>
+      <tr class="total"><td>Gesamt</td><td></td><td style="text-align:right;">59</td></tr>
+      <tr><td style="color:#9a3412;font-style:italic;">§ 4 &nbsp;Bonus</td><td style="color:#9a3412;font-style:italic;">DBSCAN vs. GMM</td><td style="text-align:right;color:#9a3412;">+5</td></tr>
+    </tfoot>
+  </table>
+</section>
+
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer class="sheet-footer">
+  <span>Aufgabenblatt 06 · Unsupervised Learning &amp; GMM</span>
+  <span>sklearn · numpy · matplotlib · scipy</span>
+</footer>
+
+  </main>
+</div>
+<site-footer caption="Aufgabenblatt 06 · GMM & Unsupervised"></site-footer>
+</body>
+</html>

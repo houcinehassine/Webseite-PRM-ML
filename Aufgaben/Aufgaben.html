@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Aufgaben: Übungsblätter zur PRM Prüfungsvorbereitung – interaktiv und statisch.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Aufgaben & Übungsblätter</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/kapitel-overview.css">
+  <style>
+    .aufg-hero {
+      padding: clamp(3rem,10vw,5rem) 0 clamp(2rem,6vw,3rem);
+      text-align: center;
+      background: linear-gradient(150deg, #0F172A 0%, #1E3A5F 100%);
+      color: #F8FAFC;
+      position: relative;
+      overflow: hidden;
+    }
+    .aufg-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+    .aufg-hero .eyebrow {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #94A3B8;
+    }
+    .aufg-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700;
+      margin: var(--space-4) auto var(--space-4);
+      color: #F8FAFC;
+    }
+    .aufg-hero p {
+      color: #94A3B8;
+      font-size: var(--text-base);
+      max-width: 58ch;
+      margin-inline: auto;
+      line-height: 1.7;
+    }
+    .aufg-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      justify-content: center;
+      margin-top: var(--space-6);
+    }
+    .aufg-pill {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255,255,255,.15);
+      color: #CBD5E1;
+      background: rgba(255,255,255,.06);
+    }
+    /* Aufgaben-spezifische Karten-Banner Farben */
+    .banner-quiz    { background: #EEF2FF; }
+    .banner-warmup  { background: #ECFDF5; }
+    .banner-haupt   { background: #FEF2F2; }
+    .banner-gmm     { background: #FFF7ED; }
+    .banner-static  { background: var(--color-surface-2); }
+
+    .badge-interaktiv {
+      background: #DCFCE7;
+      color: #15803D;
+      border: 1px solid #86EFAC;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-full);
+    }
+    .badge-statisch {
+      background: var(--color-surface-offset);
+      color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-full);
+    }
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-6);
+      max-width: 1120px;
+      margin: var(--space-8) auto;
+      padding: 0 var(--space-8) var(--space-16);
+    }
+    .page-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--color-text);
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+    .page-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .card-banner {
+      width: 100%; height: 130px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3rem; position: relative;
+    }
+    .card-banner .card-num {
+      position: absolute; top: var(--space-3); left: var(--space-4);
+      font-size: var(--text-xs); font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--color-primary);
+      background: color-mix(in oklab, var(--color-primary) 10%, var(--color-surface));
+      padding: 0.15rem 0.6rem; border-radius: var(--radius-full);
+    }
+    .card-body { padding: var(--space-5); flex: 1; display: flex; flex-direction: column; gap: var(--space-2); }
+    .card-titel { font-size: var(--text-base); font-weight: 700; }
+    .card-desc  { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.6; flex: 1; }
+    .card-tags  { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-2); }
+    .card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: var(--space-3) var(--space-5);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--text-xs); color: var(--color-text-muted);
+    }
+    .card-arrow { font-size: 1rem; color: var(--color-primary); transition: transform 0.15s; }
+    .page-card:hover .card-arrow { transform: translateX(4px); }
+    .tag {
+      font-size: 0.7rem; font-weight: 600;
+      padding: 0.15rem 0.5rem; border-radius: var(--radius-full);
+      background: var(--color-surface-2); color: var(--color-text-muted);
+      border: 1px solid var(--color-border);
+    }
+    .section-label {
+      font-size: var(--text-xs); font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--color-text-faint);
+      max-width: 1120px; margin: 0 auto var(--space-3);
+      padding: 0 var(--space-8);
+    }
+  </style>
+</head>
+<body>
+  <site-header active="pageA" title="Aufgaben · Übungsblätter"></site-header>
+  <main id="main-content">
+
+    <!-- ── Hero ────────────────────────────────────────────── -->
+    <section class="aufg-hero">
+      <div class="container">
+        <span class="eyebrow">✦ Prüfungsvorbereitung · Aufgaben</span>
+        <h1>Übungsblätter</h1>
+        <p>5 Aufgabenblätter mit echten Prüfungsaufgaben — von interaktiven
+           Python-Umgebungen bis zu klassischen Übungsblättern mit Muster&shy;lösungen.</p>
+        <div class="aufg-pills">
+          <span class="aufg-pill">🧠 Quiz</span>
+          <span class="aufg-pill">🌡️ WarmUp</span>
+          <span class="aufg-pill">⚡ Hauptaufgaben</span>
+          <span class="aufg-pill">🥨 Schmankerl</span>
+          <span class="aufg-pill">▶ Pyodide</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Aufgabenblätter ──────────────────────────────────── -->
+    <p class="section-label" style="margin-top: var(--space-10)">Alle Aufgabenblätter</p>
+
+    <div class="pages-grid">
+
+      <!-- Blatt 02 – Interaktiv -->
+      <a class="page-card" href="Aufgabenblatt02.html">
+        <div class="card-banner banner-quiz">
+          ⚡
+          <span class="card-num">Blatt 02</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">ML Grundlagen</div>
+          <div class="card-desc">
+            Cross-Validation, Train-Test-Splits, Hyperparameter-Suche und
+            Lernkurven — mit interaktivem Python-Editor und Musterlösungen.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Cross-Validation</span>
+            <span class="tag">GridSearchCV</span>
+            <span class="tag">make_classification</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="badge-interaktiv">▶ Interaktiv</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Blatt 03 – SVM -->
+      <a class="page-card" href="Aufgabenblatt03.html">
+        <div class="card-banner banner-warmup">
+          🎯
+          <span class="card-num">Blatt 03</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Support Vector Machines</div>
+          <div class="card-desc">
+            Mini-SVM, GridSearchCV auf dem Digits-Datensatz,
+            umgekehrte SVM-Aufgabe und Entscheidungsgrenzen-Visualisierung.
+          </div>
+          <div class="card-tags">
+            <span class="tag">SVM</span>
+            <span class="tag">GridSearchCV</span>
+            <span class="tag">Entscheidungsgrenzen</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="badge-statisch">📄 Statisch</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Blatt 04 – Clustering -->
+      <a class="page-card" href="Aufgabenblatt04.html">
+        <div class="card-banner banner-haupt">
+          🔵
+          <span class="card-num">Blatt 04</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Clustering & Anomalie-Erkennung</div>
+          <div class="card-desc">
+            k-Means Microtargeting, Elbow-Plot, DBSCAN für Anomalie-Erkennung
+            und kNN-Klassifikator auf Core-Points. 30 + 10 Bonus Punkte.
+          </div>
+          <div class="card-tags">
+            <span class="tag">k-Means</span>
+            <span class="tag">DBSCAN</span>
+            <span class="tag">Anomalie</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="badge-statisch">📄 Statisch</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Blatt 05 – Klassifikation -->
+      <a class="page-card" href="Aufgabenblatt05.html">
+        <div class="card-banner banner-static">
+          🌲
+          <span class="card-num">Blatt 05</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">Klassifikation & Modellanalyse</div>
+          <div class="card-desc">
+            SVM vs. Random Forest unter Rauschen, Feature-Importance-Visualisierung
+            mit MNIST und Music Genre Classification. 50 Punkte.
+          </div>
+          <div class="card-tags">
+            <span class="tag">Random Forest</span>
+            <span class="tag">Feature Importance</span>
+            <span class="tag">MNIST</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="badge-statisch">📄 Statisch</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- Blatt 06 – GMM -->
+      <a class="page-card" href="Aufgabenblatt06.html">
+        <div class="card-banner banner-gmm">
+          🔬
+          <span class="card-num">Blatt 06</span>
+        </div>
+        <div class="card-body">
+          <div class="card-titel">GMM & Unsupervised Learning</div>
+          <div class="card-desc">
+            Gaussian Mixture Models für Betriebszustandserkennung,
+            Face Generator mit PCA+GMM und Gehirntumor-Segmentierung. 59 + 5 Bonus Punkte.
+          </div>
+          <div class="card-tags">
+            <span class="tag">GMM</span>
+            <span class="tag">PCA</span>
+            <span class="tag">Olivetti Faces</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="badge-statisch">📄 Statisch</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </main>
+  <site-footer caption="Aufgaben · PRM Prüfungsvorbereitung"></site-footer>
+</body>
+</html>

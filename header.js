@@ -39,19 +39,6 @@ class SiteHeader extends HTMLElement {
     };
     document.head.appendChild(hljsScript);
 
-    // ── Pyodide laden ─────────────────────────────────────────
-    const pyodideScript = document.createElement('script');
-    pyodideScript.src = 'https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js';
-    pyodideScript.onload = async () => {
-      window._pyodide = await loadPyodide();
-      await window._pyodide.loadPackage(['matplotlib', 'scikit-learn', 'numpy']);
-      window._pyodideReady = true;
-      document.dispatchEvent(new Event('pyodide-ready'));
-      console.log('✅ Pyodide bereit');
-    };
-    document.head.appendChild(pyodideScript);
-
-
     /* ── Header HTML ── */
     this.innerHTML = `
       <a href="#main-content" class="skip-link">Zum Inhalt springen</a>
@@ -99,6 +86,7 @@ class SiteHeader extends HTMLElement {
             <a href="../Kapitel5/Kapitel5.html" ${page === 'page5' ? 'class="active"' : ''}>5 - Random Forest</a>
             <a href="../Kapitel6/Kapitel6.html" ${page === 'page6' ? 'class="active"' : ''}>6 - Deep Learning</a>
             <a href="../Kapitel7/Kapitel7.html" ${page === 'page7' ? 'class="active"' : ''}>7 - Reinforcement Learning</a>
+            <a href="../Aufgaben/Aufgaben.html" ${page === 'pageA' ? 'class="active"' : ''}>✏️ Aufgaben</a>
           </nav>
 
           <!-- RECHTS: Theme Toggle -->

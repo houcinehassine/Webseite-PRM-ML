@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRM – Aufgabenblatt 03 · SVM</title>
+  <!-- Site Navigation -->
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <!-- Originales CSS des Aufgabenblatts -->
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --accent: #1a3a5c;
+    --accent-light: #e8f0f8;
+    --badge-theory: #e8f0f8;
+    --badge-theory-text: #0c447c;
+    --badge-code: #eaf3de;
+    --badge-code-text: #3b6d11;
+    --badge-analysis: #faeeda;
+    --badge-analysis-text: #854f0b;
+    --badge-bonus: #fbeaf0;
+    --badge-bonus-text: #993556;
+    --divider: var(--color-border-tertiary);
+    --number-bg: #1a3a5c;
+    --number-text: #e8f0f8;
+  }
+
+  .sheet { font-family: 'Source Serif 4', Georgia, serif; color: var(--color-text-primary); padding: 2rem 2.5rem; max-width: 680px; }
+
+  .header { border-bottom: 2px solid var(--accent); padding-bottom: 1.25rem; margin-bottom: 2rem; }
+  .header-top { display: flex; align-items: baseline; gap: 1rem; }
+  .sheet-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.1em; }
+  .sheet-title { font-size: 22px; font-weight: 600; margin: 0.5rem 0 0.25rem; color: var(--color-text-primary); }
+  .sheet-subtitle { font-size: 14px; color: var(--color-text-secondary); font-weight: 300; font-style: italic; margin: 0; }
+
+  .meta-row { display: flex; gap: 1.5rem; margin-top: 1rem; flex-wrap: wrap; }
+  .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--color-text-secondary); font-family: 'IBM Plex Mono', monospace; }
+
+  .imports-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.75rem 1rem; margin-bottom: 2rem; border: 0.5px solid var(--color-border-tertiary); }
+  .imports-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .imports-code { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--color-text-primary); line-height: 1.7; }
+
+  .section { margin-bottom: 2.5rem; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .section-number { width: 28px; height: 28px; border-radius: 50%; background: var(--number-bg); color: var(--number-text); font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .section-title { font-size: 16px; font-weight: 600; margin: 0; flex: 1; }
+  .badge { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.06em; flex-shrink: 0; }
+  .badge-theory { background: var(--badge-theory); color: var(--badge-theory-text); }
+  .badge-code { background: var(--badge-code); color: var(--badge-code-text); }
+  .badge-analysis { background: var(--badge-analysis); color: var(--badge-analysis-text); }
+  .badge-bonus { background: var(--badge-bonus); color: var(--badge-bonus-text); }
+
+  .task-list { list-style: none; padding: 0; margin: 0; }
+  .task-list > li { display: flex; gap: 10px; margin-bottom: 0.9rem; font-size: 15px; line-height: 1.65; font-weight: 300; }
+  .task-list > li::before { content: attr(data-n); font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--color-text-secondary); min-width: 22px; padding-top: 3px; flex-shrink: 0; }
+  .task-list > li code { font-family: 'IBM Plex Mono', monospace; font-size: 12px; background: var(--color-background-secondary); padding: 1px 5px; border-radius: 4px; color: var(--color-text-primary); }
+
+  .quiz-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0.5rem; }
+  .quiz-card { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.75rem 1rem; font-size: 13px; line-height: 1.6; font-weight: 300; }
+  .quiz-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+
+  .hint-box { background: var(--badge-theory); border-left: 3px solid #185fa5; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 0.65rem 1rem; margin-top: 0.75rem; font-size: 13px; font-weight: 300; color: var(--color-text-secondary); }
+  .hint-box strong { color: var(--badge-theory-text); font-weight: 500; font-family: 'IBM Plex Mono', monospace; font-size: 11px; }
+
+  .warning-box { background: var(--badge-analysis); border-left: 3px solid #ba7517; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; padding: 0.65rem 1rem; margin-top: 0.75rem; font-size: 13px; font-weight: 300; color: var(--color-text-secondary); }
+
+  .step-list { counter-reset: steps; list-style: none; padding: 0; margin: 0; }
+  .step-list > li { counter-increment: steps; display: flex; gap: 10px; margin-bottom: 0.8rem; font-size: 15px; line-height: 1.65; font-weight: 300; }
+  .step-list > li::before { content: counter(steps) "."; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--color-text-secondary); min-width: 18px; padding-top: 3px; flex-shrink: 0; }
+  .step-list > li code { font-family: 'IBM Plex Mono', monospace; font-size: 12px; background: var(--color-background-secondary); padding: 1px 5px; border-radius: 4px; color: var(--color-text-primary); }
+
+  .target-box { display: inline-flex; align-items: center; gap: 8px; background: var(--badge-code); border-radius: var(--border-radius-md); padding: 6px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--badge-code-text); font-weight: 500; margin-top: 0.5rem; }
+
+  .bonus-box { background: var(--badge-bonus); border: 0.5px solid #d4537e; border-radius: var(--border-radius-md); padding: 1rem 1.25rem; }
+  .bonus-box .task-list > li, .bonus-box .step-list > li { font-size: 14px; }
+
+  p.intro { font-size: 14px; font-weight: 300; color: var(--color-text-secondary); margin: 0 0 1rem; line-height: 1.65; font-style: italic; }
+</style>
+</head>
+<body>
+<site-header active="pageA" title="Aufgabenblatt 03 · SVM"></site-header>
+<div class="layout">
+  <site-sidebar active="blatt03"></site-sidebar>
+  <main class="content" id="main-content" style="padding:0;overflow:visible;">
+
+
+<div class="sheet">
+
+  <div class="header">
+    <div class="header-top">
+      <span class="sheet-label">Aufgabenblatt 03</span>
+    </div>
+    <h1 class="sheet-title">Support Vector Machines (SVMs)</h1>
+    <p class="sheet-subtitle">Klassifikation, Hyperparameteroptimierung und Entscheidungsgrenzen</p>
+    <div class="meta-row">
+      <span class="meta-item"><i class="ti ti-code" aria-hidden="true"></i> sklearn, numpy, scipy, matplotlib</span>
+      <span class="meta-item"><i class="ti ti-layers" aria-hidden="true"></i> 5 Aufgaben + 1 Bonus</span>
+    </div>
+  </div>
+
+  <div class="imports-box">
+    <div class="imports-label">Vorgegebene Imports</div>
+    <div class="imports-code">import numpy as np<br>
+from sklearn.datasets import make_blobs, load_digits<br>
+from sklearn.svm import SVC<br>
+from sklearn.model_selection import train_test_split, GridSearchCV<br>
+from sklearn.metrics import accuracy_score<br>
+from scipy.stats import skew, kurtosis<br>
+import matplotlib.pyplot as plt<br>
+import glob</div>
+  </div>
+
+  <!-- QUIZ -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">W</div>
+      <h2 class="section-title">WarmUp – Quiz</h2>
+      <span class="badge badge-theory">Theorie</span>
+    </div>
+    <p class="intro">Kurze Verständnisfragen zum Einstieg. Beantworten Sie jede Frage in 1–2 Sätzen.</p>
+    <div class="quiz-grid">
+      <div class="quiz-card">
+        <div class="quiz-label">Q1</div>
+        Was ist ein Support Vector und welche Rolle spielt er beim Training einer SVM?
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-label">Q2</div>
+        Was beschreibt der Hyperparameter <code>C</code> bei einem <code>SVC</code> und wie beeinflusst ein sehr großes <code>C</code> das Modell?
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-label">Q3</div>
+        Was ist der Unterschied zwischen einem linearen und einem RBF-Kernel? Wann würden Sie welchen wählen?
+      </div>
+      <div class="quiz-card">
+        <div class="quiz-label">Q4</div>
+        Was misst die <code>accuracy_score</code>-Funktion, und wann ist sie als alleinige Güte­metrik ungeeignet?
+      </div>
+    </div>
+  </div>
+
+  <!-- AUFGABE 1 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <h2 class="section-title">Eignungstest­klassifikation – Mini-SVM</h2>
+      <span class="badge badge-code">Coding</span>
+    </div>
+    <p class="intro">Sie automatisieren die manuelle Auswertung von Hochschuleignungstests mithilfe einer SVM.</p>
+    <ul class="task-list">
+      <li data-n="(a)">Laden Sie mit <code>make_blobs</code> (3 Features, 2 Klassen, <code>random_state=0</code>) einen Datensatz in das Array <code>X_y</code>, das Features und Labels enthält.</li>
+      <li data-n="(b)">Instanziieren Sie, trainieren Sie und klassifizieren Sie neue Bewerber in <strong>einer einzigen Zeile</strong> (<em>One-Liner</em>). Probieren Sie z.B. den Feature-Vektor <code>[[3, 3, 6]]</code>.</li>
+      <li data-n="(c)">Wiederholen Sie (b) – diesmal mit <code>GridSearchCV</code> zur Hyperparameteroptimierung. Welche Parameter und Wertebereiche wählen Sie?</li>
+    </ul>
+    <div class="hint-box">
+      <strong>Hinweis</strong> — Verketten Sie <code>.fit()</code> und <code>.predict()</code> direkt auf einer neu instanziierten <code>SVC</code>-Instanz.
+    </div>
+  </div>
+
+  <!-- AUFGABE 2 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <h2 class="section-title">Digits-Modell mit GridSearchCV</h2>
+      <span class="badge badge-code">Coding</span>
+    </div>
+    <p class="intro">Optimieren Sie eine SVM für den bekannten Digits-Datensatz per Grid-Search statt per einfachem Train-Test-Split.</p>
+    <ul class="task-list">
+      <li data-n="(a)">Laden Sie den Digits-Datensatz mit <code>load_digits()</code> und teilen Sie ihn in Trainings- und Testset auf.</li>
+      <li data-n="(b)">Trainieren Sie mittels <code>GridSearchCV</code> eine <code>SVC</code> auf dem Trainingset. Setzen Sie <code>verbose=1</code> und <code>n_jobs=-1</code>.</li>
+      <li data-n="(c)">Was bedeuten diese beiden Parameter? Sind sie in der Praxis nützlich?</li>
+      <li data-n="(d)">Bewerten Sie das beste gefundene Modell auf dem Testset. Welche Klassifikationsgenauigkeit erreichen Sie?</li>
+    </ul>
+  </div>
+
+  <!-- AUFGABE 3 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <h2 class="section-title">SVM reversed – Datensatz anpassen</h2>
+      <span class="badge badge-analysis">Analyse</span>
+    </div>
+    <p class="intro">Anstatt das Modell zu optimieren, passen Sie diesmal den <em>Testdatensatz</em> an das Modell an.</p>
+    <ul class="task-list">
+      <li data-n="(a)">Trainieren Sie eine <code>SVC</code> auf den gegebenen Daten <code>Xtrain_1</code>, <code>ytrain_1</code> (<code>make_blobs</code>, 100 Samples, 2 Zentren, <code>cluster_std=2.6</code>, <code>random_state=42</code>).</li>
+      <li data-n="(b)">Nutzen Sie einen <code>while</code>-Loop: Generieren Sie wiederholt mit <code>make_blobs(n_samples=100, centers=2, cluster_std=2.6)</code> zufällige Testdatensätze, bis Ihre trainierte SVM darauf einen <code>accuracy_score > 0.8</code> erreicht.</li>
+      <li data-n="(c)">Visualisieren Sie die Blobs des gefundenen Testdatensatzes mit <code>matplotlib</code>.</li>
+    </ul>
+    <div class="warning-box">
+      <strong>Zu beachten:</strong> Warum ist dieser Ansatz in der Praxis problematisch? Diskutieren Sie kurz in Kommentarform im Code.
+    </div>
+  </div>
+
+  <!-- AUFGABE 4 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">4</div>
+      <h2 class="section-title">Extremely Damaged Bearings</h2>
+      <span class="badge badge-analysis">Analyse</span>
+    </div>
+    <p class="intro">Erweitern Sie den Ansatz der Wälzlagerfehler-Klassifikation auf 9 Schadensklassen + 1 Gesundklasse.</p>
+    <ul class="step-list">
+      <li>Übernehmen Sie den Code aus dem Kursbeispiel (<em>Copy&amp;Paste</em>) und trainieren Sie das Modell auf den 10 Klassen. Welche Genauigkeit erzielen Sie ohne weitere Anpassungen?</li>
+      <li>Variieren Sie systematisch die Hyperparameter-Ranges in <code>GridSearchCV</code>. Wie stark verbessert sich die Genauigkeit?</li>
+      <li>Fügen Sie mindestens zwei neue Features hinzu (z.B. <code>skew</code>, <code>kurtosis</code> aus <code>scipy.stats</code>). Wie ändert sich die Genauigkeit?</li>
+      <li>Führen Sie für die Anzahl Klassen, Features, etc. Variablen ein, sodass der Code flexibel bleibt.</li>
+      <li>Variieren Sie die Anzahl der Cross-Validation-Splits über einen <code>for</code>-Loop. Wo im Code muss dieser platziert werden?</li>
+    </ul>
+    <div class="target-box"><i class="ti ti-target" aria-hidden="true"></i> Ziel: ≥ 95 % Genauigkeit</div>
+  </div>
+
+  <!-- BONUS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">★</div>
+      <h2 class="section-title">Bonus – Entscheidungsflächen</h2>
+      <span class="badge badge-bonus">Bonus</span>
+    </div>
+    <div class="bonus-box">
+      <p class="intro" style="margin-bottom:0.75rem;">Nutzen Sie zwei trainierte Modelle aus den Aufgaben 3 und 4, um Entscheidungsflächen zu visualisieren.</p>
+      <ul class="task-list">
+        <li data-n="(a)">Wie speichert man ein trainiertes <code>sklearn</code>-Modell? Laden Sie die Modelle aus Aufgabe 3 und 4.</li>
+        <li data-n="(b)">Orientieren Sie sich am Abschnitt <em>Classifier Comparison</em> der sklearn-Dokumentation und erzeugen Sie Entscheidungsflächen für das Modell aus Aufgabe 3.</li>
+        <li data-n="(c)">Erweitern Sie die Visualisierung auf das hochdimensionale Bearing-Modell (Aufgabe 4). Welches Problem tritt auf, und wie lässt es sich lösen?</li>
+      </ul>
+      <div class="hint-box" style="margin-top:0.75rem;">
+        <strong>Tipp</strong> — Hochdimensionale Entscheidungsgrenzen: stackoverflow.com/questions/37718347/… bzw. github.com/tmadl/highdimensional-decision-boundary-plot
+      </div>
+    </div>
+  </div>
+
+</div>
+
+  </main>
+</div>
+<site-footer caption="Aufgabenblatt 03 · SVM"></site-footer>
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übungsblatt 04 – Clustering & Anomaliedetektion</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.7;background:var(--color-background-tertiary,#f8f9fa);color:var(--color-text-primary,#1a1a1a);padding:2rem 1rem}
+  .page{max-width:820px;margin:0 auto}
+
+  /* Header */
+  .sheet-header{background:var(--color-background-primary,#fff);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.12));border-radius:var(--border-radius-lg,12px);padding:1.5rem 2rem;margin-bottom:2rem}
+  .sheet-meta{display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:.75rem}
+  .meta-item{font-size:13px;color:var(--color-text-secondary,#555)}
+  .meta-item strong{color:var(--color-text-primary,#1a1a1a)}
+  .sheet-title{font-size:22px;font-weight:500;margin-bottom:.25rem}
+  .sheet-subtitle{font-size:14px;color:var(--color-text-secondary,#555)}
+  .imports-box{margin-top:1rem;background:var(--color-background-secondary,#f0f0f0);border-radius:var(--border-radius-md,8px);padding:.75rem 1rem;border-left:3px solid #888780}
+  .imports-label{font-size:12px;color:var(--color-text-secondary,#555);margin-bottom:.4rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+
+  /* Section heading */
+  .section-title{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-secondary,#555);margin:2.5rem 0 1rem;padding-bottom:.4rem;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.12))}
+
+  /* Task card */
+  .task{background:var(--color-background-primary,#fff);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.12));border-radius:var(--border-radius-lg,12px);padding:1.25rem 1.5rem;margin-bottom:1.25rem;position:relative}
+  .task-header{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
+  .badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;white-space:nowrap}
+  .badge-quiz{background:#e6f1fb;color:#0c447c}
+  .badge-warmup{background:#e1f5ee;color:#085041}
+  .badge-aufgabe{background:#eeedfe;color:#3c3489}
+  .badge-bonus{background:#faeeda;color:#633806}
+  .badge-schmankerl{background:#fbeaf0;color:#72243e}
+  .task-num{font-size:13px;color:var(--color-text-secondary,#555);font-weight:500}
+  .pts{margin-left:auto;font-size:12px;color:var(--color-text-secondary,#555);background:var(--color-background-secondary,#f0f0f0);padding:2px 8px;border-radius:20px}
+  .task-title{font-size:16px;font-weight:500;margin-bottom:.5rem}
+  .task-body{font-size:15px;color:var(--color-text-primary,#1a1a1a)}
+  .task-body p{margin-bottom:.75rem}
+  .task-body p:last-child{margin-bottom:0}
+
+  /* Sub-tasks */
+  .subtasks{list-style:none;padding:0;margin-top:.75rem}
+  .subtasks li{padding:.5rem 0 .5rem 1.5rem;position:relative;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.07));font-size:14.5px}
+  .subtasks li:last-child{border-bottom:none}
+  .subtasks li::before{content:attr(data-label);position:absolute;left:0;font-weight:500;color:var(--color-text-secondary,#555)}
+
+  /* Quiz options */
+  .options{list-style:none;padding:0;margin:.5rem 0 0 1.5rem}
+  .options li{padding:3px 0;font-size:14px}
+  .options li::before{content:"○ ";color:var(--color-text-secondary,#555)}
+
+  /* Code block */
+  pre{font-family:ui-monospace,SFMono-Regular,monospace;font-size:12.5px;background:var(--color-background-secondary,#f0f0f0);border-radius:var(--border-radius-md,8px);padding:.75rem 1rem;margin:.75rem 0;overflow-x:auto;line-height:1.6;border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.08))}
+  code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:13px;background:var(--color-background-secondary,#f0f0f0);padding:1px 5px;border-radius:4px}
+
+  /* Hint */
+  .hint{background:var(--color-background-info,#e8f0fb);border-left:3px solid #378add;border-radius:0 var(--border-radius-md,8px) var(--border-radius-md,8px) 0;padding:.6rem 1rem;margin-top:.75rem;font-size:13.5px;color:var(--color-text-primary,#1a1a1a)}
+  .hint strong{color:#0c447c;font-weight:500}
+
+  /* Context / story box */
+  .context{background:var(--color-background-secondary,#f0f0f0);border-radius:var(--border-radius-md,8px);padding:.85rem 1rem;margin:.5rem 0 .85rem;font-size:14px;font-style:italic;color:var(--color-text-secondary,#444);border-left:3px solid #d3d1c7}
+
+  /* Answer box */
+  .answer-box{border:0.5px dashed var(--color-border-secondary,rgba(0,0,0,.2));border-radius:var(--border-radius-md,8px);padding:.6rem 1rem;margin-top:.75rem;min-height:48px;font-size:13px;color:var(--color-text-tertiary,#aaa)}
+
+  /* Difficulty dots */
+  .diff{display:inline-flex;gap:3px;align-items:center;margin-left:.4rem}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--color-border-secondary,rgba(0,0,0,.2))}
+  .dot.on-easy{background:#1d9e75}
+  .dot.on-medium{background:#ef9f27}
+  .dot.on-hard{background:#e24b4a}
+
+  /* True / False row */
+  .tf-row{display:flex;align-items:center;gap:.5rem;padding:.45rem 0;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.07));font-size:14px}
+  .tf-row:last-child{border-bottom:none}
+  .tf-check{display:flex;gap:.5rem;margin-left:auto}
+  .tf-lbl{font-size:12px;padding:2px 8px;border-radius:12px;background:var(--color-background-secondary,#f0f0f0);color:var(--color-text-secondary,#555)}
+
+  /* Fill in the blank */
+  .blank{display:inline-block;width:120px;border-bottom:1.5px solid var(--color-text-secondary,#888);vertical-align:bottom;margin:0 4px}
+</style>
+  <!-- Site Navigation -->
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<site-header active="pageA" title="Aufgabenblatt 04 · Clustering"></site-header>
+<div class="layout">
+  <site-sidebar active="blatt04"></site-sidebar>
+  <main class="content" id="main-content" style="padding:0;overflow:visible;">
+<div class="page">
+
+  <!-- Header -->
+  <div class="sheet-header">
+    <div class="sheet-title">Übungsblatt 04 – Clustering &amp; Anomaliedetektion</div>
+    <div class="sheet-subtitle">Maschinelles Lernen · Unsupervised Learning</div>
+    <div class="sheet-meta">
+      <span class="meta-item"><strong>Themen:</strong> k-means, DBSCAN, kNN, Validierungskriterien</span>
+      <span class="meta-item"><strong>Gesamt:</strong> 30 + 10 Bonus Punkte</span>
+      <span class="meta-item"><strong>Bibliotheken:</strong> sklearn, numpy, pandas, matplotlib, seaborn</span>
+    </div>
+    <div class="imports-box">
+      <div class="imports-label">Imports (bereits gegeben)</div>
+      <pre style="margin:0;background:transparent;border:none;padding:0">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.datasets import make_blobs
+from sklearn.metrics import davies_bouldin_score, silhouette_score
+from sklearn.preprocessing import MinMaxScaler, StandardScaler</pre>
+    </div>
+  </div>
+
+  <!-- === QUIZ === -->
+  <div class="section-title">Teil 1 · Quiz (6 Punkte)</div>
+
+  <div class="task">
+    <div class="task-header">
+      <span class="badge badge-quiz">Quiz</span>
+      <span class="task-num">Aufgabe 1.1</span>
+      <span class="pts">2 Pkt.</span>
+    </div>
+    <div class="task-title">Multiple Choice – Clustering-Grundlagen</div>
+    <div class="task-body">
+      <p>Kreuzen Sie die <strong>eine</strong> richtige Antwort an.</p>
+
+      <p style="margin-top:.75rem;font-weight:500">1. Was minimiert der k-means Algorithmus?</p>
+      <ul class="options">
+        <li>Den Silhouette Score</li>
+        <li>Die Sum-of-Squared Distances zur Clustermitte (Inertia)</li>
+        <li>Den Davies-Bouldin Index</li>
+        <li>Den maximalen Abstand zweier Datenpunkte im Cluster</li>
+      </ul>
+
+      <p style="margin-top:1rem;font-weight:500">2. Welcher Score gilt: <em>je kleiner, desto besser</em>?</p>
+      <ul class="options">
+        <li>Silhouette Score</li>
+        <li>Davies-Bouldin Index</li>
+        <li>Beide</li>
+        <li>Keiner von beiden</li>
+      </ul>
+
+      <p style="margin-top:1rem;font-weight:500">3. Wie nennt man Datenpunkte, die von DBSCAN keinem Cluster zugeordnet werden?</p>
+      <ul class="options">
+        <li>Border Points</li>
+        <li>Core Points</li>
+        <li>Noise / Outlier (Label <code>-1</code>)</li>
+        <li>Centroid Points</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-header">
+      <span class="badge badge-quiz">Quiz</span>
+      <span class="task-num">Aufgabe 1.2</span>
+      <span class="pts">2 Pkt.</span>
+    </div>
+    <div class="task-title">Wahr oder Falsch</div>
+    <div class="task-body">
+      <p>Markieren Sie jede Aussage als <em>wahr</em> oder <em>falsch</em>.</p>
+      <div style="margin-top:.6rem">
+        <div class="tf-row">
+          <span>k-means kann Cluster beliebiger Form erkennen.</span>
+          <div class="tf-check"><span class="tf-lbl">W</span><span class="tf-lbl">F</span></div>
+        </div>
+        <div class="tf-row">
+          <span>DBSCAN benötigt die Anzahl der Cluster als Eingabeparameter.</span>
+          <div class="tf-check"><span class="tf-lbl">W</span><span class="tf-lbl">F</span></div>
+        </div>
+        <div class="tf-row">
+          <span>Ein Silhouette Score von 1.0 bedeutet perfekte Cluster-Trennung.</span>
+          <div class="tf-check"><span class="tf-lbl">W</span><span class="tf-lbl">F</span></div>
+        </div>
+        <div class="tf-row">
+          <span>Der Elbow-Plot zeigt die Inertia als Funktion von k.</span>
+          <div class="tf-check"><span class="tf-lbl">W</span><span class="tf-lbl">F</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-header">
+      <span class="badge badge-quiz">Quiz</span>
+      <span class="task-num">Aufgabe 1.3</span>
+      <span class="pts">2 Pkt.</span>
+    </div>
+    <div class="task-title">Lückentext – DBSCAN-Parameter</div>
+    <div class="task-body">
+      <p>Vervollständigen Sie die folgenden Sätze:</p>
+      <ol style="padding-left:1.3rem;margin-top:.5rem">
+        <li style="margin-bottom:.6rem">Der Parameter <code>eps</code> in DBSCAN definiert den <span class="blank"></span> eines Nachbarschaftsbereichs.</li>
+        <li style="margin-bottom:.6rem">Der Parameter <code>min_samples</code> legt fest, wie viele Punkte mindestens in der <span class="blank"></span> eines Core Points liegen müssen.</li>
+        <li>Beim Anomaliedetektions-Einsatz von DBSCAN werden Rauschen-Punkte (Label <code>-1</code>) als <span class="blank"></span> interpretiert.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- === WARMUP === -->
+  <div class="section-title">Teil 2 · WarmUp (4 Punkte)</div>
+
+  <div class="task">
+    <div class="task-header">
+      <span class="badge badge-warmup">WarmUp</span>
+      <span class="task-num">Aufgabe 2.1</span>
+      <span class="pts">2 Pkt.</span>
+    </div>
+    <div class="task-title">make_blobs + KMeans</div>
+    <div class="task-body">
+      <ul class="subtasks">
+        <li data-label="a)">Erstellen Sie mit <code>make_blobs</code> einen Datensatz <code>X</code> mit 300 Samples, <strong>4 Zentren</strong> und einer Standardabweichung von <code>0.5</code>. Setzen Sie <code>random_state=42</code>.</li>
+        <li data-label="b)">Trainieren Sie einen <code>KMeans</code> mit <code>k=4</code> auf <code>X</code>.</li>
+        <li data-label="c)">Berechnen Sie den <strong>Silhouette Score</strong> und den <strong>Davies-Bouldin Index</strong> und geben Sie beide Werte aus.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-header">
+      <span class="badge badge-warmup">WarmUp</span>
+      <span class="task-num">Aufgabe 2.2</span>
+      <span class="pts">2 Pkt.</span>
+    </div>
+    <div class="task-title">Datenskalierung &amp; Einfluss auf Clustering</div>
+    <div class="task-body">
+      <ul class="subtasks">
+        <li data-label="a)">Skalieren Sie <code>X</code> aus Aufgabe 2.1 mit dem <code>MinMaxScaler</code> auf den Bereich [0, 1].</li>
+        <li data-label="b)">Trainieren Sie erneut einen <code>KMeans(k=4)</code> auf den skalierten Daten und berechnen Sie wieder Silhouette Score und Davies-Bouldin Index.</li>
+        <li data-label="c)">Vergleichen Sie die Ergebnisse. Was stellen Sie fest? Wann ist Skalierung besonders wichtig?</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- === AUFGABE 1 === -->
+  <div class="section-title">Teil 3 · Hauptaufgaben (20 Punkte)</div>
+
+  <div class="task">
+    <div class="task-header">
+      <span class="badge badge-aufgabe">Aufgabe</span>
+      <span class="task-num">Aufgabe 3.1 – Microtargeting mit k-means</span>
+      <span class="pts">10 Pkt.</span>
+    </div>
+    <div class="task-title">Wählergruppen segmentieren mit k-means</div>
+    <div class="task-body">
+      <div class="context">
+        Stellen Sie sich vor, Sie sind Spitzenkandidat einer Partei. Statt alle Wähler gleich anzusprechen, setzen Sie auf <em>Microtargeting</em>: Sie senden jeder Personengruppe eine individuell zugeschnittene Botschaft. Daten: <code>citizen_database.csv</code> mit den Features <em>Fahrräder pro Familie, Stadtentfernung, Verdienst, Bildungslevel</em>.
+      </div>
+      <ul class="subtasks">
+        <li data-label="a)">Laden Sie <code>citizen_database.csv</code> und verschaffen Sie sich einen ersten Überblick (Form, Datentypen, fehlende Werte).</li>
+        <li data-label="b)">Visualisieren Sie die Verteilung der Features mit <code>seaborn.pairplot</code>. Was fällt auf?</li>
+        <li data-label="c)">Skalieren Sie die Daten mit dem <code>StandardScaler</code>. Begründen Sie kurz, warum das hier sinnvoll ist.</li>
+        <li data-label="d)">Erstellen Sie einen <strong>Elbow-Plot</strong> (Inertia für <em>k</em> = 2 … 10) und bestimmen Sie die optimale Clusteranzahl.</li>
+        <li data-label="e)">Trainieren Sie den finalen <code>KMeans</code> mit Ihrem gewählten k. Visualisieren Sie die Cluster erneut mit <code>pairplot</code> (Einfärbung: <code>labels_</code>).</li>
+        <li data-label="f)">Interpretieren Sie die Cluster: Welche Personengruppen sind erkennbar? Überlegen Sie sich für jede Gruppe eine geeignete Wahlkampfbotschaft.</li>
+      </ul>
+      <div class="hint"><strong>Hinweis:</strong> Ein unzufriedenstellender erster Elbow-Plot kann durch fehlende Skalierung entstehen. Probieren Sie <code>StandardScaler</code> statt <code>MinMaxScaler</code> – warum könnte das hier besser passen?</div>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-header">
+      <span class="badge badge-schmankerl">Schmankerl</span>
+      <span class="task-num">Aufgabe 3.2 – Elbow-Plot One-Liner</span>
+      <span class="pts">3 Pkt.</span>
+    </div>
+    <div class="task-title">Python-Einzeiler: Elbow-Plot</div>
+    <div class="task-body">
+      <p>Gegeben sei ein Datensatz <code>X</code>. Schreiben Sie den gesamten Elbow-Plot (<em>k</em> = 2 … 10) in <strong>einer einzigen Python-Zeile</strong>. Der Plot soll die Inertia-Werte als Linie darstellen.</p>
+      <pre><code># Ihr One-Liner hier:
+plt.plot( ... )</code></pre>
+      <div class="hint"><strong>Tipp:</strong> List Comprehension + <code>KMeans(k).fit(X).inertia_</code> lässt sich direkt in <code>plt.plot()</code> einbetten.</div>
+    </div>
+  </div>
+
+  <div class="task">
+    <div class="task-header">
+      <span class="badge badge-aufgabe">Aufgabe</span>
+      <span class="task-num">Aufgabe 3.3 – Anomaliedetektion mit DBSCAN</span>
+      <span class="pts">7 Pkt.</span>
+    </div>
+    <div class="task-title">Anomaler Roboterarm in der Fertigungsstraße</div>
+    <div class="task-body">
+      <div class="context">
+        Sie arbeiten bei einem Maschinenbauunternehmen. Ihnen liegen 300 Kraft- bzw. Beschleunigungsmessungen <code>(F_x, F_y, F_z)</code> eines Roboterarms vor (<code>anomaly_detection.npy</code>). Laut Betreibern verhält sich der Arm zu ca. 15 % der Zeit <em>anomal</em>. Ihre Aufgabe: einen Anomaliedetektor bauen.
+      </div>
+      <ul class="subtasks">
+        <li data-label="a)">Laden Sie <code>anomaly_detection.npy</code> und visualisieren Sie die Daten mit <code>seaborn.pairplot</code>. Gibt es bereits visuell erkennbare Ausreißer?</li>
+        <li data-label="b)">Starten Sie eine Hyperparametersuche für DBSCAN (<code>eps</code>, <code>min_samples</code>). Visualisieren Sie die Anzahl der Ausreißer (Label <code>-1</code>) als Heatmap über das Parametergitter (<code>seaborn.heatmap</code>). Welche Kriterien leiten Ihre Wahl?</li>
+        <li data-label="c)">Trainieren Sie DBSCAN mit Ihren gewählten Hyperparametern. Visualisieren Sie das Ergebnis erneut mit <code>pairplot</code>, eingefärbt nach <code>dbscan.labels_</code>. Ist die Wahl plausibel?</li>
+        <li data-label="d)">Verwenden Sie die DBSCAN-Labels als Trainingsgrundlage: Trainieren Sie einen <code>KNeighborsClassifier</code>, der für <em>neue, unbekannte</em> Messpunkte vorhersagt, ob sie anomal (Label <code>-1</code>) oder normal sind.</li>
+        <li data-label="e)">Testen Sie den Klassifikator mit mindestens zwei selbst gewählten Testpunkten – einem vermutlich normalen und einem vermutlich anomalen – und interpretieren Sie die Ausgabe.</li>
+      </ul>
+      <div class="hint"><strong>Hinweis:</strong> Das Ziel von DBSCAN hier ist nicht die Suche nach genau zwei Clustern „normal" und „anomal", sondern die Identifikation von <em>Rauschpunkten</em> als Anomalien. Normales Verhalten kann sich in <em>beliebig vielen</em> Clustern abbilden.</div>
+    </div>
+  </div>
+
+  <!-- === BONUS === -->
+  <div class="section-title">Bonus (10 Punkte)</div>
+
+  <div class="task">
+    <div class="task-header">
+      <span class="badge badge-bonus">Bonus</span>
+      <span class="task-num">Aufgabe B – Validierungskriterien im Vergleich</span>
+      <span class="pts">10 Pkt.</span>
+    </div>
+    <div class="task-title">Funktion <code>explore_validation_criteria</code></div>
+    <div class="task-body">
+      <div class="context">
+        Sind Silhouette Score, Davies-Bouldin Index und Sum-of-Squared Distances wirklich verlässliche Indikatoren für die wahre Clusteranzahl? Untersuchen Sie dies systematisch.
+      </div>
+      <p>Implementieren Sie die Funktion mit folgendem Gerüst:</p>
+      <pre>def explore_validation_criteria(list_of_std, list_of_num_blobs):
+    """
+    Erzeugt ein Grid mit (len(list_of_std) × len(list_of_num_blobs)) Subplots.
+    Jeder Subplot zeigt Silhouette Score, Davies-Bouldin Index und Inertia
+    (via MinMaxScaler normalisiert) für k = 2 ... 11 als Liniengraphen.
+    Eine vertikale Linie markiert die wahre Blob-Anzahl.
+    """
+    # Loop über Standardabweichungen
+        # Loop über Blob-Anzahlen
+            # make_blobs mit aktueller Kombination erzeugen
+            # Loop über k = 2 ... 11
+                # KMeans trainieren
+                # Inertia, Davies-Bouldin, Silhouette berechnen
+            # Werte mit MinMaxScaler normalisieren
+            # Linienplot der drei Scores zeichnen
+            # Vertikale Linie bei wahrer Blob-Anzahl ergänzen</pre>
+      <ul class="subtasks" style="margin-top:1rem">
+        <li data-label="a)">Implementieren Sie die Funktion vollständig.</li>
+        <li data-label="b)">Rufen Sie sie auf: <code>explore_validation_criteria([0.2, 0.5, 1.0], [3, 5, 7])</code>.</li>
+        <li data-label="c)">Interpretieren Sie: Bei welchen Bedingungen (hohe/niedrige Standardabweichung) stimmen die Validierungskriterien zuverlässig mit der echten Clusteranzahl überein? Wo versagen sie?</li>
+        <li data-label="d)">Welches der drei Kriterien scheint robuster gegenüber hoher Überlappung (großes <code>std</code>)? Begründen Sie kurz.</li>
+      </ul>
+      <div class="hint"><strong>Tipp:</strong> Vergessen Sie nicht, den <code>MinMaxScaler</code> auf die Liste der Scores anzuwenden, da sich die drei Metriken auf sehr unterschiedlichen Skalen befinden. Nur so sind sie im selben Plot vergleichbar.</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="margin-top:2.5rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.12));font-size:12px;color:var(--color-text-secondary,#888);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
+    <span>Übungsblatt 04 · Maschinelles Lernen</span>
+    <span>Bibliotheken: sklearn · numpy · pandas · matplotlib · seaborn</span>
+  </div>
+
+</div>
+  </main>
+</div>
+<site-footer caption="Aufgabenblatt 04 · Clustering"></site-footer>
+</body>
+</html>

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aufgabenblatt 05 — Maschinelles Lernen</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #1a1a2e;
+    background: #f4f6fb;
+    padding: 32px 16px 60px;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    background: #ffffff;
+    border-radius: 4px;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.09);
+    overflow: hidden;
+  }
+
+  /* ── HEADER ─────────────────────────────────── */
+  .header {
+    background: #0d1f4e;
+    color: #ffffff;
+    padding: 28px 40px 22px;
+  }
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .kurs-label {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8ab4f8;
+    margin-bottom: 4px;
+  }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .header-meta {
+    text-align: right;
+    font-size: 12px;
+    color: #a8c4f0;
+    line-height: 1.8;
+  }
+  .header-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.15);
+    margin: 14px 0 12px;
+  }
+  .header-info {
+    display: flex;
+    gap: 28px;
+    font-size: 12px;
+    color: #c5d8ff;
+  }
+  .header-info span strong { color: #ffffff; }
+
+  /* ── HINWEIS KASTEN ─────────────────────────── */
+  .hinweis {
+    margin: 20px 40px 0;
+    padding: 12px 16px;
+    background: #eef3ff;
+    border-left: 3px solid #3b6fd4;
+    border-radius: 0 4px 4px 0;
+    font-size: 13px;
+    color: #2a3f7a;
+  }
+  .hinweis strong { color: #1a2e6e; }
+
+  /* ── SECTION ────────────────────────────────── */
+  .section {
+    padding: 28px 40px 0;
+  }
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6b7a99;
+    border-bottom: 1px solid #e4e9f5;
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+  }
+
+  /* ── AUFGABE CARD ───────────────────────────── */
+  .aufgabe {
+    border: 1px solid #e4e9f5;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .aufgabe-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: #f7f9fe;
+    border-bottom: 1px solid #e4e9f5;
+  }
+  .aufgabe-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: #0d1f4e;
+    min-width: 80px;
+  }
+  .badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 20px;
+  }
+  .badge-quiz   { background: #ede9fd; color: #5b3fa6; }
+  .badge-code   { background: #d8f5ec; color: #0d6e56; }
+  .badge-analyse{ background: #fce8e0; color: #8c3318; }
+  .badge-bonus  { background: #fff0c2; color: #7a5200; }
+
+  .punkte {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4a5880;
+    white-space: nowrap;
+  }
+
+  .aufgabe-body { padding: 16px 18px; }
+
+  .aufgabe-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0d1f4e;
+    margin-bottom: 8px;
+  }
+  .aufgabe-desc {
+    font-size: 13px;
+    color: #3a4463;
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .aufgabe-desc p { margin-bottom: 8px; }
+  .aufgabe-desc p:last-child { margin-bottom: 0; }
+
+  /* ── QUIZ ───────────────────────────────────── */
+  .quiz-item {
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px dashed #dde3f0;
+  }
+  .quiz-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .quiz-q {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1a1f3e;
+    margin-bottom: 10px;
+  }
+  .quiz-q span {
+    display: inline-block;
+    background: #0d1f4e;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: 1px;
+  }
+  .options { display: flex; flex-direction: column; gap: 7px; }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 13px;
+    color: #3a4463;
+    padding: 7px 11px;
+    border: 1px solid #e0e6f5;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+  }
+  .option:hover { background: #f0f4ff; border-color: #b0c0e8; }
+  .option input[type="radio"] { margin-top: 1px; accent-color: #3b6fd4; flex-shrink: 0; }
+
+  /* ── CODE BLOCK ─────────────────────────────── */
+  .code-block {
+    background: #f0f4fc;
+    border: 1px solid #d8e0f0;
+    border-radius: 5px;
+    padding: 14px 16px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    color: #1a2e6e;
+    line-height: 1.7;
+    overflow-x: auto;
+    margin: 10px 0;
+    white-space: pre;
+  }
+  .code-comment { color: #6b7a99; }
+  .code-kw    { color: #7b3fa6; font-weight: 600; }
+  .code-fn    { color: #0a6bbf; }
+  .code-str   { color: #c4560a; }
+
+  /* ── ANSWER AREA ────────────────────────────── */
+  .answer-area {
+    min-height: 90px;
+    border: 1px dashed #b0bdd8;
+    border-radius: 5px;
+    background: #fafbff;
+    padding: 12px;
+    margin-top: 10px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    color: #7a8aaa;
+  }
+
+  .answer-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .answer-line {
+    height: 30px;
+    border-bottom: 1px solid #c8d4ea;
+  }
+
+  /* ── SUB-TASK ───────────────────────────────── */
+  .subtasks { list-style: none; margin: 10px 0 0; }
+  .subtasks li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px dotted #e0e6f4;
+    font-size: 13px;
+    color: #3a4463;
+  }
+  .subtasks li:last-child { border-bottom: none; }
+  .subtask-alpha {
+    font-weight: 700;
+    color: #3b6fd4;
+    min-width: 22px;
+    margin-top: 1px;
+  }
+
+  /* ── TIPP / HINWEIS INLINE ──────────────────── */
+  .tipp {
+    font-size: 12px;
+    background: #fffbec;
+    border-left: 3px solid #e6a817;
+    padding: 8px 12px;
+    border-radius: 0 4px 4px 0;
+    color: #5a420a;
+    margin: 10px 0 0;
+  }
+  .tipp strong { color: #3d2c06; }
+
+  /* ── FOOTER ─────────────────────────────────── */
+  .footer {
+    margin-top: 32px;
+    padding: 16px 40px 24px;
+    border-top: 1px solid #e4e9f5;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #8a95b0;
+  }
+  .total-punkte {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0d1f4e;
+  }
+
+  /* ── IMPORTS LIST ───────────────────────────── */
+  .imports-note {
+    font-size: 12px;
+    background: #f0f4fc;
+    border: 1px solid #d0daf2;
+    border-radius: 5px;
+    padding: 10px 14px;
+    color: #2a3f7a;
+    margin-bottom: 14px;
+  }
+  .imports-note strong { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #0d1f4e; display: block; margin-bottom: 4px; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page { box-shadow: none; }
+    .option:hover { background: transparent; }
+  }
+</style>
+  <!-- Site Navigation -->
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<site-header active="pageA" title="Aufgabenblatt 05 · Klassifikation"></site-header>
+<div class="layout">
+  <site-sidebar active="blatt05"></site-sidebar>
+  <main class="content" id="main-content" style="padding:0;overflow:visible;">
+<div class="page">
+
+  <!-- ─────────── HEADER ─────────── -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="kurs-label">Maschinelles Lernen &amp; Data Science</div>
+        <h1>Übungsblatt 05 — Klassifikation &amp; Modellanalyse</h1>
+      </div>
+      <div class="header-meta">
+        Sommersemester 2025<br>
+        Abgabe: 1 Woche<br>
+        Gesamtpunkte: <strong style="color:#fff;">50 Pkt.</strong>
+      </div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-info">
+      <span>Themen: <strong>SVM · Random Forest · Feature Importance · Rauschen</strong></span>
+      <span>Hilfsmittel: <strong>Skript, scikit-learn Doku</strong></span>
+    </div>
+  </div>
+
+  <!-- ─────────── HINWEIS ─────────── -->
+  <div class="hinweis">
+    <strong>Hinweis:</strong> Alle Programmieraufgaben sind in Python mit <code>scikit-learn</code> zu lösen. Die benötigten Imports sind oben in jeder Aufgabe angegeben. Verwenden Sie bei allen Aufgaben den vorgesehenen Antwortbereich (Liniensatz oder Code-Textfeld).
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       ABSCHNITT A – QUIZ
+  ════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">Abschnitt A — Verständnisfragen (Quiz)</div>
+
+    <!-- Aufgabe 1 -->
+    <div class="aufgabe">
+      <div class="aufgabe-header">
+        <div class="aufgabe-num">Aufgabe 1</div>
+        <span class="badge badge-quiz">Quiz</span>
+        <div class="punkte">12 Punkte</div>
+      </div>
+      <div class="aufgabe-body">
+        <div class="aufgabe-title">WarmUp — Konzepte &amp; Definitionen</div>
+        <div class="aufgabe-desc">
+          <p>Wählen Sie für jede Frage die <strong>eine</strong> richtige Antwort aus. Jede korrekte Antwort gibt <strong>3 Punkte</strong>. Teilpunkte werden nicht vergeben.</p>
+        </div>
+
+        <!-- Q1 -->
+        <div class="quiz-item">
+          <div class="quiz-q"><span>F1</span> Welche Aussage über <em>Random Forest</em> ist korrekt?</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q1"> Ein Random Forest trainiert alle Entscheidungsbäume auf dem identischen Datensatz.</label>
+            <label class="option"><input type="radio" name="q1"> Durch Bagging und zufällige Feature-Auswahl pro Split reduziert der Random Forest die Varianz gegenüber einem einzelnen Baum.</label>
+            <label class="option"><input type="radio" name="q1"> Ein Random Forest kann nur für binäre Klassifikationsaufgaben eingesetzt werden.</label>
+            <label class="option"><input type="radio" name="q1"> Die Hyperparameter eines Random Forest haben keinerlei Einfluss auf die Vorhersagegenauigkeit.</label>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="quiz-item">
+          <div class="quiz-q"><span>F2</span> Was gibt <code>permutation_importance</code> in scikit-learn zurück?</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q2"> Die Gewichte der Neuronen im trainierten Modell.</label>
+            <label class="option"><input type="radio" name="q2"> Einen Wert, der angibt, wie stark der Modell-Score sinkt, wenn ein Feature zufällig permutiert wird.</label>
+            <label class="option"><input type="radio" name="q2"> Die Rangfolge der Features nach ihrer Häufigkeit im Trainingsset.</label>
+            <label class="option"><input type="radio" name="q2"> Den Korrelationskoeffizienten aller Feature-Paare.</label>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="quiz-item">
+          <div class="quiz-q"><span>F3</span> Welcher der folgenden Klassifikatoren ist typischerweise <em>robuster gegen Rauschen</em>?</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q3"> SVM mit linearem Kernel ohne Regularisierung.</label>
+            <label class="option"><input type="radio" name="q3"> Ein einzelner nicht-beschnittener Entscheidungsbaum.</label>
+            <label class="option"><input type="radio" name="q3"> Random Forest, da er über viele schwache Lerner mittelt.</label>
+            <label class="option"><input type="radio" name="q3"> k-Nearest Neighbors mit k=1.</label>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="quiz-item">
+          <div class="quiz-q"><span>F4</span> Was beschreibt <code>feature_importances_</code> im <code>RandomForestClassifier</code>?</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="q4"> Die Anzahl der Male, in denen ein Feature im Training auftaucht.</label>
+            <label class="option"><input type="radio" name="q4"> Den mittleren Gewinn an Unreinheitsreduktion (z.&nbsp;B. Gini), den ein Feature über alle Bäume hinweg liefert.</label>
+            <label class="option"><input type="radio" name="q4"> Die Kollinearität eines Features mit dem Zielmerkmal.</label>
+            <label class="option"><input type="radio" name="q4"> Den p-Wert eines statistischen Tests auf Feature-Relevanz.</label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       ABSCHNITT B – PROGRAMMIERAUFGABEN
+  ════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">Abschnitt B — Programmieraufgaben</div>
+
+    <!-- Aufgabe 2 -->
+    <div class="aufgabe">
+      <div class="aufgabe-header">
+        <div class="aufgabe-num">Aufgabe 2</div>
+        <span class="badge badge-code">Code</span>
+        <div class="punkte">12 Punkte</div>
+      </div>
+      <div class="aufgabe-body">
+        <div class="aufgabe-title">SVM vs. Random Forest — Rauschverhalten</div>
+
+        <div class="imports-note">
+          <strong>Benötigte Imports</strong>
+          <code>from sklearn.ensemble import RandomForestClassifier<br>
+from sklearn.svm import SVC<br>
+from sklearn.model_selection import train_test_split<br>
+from sklearn.datasets import load_digits, load_iris, make_blobs<br>
+import numpy as np, matplotlib.pyplot as plt</code>
+        </div>
+
+        <div class="aufgabe-desc">
+          <p>Schreiben Sie die Funktion <code>explore_noise_behavior(X, y, list_of_noise_levels)</code>, die für jeden Rauschgrad aus der übergebenen Liste folgende Schritte durchführt:</p>
+        </div>
+
+        <ul class="subtasks">
+          <li><span class="subtask-alpha">a)</span> Fügen Sie zu jeder Spalte der Feature-Matrix <code>X</code> Gauß'sches Rauschen der Stärke <code>noise_level · std(X)</code> hinzu.</li>
+          <li><span class="subtask-alpha">b)</span> Teilen Sie den verrauschten Datensatz in Trainings- und Testdaten (80/20).</li>
+          <li><span class="subtask-alpha">c)</span> Trainieren Sie je einen <code>RandomForestClassifier</code> und eine <code>SVC</code> mit Default-Hyperparametern auf den Trainingsdaten.</li>
+          <li><span class="subtask-alpha">d)</span> Geben Sie die Test-Scores beider Modelle für alle Rauschgrade als zwei Listen zurück und visualisieren Sie diese als Liniendiagramm.</li>
+          <li><span class="subtask-alpha">e)</span> <em>(Kurzantwort, 2 Pkt.)</em> Welches Modell verhält sich bei zunehmendem Rauschen stabiler, und warum?</li>
+        </ul>
+
+        <div class="code-block"><span class="code-kw">def</span> <span class="code-fn">explore_noise_behavior</span>(X, y, list_of_noise_levels):
+    <span class="code-comment"># a) Rauschen hinzufügen (noise_level * std(X))</span>
+
+    <span class="code-comment"># b) Train-Test-Split</span>
+
+    <span class="code-comment"># c) Modelle trainieren (Default-Hyperparameter)</span>
+
+    <span class="code-comment"># d) Scores zurückgeben und Linienplot erstellen</span>
+
+    <span class="code-kw">return</span> scores_rf, scores_svm</div>
+
+        <div class="answer-lines">
+          <div style="font-size:12px;color:#6b7a99;margin-bottom:4px;">e) Kurzantwort:</div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+
+        <div class="tipp"><strong>Tipp:</strong> Verwenden Sie <code>np.random.normal(0, noise_level * X.std(), X.shape)</code> zum Erzeugen des Rauschens. Testen Sie Ihre Funktion mit <code>load_digits()</code>.</div>
+      </div>
+    </div>
+
+    <!-- Aufgabe 3 -->
+    <div class="aufgabe">
+      <div class="aufgabe-header">
+        <div class="aufgabe-num">Aufgabe 3</div>
+        <span class="badge badge-code">Code</span>
+        <div class="punkte">14 Punkte</div>
+      </div>
+      <div class="aufgabe-body">
+        <div class="aufgabe-title">Modell-Aufmerksamkeit visualisieren</div>
+
+        <div class="imports-note">
+          <strong>Benötigte Imports</strong>
+          <code>from sklearn.datasets import fetch_openml<br>
+from sklearn.ensemble import RandomForestClassifier<br>
+from sklearn.model_selection import train_test_split<br>
+import matplotlib.pyplot as plt, numpy as np</code>
+        </div>
+
+        <div class="aufgabe-desc">
+          <p>Laden Sie den Datensatz <code>mnist_784</code> über <code>fetch_openml</code>. Trainieren Sie einen <code>RandomForestClassifier</code> auf einem Trainingssubset (keine Hyperparameter-Optimierung nötig). Schreiben Sie anschließend die Funktion <code>attention_of_my_model(string_of_dataset, shape_of_images)</code>.</p>
+        </div>
+
+        <ul class="subtasks">
+          <li><span class="subtask-alpha">a)</span> Laden Sie den Datensatz über <code>fetch_openml(string_of_dataset, as_frame=False)</code> und trainieren Sie den <code>RandomForestClassifier</code>.</li>
+          <li><span class="subtask-alpha">b)</span> Extrahieren Sie das interne Pendant zur <code>permutation_importance</code> aus dem trainierten <code>RandomForestClassifier</code> (Attribut <code>feature_importances_</code>).</li>
+          <li><span class="subtask-alpha">c)</span> Formen Sie die Feature-Wichtigkeiten in die durch <code>shape_of_images</code> vorgegebene Bildgestalt um und visualisieren Sie sie als Heatmap (<code>plt.imshow</code>, Colormap Ihrer Wahl).</li>
+          <li><span class="subtask-alpha">d)</span> Erstellen Sie zusätzlich ein Histogramm der Feature-Wichtigkeiten.</li>
+          <li><span class="subtask-alpha">e)</span> <em>(Kurzantwort, 2 Pkt.)</em> Welche Bildbereiche werden vom Modell am stärksten genutzt? Macht das inhaltlich Sinn?</li>
+        </ul>
+
+        <div class="code-block"><span class="code-kw">def</span> <span class="code-fn">attention_of_my_model</span>(string_of_dataset, shape_of_images):
+    <span class="code-comment"># a) Daten laden &amp; Modell trainieren</span>
+
+    <span class="code-comment"># b) Feature-Wichtigkeiten extrahieren</span>
+
+    <span class="code-comment"># c) Heatmap der Wichtigkeiten (reshape → imshow)</span>
+
+    <span class="code-comment"># d) Histogramm</span>
+
+    <span class="code-kw">return</span> importances</div>
+
+        <div class="answer-lines">
+          <div style="font-size:12px;color:#6b7a99;margin-bottom:4px;">e) Kurzantwort:</div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+
+        <div class="tipp"><strong>Tipp:</strong> Aufruf: <code>attention_of_my_model("mnist_784", (28, 28))</code>. Für Fashion-MNIST: <code>"fashion-mnist"</code>, ebenfalls <code>(28, 28)</code>.</div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════════
+       ABSCHNITT C – ANALYSE
+  ════════════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">Abschnitt C — Anwendungsaufgabe</div>
+
+    <!-- Aufgabe 4 -->
+    <div class="aufgabe">
+      <div class="aufgabe-header">
+        <div class="aufgabe-num">Aufgabe 4</div>
+        <span class="badge badge-analyse">Analyse</span>
+        <div class="punkte">12 Punkte</div>
+      </div>
+      <div class="aufgabe-body">
+        <div class="aufgabe-title">Musik-Genre-Klassifikation mit Audio-Features</div>
+
+        <div class="imports-note">
+          <strong>Benötigte Imports</strong>
+          <code>import pandas as pd<br>
+from sklearn.ensemble import RandomForestClassifier<br>
+from sklearn.svm import SVC<br>
+from sklearn.model_selection import train_test_split, cross_val_score<br>
+from sklearn.preprocessing import StandardScaler</code>
+        </div>
+
+        <div class="aufgabe-desc">
+          <p>Stellen Sie sich vor, Sie arbeiten bei einem Musik-Streaming-Dienst. Ihnen liegen Audio-Features (z.&nbsp;B. Tempo, Energie, Tanzbarkeit) und die zugehörigen Genres von 5 000 Songs vor. Ihre Aufgabe ist es zu prüfen, ob ein ML-Modell diese Songs zuverlässig klassifizieren kann.</p>
+        </div>
+
+        <ul class="subtasks">
+          <li><span class="subtask-alpha">a)</span> Laden Sie den bereitgestellten Datensatz (<code>songs_5genres.csv</code>) und analysieren Sie kurz die Klassenverteilung. Ist der Datensatz balanciert?</li>
+          <li><span class="subtask-alpha">b)</span> Skalieren Sie die Features mit <code>StandardScaler</code> und trainieren Sie beide Modelle (<code>RandomForestClassifier</code>, <code>SVC</code>) mit 5-facher Kreuzvalidierung. Notieren Sie den mittleren Accuracy-Score.</li>
+          <li><span class="subtask-alpha">c)</span> Identifizieren Sie die drei wichtigsten Audio-Features für den Random Forest. Welche Merkmale trennen die Genres am besten?</li>
+          <li><span class="subtask-alpha">d)</span> <em>(Kurzantwort, 4 Pkt.)</em> Diskutieren Sie: Sind 5 Genres ausreichend, um die Vielfalt von 5 000 Songs abzubilden? Wie könnten Sie dies mit einem unüberwachten Verfahren (Clustering) prüfen?</li>
+        </ul>
+
+        <div class="answer-area">
+          # Ihr Code hier ...
+        </div>
+
+        <div class="answer-lines" style="margin-top:14px">
+          <div style="font-size:12px;color:#6b7a99;margin-bottom:4px;">d) Diskussion:</div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aufgabe 5 – BONUS -->
+    <div class="aufgabe">
+      <div class="aufgabe-header">
+        <div class="aufgabe-num">Aufgabe 5</div>
+        <span class="badge badge-bonus">Bonus</span>
+        <div class="punkte">+5 Bonuspunkte</div>
+      </div>
+      <div class="aufgabe-body">
+        <div class="aufgabe-title">Schwellwert-Analyse der Feature-Wichtigkeiten</div>
+        <div class="aufgabe-desc">
+          <p>Erweitern Sie die Funktion aus Aufgabe 3 um eine Schwellwert-Visualisierung: Setzen Sie alle Feature-Wichtigkeiten, die <em>unter</em> einem Schwellwert <code>tau</code> liegen, auf Null und stellen Sie das resultierende Bild dar.</p>
+        </div>
+        <ul class="subtasks">
+          <li><span class="subtask-alpha">a)</span> Experimentieren Sie mit verschiedenen Werten für <code>tau</code> (z.&nbsp;B. 0.001, 0.003, 0.005).</li>
+          <li><span class="subtask-alpha">b)</span> Beschreiben Sie, wie diese Schwellwertbilder für Feature-Engineering genutzt werden könnten (z.&nbsp;B. zur Reduktion uninformativer Pixel).</li>
+        </ul>
+        <div class="answer-area">
+          # Bonus-Code hier ...
+        </div>
+        <div class="answer-lines" style="margin-top:10px">
+          <div style="font-size:12px;color:#6b7a99;margin-bottom:4px;">b) Kurzantwort:</div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ─────────── FOOTER ─────────── -->
+  <div class="footer">
+    <span>Bitte geben Sie alle Aufgaben als <strong>Jupyter Notebook (.ipynb)</strong> ab.</span>
+    <span class="total-punkte">Gesamtpunkte: 50 Pkt. (+ 5 Bonus)</span>
+  </div>
+
+</div>
+  </main>
+</div>
+<site-footer caption="Aufgabenblatt 05 · Klassifikation"></site-footer>
+</body>
+</html>
