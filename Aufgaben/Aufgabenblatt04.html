@@ -3,352 +3,937 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Übungsblatt 04 – Clustering & Anomaliedetektion</title>
+<title>PRM – Aufgabenblatt 04 · Clustering & Anomaliedetektion</title>
+
+<!-- Site Navigation -->
+<script type="module" src="../header.js"></script>
+<script type="module" src="../footer.js"></script>
+<script type="module" src="sidebar.js"></script>
+<link rel="stylesheet" href="../assets/style.css">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- CodeMirror (lokal) -->
+<link rel="stylesheet" href="../assets/vendor/codemirror.min.css">
+<link rel="stylesheet" href="../assets/vendor/codemirror-dracula.min.css">
+<script src="../assets/vendor/codemirror.min.js"></script>
+<script src="../assets/vendor/codemirror-python.min.js"></script>
+<script src="../assets/vendor/codemirror-matchbrackets.min.js"></script>
+<script src="../assets/vendor/codemirror-closebrackets.min.js"></script>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.7;background:var(--color-background-tertiary,#f8f9fa);color:var(--color-text-primary,#1a1a1a);padding:2rem 1rem}
-  .page{max-width:820px;margin:0 auto}
+*{box-sizing:border-box;margin:0;padding:0;}
 
-  /* Header */
-  .sheet-header{background:var(--color-background-primary,#fff);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.12));border-radius:var(--border-radius-lg,12px);padding:1.5rem 2rem;margin-bottom:2rem}
-  .sheet-meta{display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:.75rem}
-  .meta-item{font-size:13px;color:var(--color-text-secondary,#555)}
-  .meta-item strong{color:var(--color-text-primary,#1a1a1a)}
-  .sheet-title{font-size:22px;font-weight:500;margin-bottom:.25rem}
-  .sheet-subtitle{font-size:14px;color:var(--color-text-secondary,#555)}
-  .imports-box{margin-top:1rem;background:var(--color-background-secondary,#f0f0f0);border-radius:var(--border-radius-md,8px);padding:.75rem 1rem;border-left:3px solid #888780}
-  .imports-label{font-size:12px;color:var(--color-text-secondary,#555);margin-bottom:.4rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em}
+:root{
+  --bg:#F1F5F9;
+  --card:#FFFFFF;
+  --border:#E2E8F0;
+  --text:#0F172A;
+  --muted:#64748B;
+  --hdr1:#0F172A;
+  --hdr2:#1E3A5F;
+  --quiz:#6366F1;
+  --quiz-light:#EEF2FF;
+  --warmup:#059669;
+  --warmup-light:#ECFDF5;
+  --haupt:#DC2626;
+  --haupt-light:#FEF2F2;
+  --schnk:#D97706;
+  --schnk-light:#FFFBEB;
+  --run:#16A34A;
+  --run-h:#15803D;
+  --sol:#D97706;
+  --sol-h:#B45309;
+}
 
-  /* Section heading */
-  .section-title{font-size:13px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--color-text-secondary,#555);margin:2.5rem 0 1rem;padding-bottom:.4rem;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.12))}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  font-size:15px;
+}
 
-  /* Task card */
-  .task{background:var(--color-background-primary,#fff);border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.12));border-radius:var(--border-radius-lg,12px);padding:1.25rem 1.5rem;margin-bottom:1.25rem;position:relative}
-  .task-header{display:flex;align-items:center;gap:.6rem;margin-bottom:1rem}
-  .badge{font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px;white-space:nowrap}
-  .badge-quiz{background:#e6f1fb;color:#0c447c}
-  .badge-warmup{background:#e1f5ee;color:#085041}
-  .badge-aufgabe{background:#eeedfe;color:#3c3489}
-  .badge-bonus{background:#faeeda;color:#633806}
-  .badge-schmankerl{background:#fbeaf0;color:#72243e}
-  .task-num{font-size:13px;color:var(--color-text-secondary,#555);font-weight:500}
-  .pts{margin-left:auto;font-size:12px;color:var(--color-text-secondary,#555);background:var(--color-background-secondary,#f0f0f0);padding:2px 8px;border-radius:20px}
-  .task-title{font-size:16px;font-weight:500;margin-bottom:.5rem}
-  .task-body{font-size:15px;color:var(--color-text-primary,#1a1a1a)}
-  .task-body p{margin-bottom:.75rem}
-  .task-body p:last-child{margin-bottom:0}
+/* ─── LOADING OVERLAY ─────────────────────────────────── */
+#overlay{
+  position:fixed;inset:0;
+  background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:9999;gap:18px;
+}
+.ov-logo{font-size:2.6rem;filter:drop-shadow(0 0 20px #6366f1aa);}
+.ov-title{color:#F8FAFC;font-size:1.3rem;font-weight:700;letter-spacing:-.02em;}
+.ov-msg{color:#94A3B8;font-size:.88rem;min-height:1.2em;text-align:center;}
+.ov-bar{width:280px;height:4px;background:#1E293B;border-radius:4px;overflow:hidden;}
+.ov-fill{height:100%;background:linear-gradient(90deg,#6366F1,#10B981);border-radius:4px;width:0%;transition:width .4s ease;}
+.spinner{
+  width:36px;height:36px;
+  border:3px solid rgba(99,102,241,.25);
+  border-top-color:#6366F1;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  /* Sub-tasks */
-  .subtasks{list-style:none;padding:0;margin-top:.75rem}
-  .subtasks li{padding:.5rem 0 .5rem 1.5rem;position:relative;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.07));font-size:14.5px}
-  .subtasks li:last-child{border-bottom:none}
-  .subtasks li::before{content:attr(data-label);position:absolute;left:0;font-weight:500;color:var(--color-text-secondary,#555)}
+/* ─── HEADER ─────────────────────────────────────────── */
+header{
+  background:linear-gradient(150deg,var(--hdr1) 0%,var(--hdr2) 100%);
+  padding:52px 24px 44px;
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+header::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(99,102,241,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(99,102,241,.07) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+header *{position:relative;}
+header h1{
+  font-size:2rem;font-weight:700;color:#F8FAFC;
+  letter-spacing:-.03em;margin-bottom:6px;
+}
+header .sub{color:#94A3B8;font-size:.92rem;}
+.pills{
+  display:flex;gap:10px;justify-content:center;
+  flex-wrap:wrap;margin-top:22px;
+}
+.pill{
+  background:rgba(255,255,255,.08);
+  color:#CBD5E1;font-size:.8rem;
+  padding:5px 13px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.1);
+}
 
-  /* Quiz options */
-  .options{list-style:none;padding:0;margin:.5rem 0 0 1.5rem}
-  .options li{padding:3px 0;font-size:14px}
-  .options li::before{content:"○ ";color:var(--color-text-secondary,#555)}
+/* ─── NAV BAR ────────────────────────────────────────── */
+nav{
+  background:#1E293B;
+  display:flex;gap:0;justify-content:center;
+  flex-wrap:wrap;
+  position:sticky;top:56px;z-index:100;
+  border-bottom:1px solid #334155;
+}
+nav a{
+  color:#94A3B8;font-size:.8rem;font-weight:500;
+  padding:10px 18px;text-decoration:none;
+  transition:color .15s,background .15s;
+  white-space:nowrap;
+}
+nav a:hover{color:#F8FAFC;background:rgba(255,255,255,.06);}
 
-  /* Code block */
-  pre{font-family:ui-monospace,SFMono-Regular,monospace;font-size:12.5px;background:var(--color-background-secondary,#f0f0f0);border-radius:var(--border-radius-md,8px);padding:.75rem 1rem;margin:.75rem 0;overflow-x:auto;line-height:1.6;border:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.08))}
-  code{font-family:ui-monospace,SFMono-Regular,monospace;font-size:13px;background:var(--color-background-secondary,#f0f0f0);padding:1px 5px;border-radius:4px}
+/* ─── MAIN ───────────────────────────────────────────── */
+main{
+  max-width:880px;margin:0 auto;
+  padding:36px 16px 72px;
+  display:flex;flex-direction:column;gap:36px;
+}
 
-  /* Hint */
-  .hint{background:var(--color-background-info,#e8f0fb);border-left:3px solid #378add;border-radius:0 var(--border-radius-md,8px) var(--border-radius-md,8px) 0;padding:.6rem 1rem;margin-top:.75rem;font-size:13.5px;color:var(--color-text-primary,#1a1a1a)}
-  .hint strong{color:#0c447c;font-weight:500}
+/* ─── SECTION ────────────────────────────────────────── */
+.sec-hdr{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:18px;padding-bottom:12px;
+  border-bottom:2px solid var(--border);
+}
+.badge{
+  padding:4px 13px;border-radius:20px;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:#fff;flex-shrink:0;
+}
+.bq{background:var(--quiz);}
+.bw{background:var(--warmup);}
+.bh{background:var(--haupt);}
+.bs{background:var(--schnk);}
 
-  /* Context / story box */
-  .context{background:var(--color-background-secondary,#f0f0f0);border-radius:var(--border-radius-md,8px);padding:.85rem 1rem;margin:.5rem 0 .85rem;font-size:14px;font-style:italic;color:var(--color-text-secondary,#444);border-left:3px solid #d3d1c7}
+.sec-hdr h2{font-size:1.15rem;font-weight:700;color:var(--text);}
 
-  /* Answer box */
-  .answer-box{border:0.5px dashed var(--color-border-secondary,rgba(0,0,0,.2));border-radius:var(--border-radius-md,8px);padding:.6rem 1rem;margin-top:.75rem;min-height:48px;font-size:13px;color:var(--color-text-tertiary,#aaa)}
+/* ─── TASK CARD ──────────────────────────────────────── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);
+  margin-bottom:14px;
+}
+.card:last-child{margin-bottom:0;}
+.card-top{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+}
+.num{
+  font-size:.75rem;font-weight:700;
+  color:#fff;padding:3px 9px;border-radius:5px;
+  flex-shrink:0;font-family:'JetBrains Mono',monospace;
+}
+.card-title{font-size:.98rem;font-weight:600;}
+.card-body{padding:18px 20px 20px;}
 
-  /* Difficulty dots */
-  .diff{display:inline-flex;gap:3px;align-items:center;margin-left:.4rem}
-  .dot{width:7px;height:7px;border-radius:50%;background:var(--color-border-secondary,rgba(0,0,0,.2))}
-  .dot.on-easy{background:#1d9e75}
-  .dot.on-medium{background:#ef9f27}
-  .dot.on-hard{background:#e24b4a}
+/* ─── DESCRIPTION ────────────────────────────────────── */
+.desc{
+  font-size:.88rem;color:#334155;
+  margin-bottom:14px;line-height:1.75;
+}
+.desc ul{margin:7px 0 7px 20px;}
+.desc li{margin:3px 0;}
+.desc code,.hint code{
+  background:#F1F5F9;
+  padding:1px 5px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#6366F1;
+}
+.desc pre{
+  background:#F1F5F9;padding:10px 14px;
+  border-radius:7px;font-size:.83rem;
+  font-family:'JetBrains Mono',monospace;
+  margin:8px 0;overflow-x:auto;color:#334155;
+}
+.hint{
+  background:#EFF6FF;border-left:3px solid #3B82F6;
+  padding:8px 12px;border-radius:0 7px 7px 0;
+  font-size:.83rem;color:#1E40AF;margin-bottom:14px;
+}
 
-  /* True / False row */
-  .tf-row{display:flex;align-items:center;gap:.5rem;padding:.45rem 0;border-bottom:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.07));font-size:14px}
-  .tf-row:last-child{border-bottom:none}
-  .tf-check{display:flex;gap:.5rem;margin-left:auto}
-  .tf-lbl{font-size:12px;padding:2px 8px;border-radius:12px;background:var(--color-background-secondary,#f0f0f0);color:var(--color-text-secondary,#555)}
+/* ─── EDITOR ──────────────────────────────────────────── */
+.elabel{
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.CodeMirror{
+  height:auto!important;min-height:150px;max-height:380px;
+  font-size:13px;
+  font-family:'JetBrains Mono','Fira Code',monospace!important;
+  border-radius:9px;
+  border:1px solid #374151!important;
+  line-height:1.6;
+}
+.CodeMirror-scroll{min-height:150px;max-height:380px;}
+.CodeMirror-linenumber{color:#4B5563;}
 
-  /* Fill in the blank */
-  .blank{display:inline-block;width:120px;border-bottom:1.5px solid var(--color-text-secondary,#888);vertical-align:bottom;margin:0 4px}
+/* ─── TOOLBAR ────────────────────────────────────────── */
+.toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.btn{
+  padding:7px 16px;border:none;border-radius:7px;
+  cursor:pointer;font-size:.83rem;font-weight:600;
+  font-family:'Inter',sans-serif;
+  transition:background .15s,transform .1s;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+.btn-run{background:var(--run);color:#fff;}
+.btn-run:hover:not(:disabled){background:var(--run-h);}
+.btn-clear{background:#475569;color:#fff;}
+.btn-clear:hover:not(:disabled){background:#334155;}
+.btn-sol{background:var(--sol);color:#fff;}
+.btn-sol:hover:not(:disabled){background:var(--sol-h);}
+.btn-sol.locked{background:#94A3B8;cursor:not-allowed;}
+.btn-sol.locked::after{content:" 🔒";}
+
+/* ─── OUTPUT ─────────────────────────────────────────── */
+.output-wrap{margin-top:13px;}
+.output{
+  background:#0D1117;border-radius:9px;
+  padding:12px 14px;min-height:38px;
+  border:1px solid #21262D;
+}
+.output pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;white-space:pre-wrap;word-break:break-word;
+}
+.out-text{color:#E2E8F0;}
+.out-err{color:#F87171;}
+.out-ok{color:#4ADE80;font-size:.82rem;}
+.out-wait{color:#475569;font-size:.82rem;}
+.out-run{color:#60A5FA;font-size:.82rem;}
+.out-fig img{
+  max-width:100%;border-radius:7px;
+  margin-top:10px;border:1px solid #21262D;
+  display:block;
+}
+
+/* ─── SOLUTION ───────────────────────────────────────── */
+.sol-panel{display:none;margin-top:13px;}
+.sol-panel.open{display:block;}
+.sol-hdr{
+  background:#FFFBEB;
+  border:1px solid #FCD34D;border-bottom:none;
+  padding:8px 14px;border-radius:9px 9px 0 0;
+  font-size:.75rem;font-weight:700;color:#92400E;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.sol-code{
+  background:#1E1E2E;
+  border:1px solid #FCD34D;
+  border-top:none;border-radius:0 0 9px 9px;
+  padding:14px 16px;overflow-x:auto;
+  position:relative;
+}
+.sol-code pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;color:#CDD6F4;
+  white-space:pre;
+  tab-size:4;
+}
+.copy-sol{
+  position:absolute;top:10px;right:10px;
+  background:rgba(99,102,241,.2);color:#A5B4FC;
+  border:1px solid rgba(99,102,241,.3);
+  border-radius:5px;padding:3px 9px;
+  font-size:.75rem;cursor:pointer;font-weight:600;
+  transition:background .15s;
+}
+.copy-sol:hover{background:rgba(99,102,241,.35);}
+
+/* ─── QUIZ ───────────────────────────────────────────── */
+.q-answer{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--border);border-radius:8px;
+  font-size:.88rem;font-family:'Inter',sans-serif;
+  resize:vertical;min-height:72px;color:var(--text);
+  transition:border-color .15s;margin-top:8px;
+}
+.q-answer:focus{outline:none;border-color:var(--quiz);}
+.q-reveal-btn{
+  margin-top:9px;padding:7px 16px;
+  background:var(--quiz);color:#fff;
+  border:none;border-radius:7px;cursor:pointer;
+  font-size:.83rem;font-weight:600;font-family:'Inter',sans-serif;
+  transition:background .15s;
+}
+.q-reveal-btn:hover{background:#4F46E5;}
+.q-ans-panel{
+  display:none;margin-top:10px;
+  background:var(--quiz-light);
+  border:1px solid #C7D2FE;border-radius:9px;
+  padding:13px 16px;font-size:.87rem;line-height:1.75;
+}
+.q-ans-panel.open{display:block;}
+.q-ans-panel strong{color:#4338CA;}
+.q-ans-panel code{
+  background:#E0E7FF;padding:1px 5px;
+  border-radius:4px;font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#4338CA;
+}
+
+/* ─── ACCENT BARS ─────────────────────────────────────── */
+.acc-quiz .card-top{border-top:3px solid var(--quiz);}
+.acc-warmup .card-top{border-top:3px solid var(--warmup);}
+.acc-haupt .card-top{border-top:3px solid var(--haupt);}
+.acc-schnk .card-top{border-top:3px solid var(--schnk);}
 </style>
-  <!-- Site Navigation -->
-  <script type="module" src="../header.js"></script>
-  <script type="module" src="../footer.js"></script>
-  <script type="module" src="sidebar.js"></script>
-  <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
-<site-header active="pageA" title="Aufgabenblatt 04 · Clustering"></site-header>
+<site-header active="pageA" title="Aufgabenblatt 04 · Clustering & Anomaliedetektion"></site-header>
 <div class="layout">
   <site-sidebar active="blatt04"></site-sidebar>
   <main class="content" id="main-content" style="padding:0;overflow:visible;">
-<div class="page">
 
-  <!-- Header -->
-  <div class="sheet-header">
-    <div class="sheet-title">Übungsblatt 04 – Clustering &amp; Anomaliedetektion</div>
-    <div class="sheet-subtitle">Maschinelles Lernen · Unsupervised Learning</div>
-    <div class="sheet-meta">
-      <span class="meta-item"><strong>Themen:</strong> k-means, DBSCAN, kNN, Validierungskriterien</span>
-      <span class="meta-item"><strong>Gesamt:</strong> 30 + 10 Bonus Punkte</span>
-      <span class="meta-item"><strong>Bibliotheken:</strong> sklearn, numpy, pandas, matplotlib, seaborn</span>
+<!-- ═══════════════════════════════════ LOADING OVERLAY -->
+<div id="overlay">
+  <div class="ov-logo">🐍</div>
+  <div class="ov-title">Python-Umgebung wird geladen</div>
+  <div class="spinner"></div>
+  <div class="ov-bar"><div class="ov-fill" id="ov-fill"></div></div>
+  <div class="ov-msg" id="ov-msg">Initialisiere Pyodide...</div>
+  <div class="ov-msg" style="font-size:.78rem;color:#475569">scikit-learn lädt etwas länger (~30s) – kurz warten ☕</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ HEADER -->
+<header>
+  <h1>Clustering & Anomaliedetektion</h1>
+  <p class="sub">Interaktives Übungsblatt — k-means, DBSCAN & Anomalieerkennung im Browser</p>
+  <div class="pills">
+    <span class="pill">📚 6 Aufgaben</span>
+    <span class="pill">🧠 3 Quiz-Fragen</span>
+    <span class="pill">🐍 Python im Browser</span>
+    <span class="pill">🔒 Lösung nach Ausführen</span>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════ NAV -->
+<nav>
+  <a href="#quiz">🧠 Quiz</a>
+  <a href="#warmup">🌡️ WarmUp</a>
+  <a href="#haupt">⚡ Hauptaufgaben</a>
+  <a href="#schmankerl">🥨 Schmankerl</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════ MAIN -->
+<main>
+
+<!-- ─────────────────────────────────── QUIZ -->
+<section id="quiz">
+  <div class="sec-hdr">
+    <span class="badge bq">Quiz</span>
+    <h2>Teil 1 – Theoriefragen</h2>
+  </div>
+
+  <div class="card acc-quiz">
+    <div class="card-top">
+      <span class="num" style="background:var(--quiz)">Q1</span>
+      <span class="card-title">Multiple Choice – Grundlagen</span>
     </div>
-    <div class="imports-box">
-      <div class="imports-label">Imports (bereits gegeben)</div>
-      <pre style="margin:0;background:transparent;border:none;padding:0">import numpy as np
-import pandas as pd
+    <div class="card-body">
+      <div class="desc"><strong>1.</strong> Was minimiert der k-means-Algorithmus?<br><strong>2.</strong> Welcher Score gilt: <em>je kleiner, desto besser</em>?<br><strong>3.</strong> Wie heißen Punkte, die DBSCAN keinem Cluster zuordnet?</div>
+      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
+      <button class="q-reveal-btn" onclick="toggleQuiz('q1',this)">Antwort anzeigen</button>
+      <div class="q-ans-panel" id="q1"><strong>1.</strong> Die <strong>Sum-of-Squared Distances zur Clustermitte (Inertia)</strong>.<br><strong>2.</strong> Der <strong>Davies-Bouldin Index</strong> (Silhouette dagegen: je größer, desto besser).<br><strong>3.</strong> <strong>Noise / Outlier</strong> mit Label <code>-1</code>.</div>
+    </div>
+  </div>
+  <div class="card acc-quiz">
+    <div class="card-top">
+      <span class="num" style="background:var(--quiz)">Q2</span>
+      <span class="card-title">Wahr oder Falsch</span>
+    </div>
+    <div class="card-body">
+      <div class="desc"><strong>a)</strong> k-means kann Cluster beliebiger Form erkennen.<br><strong>b)</strong> DBSCAN benötigt die Clusterzahl als Eingabe.<br><strong>c)</strong> Silhouette Score 1.0 = perfekte Trennung.<br><strong>d)</strong> Der Elbow-Plot zeigt die Inertia als Funktion von k.</div>
+      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
+      <button class="q-reveal-btn" onclick="toggleQuiz('q2',this)">Antwort anzeigen</button>
+      <div class="q-ans-panel" id="q2"><strong>a) Falsch</strong> – k-means findet nur konvexe, kugelförmige Cluster.<br><strong>b) Falsch</strong> – DBSCAN bestimmt die Clusterzahl selbst (nur <code>eps</code>, <code>min_samples</code>).<br><strong>c) Wahr</strong> – 1.0 ist der bestmögliche Silhouette-Wert.<br><strong>d) Wahr</strong> – genau das ist die Definition des Elbow-Plots.</div>
+    </div>
+  </div>
+  <div class="card acc-quiz">
+    <div class="card-top">
+      <span class="num" style="background:var(--quiz)">Q3</span>
+      <span class="card-title">Lückentext – DBSCAN</span>
+    </div>
+    <div class="card-body">
+      <div class="desc"><strong>1.</strong> <code>eps</code> definiert den ___ eines Nachbarschaftsbereichs.<br><strong>2.</strong> <code>min_samples</code> legt fest, wie viele Punkte in der ___ eines Core Points liegen müssen.<br><strong>3.</strong> Rauschpunkte (Label <code>-1</code>) werden als ___ interpretiert.</div>
+      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
+      <button class="q-reveal-btn" onclick="toggleQuiz('q3',this)">Antwort anzeigen</button>
+      <div class="q-ans-panel" id="q3"><strong>1.</strong> <strong>Radius</strong> &nbsp; <strong>2.</strong> <strong>ε-Nachbarschaft</strong> (Umgebung) &nbsp; <strong>3.</strong> <strong>Anomalien / Ausreißer</strong>.</div>
+    </div>
+  </div>
+</section>
+<!-- ─────────────────────────────────── WARMUP -->
+<section id="warmup">
+  <div class="sec-hdr">
+    <span class="badge bw">WarmUp</span>
+    <h2>Teil 2 – WarmUp</h2>
+  </div>
+
+  <div class="card acc-warmup" id="card-task1">
+    <div class="card-top">
+      <span class="num" style="background:var(--warmup)">A1</span>
+      <span class="card-title">make_blobs + KMeans</span>
+    </div>
+    <div class="card-body">
+      <div class="desc"><ul><li>Erstellen Sie mit <code>make_blobs</code> 300 Samples, <strong>4 Zentren</strong>, <code>cluster_std=0.5</code>, <code>random_state=42</code>.</li><li>Trainieren Sie <code>KMeans(k=4)</code>.</li><li>Berechnen Sie <strong>Silhouette Score</strong> und <strong>Davies-Bouldin Index</strong>.</li></ul></div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task1"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task1" onclick="runCode('task1')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task1')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task1" onclick="toggleSol('task1')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task1"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task1">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task1')">Kopieren</button>
+          <pre id="solpre-task1"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-warmup" id="card-task2">
+    <div class="card-top">
+      <span class="num" style="background:var(--warmup)">A2</span>
+      <span class="card-title">Skalierung & Clustering</span>
+    </div>
+    <div class="card-body">
+      <div class="desc"><ul><li>Skalieren Sie <code>X</code> aus A1 mit <code>MinMaxScaler</code> auf [0, 1].</li><li>Trainieren Sie erneut <code>KMeans(k=4)</code> und berechnen Sie beide Scores.</li><li>Vergleichen Sie — wann ist Skalierung besonders wichtig?</li></ul></div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task2"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task2" onclick="runCode('task2')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task2')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task2" onclick="toggleSol('task2')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task2"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task2">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task2')">Kopieren</button>
+          <pre id="solpre-task2"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ─────────────────────────────────── HAUPTAUFGABEN -->
+<section id="haupt">
+  <div class="sec-hdr">
+    <span class="badge bh">Hauptaufgaben</span>
+    <h2>Teil 3 – Kernaufgaben</h2>
+  </div>
+
+  <div class="card acc-haupt" id="card-task3">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A3</span>
+      <span class="card-title">Microtargeting mit k-means (10 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Segmentieren Sie Wählergruppen (synthetische <em>citizen</em>-Daten: 4 Features).<ul><li>Daten skalieren (<code>StandardScaler</code>).</li><li><strong>Elbow-Plot</strong> für k=2…10 erstellen und optimales k wählen.</li><li>Finales <code>KMeans</code> trainieren und Clustergrößen ausgeben.</li></ul></div>
+      <div class="hint">💡 Im Original liegt <code>citizen_database.csv</code> vor — hier synthetisch via make_blobs.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task3"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task3" onclick="runCode('task3')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task3')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task3" onclick="toggleSol('task3')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task3"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task3">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task3')">Kopieren</button>
+          <pre id="solpre-task3"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-schnk" id="card-task4">
+    <div class="card-top">
+      <span class="num" style="background:var(--schnk)">A4</span>
+      <span class="card-title">Elbow-Plot One-Liner (3 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Schreiben Sie den gesamten Elbow-Plot (k=2…10) in <strong>einer Python-Zeile</strong>.</div>
+      <div class="hint">💡 List Comprehension + <code>KMeans(k).fit(X).inertia_</code> direkt in <code>plt.plot()</code>.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task4"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task4" onclick="runCode('task4')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task4')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task4" onclick="toggleSol('task4')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task4"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task4">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task4')">Kopieren</button>
+          <pre id="solpre-task4"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ─────────────────────────────────── SCHMANKERL -->
+<section id="schmankerl">
+  <div class="sec-hdr">
+    <span class="badge bs">Schmankerl</span>
+    <h2>Vertiefung & Bonus</h2>
+  </div>
+
+  <div class="card acc-haupt" id="card-task5">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A5</span>
+      <span class="card-title">Anomaliedetektion mit DBSCAN + kNN (7 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Roboterarm-Messungen (3D-Kraft) mit ~15 % Anomalien.<ul><li>DBSCAN anwenden, Anomalien (Label <code>-1</code>) finden.</li><li>kNN auf den DBSCAN-Labels trainieren (anomal vs. normal).</li><li>Mit einem normalen und einem anomalen Testpunkt prüfen.</li></ul></div>
+      <div class="hint">💡 Original: <code>anomaly_detection.npy</code> — hier synthetisch mit injizierten Ausreißern.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task5"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task5" onclick="runCode('task5')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task5')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task5" onclick="toggleSol('task5')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task5"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task5">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task5')">Kopieren</button>
+          <pre id="solpre-task5"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-schnk" id="card-task6">
+    <div class="card-top">
+      <span class="num" style="background:var(--schnk)">★</span>
+      <span class="card-title">Bonus – Validierungskriterien (10 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Implementieren Sie <code>explore_validation_criteria(list_of_std, list_of_num_blobs)</code>: ein Subplot-Grid, das Silhouette, Davies-Bouldin und (normalisierte) Inertia für k=2…11 zeigt, mit vertikaler Linie bei der wahren Blob-Anzahl.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task6"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task6" onclick="runCode('task6')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task6')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task6" onclick="toggleSol('task6')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task6"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task6">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task6')">Kopieren</button>
+          <pre id="solpre-task6"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ══════════════════════════════════════════ SCRIPT -->
+<script>
+/* ─── SOLUTIONS ──────────────────────────────────────── */
+const SOL = {
+task1:
+`import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, davies_bouldin_score
+
+X, _ = make_blobs(n_samples=300, centers=4, cluster_std=0.5, random_state=42)
+km = KMeans(n_clusters=4, n_init=10, random_state=42).fit(X)
+
+print("Silhouette Score:    ", round(silhouette_score(X, km.labels_), 4))
+print("Davies-Bouldin Index:", round(davies_bouldin_score(X, km.labels_), 4))`,
+task2:
+`import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.metrics import silhouette_score, davies_bouldin_score
+
+X, _ = make_blobs(n_samples=300, centers=4, cluster_std=0.5, random_state=42)
+Xs = MinMaxScaler().fit_transform(X)
+km = KMeans(n_clusters=4, n_init=10, random_state=42).fit(Xs)
+
+print("Skaliert Silhouette:", round(silhouette_score(Xs, km.labels_), 4))
+print("Skaliert DB-Index:  ", round(davies_bouldin_score(Xs, km.labels_), 4))
+# Skalierung ist wichtig, wenn Features sehr unterschiedliche Wertebereiche
+# haben - sonst dominieren großskalige Features das Distanzmaß.`,
+task3:
+`import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.cluster import KMeans, DBSCAN
+from sklearn.datasets import make_blobs
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+# Synthetische "citizen_database": 4 Features, 4 echte Gruppen
+X, _ = make_blobs(n_samples=400, n_features=4, centers=4,
+                  cluster_std=1.2, random_state=42)
+print("Daten:", X.shape, "(Fahrräder, Stadtdistanz, Verdienst, Bildung)")
+
+Xs = StandardScaler().fit_transform(X)
+
+# Elbow-Plot
+inertias = [KMeans(k, n_init=10, random_state=42).fit(Xs).inertia_
+            for k in range(2, 11)]
+plt.figure(figsize=(8, 4))
+plt.plot(range(2, 11), inertias, 'o-')
+plt.xlabel("k"); plt.ylabel("Inertia"); plt.title("Elbow-Plot")
+plt.grid(alpha=0.3); plt.show()
+
+# Finales Modell
+km = KMeans(n_clusters=4, n_init=10, random_state=42).fit(Xs)
+print("Clustergrößen:", np.bincount(km.labels_))
+# Interpretation: 4 Wählergruppen -> je eigene Wahlkampfbotschaft.`,
+task4:
+`import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+
+X, _ = make_blobs(n_samples=300, centers=4, cluster_std=0.6, random_state=42)
+
+# One-Liner Elbow-Plot
+plt.plot(range(2, 11), [KMeans(k, n_init=10, random_state=42).fit(X).inertia_ for k in range(2, 11)], 'o-'); plt.xlabel("k"); plt.ylabel("Inertia"); plt.title("Elbow (One-Liner)"); plt.show()`,
+task5:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.datasets import make_blobs
-from sklearn.metrics import davies_bouldin_score, silhouette_score
-from sklearn.preprocessing import MinMaxScaler, StandardScaler</pre>
-    </div>
-  </div>
 
-  <!-- === QUIZ === -->
-  <div class="section-title">Teil 1 · Quiz (6 Punkte)</div>
+rng = np.random.default_rng(42)
+# Normale 3D-Kraftmessungen + 15% Anomalien
+X_norm, _ = make_blobs(n_samples=255, n_features=3, centers=3,
+                       cluster_std=0.6, random_state=42)
+X_anom = rng.uniform(X_norm.min() - 3, X_norm.max() + 3, size=(45, 3))
+X = np.vstack([X_norm, X_anom])
 
-  <div class="task">
-    <div class="task-header">
-      <span class="badge badge-quiz">Quiz</span>
-      <span class="task-num">Aufgabe 1.1</span>
-      <span class="pts">2 Pkt.</span>
-    </div>
-    <div class="task-title">Multiple Choice – Clustering-Grundlagen</div>
-    <div class="task-body">
-      <p>Kreuzen Sie die <strong>eine</strong> richtige Antwort an.</p>
+# (b/c) DBSCAN
+db = DBSCAN(eps=0.9, min_samples=5).fit(X)
+n_anom = (db.labels_ == -1).sum()
+print(f"DBSCAN: {n_anom} Anomalien erkannt ({n_anom/len(X)*100:.0f}%)")
 
-      <p style="margin-top:.75rem;font-weight:500">1. Was minimiert der k-means Algorithmus?</p>
-      <ul class="options">
-        <li>Den Silhouette Score</li>
-        <li>Die Sum-of-Squared Distances zur Clustermitte (Inertia)</li>
-        <li>Den Davies-Bouldin Index</li>
-        <li>Den maximalen Abstand zweier Datenpunkte im Cluster</li>
-      </ul>
+# (d) kNN auf DBSCAN-Labels: 1 = anomal, 0 = normal
+y = (db.labels_ == -1).astype(int)
+knn = KNeighborsClassifier(n_neighbors=5).fit(X, y)
 
-      <p style="margin-top:1rem;font-weight:500">2. Welcher Score gilt: <em>je kleiner, desto besser</em>?</p>
-      <ul class="options">
-        <li>Silhouette Score</li>
-        <li>Davies-Bouldin Index</li>
-        <li>Beide</li>
-        <li>Keiner von beiden</li>
-      </ul>
+# (e) Testpunkte
+normal_pt = X_norm.mean(axis=0).reshape(1, -1)
+anom_pt   = np.array([[X.max() + 5, X.max() + 5, X.max() + 5]])
+print("Normaler Punkt ->", "anomal" if knn.predict(normal_pt)[0] else "normal")
+print("Anomaler Punkt ->", "anomal" if knn.predict(anom_pt)[0] else "normal")
 
-      <p style="margin-top:1rem;font-weight:500">3. Wie nennt man Datenpunkte, die von DBSCAN keinem Cluster zugeordnet werden?</p>
-      <ul class="options">
-        <li>Border Points</li>
-        <li>Core Points</li>
-        <li>Noise / Outlier (Label <code>-1</code>)</li>
-        <li>Centroid Points</li>
-      </ul>
-    </div>
-  </div>
+plt.figure(figsize=(7, 5))
+plt.scatter(X[:, 0], X[:, 1], c=db.labels_, cmap='tab10', edgecolor='k', s=25)
+plt.title("DBSCAN: Anomalien = -1"); plt.show()`,
+task6:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score, davies_bouldin_score
+from sklearn.preprocessing import MinMaxScaler
 
-  <div class="task">
-    <div class="task-header">
-      <span class="badge badge-quiz">Quiz</span>
-      <span class="task-num">Aufgabe 1.2</span>
-      <span class="pts">2 Pkt.</span>
-    </div>
-    <div class="task-title">Wahr oder Falsch</div>
-    <div class="task-body">
-      <p>Markieren Sie jede Aussage als <em>wahr</em> oder <em>falsch</em>.</p>
-      <div style="margin-top:.6rem">
-        <div class="tf-row">
-          <span>k-means kann Cluster beliebiger Form erkennen.</span>
-          <div class="tf-check"><span class="tf-lbl">W</span><span class="tf-lbl">F</span></div>
-        </div>
-        <div class="tf-row">
-          <span>DBSCAN benötigt die Anzahl der Cluster als Eingabeparameter.</span>
-          <div class="tf-check"><span class="tf-lbl">W</span><span class="tf-lbl">F</span></div>
-        </div>
-        <div class="tf-row">
-          <span>Ein Silhouette Score von 1.0 bedeutet perfekte Cluster-Trennung.</span>
-          <div class="tf-check"><span class="tf-lbl">W</span><span class="tf-lbl">F</span></div>
-        </div>
-        <div class="tf-row">
-          <span>Der Elbow-Plot zeigt die Inertia als Funktion von k.</span>
-          <div class="tf-check"><span class="tf-lbl">W</span><span class="tf-lbl">F</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
+def explore_validation_criteria(list_of_std, list_of_num_blobs):
+    rows, cols = len(list_of_std), len(list_of_num_blobs)
+    fig, axes = plt.subplots(rows, cols, figsize=(4*cols, 3*rows), squeeze=False)
+    ks = range(2, 12)
+    for i, std in enumerate(list_of_std):
+        for j, nb in enumerate(list_of_num_blobs):
+            X, _ = make_blobs(n_samples=300, centers=nb,
+                              cluster_std=std, random_state=42)
+            sil, dbi, ine = [], [], []
+            for k in ks:
+                km = KMeans(k, n_init=10, random_state=42).fit(X)
+                sil.append(silhouette_score(X, km.labels_))
+                dbi.append(davies_bouldin_score(X, km.labels_))
+                ine.append(km.inertia_)
+            ine = MinMaxScaler().fit_transform(np.array(ine).reshape(-1, 1)).ravel()
+            ax = axes[i][j]
+            ax.plot(list(ks), sil, label='Silhouette')
+            ax.plot(list(ks), dbi, label='Davies-Bouldin')
+            ax.plot(list(ks), ine, label='Inertia (norm)')
+            ax.axvline(nb, color='red', ls='--')
+            ax.set_title(f"std={std}, blobs={nb}")
+            ax.legend(fontsize=7)
+    plt.tight_layout(); plt.show()
 
-  <div class="task">
-    <div class="task-header">
-      <span class="badge badge-quiz">Quiz</span>
-      <span class="task-num">Aufgabe 1.3</span>
-      <span class="pts">2 Pkt.</span>
-    </div>
-    <div class="task-title">Lückentext – DBSCAN-Parameter</div>
-    <div class="task-body">
-      <p>Vervollständigen Sie die folgenden Sätze:</p>
-      <ol style="padding-left:1.3rem;margin-top:.5rem">
-        <li style="margin-bottom:.6rem">Der Parameter <code>eps</code> in DBSCAN definiert den <span class="blank"></span> eines Nachbarschaftsbereichs.</li>
-        <li style="margin-bottom:.6rem">Der Parameter <code>min_samples</code> legt fest, wie viele Punkte mindestens in der <span class="blank"></span> eines Core Points liegen müssen.</li>
-        <li>Beim Anomaliedetektions-Einsatz von DBSCAN werden Rauschen-Punkte (Label <code>-1</code>) als <span class="blank"></span> interpretiert.</li>
-      </ol>
-    </div>
-  </div>
+explore_validation_criteria([0.5, 2.0], [3, 5])`
+};
 
-  <!-- === WARMUP === -->
-  <div class="section-title">Teil 2 · WarmUp (4 Punkte)</div>
+const EDITORS = {};
+const TASK_IDS = ['task1', 'task2', 'task3', 'task4', 'task5', 'task6'];
 
-  <div class="task">
-    <div class="task-header">
-      <span class="badge badge-warmup">WarmUp</span>
-      <span class="task-num">Aufgabe 2.1</span>
-      <span class="pts">2 Pkt.</span>
-    </div>
-    <div class="task-title">make_blobs + KMeans</div>
-    <div class="task-body">
-      <ul class="subtasks">
-        <li data-label="a)">Erstellen Sie mit <code>make_blobs</code> einen Datensatz <code>X</code> mit 300 Samples, <strong>4 Zentren</strong> und einer Standardabweichung von <code>0.5</code>. Setzen Sie <code>random_state=42</code>.</li>
-        <li data-label="b)">Trainieren Sie einen <code>KMeans</code> mit <code>k=4</code> auf <code>X</code>.</li>
-        <li data-label="c)">Berechnen Sie den <strong>Silhouette Score</strong> und den <strong>Davies-Bouldin Index</strong> und geben Sie beide Werte aus.</li>
-      </ul>
-    </div>
-  </div>
+/* ─── INIT CODEMIRROR ─────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  TASK_IDS.forEach(id => {
+    EDITORS[id] = CodeMirror.fromTextArea(document.getElementById('code-' + id), {
+      mode: 'python',
+      theme: 'dracula',
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseBrackets: true,
+      indentUnit: 4,
+      tabSize: 4,
+      indentWithTabs: false,
+      extraKeys: {
+        'Tab': cm => cm.execCommand('insertSoftTab'),
+        'Shift-Enter': () => { /* handled per-task */ }
+      }
+    });
+    document.getElementById('solpre-' + id).textContent = SOL[id];
+  });
+  initPyodide();
+});
 
-  <div class="task">
-    <div class="task-header">
-      <span class="badge badge-warmup">WarmUp</span>
-      <span class="task-num">Aufgabe 2.2</span>
-      <span class="pts">2 Pkt.</span>
-    </div>
-    <div class="task-title">Datenskalierung &amp; Einfluss auf Clustering</div>
-    <div class="task-body">
-      <ul class="subtasks">
-        <li data-label="a)">Skalieren Sie <code>X</code> aus Aufgabe 2.1 mit dem <code>MinMaxScaler</code> auf den Bereich [0, 1].</li>
-        <li data-label="b)">Trainieren Sie erneut einen <code>KMeans(k=4)</code> auf den skalierten Daten und berechnen Sie wieder Silhouette Score und Davies-Bouldin Index.</li>
-        <li data-label="c)">Vergleichen Sie die Ergebnisse. Was stellen Sie fest? Wann ist Skalierung besonders wichtig?</li>
-      </ul>
-    </div>
-  </div>
+/* ─── PYODIDE ─────────────────────────────────────────── */
+let pyodide = null;
+let pyodideReady = false;
 
-  <!-- === AUFGABE 1 === -->
-  <div class="section-title">Teil 3 · Hauptaufgaben (20 Punkte)</div>
+function setProgress(pct, msg) {
+  document.getElementById('ov-fill').style.width = pct + '%';
+  document.getElementById('ov-msg').textContent = msg;
+}
 
-  <div class="task">
-    <div class="task-header">
-      <span class="badge badge-aufgabe">Aufgabe</span>
-      <span class="task-num">Aufgabe 3.1 – Microtargeting mit k-means</span>
-      <span class="pts">10 Pkt.</span>
-    </div>
-    <div class="task-title">Wählergruppen segmentieren mit k-means</div>
-    <div class="task-body">
-      <div class="context">
-        Stellen Sie sich vor, Sie sind Spitzenkandidat einer Partei. Statt alle Wähler gleich anzusprechen, setzen Sie auf <em>Microtargeting</em>: Sie senden jeder Personengruppe eine individuell zugeschnittene Botschaft. Daten: <code>citizen_database.csv</code> mit den Features <em>Fahrräder pro Familie, Stadtentfernung, Verdienst, Bildungslevel</em>.
-      </div>
-      <ul class="subtasks">
-        <li data-label="a)">Laden Sie <code>citizen_database.csv</code> und verschaffen Sie sich einen ersten Überblick (Form, Datentypen, fehlende Werte).</li>
-        <li data-label="b)">Visualisieren Sie die Verteilung der Features mit <code>seaborn.pairplot</code>. Was fällt auf?</li>
-        <li data-label="c)">Skalieren Sie die Daten mit dem <code>StandardScaler</code>. Begründen Sie kurz, warum das hier sinnvoll ist.</li>
-        <li data-label="d)">Erstellen Sie einen <strong>Elbow-Plot</strong> (Inertia für <em>k</em> = 2 … 10) und bestimmen Sie die optimale Clusteranzahl.</li>
-        <li data-label="e)">Trainieren Sie den finalen <code>KMeans</code> mit Ihrem gewählten k. Visualisieren Sie die Cluster erneut mit <code>pairplot</code> (Einfärbung: <code>labels_</code>).</li>
-        <li data-label="f)">Interpretieren Sie die Cluster: Welche Personengruppen sind erkennbar? Überlegen Sie sich für jede Gruppe eine geeignete Wahlkampfbotschaft.</li>
-      </ul>
-      <div class="hint"><strong>Hinweis:</strong> Ein unzufriedenstellender erster Elbow-Plot kann durch fehlende Skalierung entstehen. Probieren Sie <code>StandardScaler</code> statt <code>MinMaxScaler</code> – warum könnte das hier besser passen?</div>
-    </div>
-  </div>
+async function initPyodide() {
+  try {
+    setProgress(10, 'Lade Pyodide-Runtime...');
+    pyodide = await loadPyodide();
 
-  <div class="task">
-    <div class="task-header">
-      <span class="badge badge-schmankerl">Schmankerl</span>
-      <span class="task-num">Aufgabe 3.2 – Elbow-Plot One-Liner</span>
-      <span class="pts">3 Pkt.</span>
-    </div>
-    <div class="task-title">Python-Einzeiler: Elbow-Plot</div>
-    <div class="task-body">
-      <p>Gegeben sei ein Datensatz <code>X</code>. Schreiben Sie den gesamten Elbow-Plot (<em>k</em> = 2 … 10) in <strong>einer einzigen Python-Zeile</strong>. Der Plot soll die Inertia-Werte als Linie darstellen.</p>
-      <pre><code># Ihr One-Liner hier:
-plt.plot( ... )</code></pre>
-      <div class="hint"><strong>Tipp:</strong> List Comprehension + <code>KMeans(k).fit(X).inertia_</code> lässt sich direkt in <code>plt.plot()</code> einbetten.</div>
-    </div>
-  </div>
+    setProgress(35, 'Lade numpy & matplotlib...');
+    await pyodide.loadPackage(['numpy', 'matplotlib']);
 
-  <div class="task">
-    <div class="task-header">
-      <span class="badge badge-aufgabe">Aufgabe</span>
-      <span class="task-num">Aufgabe 3.3 – Anomaliedetektion mit DBSCAN</span>
-      <span class="pts">7 Pkt.</span>
-    </div>
-    <div class="task-title">Anomaler Roboterarm in der Fertigungsstraße</div>
-    <div class="task-body">
-      <div class="context">
-        Sie arbeiten bei einem Maschinenbauunternehmen. Ihnen liegen 300 Kraft- bzw. Beschleunigungsmessungen <code>(F_x, F_y, F_z)</code> eines Roboterarms vor (<code>anomaly_detection.npy</code>). Laut Betreibern verhält sich der Arm zu ca. 15 % der Zeit <em>anomal</em>. Ihre Aufgabe: einen Anomaliedetektor bauen.
-      </div>
-      <ul class="subtasks">
-        <li data-label="a)">Laden Sie <code>anomaly_detection.npy</code> und visualisieren Sie die Daten mit <code>seaborn.pairplot</code>. Gibt es bereits visuell erkennbare Ausreißer?</li>
-        <li data-label="b)">Starten Sie eine Hyperparametersuche für DBSCAN (<code>eps</code>, <code>min_samples</code>). Visualisieren Sie die Anzahl der Ausreißer (Label <code>-1</code>) als Heatmap über das Parametergitter (<code>seaborn.heatmap</code>). Welche Kriterien leiten Ihre Wahl?</li>
-        <li data-label="c)">Trainieren Sie DBSCAN mit Ihren gewählten Hyperparametern. Visualisieren Sie das Ergebnis erneut mit <code>pairplot</code>, eingefärbt nach <code>dbscan.labels_</code>. Ist die Wahl plausibel?</li>
-        <li data-label="d)">Verwenden Sie die DBSCAN-Labels als Trainingsgrundlage: Trainieren Sie einen <code>KNeighborsClassifier</code>, der für <em>neue, unbekannte</em> Messpunkte vorhersagt, ob sie anomal (Label <code>-1</code>) oder normal sind.</li>
-        <li data-label="e)">Testen Sie den Klassifikator mit mindestens zwei selbst gewählten Testpunkten – einem vermutlich normalen und einem vermutlich anomalen – und interpretieren Sie die Ausgabe.</li>
-      </ul>
-      <div class="hint"><strong>Hinweis:</strong> Das Ziel von DBSCAN hier ist nicht die Suche nach genau zwei Clustern „normal" und „anomal", sondern die Identifikation von <em>Rauschpunkten</em> als Anomalien. Normales Verhalten kann sich in <em>beliebig vielen</em> Clustern abbilden.</div>
-    </div>
-  </div>
+    setProgress(60, 'Lade scikit-learn (dauert ~20s)...');
+    await pyodide.loadPackage(['scikit-learn']);
 
-  <!-- === BONUS === -->
-  <div class="section-title">Bonus (10 Punkte)</div>
+    setProgress(90, 'Konfiguriere Python-Umgebung...');
+    pyodide.runPython(`import matplotlib\nmatplotlib.use('Agg')`);
 
-  <div class="task">
-    <div class="task-header">
-      <span class="badge badge-bonus">Bonus</span>
-      <span class="task-num">Aufgabe B – Validierungskriterien im Vergleich</span>
-      <span class="pts">10 Pkt.</span>
-    </div>
-    <div class="task-title">Funktion <code>explore_validation_criteria</code></div>
-    <div class="task-body">
-      <div class="context">
-        Sind Silhouette Score, Davies-Bouldin Index und Sum-of-Squared Distances wirklich verlässliche Indikatoren für die wahre Clusteranzahl? Untersuchen Sie dies systematisch.
-      </div>
-      <p>Implementieren Sie die Funktion mit folgendem Gerüst:</p>
-      <pre>def explore_validation_criteria(list_of_std, list_of_num_blobs):
-    """
-    Erzeugt ein Grid mit (len(list_of_std) × len(list_of_num_blobs)) Subplots.
-    Jeder Subplot zeigt Silhouette Score, Davies-Bouldin Index und Inertia
-    (via MinMaxScaler normalisiert) für k = 2 ... 11 als Liniengraphen.
-    Eine vertikale Linie markiert die wahre Blob-Anzahl.
-    """
-    # Loop über Standardabweichungen
-        # Loop über Blob-Anzahlen
-            # make_blobs mit aktueller Kombination erzeugen
-            # Loop über k = 2 ... 11
-                # KMeans trainieren
-                # Inertia, Davies-Bouldin, Silhouette berechnen
-            # Werte mit MinMaxScaler normalisieren
-            # Linienplot der drei Scores zeichnen
-            # Vertikale Linie bei wahrer Blob-Anzahl ergänzen</pre>
-      <ul class="subtasks" style="margin-top:1rem">
-        <li data-label="a)">Implementieren Sie die Funktion vollständig.</li>
-        <li data-label="b)">Rufen Sie sie auf: <code>explore_validation_criteria([0.2, 0.5, 1.0], [3, 5, 7])</code>.</li>
-        <li data-label="c)">Interpretieren Sie: Bei welchen Bedingungen (hohe/niedrige Standardabweichung) stimmen die Validierungskriterien zuverlässig mit der echten Clusteranzahl überein? Wo versagen sie?</li>
-        <li data-label="d)">Welches der drei Kriterien scheint robuster gegenüber hoher Überlappung (großes <code>std</code>)? Begründen Sie kurz.</li>
-      </ul>
-      <div class="hint"><strong>Tipp:</strong> Vergessen Sie nicht, den <code>MinMaxScaler</code> auf die Liste der Scores anzuwenden, da sich die drei Metriken auf sehr unterschiedlichen Skalen befinden. Nur so sind sie im selben Plot vergleichbar.</div>
-    </div>
-  </div>
+    setProgress(100, 'Bereit!');
+    await new Promise(r => setTimeout(r, 400));
+    document.getElementById('overlay').style.display = 'none';
 
-  <!-- Footer -->
-  <div style="margin-top:2.5rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary,rgba(0,0,0,.12));font-size:12px;color:var(--color-text-secondary,#888);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem">
-    <span>Übungsblatt 04 · Maschinelles Lernen</span>
-    <span>Bibliotheken: sklearn · numpy · pandas · matplotlib · seaborn</span>
-  </div>
+    pyodideReady = true;
+    TASK_IDS.forEach(id => {
+      const btn = document.getElementById('run-' + id);
+      if (btn) btn.disabled = false;
+    });
+  } catch(e) {
+    setProgress(0, 'Fehler: ' + e.message);
+  }
+}
 
-</div>
+/* ─── RUN CODE ────────────────────────────────────────── */
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function runCode(id) {
+  if (!pyodideReady) { alert('Python lädt noch — bitte kurz warten.'); return; }
+  const code = EDITORS[id].getValue().trim();
+  if (!code || code === '# Dein Code hier') return;
+
+  const out   = document.getElementById('out-' + id);
+  const runBtn = document.getElementById('run-' + id);
+  out.innerHTML = '<span class="out-run">⏳ Code wird ausgeführt...</span>';
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ Läuft...';
+
+  pyodide.globals.set('_stu_code', code);
+
+  try {
+    await pyodide.runPythonAsync(`
+import sys, io, base64
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+_figs_out    = []
+_stdout_buf  = io.StringIO()
+_orig_stdout = sys.stdout
+
+def _cap_show(*a, **kw):
+    for fn in sorted(plt.get_fignums()):
+        fig = plt.figure(fn)
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+        buf.seek(0)
+        _figs_out.append(base64.b64encode(buf.read()).decode())
+    plt.close('all')
+
+_orig_show   = plt.show
+plt.show     = _cap_show
+sys.stdout   = _stdout_buf
+_run_error   = None
+
+try:
+    exec(compile(_stu_code, '<aufgabe>', 'exec'))
+    if plt.get_fignums():
+        _cap_show()
+except Exception as _e:
+    import traceback
+    _run_error = traceback.format_exc()
+finally:
+    sys.stdout = _orig_stdout
+    plt.show   = _orig_show
+
+_run_text = _stdout_buf.getvalue()
+`);
+
+    const txt   = pyodide.globals.get('_run_text') || '';
+    const fp    = pyodide.globals.get('_figs_out');
+    const figs  = fp ? fp.toJs() : [];
+    if (fp) fp.destroy();
+    const err   = pyodide.globals.get('_run_error');
+
+    let html = '';
+    if (txt.trim())
+      html += `<pre class="out-text">${esc(txt)}</pre>`;
+    figs.forEach(f => {
+      html += `<div class="out-fig"><img src="data:image/png;base64,${f}" alt="Plot"></div>`;
+    });
+    if (err)
+      html += `<pre class="out-err">${esc(err)}</pre>`;
+    if (!txt.trim() && !figs.length && !err)
+      html = '<span class="out-ok">✓ Code erfolgreich ausgeführt (keine Ausgabe)</span>';
+
+    out.innerHTML = html;
+
+    // Unlock solution button after first run
+    const sb = document.getElementById('sol-btn-' + id);
+    if (sb) sb.classList.remove('locked');
+
+  } catch(e) {
+    out.innerHTML = `<pre class="out-err">${esc(e.toString())}</pre>`;
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = '▶ Ausführen';
+  }
+}
+
+/* ─── HELPERS ─────────────────────────────────────────── */
+function clearCode(id) {
+  EDITORS[id].setValue('# Dein Code hier\n');
+  document.getElementById('out-' + id).innerHTML =
+    '<span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span>';
+}
+
+function toggleSol(id) {
+  const btn = document.getElementById('sol-btn-' + id);
+  if (btn.classList.contains('locked')) {
+    alert('Führe deinen Code zuerst aus — dann wird die Lösung freigeschaltet.');
+    return;
+  }
+  const panel = document.getElementById('sol-' + id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Lösung';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Lösung verbergen';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function copySol(id) {
+  navigator.clipboard.writeText(SOL[id]).then(() => {
+    const btn = document.querySelector(`#sol-${id} .copy-sol`);
+    btn.textContent = '✓ Kopiert';
+    setTimeout(() => btn.textContent = 'Kopieren', 1800);
+  });
+}
+
+function toggleQuiz(id, btn) {
+  const panel = document.getElementById(id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Antwort anzeigen';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Antwort verbergen';
+  }
+}
+</script>
+
   </main>
 </div>
-<site-footer caption="Aufgabenblatt 04 · Clustering"></site-footer>
+<site-footer caption="Aufgabenblatt 04 · Clustering & Anomaliedetektion"></site-footer>
 </body>
 </html>

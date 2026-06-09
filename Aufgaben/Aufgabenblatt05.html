@@ -3,615 +3,860 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aufgabenblatt 05 — Maschinelles Lernen</title>
+<title>PRM – Aufgabenblatt 05 · Klassifikation & Modellanalyse</title>
+
+<!-- Site Navigation -->
+<script type="module" src="../header.js"></script>
+<script type="module" src="../footer.js"></script>
+<script type="module" src="sidebar.js"></script>
+<link rel="stylesheet" href="../assets/style.css">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- CodeMirror (lokal) -->
+<link rel="stylesheet" href="../assets/vendor/codemirror.min.css">
+<link rel="stylesheet" href="../assets/vendor/codemirror-dracula.min.css">
+<script src="../assets/vendor/codemirror.min.js"></script>
+<script src="../assets/vendor/codemirror-python.min.js"></script>
+<script src="../assets/vendor/codemirror-matchbrackets.min.js"></script>
+<script src="../assets/vendor/codemirror-closebrackets.min.js"></script>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+*{box-sizing:border-box;margin:0;padding:0;}
 
-  body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 14px;
-    line-height: 1.65;
-    color: #1a1a2e;
-    background: #f4f6fb;
-    padding: 32px 16px 60px;
-  }
+:root{
+  --bg:#F1F5F9;
+  --card:#FFFFFF;
+  --border:#E2E8F0;
+  --text:#0F172A;
+  --muted:#64748B;
+  --hdr1:#0F172A;
+  --hdr2:#1E3A5F;
+  --quiz:#6366F1;
+  --quiz-light:#EEF2FF;
+  --warmup:#059669;
+  --warmup-light:#ECFDF5;
+  --haupt:#DC2626;
+  --haupt-light:#FEF2F2;
+  --schnk:#D97706;
+  --schnk-light:#FFFBEB;
+  --run:#16A34A;
+  --run-h:#15803D;
+  --sol:#D97706;
+  --sol-h:#B45309;
+}
 
-  .page {
-    max-width: 860px;
-    margin: 0 auto;
-    background: #ffffff;
-    border-radius: 4px;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.09);
-    overflow: hidden;
-  }
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  font-size:15px;
+}
 
-  /* ── HEADER ─────────────────────────────────── */
-  .header {
-    background: #0d1f4e;
-    color: #ffffff;
-    padding: 28px 40px 22px;
-  }
-  .header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
-  }
-  .kurs-label {
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #8ab4f8;
-    margin-bottom: 4px;
-  }
-  .header h1 {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-  }
-  .header-meta {
-    text-align: right;
-    font-size: 12px;
-    color: #a8c4f0;
-    line-height: 1.8;
-  }
-  .header-divider {
-    height: 1px;
-    background: rgba(255,255,255,0.15);
-    margin: 14px 0 12px;
-  }
-  .header-info {
-    display: flex;
-    gap: 28px;
-    font-size: 12px;
-    color: #c5d8ff;
-  }
-  .header-info span strong { color: #ffffff; }
+/* ─── LOADING OVERLAY ─────────────────────────────────── */
+#overlay{
+  position:fixed;inset:0;
+  background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:9999;gap:18px;
+}
+.ov-logo{font-size:2.6rem;filter:drop-shadow(0 0 20px #6366f1aa);}
+.ov-title{color:#F8FAFC;font-size:1.3rem;font-weight:700;letter-spacing:-.02em;}
+.ov-msg{color:#94A3B8;font-size:.88rem;min-height:1.2em;text-align:center;}
+.ov-bar{width:280px;height:4px;background:#1E293B;border-radius:4px;overflow:hidden;}
+.ov-fill{height:100%;background:linear-gradient(90deg,#6366F1,#10B981);border-radius:4px;width:0%;transition:width .4s ease;}
+.spinner{
+  width:36px;height:36px;
+  border:3px solid rgba(99,102,241,.25);
+  border-top-color:#6366F1;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-  /* ── HINWEIS KASTEN ─────────────────────────── */
-  .hinweis {
-    margin: 20px 40px 0;
-    padding: 12px 16px;
-    background: #eef3ff;
-    border-left: 3px solid #3b6fd4;
-    border-radius: 0 4px 4px 0;
-    font-size: 13px;
-    color: #2a3f7a;
-  }
-  .hinweis strong { color: #1a2e6e; }
+/* ─── HEADER ─────────────────────────────────────────── */
+header{
+  background:linear-gradient(150deg,var(--hdr1) 0%,var(--hdr2) 100%);
+  padding:52px 24px 44px;
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+header::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(99,102,241,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(99,102,241,.07) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+header *{position:relative;}
+header h1{
+  font-size:2rem;font-weight:700;color:#F8FAFC;
+  letter-spacing:-.03em;margin-bottom:6px;
+}
+header .sub{color:#94A3B8;font-size:.92rem;}
+.pills{
+  display:flex;gap:10px;justify-content:center;
+  flex-wrap:wrap;margin-top:22px;
+}
+.pill{
+  background:rgba(255,255,255,.08);
+  color:#CBD5E1;font-size:.8rem;
+  padding:5px 13px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.1);
+}
 
-  /* ── SECTION ────────────────────────────────── */
-  .section {
-    padding: 28px 40px 0;
-  }
-  .section-title {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #6b7a99;
-    border-bottom: 1px solid #e4e9f5;
-    padding-bottom: 8px;
-    margin-bottom: 18px;
-  }
+/* ─── NAV BAR ────────────────────────────────────────── */
+nav{
+  background:#1E293B;
+  display:flex;gap:0;justify-content:center;
+  flex-wrap:wrap;
+  position:sticky;top:56px;z-index:100;
+  border-bottom:1px solid #334155;
+}
+nav a{
+  color:#94A3B8;font-size:.8rem;font-weight:500;
+  padding:10px 18px;text-decoration:none;
+  transition:color .15s,background .15s;
+  white-space:nowrap;
+}
+nav a:hover{color:#F8FAFC;background:rgba(255,255,255,.06);}
 
-  /* ── AUFGABE CARD ───────────────────────────── */
-  .aufgabe {
-    border: 1px solid #e4e9f5;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    overflow: hidden;
-  }
-  .aufgabe-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    background: #f7f9fe;
-    border-bottom: 1px solid #e4e9f5;
-  }
-  .aufgabe-num {
-    font-size: 11px;
-    font-weight: 700;
-    color: #0d1f4e;
-    min-width: 80px;
-  }
-  .badge {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    padding: 3px 9px;
-    border-radius: 20px;
-  }
-  .badge-quiz   { background: #ede9fd; color: #5b3fa6; }
-  .badge-code   { background: #d8f5ec; color: #0d6e56; }
-  .badge-analyse{ background: #fce8e0; color: #8c3318; }
-  .badge-bonus  { background: #fff0c2; color: #7a5200; }
+/* ─── MAIN ───────────────────────────────────────────── */
+main{
+  max-width:880px;margin:0 auto;
+  padding:36px 16px 72px;
+  display:flex;flex-direction:column;gap:36px;
+}
 
-  .punkte {
-    margin-left: auto;
-    font-size: 11px;
-    font-weight: 600;
-    color: #4a5880;
-    white-space: nowrap;
-  }
+/* ─── SECTION ────────────────────────────────────────── */
+.sec-hdr{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:18px;padding-bottom:12px;
+  border-bottom:2px solid var(--border);
+}
+.badge{
+  padding:4px 13px;border-radius:20px;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:#fff;flex-shrink:0;
+}
+.bq{background:var(--quiz);}
+.bw{background:var(--warmup);}
+.bh{background:var(--haupt);}
+.bs{background:var(--schnk);}
 
-  .aufgabe-body { padding: 16px 18px; }
+.sec-hdr h2{font-size:1.15rem;font-weight:700;color:var(--text);}
 
-  .aufgabe-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #0d1f4e;
-    margin-bottom: 8px;
-  }
-  .aufgabe-desc {
-    font-size: 13px;
-    color: #3a4463;
-    line-height: 1.7;
-    margin-bottom: 12px;
-  }
-  .aufgabe-desc p { margin-bottom: 8px; }
-  .aufgabe-desc p:last-child { margin-bottom: 0; }
+/* ─── TASK CARD ──────────────────────────────────────── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);
+  margin-bottom:14px;
+}
+.card:last-child{margin-bottom:0;}
+.card-top{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+}
+.num{
+  font-size:.75rem;font-weight:700;
+  color:#fff;padding:3px 9px;border-radius:5px;
+  flex-shrink:0;font-family:'JetBrains Mono',monospace;
+}
+.card-title{font-size:.98rem;font-weight:600;}
+.card-body{padding:18px 20px 20px;}
 
-  /* ── QUIZ ───────────────────────────────────── */
-  .quiz-item {
-    margin-bottom: 18px;
-    padding-bottom: 18px;
-    border-bottom: 1px dashed #dde3f0;
-  }
-  .quiz-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .quiz-q {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1a1f3e;
-    margin-bottom: 10px;
-  }
-  .quiz-q span {
-    display: inline-block;
-    background: #0d1f4e;
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 3px;
-    margin-right: 6px;
-    vertical-align: 1px;
-  }
-  .options { display: flex; flex-direction: column; gap: 7px; }
-  .option {
-    display: flex;
-    align-items: flex-start;
-    gap: 9px;
-    font-size: 13px;
-    color: #3a4463;
-    padding: 7px 11px;
-    border: 1px solid #e0e6f5;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.12s, border-color 0.12s;
-  }
-  .option:hover { background: #f0f4ff; border-color: #b0c0e8; }
-  .option input[type="radio"] { margin-top: 1px; accent-color: #3b6fd4; flex-shrink: 0; }
+/* ─── DESCRIPTION ────────────────────────────────────── */
+.desc{
+  font-size:.88rem;color:#334155;
+  margin-bottom:14px;line-height:1.75;
+}
+.desc ul{margin:7px 0 7px 20px;}
+.desc li{margin:3px 0;}
+.desc code,.hint code{
+  background:#F1F5F9;
+  padding:1px 5px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#6366F1;
+}
+.desc pre{
+  background:#F1F5F9;padding:10px 14px;
+  border-radius:7px;font-size:.83rem;
+  font-family:'JetBrains Mono',monospace;
+  margin:8px 0;overflow-x:auto;color:#334155;
+}
+.hint{
+  background:#EFF6FF;border-left:3px solid #3B82F6;
+  padding:8px 12px;border-radius:0 7px 7px 0;
+  font-size:.83rem;color:#1E40AF;margin-bottom:14px;
+}
 
-  /* ── CODE BLOCK ─────────────────────────────── */
-  .code-block {
-    background: #f0f4fc;
-    border: 1px solid #d8e0f0;
-    border-radius: 5px;
-    padding: 14px 16px;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 12px;
-    color: #1a2e6e;
-    line-height: 1.7;
-    overflow-x: auto;
-    margin: 10px 0;
-    white-space: pre;
-  }
-  .code-comment { color: #6b7a99; }
-  .code-kw    { color: #7b3fa6; font-weight: 600; }
-  .code-fn    { color: #0a6bbf; }
-  .code-str   { color: #c4560a; }
+/* ─── EDITOR ──────────────────────────────────────────── */
+.elabel{
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.CodeMirror{
+  height:auto!important;min-height:150px;max-height:380px;
+  font-size:13px;
+  font-family:'JetBrains Mono','Fira Code',monospace!important;
+  border-radius:9px;
+  border:1px solid #374151!important;
+  line-height:1.6;
+}
+.CodeMirror-scroll{min-height:150px;max-height:380px;}
+.CodeMirror-linenumber{color:#4B5563;}
 
-  /* ── ANSWER AREA ────────────────────────────── */
-  .answer-area {
-    min-height: 90px;
-    border: 1px dashed #b0bdd8;
-    border-radius: 5px;
-    background: #fafbff;
-    padding: 12px;
-    margin-top: 10px;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 12px;
-    color: #7a8aaa;
-  }
+/* ─── TOOLBAR ────────────────────────────────────────── */
+.toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.btn{
+  padding:7px 16px;border:none;border-radius:7px;
+  cursor:pointer;font-size:.83rem;font-weight:600;
+  font-family:'Inter',sans-serif;
+  transition:background .15s,transform .1s;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+.btn-run{background:var(--run);color:#fff;}
+.btn-run:hover:not(:disabled){background:var(--run-h);}
+.btn-clear{background:#475569;color:#fff;}
+.btn-clear:hover:not(:disabled){background:#334155;}
+.btn-sol{background:var(--sol);color:#fff;}
+.btn-sol:hover:not(:disabled){background:var(--sol-h);}
+.btn-sol.locked{background:#94A3B8;cursor:not-allowed;}
+.btn-sol.locked::after{content:" 🔒";}
 
-  .answer-lines {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-top: 10px;
-  }
-  .answer-line {
-    height: 30px;
-    border-bottom: 1px solid #c8d4ea;
-  }
+/* ─── OUTPUT ─────────────────────────────────────────── */
+.output-wrap{margin-top:13px;}
+.output{
+  background:#0D1117;border-radius:9px;
+  padding:12px 14px;min-height:38px;
+  border:1px solid #21262D;
+}
+.output pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;white-space:pre-wrap;word-break:break-word;
+}
+.out-text{color:#E2E8F0;}
+.out-err{color:#F87171;}
+.out-ok{color:#4ADE80;font-size:.82rem;}
+.out-wait{color:#475569;font-size:.82rem;}
+.out-run{color:#60A5FA;font-size:.82rem;}
+.out-fig img{
+  max-width:100%;border-radius:7px;
+  margin-top:10px;border:1px solid #21262D;
+  display:block;
+}
 
-  /* ── SUB-TASK ───────────────────────────────── */
-  .subtasks { list-style: none; margin: 10px 0 0; }
-  .subtasks li {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    padding: 8px 0;
-    border-bottom: 1px dotted #e0e6f4;
-    font-size: 13px;
-    color: #3a4463;
-  }
-  .subtasks li:last-child { border-bottom: none; }
-  .subtask-alpha {
-    font-weight: 700;
-    color: #3b6fd4;
-    min-width: 22px;
-    margin-top: 1px;
-  }
+/* ─── SOLUTION ───────────────────────────────────────── */
+.sol-panel{display:none;margin-top:13px;}
+.sol-panel.open{display:block;}
+.sol-hdr{
+  background:#FFFBEB;
+  border:1px solid #FCD34D;border-bottom:none;
+  padding:8px 14px;border-radius:9px 9px 0 0;
+  font-size:.75rem;font-weight:700;color:#92400E;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.sol-code{
+  background:#1E1E2E;
+  border:1px solid #FCD34D;
+  border-top:none;border-radius:0 0 9px 9px;
+  padding:14px 16px;overflow-x:auto;
+  position:relative;
+}
+.sol-code pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;color:#CDD6F4;
+  white-space:pre;
+  tab-size:4;
+}
+.copy-sol{
+  position:absolute;top:10px;right:10px;
+  background:rgba(99,102,241,.2);color:#A5B4FC;
+  border:1px solid rgba(99,102,241,.3);
+  border-radius:5px;padding:3px 9px;
+  font-size:.75rem;cursor:pointer;font-weight:600;
+  transition:background .15s;
+}
+.copy-sol:hover{background:rgba(99,102,241,.35);}
 
-  /* ── TIPP / HINWEIS INLINE ──────────────────── */
-  .tipp {
-    font-size: 12px;
-    background: #fffbec;
-    border-left: 3px solid #e6a817;
-    padding: 8px 12px;
-    border-radius: 0 4px 4px 0;
-    color: #5a420a;
-    margin: 10px 0 0;
-  }
-  .tipp strong { color: #3d2c06; }
+/* ─── QUIZ ───────────────────────────────────────────── */
+.q-answer{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--border);border-radius:8px;
+  font-size:.88rem;font-family:'Inter',sans-serif;
+  resize:vertical;min-height:72px;color:var(--text);
+  transition:border-color .15s;margin-top:8px;
+}
+.q-answer:focus{outline:none;border-color:var(--quiz);}
+.q-reveal-btn{
+  margin-top:9px;padding:7px 16px;
+  background:var(--quiz);color:#fff;
+  border:none;border-radius:7px;cursor:pointer;
+  font-size:.83rem;font-weight:600;font-family:'Inter',sans-serif;
+  transition:background .15s;
+}
+.q-reveal-btn:hover{background:#4F46E5;}
+.q-ans-panel{
+  display:none;margin-top:10px;
+  background:var(--quiz-light);
+  border:1px solid #C7D2FE;border-radius:9px;
+  padding:13px 16px;font-size:.87rem;line-height:1.75;
+}
+.q-ans-panel.open{display:block;}
+.q-ans-panel strong{color:#4338CA;}
+.q-ans-panel code{
+  background:#E0E7FF;padding:1px 5px;
+  border-radius:4px;font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#4338CA;
+}
 
-  /* ── FOOTER ─────────────────────────────────── */
-  .footer {
-    margin-top: 32px;
-    padding: 16px 40px 24px;
-    border-top: 1px solid #e4e9f5;
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: #8a95b0;
-  }
-  .total-punkte {
-    font-size: 12px;
-    font-weight: 700;
-    color: #0d1f4e;
-  }
-
-  /* ── IMPORTS LIST ───────────────────────────── */
-  .imports-note {
-    font-size: 12px;
-    background: #f0f4fc;
-    border: 1px solid #d0daf2;
-    border-radius: 5px;
-    padding: 10px 14px;
-    color: #2a3f7a;
-    margin-bottom: 14px;
-  }
-  .imports-note strong { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #0d1f4e; display: block; margin-bottom: 4px; }
-
-  @media print {
-    body { background: #fff; padding: 0; }
-    .page { box-shadow: none; }
-    .option:hover { background: transparent; }
-  }
+/* ─── ACCENT BARS ─────────────────────────────────────── */
+.acc-quiz .card-top{border-top:3px solid var(--quiz);}
+.acc-warmup .card-top{border-top:3px solid var(--warmup);}
+.acc-haupt .card-top{border-top:3px solid var(--haupt);}
+.acc-schnk .card-top{border-top:3px solid var(--schnk);}
 </style>
-  <!-- Site Navigation -->
-  <script type="module" src="../header.js"></script>
-  <script type="module" src="../footer.js"></script>
-  <script type="module" src="sidebar.js"></script>
-  <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
-<site-header active="pageA" title="Aufgabenblatt 05 · Klassifikation"></site-header>
+<site-header active="pageA" title="Aufgabenblatt 05 · Klassifikation & Modellanalyse"></site-header>
 <div class="layout">
   <site-sidebar active="blatt05"></site-sidebar>
   <main class="content" id="main-content" style="padding:0;overflow:visible;">
-<div class="page">
 
-  <!-- ─────────── HEADER ─────────── -->
-  <div class="header">
-    <div class="header-top">
-      <div>
-        <div class="kurs-label">Maschinelles Lernen &amp; Data Science</div>
-        <h1>Übungsblatt 05 — Klassifikation &amp; Modellanalyse</h1>
-      </div>
-      <div class="header-meta">
-        Sommersemester 2025<br>
-        Abgabe: 1 Woche<br>
-        Gesamtpunkte: <strong style="color:#fff;">50 Pkt.</strong>
-      </div>
-    </div>
-    <div class="header-divider"></div>
-    <div class="header-info">
-      <span>Themen: <strong>SVM · Random Forest · Feature Importance · Rauschen</strong></span>
-      <span>Hilfsmittel: <strong>Skript, scikit-learn Doku</strong></span>
-    </div>
-  </div>
-
-  <!-- ─────────── HINWEIS ─────────── -->
-  <div class="hinweis">
-    <strong>Hinweis:</strong> Alle Programmieraufgaben sind in Python mit <code>scikit-learn</code> zu lösen. Die benötigten Imports sind oben in jeder Aufgabe angegeben. Verwenden Sie bei allen Aufgaben den vorgesehenen Antwortbereich (Liniensatz oder Code-Textfeld).
-  </div>
-
-  <!-- ═══════════════════════════════════════════════════════
-       ABSCHNITT A – QUIZ
-  ════════════════════════════════════════════════════════════ -->
-  <div class="section">
-    <div class="section-title">Abschnitt A — Verständnisfragen (Quiz)</div>
-
-    <!-- Aufgabe 1 -->
-    <div class="aufgabe">
-      <div class="aufgabe-header">
-        <div class="aufgabe-num">Aufgabe 1</div>
-        <span class="badge badge-quiz">Quiz</span>
-        <div class="punkte">12 Punkte</div>
-      </div>
-      <div class="aufgabe-body">
-        <div class="aufgabe-title">WarmUp — Konzepte &amp; Definitionen</div>
-        <div class="aufgabe-desc">
-          <p>Wählen Sie für jede Frage die <strong>eine</strong> richtige Antwort aus. Jede korrekte Antwort gibt <strong>3 Punkte</strong>. Teilpunkte werden nicht vergeben.</p>
-        </div>
-
-        <!-- Q1 -->
-        <div class="quiz-item">
-          <div class="quiz-q"><span>F1</span> Welche Aussage über <em>Random Forest</em> ist korrekt?</div>
-          <div class="options">
-            <label class="option"><input type="radio" name="q1"> Ein Random Forest trainiert alle Entscheidungsbäume auf dem identischen Datensatz.</label>
-            <label class="option"><input type="radio" name="q1"> Durch Bagging und zufällige Feature-Auswahl pro Split reduziert der Random Forest die Varianz gegenüber einem einzelnen Baum.</label>
-            <label class="option"><input type="radio" name="q1"> Ein Random Forest kann nur für binäre Klassifikationsaufgaben eingesetzt werden.</label>
-            <label class="option"><input type="radio" name="q1"> Die Hyperparameter eines Random Forest haben keinerlei Einfluss auf die Vorhersagegenauigkeit.</label>
-          </div>
-        </div>
-
-        <!-- Q2 -->
-        <div class="quiz-item">
-          <div class="quiz-q"><span>F2</span> Was gibt <code>permutation_importance</code> in scikit-learn zurück?</div>
-          <div class="options">
-            <label class="option"><input type="radio" name="q2"> Die Gewichte der Neuronen im trainierten Modell.</label>
-            <label class="option"><input type="radio" name="q2"> Einen Wert, der angibt, wie stark der Modell-Score sinkt, wenn ein Feature zufällig permutiert wird.</label>
-            <label class="option"><input type="radio" name="q2"> Die Rangfolge der Features nach ihrer Häufigkeit im Trainingsset.</label>
-            <label class="option"><input type="radio" name="q2"> Den Korrelationskoeffizienten aller Feature-Paare.</label>
-          </div>
-        </div>
-
-        <!-- Q3 -->
-        <div class="quiz-item">
-          <div class="quiz-q"><span>F3</span> Welcher der folgenden Klassifikatoren ist typischerweise <em>robuster gegen Rauschen</em>?</div>
-          <div class="options">
-            <label class="option"><input type="radio" name="q3"> SVM mit linearem Kernel ohne Regularisierung.</label>
-            <label class="option"><input type="radio" name="q3"> Ein einzelner nicht-beschnittener Entscheidungsbaum.</label>
-            <label class="option"><input type="radio" name="q3"> Random Forest, da er über viele schwache Lerner mittelt.</label>
-            <label class="option"><input type="radio" name="q3"> k-Nearest Neighbors mit k=1.</label>
-          </div>
-        </div>
-
-        <!-- Q4 -->
-        <div class="quiz-item">
-          <div class="quiz-q"><span>F4</span> Was beschreibt <code>feature_importances_</code> im <code>RandomForestClassifier</code>?</div>
-          <div class="options">
-            <label class="option"><input type="radio" name="q4"> Die Anzahl der Male, in denen ein Feature im Training auftaucht.</label>
-            <label class="option"><input type="radio" name="q4"> Den mittleren Gewinn an Unreinheitsreduktion (z.&nbsp;B. Gini), den ein Feature über alle Bäume hinweg liefert.</label>
-            <label class="option"><input type="radio" name="q4"> Die Kollinearität eines Features mit dem Zielmerkmal.</label>
-            <label class="option"><input type="radio" name="q4"> Den p-Wert eines statistischen Tests auf Feature-Relevanz.</label>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-  </div>
-
-
-  <!-- ═══════════════════════════════════════════════════════
-       ABSCHNITT B – PROGRAMMIERAUFGABEN
-  ════════════════════════════════════════════════════════════ -->
-  <div class="section">
-    <div class="section-title">Abschnitt B — Programmieraufgaben</div>
-
-    <!-- Aufgabe 2 -->
-    <div class="aufgabe">
-      <div class="aufgabe-header">
-        <div class="aufgabe-num">Aufgabe 2</div>
-        <span class="badge badge-code">Code</span>
-        <div class="punkte">12 Punkte</div>
-      </div>
-      <div class="aufgabe-body">
-        <div class="aufgabe-title">SVM vs. Random Forest — Rauschverhalten</div>
-
-        <div class="imports-note">
-          <strong>Benötigte Imports</strong>
-          <code>from sklearn.ensemble import RandomForestClassifier<br>
-from sklearn.svm import SVC<br>
-from sklearn.model_selection import train_test_split<br>
-from sklearn.datasets import load_digits, load_iris, make_blobs<br>
-import numpy as np, matplotlib.pyplot as plt</code>
-        </div>
-
-        <div class="aufgabe-desc">
-          <p>Schreiben Sie die Funktion <code>explore_noise_behavior(X, y, list_of_noise_levels)</code>, die für jeden Rauschgrad aus der übergebenen Liste folgende Schritte durchführt:</p>
-        </div>
-
-        <ul class="subtasks">
-          <li><span class="subtask-alpha">a)</span> Fügen Sie zu jeder Spalte der Feature-Matrix <code>X</code> Gauß'sches Rauschen der Stärke <code>noise_level · std(X)</code> hinzu.</li>
-          <li><span class="subtask-alpha">b)</span> Teilen Sie den verrauschten Datensatz in Trainings- und Testdaten (80/20).</li>
-          <li><span class="subtask-alpha">c)</span> Trainieren Sie je einen <code>RandomForestClassifier</code> und eine <code>SVC</code> mit Default-Hyperparametern auf den Trainingsdaten.</li>
-          <li><span class="subtask-alpha">d)</span> Geben Sie die Test-Scores beider Modelle für alle Rauschgrade als zwei Listen zurück und visualisieren Sie diese als Liniendiagramm.</li>
-          <li><span class="subtask-alpha">e)</span> <em>(Kurzantwort, 2 Pkt.)</em> Welches Modell verhält sich bei zunehmendem Rauschen stabiler, und warum?</li>
-        </ul>
-
-        <div class="code-block"><span class="code-kw">def</span> <span class="code-fn">explore_noise_behavior</span>(X, y, list_of_noise_levels):
-    <span class="code-comment"># a) Rauschen hinzufügen (noise_level * std(X))</span>
-
-    <span class="code-comment"># b) Train-Test-Split</span>
-
-    <span class="code-comment"># c) Modelle trainieren (Default-Hyperparameter)</span>
-
-    <span class="code-comment"># d) Scores zurückgeben und Linienplot erstellen</span>
-
-    <span class="code-kw">return</span> scores_rf, scores_svm</div>
-
-        <div class="answer-lines">
-          <div style="font-size:12px;color:#6b7a99;margin-bottom:4px;">e) Kurzantwort:</div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-        </div>
-
-        <div class="tipp"><strong>Tipp:</strong> Verwenden Sie <code>np.random.normal(0, noise_level * X.std(), X.shape)</code> zum Erzeugen des Rauschens. Testen Sie Ihre Funktion mit <code>load_digits()</code>.</div>
-      </div>
-    </div>
-
-    <!-- Aufgabe 3 -->
-    <div class="aufgabe">
-      <div class="aufgabe-header">
-        <div class="aufgabe-num">Aufgabe 3</div>
-        <span class="badge badge-code">Code</span>
-        <div class="punkte">14 Punkte</div>
-      </div>
-      <div class="aufgabe-body">
-        <div class="aufgabe-title">Modell-Aufmerksamkeit visualisieren</div>
-
-        <div class="imports-note">
-          <strong>Benötigte Imports</strong>
-          <code>from sklearn.datasets import fetch_openml<br>
-from sklearn.ensemble import RandomForestClassifier<br>
-from sklearn.model_selection import train_test_split<br>
-import matplotlib.pyplot as plt, numpy as np</code>
-        </div>
-
-        <div class="aufgabe-desc">
-          <p>Laden Sie den Datensatz <code>mnist_784</code> über <code>fetch_openml</code>. Trainieren Sie einen <code>RandomForestClassifier</code> auf einem Trainingssubset (keine Hyperparameter-Optimierung nötig). Schreiben Sie anschließend die Funktion <code>attention_of_my_model(string_of_dataset, shape_of_images)</code>.</p>
-        </div>
-
-        <ul class="subtasks">
-          <li><span class="subtask-alpha">a)</span> Laden Sie den Datensatz über <code>fetch_openml(string_of_dataset, as_frame=False)</code> und trainieren Sie den <code>RandomForestClassifier</code>.</li>
-          <li><span class="subtask-alpha">b)</span> Extrahieren Sie das interne Pendant zur <code>permutation_importance</code> aus dem trainierten <code>RandomForestClassifier</code> (Attribut <code>feature_importances_</code>).</li>
-          <li><span class="subtask-alpha">c)</span> Formen Sie die Feature-Wichtigkeiten in die durch <code>shape_of_images</code> vorgegebene Bildgestalt um und visualisieren Sie sie als Heatmap (<code>plt.imshow</code>, Colormap Ihrer Wahl).</li>
-          <li><span class="subtask-alpha">d)</span> Erstellen Sie zusätzlich ein Histogramm der Feature-Wichtigkeiten.</li>
-          <li><span class="subtask-alpha">e)</span> <em>(Kurzantwort, 2 Pkt.)</em> Welche Bildbereiche werden vom Modell am stärksten genutzt? Macht das inhaltlich Sinn?</li>
-        </ul>
-
-        <div class="code-block"><span class="code-kw">def</span> <span class="code-fn">attention_of_my_model</span>(string_of_dataset, shape_of_images):
-    <span class="code-comment"># a) Daten laden &amp; Modell trainieren</span>
-
-    <span class="code-comment"># b) Feature-Wichtigkeiten extrahieren</span>
-
-    <span class="code-comment"># c) Heatmap der Wichtigkeiten (reshape → imshow)</span>
-
-    <span class="code-comment"># d) Histogramm</span>
-
-    <span class="code-kw">return</span> importances</div>
-
-        <div class="answer-lines">
-          <div style="font-size:12px;color:#6b7a99;margin-bottom:4px;">e) Kurzantwort:</div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-        </div>
-
-        <div class="tipp"><strong>Tipp:</strong> Aufruf: <code>attention_of_my_model("mnist_784", (28, 28))</code>. Für Fashion-MNIST: <code>"fashion-mnist"</code>, ebenfalls <code>(28, 28)</code>.</div>
-      </div>
-    </div>
-
-  </div>
-
-
-  <!-- ═══════════════════════════════════════════════════════
-       ABSCHNITT C – ANALYSE
-  ════════════════════════════════════════════════════════════ -->
-  <div class="section">
-    <div class="section-title">Abschnitt C — Anwendungsaufgabe</div>
-
-    <!-- Aufgabe 4 -->
-    <div class="aufgabe">
-      <div class="aufgabe-header">
-        <div class="aufgabe-num">Aufgabe 4</div>
-        <span class="badge badge-analyse">Analyse</span>
-        <div class="punkte">12 Punkte</div>
-      </div>
-      <div class="aufgabe-body">
-        <div class="aufgabe-title">Musik-Genre-Klassifikation mit Audio-Features</div>
-
-        <div class="imports-note">
-          <strong>Benötigte Imports</strong>
-          <code>import pandas as pd<br>
-from sklearn.ensemble import RandomForestClassifier<br>
-from sklearn.svm import SVC<br>
-from sklearn.model_selection import train_test_split, cross_val_score<br>
-from sklearn.preprocessing import StandardScaler</code>
-        </div>
-
-        <div class="aufgabe-desc">
-          <p>Stellen Sie sich vor, Sie arbeiten bei einem Musik-Streaming-Dienst. Ihnen liegen Audio-Features (z.&nbsp;B. Tempo, Energie, Tanzbarkeit) und die zugehörigen Genres von 5 000 Songs vor. Ihre Aufgabe ist es zu prüfen, ob ein ML-Modell diese Songs zuverlässig klassifizieren kann.</p>
-        </div>
-
-        <ul class="subtasks">
-          <li><span class="subtask-alpha">a)</span> Laden Sie den bereitgestellten Datensatz (<code>songs_5genres.csv</code>) und analysieren Sie kurz die Klassenverteilung. Ist der Datensatz balanciert?</li>
-          <li><span class="subtask-alpha">b)</span> Skalieren Sie die Features mit <code>StandardScaler</code> und trainieren Sie beide Modelle (<code>RandomForestClassifier</code>, <code>SVC</code>) mit 5-facher Kreuzvalidierung. Notieren Sie den mittleren Accuracy-Score.</li>
-          <li><span class="subtask-alpha">c)</span> Identifizieren Sie die drei wichtigsten Audio-Features für den Random Forest. Welche Merkmale trennen die Genres am besten?</li>
-          <li><span class="subtask-alpha">d)</span> <em>(Kurzantwort, 4 Pkt.)</em> Diskutieren Sie: Sind 5 Genres ausreichend, um die Vielfalt von 5 000 Songs abzubilden? Wie könnten Sie dies mit einem unüberwachten Verfahren (Clustering) prüfen?</li>
-        </ul>
-
-        <div class="answer-area">
-          # Ihr Code hier ...
-        </div>
-
-        <div class="answer-lines" style="margin-top:14px">
-          <div style="font-size:12px;color:#6b7a99;margin-bottom:4px;">d) Diskussion:</div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Aufgabe 5 – BONUS -->
-    <div class="aufgabe">
-      <div class="aufgabe-header">
-        <div class="aufgabe-num">Aufgabe 5</div>
-        <span class="badge badge-bonus">Bonus</span>
-        <div class="punkte">+5 Bonuspunkte</div>
-      </div>
-      <div class="aufgabe-body">
-        <div class="aufgabe-title">Schwellwert-Analyse der Feature-Wichtigkeiten</div>
-        <div class="aufgabe-desc">
-          <p>Erweitern Sie die Funktion aus Aufgabe 3 um eine Schwellwert-Visualisierung: Setzen Sie alle Feature-Wichtigkeiten, die <em>unter</em> einem Schwellwert <code>tau</code> liegen, auf Null und stellen Sie das resultierende Bild dar.</p>
-        </div>
-        <ul class="subtasks">
-          <li><span class="subtask-alpha">a)</span> Experimentieren Sie mit verschiedenen Werten für <code>tau</code> (z.&nbsp;B. 0.001, 0.003, 0.005).</li>
-          <li><span class="subtask-alpha">b)</span> Beschreiben Sie, wie diese Schwellwertbilder für Feature-Engineering genutzt werden könnten (z.&nbsp;B. zur Reduktion uninformativer Pixel).</li>
-        </ul>
-        <div class="answer-area">
-          # Bonus-Code hier ...
-        </div>
-        <div class="answer-lines" style="margin-top:10px">
-          <div style="font-size:12px;color:#6b7a99;margin-bottom:4px;">b) Kurzantwort:</div>
-          <div class="answer-line"></div>
-          <div class="answer-line"></div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-
-  <!-- ─────────── FOOTER ─────────── -->
-  <div class="footer">
-    <span>Bitte geben Sie alle Aufgaben als <strong>Jupyter Notebook (.ipynb)</strong> ab.</span>
-    <span class="total-punkte">Gesamtpunkte: 50 Pkt. (+ 5 Bonus)</span>
-  </div>
-
+<!-- ═══════════════════════════════════ LOADING OVERLAY -->
+<div id="overlay">
+  <div class="ov-logo">🐍</div>
+  <div class="ov-title">Python-Umgebung wird geladen</div>
+  <div class="spinner"></div>
+  <div class="ov-bar"><div class="ov-fill" id="ov-fill"></div></div>
+  <div class="ov-msg" id="ov-msg">Initialisiere Pyodide...</div>
+  <div class="ov-msg" style="font-size:.78rem;color:#475569">scikit-learn lädt etwas länger (~30s) – kurz warten ☕</div>
 </div>
+
+<!-- ═══════════════════════════════════════════ HEADER -->
+<header>
+  <h1>Klassifikation & Modellanalyse</h1>
+  <p class="sub">Interaktives Übungsblatt — SVM, Random Forest & Feature Importance im Browser</p>
+  <div class="pills">
+    <span class="pill">📚 4 Aufgaben</span>
+    <span class="pill">🧠 4 Quiz-Fragen</span>
+    <span class="pill">🐍 Python im Browser</span>
+    <span class="pill">🔒 Lösung nach Ausführen</span>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════ NAV -->
+<nav>
+  <a href="#quiz">🧠 Quiz</a>
+  <a href="#haupt">⚡ Programmieren</a>
+  <a href="#schmankerl">🥨 Anwendung</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════ MAIN -->
+<main>
+
+<!-- ─────────────────────────────────── QUIZ -->
+<section id="quiz">
+  <div class="sec-hdr">
+    <span class="badge bq">Quiz</span>
+    <h2>Abschnitt A – Verständnisfragen</h2>
+  </div>
+
+  <div class="card acc-quiz">
+    <div class="card-top">
+      <span class="num" style="background:var(--quiz)">F1</span>
+      <span class="card-title">Random Forest</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Welche Aussage über <em>Random Forest</em> ist korrekt?</div>
+      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
+      <button class="q-reveal-btn" onclick="toggleQuiz('q1',this)">Antwort anzeigen</button>
+      <div class="q-ans-panel" id="q1">✅ <strong>Durch Bagging und zufällige Feature-Auswahl pro Split reduziert der Random Forest die Varianz</strong> gegenüber einem einzelnen Baum. (Die anderen Optionen sind falsch: Bäume nutzen Bootstrap-Stichproben, RF kann mehrklassig sein, Hyperparameter beeinflussen sehr wohl die Güte.)</div>
+    </div>
+  </div>
+  <div class="card acc-quiz">
+    <div class="card-top">
+      <span class="num" style="background:var(--quiz)">F2</span>
+      <span class="card-title">permutation_importance</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Was gibt <code>permutation_importance</code> in scikit-learn zurück?</div>
+      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
+      <button class="q-reveal-btn" onclick="toggleQuiz('q2',this)">Antwort anzeigen</button>
+      <div class="q-ans-panel" id="q2">✅ <strong>Einen Wert, der angibt, wie stark der Modell-Score sinkt, wenn ein Feature zufällig permutiert wird.</strong> Je größer der Abfall, desto wichtiger das Feature.</div>
+    </div>
+  </div>
+  <div class="card acc-quiz">
+    <div class="card-top">
+      <span class="num" style="background:var(--quiz)">F3</span>
+      <span class="card-title">Robustheit gegen Rauschen</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Welcher Klassifikator ist typischerweise <em>robuster gegen Rauschen</em>?</div>
+      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
+      <button class="q-reveal-btn" onclick="toggleQuiz('q3',this)">Antwort anzeigen</button>
+      <div class="q-ans-panel" id="q3">✅ <strong>Random Forest</strong>, da er über viele schwache Lerner mittelt (Varianzreduktion durch Bagging). Ein einzelner tiefer Baum oder k-NN mit k=1 überanpassen das Rauschen.</div>
+    </div>
+  </div>
+  <div class="card acc-quiz">
+    <div class="card-top">
+      <span class="num" style="background:var(--quiz)">F4</span>
+      <span class="card-title">feature_importances_</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Was beschreibt <code>feature_importances_</code> im <code>RandomForestClassifier</code>?</div>
+      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
+      <button class="q-reveal-btn" onclick="toggleQuiz('q4',this)">Antwort anzeigen</button>
+      <div class="q-ans-panel" id="q4">✅ <strong>Den mittleren Gewinn an Unreinheitsreduktion (z.B. Gini)</strong>, den ein Feature über alle Bäume hinweg liefert.</div>
+    </div>
+  </div>
+</section>
+<!-- ─────────────────────────────────── PROGRAMMIERAUFGABEN -->
+<section id="haupt">
+  <div class="sec-hdr">
+    <span class="badge bh">Programmieraufgaben</span>
+    <h2>Abschnitt B – Programmieraufgaben</h2>
+  </div>
+
+  <div class="card acc-haupt" id="card-task1">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A2</span>
+      <span class="card-title">SVM vs. Random Forest – Rauschverhalten (12 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Schreiben Sie <code>explore_noise_behavior(X, y, list_of_noise_levels)</code>:<ul><li>Pro Rauschgrad Gauß-Rauschen <code>noise_level · std(X)</code> hinzufügen.</li><li>80/20-Split, <code>RandomForestClassifier</code> und <code>SVC</code> trainieren.</li><li>Test-Scores beider Modelle als Linienplot darstellen.</li><li>Welches Modell ist stabiler — und warum?</li></ul></div>
+      <div class="hint">💡 Getestet mit <code>load_digits()</code>. Rauschen: <code>np.random.normal(0, nl*X.std(), X.shape)</code>.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task1"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task1" onclick="runCode('task1')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task1')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task1" onclick="toggleSol('task1')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task1"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task1">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task1')">Kopieren</button>
+          <pre id="solpre-task1"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-haupt" id="card-task2">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A3</span>
+      <span class="card-title">Modell-Aufmerksamkeit visualisieren (14 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Trainieren Sie einen Random Forest und visualisieren Sie, welche Pixel das Modell nutzt.<ul><li><code>feature_importances_</code> extrahieren.</li><li>In Bildform <code>reshape</code> und als Heatmap (<code>imshow</code>) darstellen.</li><li>Zusätzlich ein Histogramm der Wichtigkeiten.</li></ul></div>
+      <div class="hint">💡 Original: MNIST 28×28 via <code>fetch_openml</code> (Download). Hier offline: <code>load_digits()</code> 8×8.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task2"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task2" onclick="runCode('task2')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task2')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task2" onclick="toggleSol('task2')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task2"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task2">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task2')">Kopieren</button>
+          <pre id="solpre-task2"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ─────────────────────────────────── ANWENDUNG -->
+<section id="schmankerl">
+  <div class="sec-hdr">
+    <span class="badge bs">Anwendung</span>
+    <h2>Abschnitt C – Anwendung & Bonus</h2>
+  </div>
+
+  <div class="card acc-haupt" id="card-task3">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A4</span>
+      <span class="card-title">Musik-Genre-Klassifikation (12 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Audio-Features (Tempo, Energie, Tanzbarkeit …) von 5000 Songs, 5 Genres.<ul><li>Klassenverteilung prüfen — balanciert?</li><li><code>StandardScaler</code> + 5-fache Kreuzvalidierung für RF und SVC.</li><li>Die 3 wichtigsten Features identifizieren.</li></ul></div>
+      <div class="hint">💡 Original: <code>songs_5genres.csv</code> — hier synthetisch via make_classification.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task3"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task3" onclick="runCode('task3')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task3')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task3" onclick="toggleSol('task3')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task3"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task3">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task3')">Kopieren</button>
+          <pre id="solpre-task3"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-schnk" id="card-task4">
+    <div class="card-top">
+      <span class="num" style="background:var(--schnk)">★</span>
+      <span class="card-title">Bonus – Schwellwert-Analyse (+5 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Setzen Sie alle Feature-Wichtigkeiten unter einem Schwellwert <code>tau</code> auf Null und stellen Sie die resultierenden Bilder für mehrere <code>tau</code>-Werte dar.<ul><li>Experimentieren Sie mit <code>tau</code> = 0.005, 0.015, 0.03.</li><li>Wie kann das für Feature-Engineering genutzt werden?</li></ul></div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task4"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task4" onclick="runCode('task4')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task4')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task4" onclick="toggleSol('task4')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task4"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task4">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task4')">Kopieren</button>
+          <pre id="solpre-task4"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ══════════════════════════════════════════ SCRIPT -->
+<script>
+/* ─── SOLUTIONS ──────────────────────────────────────── */
+const SOL = {
+task1:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_digits
+
+def explore_noise_behavior(X, y, list_of_noise_levels):
+    scores_rf, scores_svm = [], []
+    for nl in list_of_noise_levels:
+        Xn = X + np.random.normal(0, nl * X.std(), X.shape)
+        Xtr, Xte, ytr, yte = train_test_split(
+            Xn, y, test_size=0.2, random_state=42)
+        rf = RandomForestClassifier(random_state=42).fit(Xtr, ytr)
+        sv = SVC().fit(Xtr, ytr)
+        scores_rf.append(rf.score(Xte, yte))
+        scores_svm.append(sv.score(Xte, yte))
+
+    plt.figure(figsize=(8, 4))
+    plt.plot(list_of_noise_levels, scores_rf, 'o-', label='Random Forest')
+    plt.plot(list_of_noise_levels, scores_svm, 's-', label='SVC')
+    plt.xlabel("Rauschgrad"); plt.ylabel("Test-Accuracy")
+    plt.title("Rauschverhalten"); plt.legend(); plt.grid(alpha=0.3); plt.show()
+    return scores_rf, scores_svm
+
+X, y = load_digits(return_X_y=True)
+rf, svm = explore_noise_behavior(X, y, [0, 0.5, 1.0, 1.5, 2.0])
+print("RF :", [round(s, 3) for s in rf])
+print("SVM:", [round(s, 3) for s in svm])
+# e) Random Forest bleibt stabiler: das Mitteln über viele Baeume
+#    reduziert die Varianz und damit die Empfindlichkeit gegen Rauschen.`,
+task2:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_digits
+
+def attention_of_my_model(shape_of_images=(8, 8)):
+    X, y = load_digits(return_X_y=True)
+    rf = RandomForestClassifier(n_estimators=200, random_state=42).fit(X, y)
+    importances = rf.feature_importances_
+
+    fig, ax = plt.subplots(1, 2, figsize=(11, 4))
+    im = ax[0].imshow(importances.reshape(shape_of_images), cmap='hot')
+    ax[0].set_title("Feature-Wichtigkeit (Heatmap)"); ax[0].axis('off')
+    fig.colorbar(im, ax=ax[0])
+    ax[1].hist(importances, bins=30, color='steelblue')
+    ax[1].set_title("Verteilung der Wichtigkeiten")
+    plt.tight_layout(); plt.show()
+    return importances
+
+imp = attention_of_my_model((8, 8))
+print("Wichtigstes Pixel:", imp.argmax(), "| Wert:", round(imp.max(), 4))
+# e) Die zentralen Pixel werden am staerksten genutzt - Randpixel sind
+#    meist leer. Das ist inhaltlich sinnvoll, da Ziffern zentriert sind.`,
+task3:
+`import numpy as np
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.model_selection import cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import make_classification
+
+# Synthetischer "songs_5genres": 8 Audio-Features, 5 Genres, 5000 Songs
+X, y = make_classification(n_samples=5000, n_features=8, n_informative=6,
+                           n_classes=5, n_clusters_per_class=1, random_state=42)
+print("Klassenverteilung:", np.bincount(y), "-> balanciert")
+
+Xs = StandardScaler().fit_transform(X)
+rf = cross_val_score(RandomForestClassifier(random_state=42), Xs, y, cv=5)
+sv = cross_val_score(SVC(), Xs, y, cv=5)
+print(f"Random Forest CV-Accuracy: {rf.mean():.3f}")
+print(f"SVC           CV-Accuracy: {sv.mean():.3f}")
+
+# Top-3 Features
+rf_full = RandomForestClassifier(random_state=42).fit(Xs, y)
+top3 = np.argsort(rf_full.feature_importances_)[::-1][:3]
+print("Top-3 Features (Index):", top3)
+# d) 5 Genres bilden die Vielfalt kaum ab - via KMeans-Clustering koennte
+#    man pruefen, ob sich mehr natuerliche Gruppen in den Daten finden.`,
+task4:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_digits
+
+X, y = load_digits(return_X_y=True)
+imp = RandomForestClassifier(n_estimators=200, random_state=42).fit(X, y).feature_importances_
+
+fig, axes = plt.subplots(1, 4, figsize=(13, 3.5))
+for ax, tau in zip(axes, [0.0, 0.005, 0.015, 0.03]):
+    masked = np.where(imp < tau, 0, imp)
+    ax.imshow(masked.reshape(8, 8), cmap='hot')
+    ax.set_title(f"tau={tau}\\n{(masked > 0).sum()} Pixel")
+    ax.axis('off')
+plt.tight_layout(); plt.show()
+# b) Schwellwertbilder zeigen die informativsten Pixel. Uninformative
+#    Pixel (Wichtigkeit ~ 0) koennen entfernt werden -> Feature-Selection,
+#    weniger Dimensionen, schnelleres Training.`
+};
+
+const EDITORS = {};
+const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
+
+/* ─── INIT CODEMIRROR ─────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  TASK_IDS.forEach(id => {
+    EDITORS[id] = CodeMirror.fromTextArea(document.getElementById('code-' + id), {
+      mode: 'python',
+      theme: 'dracula',
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseBrackets: true,
+      indentUnit: 4,
+      tabSize: 4,
+      indentWithTabs: false,
+      extraKeys: {
+        'Tab': cm => cm.execCommand('insertSoftTab'),
+        'Shift-Enter': () => { /* handled per-task */ }
+      }
+    });
+    document.getElementById('solpre-' + id).textContent = SOL[id];
+  });
+  initPyodide();
+});
+
+/* ─── PYODIDE ─────────────────────────────────────────── */
+let pyodide = null;
+let pyodideReady = false;
+
+function setProgress(pct, msg) {
+  document.getElementById('ov-fill').style.width = pct + '%';
+  document.getElementById('ov-msg').textContent = msg;
+}
+
+async function initPyodide() {
+  try {
+    setProgress(10, 'Lade Pyodide-Runtime...');
+    pyodide = await loadPyodide();
+
+    setProgress(35, 'Lade numpy & matplotlib...');
+    await pyodide.loadPackage(['numpy', 'matplotlib']);
+
+    setProgress(60, 'Lade scikit-learn (dauert ~20s)...');
+    await pyodide.loadPackage(['scikit-learn']);
+
+    setProgress(90, 'Konfiguriere Python-Umgebung...');
+    pyodide.runPython(`import matplotlib\nmatplotlib.use('Agg')`);
+
+    setProgress(100, 'Bereit!');
+    await new Promise(r => setTimeout(r, 400));
+    document.getElementById('overlay').style.display = 'none';
+
+    pyodideReady = true;
+    TASK_IDS.forEach(id => {
+      const btn = document.getElementById('run-' + id);
+      if (btn) btn.disabled = false;
+    });
+  } catch(e) {
+    setProgress(0, 'Fehler: ' + e.message);
+  }
+}
+
+/* ─── RUN CODE ────────────────────────────────────────── */
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function runCode(id) {
+  if (!pyodideReady) { alert('Python lädt noch — bitte kurz warten.'); return; }
+  const code = EDITORS[id].getValue().trim();
+  if (!code || code === '# Dein Code hier') return;
+
+  const out   = document.getElementById('out-' + id);
+  const runBtn = document.getElementById('run-' + id);
+  out.innerHTML = '<span class="out-run">⏳ Code wird ausgeführt...</span>';
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ Läuft...';
+
+  pyodide.globals.set('_stu_code', code);
+
+  try {
+    await pyodide.runPythonAsync(`
+import sys, io, base64
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+_figs_out    = []
+_stdout_buf  = io.StringIO()
+_orig_stdout = sys.stdout
+
+def _cap_show(*a, **kw):
+    for fn in sorted(plt.get_fignums()):
+        fig = plt.figure(fn)
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+        buf.seek(0)
+        _figs_out.append(base64.b64encode(buf.read()).decode())
+    plt.close('all')
+
+_orig_show   = plt.show
+plt.show     = _cap_show
+sys.stdout   = _stdout_buf
+_run_error   = None
+
+try:
+    exec(compile(_stu_code, '<aufgabe>', 'exec'))
+    if plt.get_fignums():
+        _cap_show()
+except Exception as _e:
+    import traceback
+    _run_error = traceback.format_exc()
+finally:
+    sys.stdout = _orig_stdout
+    plt.show   = _orig_show
+
+_run_text = _stdout_buf.getvalue()
+`);
+
+    const txt   = pyodide.globals.get('_run_text') || '';
+    const fp    = pyodide.globals.get('_figs_out');
+    const figs  = fp ? fp.toJs() : [];
+    if (fp) fp.destroy();
+    const err   = pyodide.globals.get('_run_error');
+
+    let html = '';
+    if (txt.trim())
+      html += `<pre class="out-text">${esc(txt)}</pre>`;
+    figs.forEach(f => {
+      html += `<div class="out-fig"><img src="data:image/png;base64,${f}" alt="Plot"></div>`;
+    });
+    if (err)
+      html += `<pre class="out-err">${esc(err)}</pre>`;
+    if (!txt.trim() && !figs.length && !err)
+      html = '<span class="out-ok">✓ Code erfolgreich ausgeführt (keine Ausgabe)</span>';
+
+    out.innerHTML = html;
+
+    // Unlock solution button after first run
+    const sb = document.getElementById('sol-btn-' + id);
+    if (sb) sb.classList.remove('locked');
+
+  } catch(e) {
+    out.innerHTML = `<pre class="out-err">${esc(e.toString())}</pre>`;
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = '▶ Ausführen';
+  }
+}
+
+/* ─── HELPERS ─────────────────────────────────────────── */
+function clearCode(id) {
+  EDITORS[id].setValue('# Dein Code hier\n');
+  document.getElementById('out-' + id).innerHTML =
+    '<span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span>';
+}
+
+function toggleSol(id) {
+  const btn = document.getElementById('sol-btn-' + id);
+  if (btn.classList.contains('locked')) {
+    alert('Führe deinen Code zuerst aus — dann wird die Lösung freigeschaltet.');
+    return;
+  }
+  const panel = document.getElementById('sol-' + id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Lösung';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Lösung verbergen';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function copySol(id) {
+  navigator.clipboard.writeText(SOL[id]).then(() => {
+    const btn = document.querySelector(`#sol-${id} .copy-sol`);
+    btn.textContent = '✓ Kopiert';
+    setTimeout(() => btn.textContent = 'Kopieren', 1800);
+  });
+}
+
+function toggleQuiz(id, btn) {
+  const panel = document.getElementById(id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Antwort anzeigen';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Antwort verbergen';
+  }
+}
+</script>
+
   </main>
 </div>
-<site-footer caption="Aufgabenblatt 05 · Klassifikation"></site-footer>
+<site-footer caption="Aufgabenblatt 05 · Klassifikation & Modellanalyse"></site-footer>
 </body>
 </html>
