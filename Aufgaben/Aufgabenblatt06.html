@@ -345,6 +345,8 @@ main{
   <div class="ov-bar"><div class="ov-fill" id="ov-fill"></div></div>
   <div class="ov-msg" id="ov-msg">Initialisiere Pyodide...</div>
   <div class="ov-msg" style="font-size:.78rem;color:#475569">scikit-learn lädt etwas länger (~30s) – kurz warten ☕</div>
+  <button id="ov-skip" onclick="closeOverlay()" style="margin-top:20px;background:rgba(255,255,255,.1);color:#CBD5E1;border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:9px 20px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">Überspringen &amp; nur lesen ✕</button>
+  <div class="ov-msg" style="font-size:.72rem;color:#475569;margin-top:4px">Ohne Internet kann Python nicht ausgeführt werden — Lesen &amp; Lösungen funktionieren trotzdem.</div>
 </div>
 
 <!-- ═══════════════════════════════════════════ HEADER -->
@@ -768,9 +770,20 @@ async function initPyodide() {
       if (btn) btn.disabled = false;
     });
   } catch(e) {
-    setProgress(0, 'Fehler: ' + e.message);
+    closeOverlay();
+    console.warn('Pyodide nicht geladen (offline?):', e.message);
   }
 }
+
+/* Overlay schließen — Navigation/Lesen ist dann immer möglich */
+function closeOverlay() {
+  const o = document.getElementById('overlay');
+  if (o) o.style.display = 'none';
+}
+
+/* Fallback: Overlay nach 45s automatisch schließen (z.B. offline),
+   damit man nie blockiert ist. */
+setTimeout(() => { if (!pyodideReady) closeOverlay(); }, 45000);
 
 /* ─── RUN CODE ────────────────────────────────────────── */
 function esc(s) {
