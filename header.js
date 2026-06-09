@@ -11,19 +11,11 @@ class SiteHeader extends HTMLElement {
     
     document.title = title;
 
-    /* ── FONTS (Fontshare: Satoshi + Zodiak) ── */
-    const fonts = [
-      { rel: 'preconnect', href: 'https://api.fontshare.com' },
-      {
-        rel: 'stylesheet',
-        href: 'https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=zodiak@400,600,700&display=swap'
-      }
-    ];
-    fonts.forEach(attrs => {
-      const link = document.createElement('link');
-      Object.entries(attrs).forEach(([k, v]) => link.setAttribute(k, v));
-      document.head.appendChild(link);
-    });
+    /* ── FONTS (lokal: Satoshi + Zodiak) ── */
+    const fontsCss = document.createElement('link');
+    fontsCss.rel = 'stylesheet';
+    fontsCss.href = new URL('./assets/vendor/fonts.css', import.meta.url).href;
+    document.head.appendChild(fontsCss);
 
     // --- CSS ---
     const css = document.createElement('link');
@@ -31,14 +23,14 @@ class SiteHeader extends HTMLElement {
     css.href = new URL('./assets/style.css', import.meta.url).href;
     document.head.appendChild(css);
 
-    /* ── Highlight.js ── */
+    /* ── Highlight.js (lokal) ── */
     const hljsCss  = document.createElement('link');
     hljsCss.rel    = 'stylesheet';
-    hljsCss.href   = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css';
+    hljsCss.href   = new URL('./assets/vendor/highlight-github.min.css', import.meta.url).href;
     document.head.appendChild(hljsCss);
 
     const hljsScript    = document.createElement('script');
-    hljsScript.src      = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+    hljsScript.src      = new URL('./assets/vendor/highlight.min.js', import.meta.url).href;
     hljsScript.onload   = () => {
       document.querySelectorAll('pre code').forEach(block => {
         block.classList.add('language-python');
@@ -67,7 +59,20 @@ class SiteHeader extends HTMLElement {
       <header class="header">
         <div class="header-inner container">
 
-          <!-- LINKS: Home-Button + Brand -->
+        <!-- SUCHE -->
+          <a href="../search.html" class="search-btn"
+            id="header-search-btn"
+            title="Suche (⌘K / Strg+K)"
+            aria-label="Suche öffnen">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                width="18" height="18">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="m21 21-4.35-4.35"/>
+            </svg>
+          </a>  
+        
+        <!-- LINKS: Home-Button + Brand -->
           <a href="../index.html" class="brand" title="Alle Kapitel">
             <div class="brand-mark">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -96,19 +101,7 @@ class SiteHeader extends HTMLElement {
             <a href="../Kapitel7/Kapitel7.html" ${page === 'page7' ? 'class="active"' : ''}>7 - Reinforcement Learning</a>
           </nav>
 
-          <!-- RECHTS: Suche + Theme Toggle -->
-          <a href="../search.html" class="search-btn"
-             id="header-search-btn"
-             title="Suche (⌘K / Strg+K)"
-             aria-label="Suche öffnen">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
-                 width="18" height="18">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
-            </svg>
-          </a>
-
+          <!-- RECHTS: Theme Toggle -->
           <button class="theme-toggle" data-theme-toggle aria-label="Farbschema wechseln">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
@@ -125,14 +118,6 @@ class SiteHeader extends HTMLElement {
 
     /* ── Theme Toggle Logik ── */
     this._initTheme();
-
-    /* ── Tastaturkürzel ⌘K / Strg+K → search.html ── */
-    document.addEventListener('keydown', (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        window.location.href = '../search.html';
-      }
-    });
   }
 
   _initTheme() {

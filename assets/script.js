@@ -382,9 +382,9 @@ window.MathJax = {
   }
 };
 
-// MathJax Script laden
+// MathJax Script laden (lokal)
 const script = document.createElement('script');
-script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+script.src = new URL('./vendor/mathjax-tex-chtml.js', import.meta.url).href;
 script.async = true;
 document.head.appendChild(script);
 
