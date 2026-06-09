@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python-Referenz: alle im PRM-Kurs verwendeten Bibliotheken, Modelle und Funktionen, strukturiert erklärt." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python-Referenz</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/kapitel-overview.css">
+  <style>
+    .py-hero{padding:clamp(3rem,9vw,4.5rem) 0 clamp(2rem,5vw,2.5rem);text-align:center;background:linear-gradient(150deg,#0F172A 0%,#1E3A5F 100%);color:#F8FAFC;position:relative;overflow:hidden}
+    .py-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,.04) 1px,transparent 1px);background-size:26px 26px}
+    .py-hero .eyebrow{font-size:var(--text-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#94A3B8}
+    .py-hero h1{font-family:var(--font-display);font-size:clamp(1.9rem,5vw,2.9rem);font-weight:700;margin:var(--space-4) auto;color:#F8FAFC}
+    .py-hero p{color:#94A3B8;font-size:var(--text-base);max-width:62ch;margin-inline:auto;line-height:1.7}
+    .py-pills{display:flex;flex-wrap:wrap;gap:var(--space-2);justify-content:center;margin-top:var(--space-6)}
+    .py-pill{font-size:var(--text-xs);font-weight:600;padding:.25rem .8rem;border-radius:var(--radius-full);border:1px solid rgba(255,255,255,.16);color:#CBD5E1;background:rgba(255,255,255,.06);font-family:var(--font-mono)}
+    .pages-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--space-6);max-width:1120px;margin:var(--space-8) auto;padding:0 var(--space-8) var(--space-16)}
+    .page-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;text-decoration:none;color:var(--color-text);transition:transform .15s,box-shadow .15s;box-shadow:var(--shadow-sm);display:flex;flex-direction:column}
+    .page-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
+    .card-banner{width:100%;height:120px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;background:var(--color-primary-highlight)}
+    .card-banner .card-num{position:absolute;top:var(--space-3);left:var(--space-4);font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-primary);background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface));padding:.15rem .6rem;border-radius:var(--radius-full)}
+    .card-body{padding:var(--space-5);flex:1;display:flex;flex-direction:column;gap:var(--space-2)}
+    .card-titel{font-size:var(--text-base);font-weight:700}
+    .card-desc{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.6;flex:1}
+    .card-footer{display:flex;align-items:center;justify-content:space-between;padding:var(--space-3) var(--space-5);border-top:1px solid var(--color-border);font-size:var(--text-xs);color:var(--color-text-muted)}
+    .card-arrow{color:var(--color-primary);transition:transform .15s}
+    .page-card:hover .card-arrow{transform:translateX(4px)}
+    .section-label{font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint);max-width:1120px;margin:var(--space-10) auto var(--space-3);padding:0 var(--space-8)}
+  </style>
+</head>
+<body>
+  <site-header active="pageP" title="Python · Referenz"></site-header>
+  <main id="main-content">
+    <section class="py-hero">
+      <div class="container">
+        <span class="eyebrow">✦ Nachschlagewerk · Python für ML</span>
+        <h1>Python-Referenz</h1>
+        <p>Alle Bibliotheken, Modelle und Funktionen, die wir im Kurs verwendet haben — strukturiert erklärt,
+           mit Beispielen und dem konkreten Einsatzzweck. Von <code>numpy</code> &amp; Plotten bis zu sklearn-Modellen und Metriken.</p>
+        <div class="py-pills">
+          <span class="py-pill">numpy</span>
+          <span class="py-pill">matplotlib</span>
+          <span class="py-pill">pandas</span>
+          <span class="py-pill">scikit-learn</span>
+          <span class="py-pill">scipy</span>
+        </div>
+      </div>
+    </section>
+
+    <p class="section-label">Alle Referenz-Seiten</p>
+    <div class="pages-grid">
+      <a class="page-card" href="Page01.html">
+        <div class="card-banner"><span class="card-num">Seite 1</span>🔢</div>
+        <div class="card-body">
+          <div class="card-titel">NumPy</div>
+          <div class="card-desc">Arrays, Slicing, Aggregationen & das Mesh-Grid für Plots</div>
+        </div>
+        <div class="card-footer"><span>Referenz</span><span class="card-arrow">→</span></div>
+      </a>
+      <a class="page-card" href="Page02.html">
+        <div class="card-banner"><span class="card-num">Seite 2</span>📊</div>
+        <div class="card-body">
+          <div class="card-titel">Matplotlib</div>
+          <div class="card-desc">Plots erstellen: scatter, plot, Heatmaps & Entscheidungsflächen</div>
+        </div>
+        <div class="card-footer"><span>Referenz</span><span class="card-arrow">→</span></div>
+      </a>
+      <a class="page-card" href="Page03.html">
+        <div class="card-banner"><span class="card-num">Seite 3</span>🗂️</div>
+        <div class="card-body">
+          <div class="card-titel">Datensätze & Visualisierung</div>
+          <div class="card-desc">sklearn-Datensätze, pandas-Tabellen & seaborn-Plots</div>
+        </div>
+        <div class="card-footer"><span>Referenz</span><span class="card-arrow">→</span></div>
+      </a>
+      <a class="page-card" href="Page04.html">
+        <div class="card-banner"><span class="card-num">Seite 4</span>⚙️</div>
+        <div class="card-body">
+          <div class="card-titel">Preprocessing & Pipelines</div>
+          <div class="card-desc">Skalierung, Encoding, Feature-Auswahl, PCA & Pipelines</div>
+        </div>
+        <div class="card-footer"><span>Referenz</span><span class="card-arrow">→</span></div>
+      </a>
+      <a class="page-card" href="Page05.html">
+        <div class="card-banner"><span class="card-num">Seite 5</span>🤖</div>
+        <div class="card-body">
+          <div class="card-titel">Modelle: Supervised</div>
+          <div class="card-desc">SVM, Entscheidungsbäume, Random Forest, KNN & die fit/predict-API</div>
+        </div>
+        <div class="card-footer"><span>Referenz</span><span class="card-arrow">→</span></div>
+      </a>
+      <a class="page-card" href="Page06.html">
+        <div class="card-banner"><span class="card-num">Seite 6</span>🔍</div>
+        <div class="card-body">
+          <div class="card-titel">Modelle: Unsupervised</div>
+          <div class="card-desc">KMeans, DBSCAN, GaussianMixture & BIC-Modellwahl</div>
+        </div>
+        <div class="card-footer"><span>Referenz</span><span class="card-arrow">→</span></div>
+      </a>
+      <a class="page-card" href="Page07.html">
+        <div class="card-banner"><span class="card-num">Seite 7</span>🎯</div>
+        <div class="card-body">
+          <div class="card-titel">Modellauswahl & Validierung</div>
+          <div class="card-desc">train_test_split, Cross-Validation, GridSearchCV & Lernkurven</div>
+        </div>
+        <div class="card-footer"><span>Referenz</span><span class="card-arrow">→</span></div>
+      </a>
+      <a class="page-card" href="Page08.html">
+        <div class="card-banner"><span class="card-num">Seite 8</span>📏</div>
+        <div class="card-body">
+          <div class="card-titel">Metriken & Evaluation</div>
+          <div class="card-desc">accuracy, confusion_matrix, ROC/AUC, Silhouette & Feature-Importance</div>
+        </div>
+        <div class="card-footer"><span>Referenz</span><span class="card-arrow">→</span></div>
+      </a>
+    </div>
+  </main>
+  <site-footer caption="Python-Referenz · PRM Prüfungsvorbereitung"></site-footer>
+</body>
+</html>

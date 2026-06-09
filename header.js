@@ -87,6 +87,7 @@ class SiteHeader extends HTMLElement {
             <a href="../Kapitel6/Kapitel6.html" ${page === 'page6' ? 'class="active"' : ''}>6 - Deep Learning</a>
             <a href="../Kapitel7/Kapitel7.html" ${page === 'page7' ? 'class="active"' : ''}>7 - Reinforcement Learning</a>
             <a href="../Aufgaben/Aufgaben.html" ${page === 'pageA' ? 'class="active"' : ''}>✏️ Aufgaben</a>
+            <a href="../Python/Python.html" ${page === 'pageP' ? 'class="active"' : ''}>🐍 Python</a>
           </nav>
 
           <!-- RECHTS: Theme Toggle -->

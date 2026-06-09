@@ -451,8 +451,9 @@ function initCopyButtons() {
   });
 
   // 3. Bare <pre><code> ohne Wrapper → Copy + Run als Overlay
+  //    (.ref = Python-Referenz-Snippets: nur Highlighting, kein Run-Button)
   document.querySelectorAll('pre').forEach(pre => {
-    if (pre.closest('.code-cell') || pre.closest('.code-cell-split') || pre.closest('.bare-code-wrap')) return;
+    if (pre.closest('.code-cell') || pre.closest('.code-cell-split') || pre.closest('.bare-code-wrap') || pre.closest('.ref')) return;
     const code = pre.querySelector('code');
     if (!code) return;
 

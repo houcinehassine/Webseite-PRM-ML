@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python-Referenz: Matplotlib &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Plotten&lt;/span&gt; – PRM Prüfungsvorbereitung." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python · Matplotlib &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Plotten&lt;/span&gt;</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ref-intro{color:var(--color-text-muted);max-width:72ch;margin-bottom:var(--space-6);line-height:1.7}
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-lg);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--color-surface-2);border-bottom:1px solid var(--color-border)}
+    .ref-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);font-size:.95rem}
+    .ref-mod{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.12rem .5rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary)}
+    .ref-body{padding:1rem 1.1rem 1.15rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.9rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary)}
+    .ref-body pre{margin:.4rem 0 0}
+    .ref-use{margin-top:.85rem;font-size:.84rem;line-height:1.6;border-left:3px solid var(--color-primary);padding:.5rem .85rem;background:var(--color-primary-highlight);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--color-text)}
+    .ref-use b{color:var(--color-primary)}
+    .ref-params{list-style:none;margin:.2rem 0 .6rem;padding:0;font-size:.85rem}
+    .ref-params li{padding:.15rem 0;border-bottom:1px dashed var(--color-border)}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+  </style>
+</head>
+<body>
+  <site-header active="pageP" title="Python · Matplotlib &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Plotten&lt;/span&gt;"></site-header>
+  <div class="layout">
+    <site-sidebar active="Page02"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Python · Grundlagen</span>
+            <h1>Matplotlib <span class="key" style="--key-color:var(--color-primary)">Plotten</span></h1>
+            <p><code>matplotlib.pyplot</code> (als <code>plt</code>) erzeugt alle Visualisierungen im Kurs — von einfachen Scatter-Plots bis zu Entscheidungsflächen und Bildrastern.</p>
+            <div class="pill-row">
+              <span class="pill">plt.scatter</span>
+              <span class="pill">plt.plot</span>
+              <span class="pill">subplots</span>
+              <span class="pill">contourf</span>
+              <span class="pill">imshow</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Worum geht's?</h2>
+            <p>Die wichtigsten Plot-Funktionen und die wiederkehrenden Visualisierungs-Rezepte (Entscheidungsfläche, Elbow-Plot).</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="figur">
+        <div class="section-head">
+          <h2>2.1 Figur & Achsen</h2>
+          <p>Abbildung anlegen und abschließen.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">plt.figure / plt.subplots</span>
+          <span class="ref-mod">matplotlib</span>
+        </div>
+        <div class="ref-body">
+          <p><code>figure(figsize=(b,h))</code> öffnet eine neue Abbildung; <code>subplots(zeilen, spalten)</code> erzeugt ein Raster aus Achsen (<code>ax</code>).</p>
+          
+          <pre><code>import matplotlib.pyplot as plt
+plt.figure(figsize=(8, 5))
+# ... oder mehrere Achsen:
+fig, axes = plt.subplots(1, 2, figsize=(11, 4))
+axes[0].plot(x, y)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Jede Visualisierung startet hier — Größe steuern, mehrere Plots nebeneinander.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">plt.show / tight_layout / close</span>
+          <span class="ref-mod">matplotlib</span>
+        </div>
+        <div class="ref-body">
+          <p><code>show()</code> zeigt die Abbildung; <code>tight_layout()</code> verhindert Überlappungen; <code>close('all')</code> gibt Speicher frei.</p>
+          
+          <pre><code>plt.tight_layout()
+plt.show()</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Standard-Abschluss jeder Plot-Zelle. Im Browser (Pyodide) fängt der Code <code>show()</code> ab und rendert das Bild.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="plottypen">
+        <div class="section-head">
+          <h2>2.2 Plot-Typen</h2>
+          <p>Die Diagrammarten, die im Kurs vorkommen.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">plt.scatter(x, y, c=..., cmap=...)</span>
+          <span class="ref-mod">matplotlib</span>
+        </div>
+        <div class="ref-body">
+          <p>Punktwolke. Mit <code>c=labels</code> und <code>cmap</code> färbt man Punkte nach Klasse/Cluster; <code>s=...</code> steuert die Größe.</p>
+          
+          <pre><code>plt.scatter(X[:, 0], X[:, 1], c=y, cmap='coolwarm',
+            edgecolor='k', s=25)
+# Größe ~ Wahrscheinlichkeit:
+plt.scatter(X[:,0], X[:,1], s=proba*120)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Klassen/Cluster visualisieren, GMM-Wahrscheinlichkeit als Punktgröße (Blatt 06).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">plt.plot(x, y, fmt)</span>
+          <span class="ref-mod">matplotlib</span>
+        </div>
+        <div class="ref-body">
+          <p>Linien-/Punktdiagramm. Das Format-Kürzel kombiniert Farbe, Marker, Linienstil (z.B. <code>'o-'</code>, <code>'r--'</code>).</p>
+          
+          <pre><code>plt.plot(ks, inertias, 'o-')          # Elbow-Plot
+plt.plot(fpr, tpr, label='ROC')
+plt.plot(sizes, train_sc, 'b-o')      # Lernkurve</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Elbow-Plot, ROC-Kurve, Lernkurve, BIC/AIC über k.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">plt.hist / imshow / contourf</span>
+          <span class="ref-mod">matplotlib</span>
+        </div>
+        <div class="ref-body">
+          <p><code>hist</code> = Histogramm, <code>imshow</code> = Bild/Matrix als Heatmap, <code>contourf</code> = gefüllte Höhenlinien (Entscheidungsflächen).</p>
+          
+          <pre><code>plt.hist(werte, bins=30)
+plt.imshow(importances.reshape(8, 8), cmap='hot')
+plt.contourf(xx, yy, Z, alpha=0.25, cmap='coolwarm')</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Verteilungen, Feature-Importance-Heatmaps (Blatt 05), Entscheidungsflächen (Blatt 03).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="deko">
+        <div class="section-head">
+          <h2>2.3 Beschriftung & Deko</h2>
+          <p>Plots lesbar machen.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Titel &amp; Achsen</span>
+          <span class="ref-mod">matplotlib</span>
+        </div>
+        <div class="ref-body">
+          <p>Beschriftungen für Lesbarkeit. <code>suptitle</code> setzt einen übergeordneten Titel über mehrere Subplots.</p>
+          
+          <pre><code>plt.title('SVM Entscheidungsfläche')
+plt.xlabel('Feature 1'); plt.ylabel('Feature 2')
+plt.suptitle('Generierte Ziffern')</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Jeder Plot bekommt aussagekräftige Beschriftungen.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">legend / colorbar / grid / axvline</span>
+          <span class="ref-mod">matplotlib</span>
+        </div>
+        <div class="ref-body">
+          <p><code>legend()</code> zeigt Labels, <code>colorbar()</code> die Farbskala, <code>grid()</code> ein Gitter, <code>axvline(x)</code> eine vertikale Markierung.</p>
+          
+          <pre><code>plt.legend()
+plt.colorbar()
+plt.grid(alpha=0.3)
+plt.axvline(best_k, color='red', ls='--')   # bestes k markieren</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Bestes <code>k</code> im Elbow-Plot markieren, Farbskala bei Heatmaps.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">ax.axis('off') / subplot-Grid</span>
+          <span class="ref-mod">matplotlib</span>
+        </div>
+        <div class="ref-body">
+          <p>Bei Bildrastern blendet <code>axis('off')</code> die Achsen aus — typisch für generierte Bilder.</p>
+          
+          <pre><code>fig, axes = plt.subplots(3, 4, figsize=(7, 5))
+for ax, img in zip(axes.ravel(), bilder):
+    ax.imshow(img.reshape(8, 8), cmap='gray')
+    ax.axis('off')</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> 3×4-Raster generierter Gesichter/Ziffern (Blatt 06, PCA+GMM).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="muster">
+        <div class="section-head">
+          <h2>2.4 Wiederkehrende Rezepte</h2>
+          <p>Zwei Muster, die du immer wieder brauchst.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Muster: Entscheidungsfläche</span>
+          <span class="ref-mod">Rezept</span>
+        </div>
+        <div class="ref-body">
+          <p>Das wiederkehrende Rezept, um zu zeigen, wie ein Modell den Raum aufteilt: Gitter bauen → vorhersagen → <code>contourf</code>.</p>
+          
+          <pre><code>xx, yy = np.meshgrid(np.linspace(x0, x1, 300),
+                     np.linspace(y0, y1, 300))
+Z = model.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+plt.contourf(xx, yy, Z, alpha=0.25, cmap='coolwarm')
+plt.scatter(X[:,0], X[:,1], c=y, edgecolor='k')
+plt.show()</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Standard-Visualisierung für SVM, Entscheidungsbäume, Clustering.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Muster: Elbow-Plot (One-Liner)</span>
+          <span class="ref-mod">Rezept</span>
+        </div>
+        <div class="ref-body">
+          <p>Inertia über <code>k</code> plotten, um die optimale Clusterzahl zu finden — geht sogar in einer Zeile.</p>
+          
+          <pre><code>plt.plot(range(2, 11),
+         [KMeans(k, n_init=10).fit(X).inertia_ for k in range(2, 11)], 'o-')
+plt.xlabel('k'); plt.ylabel('Inertia'); plt.show()</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Optimale Clusterzahl bestimmen (Kapitel 4, Blatt 04).</div>
+        </div>
+      </div>
+      </section>
+    </main>
+  </div>
+  <site-footer caption="Python-Referenz · Matplotlib &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Plotten&lt;/span&gt;"></site-footer>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python-Referenz: NumPy &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Grundlagen&lt;/span&gt; – PRM Prüfungsvorbereitung." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python · NumPy &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Grundlagen&lt;/span&gt;</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ref-intro{color:var(--color-text-muted);max-width:72ch;margin-bottom:var(--space-6);line-height:1.7}
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-lg);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--color-surface-2);border-bottom:1px solid var(--color-border)}
+    .ref-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);font-size:.95rem}
+    .ref-mod{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.12rem .5rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary)}
+    .ref-body{padding:1rem 1.1rem 1.15rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.9rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary)}
+    .ref-body pre{margin:.4rem 0 0}
+    .ref-use{margin-top:.85rem;font-size:.84rem;line-height:1.6;border-left:3px solid var(--color-primary);padding:.5rem .85rem;background:var(--color-primary-highlight);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--color-text)}
+    .ref-use b{color:var(--color-primary)}
+    .ref-params{list-style:none;margin:.2rem 0 .6rem;padding:0;font-size:.85rem}
+    .ref-params li{padding:.15rem 0;border-bottom:1px dashed var(--color-border)}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+  </style>
+</head>
+<body>
+  <site-header active="pageP" title="Python · NumPy &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Grundlagen&lt;/span&gt;"></site-header>
+  <div class="layout">
+    <site-sidebar active="Page01"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Python · Grundlagen</span>
+            <h1>NumPy <span class="key" style="--key-color:var(--color-primary)">Grundlagen</span></h1>
+            <p><code>numpy</code> (als <code>np</code>) ist die Basis für alle numerischen Daten im Kurs. Feature-Matrizen, Labels, Zufallsdaten und das Raster für Entscheidungsflächen — alles sind NumPy-Arrays.</p>
+            <div class="pill-row">
+              <span class="pill">np.array</span>
+              <span class="pill">linspace</span>
+              <span class="pill">meshgrid</span>
+              <span class="pill">boolesche Masken</span>
+              <span class="pill">np.unique</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Worum geht's?</h2>
+            <p>Die wichtigsten NumPy-Bausteine, die in fast jeder Code-Zelle des Kurses vorkommen — mit Beispielen, wofür sie konkret eingesetzt werden.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="erzeugen">
+        <div class="section-head">
+          <h2>1.1 Arrays erzeugen</h2>
+          <p>Die Grundlage: Daten als ndarray.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.array(liste)</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Erzeugt ein <code>ndarray</code> aus einer Python-Liste. Das zentrale Datenobjekt für Features (<code>X</code>) und Labels (<code>y</code>).</p>
+          
+          <pre><code>import numpy as np
+X = np.array([[1, 2], [3, 4], [5, 6]])   # Form (3, 2)
+y = np.array([0, 1, 0])
+print(X.shape, y.shape)   # (3, 2) (3,)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Grundbaustein jeder Feature-Matrix <code>X</code> (N×K) und jedes Label-Vektors <code>y</code>.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.arange / np.linspace</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p><code>arange(start, stop, step)</code> erzeugt gleichmäßige Werte mit Schrittweite, <code>linspace(start, stop, n)</code> erzeugt <code>n</code> Werte inklusive Endpunkt.</p>
+          
+          <pre><code>np.arange(0, 10, 2)        # [0 2 4 6 8]
+np.linspace(0, 1, 5)       # [0. 0.25 0.5 0.75 1.]
+ks = range(2, 11)          # für Elbow-Plots: k = 2..10</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> <code>linspace</code> für Achsen/Mesh-Grids beim Plotten, <code>arange</code> für Indizes & Hyperparameter-Bereiche.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.zeros / ones / full / *_like</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Erzeugt mit Nullen, Einsen oder einem festen Wert gefüllte Arrays. Die <code>_like</code>-Varianten übernehmen die Form eines vorhandenen Arrays.</p>
+          
+          <pre><code>np.zeros((2, 3))           # 2x3 Nullen
+np.ones(5)                 # [1 1 1 1 1]
+np.full(3, 7)              # [7 7 7]
+np.zeros_like(X)           # Nullen in Form von X</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Initialisieren von Ergebnis-Arrays und Masken.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.random.default_rng / normal / uniform</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Zufallszahlen. <code>default_rng(seed)</code> ist der moderne Generator; <code>normal(loc, scale, size)</code> erzeugt Gauß-Rauschen, <code>uniform(low, high, size)</code> Gleichverteilung.</p>
+          
+          <pre><code>rng = np.random.default_rng(42)
+rauschen = rng.normal(0, 1, size=(100, 2))   # Gauß
+ausreisser = rng.uniform(-3, 3, size=(10, 2))</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Künstliche Datensätze, Rauschen zu Features addieren (Blatt 05), reproduzierbar mit Seed.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="indexing">
+        <div class="section-head">
+          <h2>1.2 Slicing, Indexing & Masken</h2>
+          <p>Auf Teile von Arrays zugreifen und filtern.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Slicing &amp; Indexing</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Zugriff auf Zeilen/Spalten. <code>X[zeile, spalte]</code>, <code>:</code> wählt alles. Negative Indizes zählen von hinten.</p>
+          
+          <pre><code>X[0]          # erste Zeile
+X[:, 0]       # erste Spalte (alle Zeilen)
+X[:5]         # erste 5 Zeilen
+X[-1]         # letzte Zeile</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Features/Labels aufteilen, Spalten auswählen.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Boolesche Masken</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Ein Vergleich liefert ein Array aus <code>True/False</code>, mit dem gefiltert wird — das Herzstück von Klassen-Scatter-Plots.</p>
+          
+          <pre><code>maske = (y == 1)
+X[maske]              # nur Zeilen mit Label 1
+X[y == k, 0]          # Feature 0 der Klasse k
+ausreisser = labels == -1   # DBSCAN-Anomalien</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Klassen einfärben (<code>X[y==k]</code>), Anomalien filtern (<code>labels == -1</code>).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.where(cond, a, b)</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Wählt elementweise zwischen zwei Werten je nach Bedingung — oder gibt mit einem Argument die Indizes der <code>True</code>-Stellen zurück.</p>
+          
+          <pre><code>np.where(imp &lt; 0.01, 0, imp)   # kleine Werte auf 0 setzen
+y_anom = np.where(labels == -1, 1, 0)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Schwellwert-Masken (Blatt 05), Anomalie-Labels bauen.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="aggregation">
+        <div class="section-head">
+          <h2>1.3 Aggregationen & Statistik</h2>
+          <p>Werte zusammenfassen — pro Achse oder gesamt.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.unique(y, return_counts=True)</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Liefert die eindeutigen Werte und (optional) deren Häufigkeiten — die Standardmethode, um die Klassenverteilung zu prüfen.</p>
+          
+          <pre><code>klassen, anzahl = np.unique(y, return_counts=True)
+for k, a in zip(klassen, anzahl):
+    print(f'Klasse {k}: {a} Samples')</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Klassenbalance prüfen, stratify-Effekt zeigen (Blatt 02).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Aggregationen: mean, std, sum, median …</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Statistik über ganze Arrays oder entlang einer Achse (<code>axis=0</code> = spaltenweise). Wichtig für Skalierung und Feature-Extraktion.</p>
+          
+          <pre><code>X.mean(axis=0)     # Spalten-Mittelwerte
+X.std()            # Gesamt-Standardabweichung
+np.median(werte)
+np.sqrt((sig**2).mean())   # RMS eines Signals</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Feature-Extraktion (Mittelwert, Std, RMS), Skalierung, Rausch-Stärke <code>noise·std(X)</code>.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">argmax / argmin / argsort / bincount</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p><code>argmax/argmin</code> geben den Index des Maximums/Minimums; <code>argsort</code> die Sortier-Indizes; <code>bincount</code> zählt Ganzzahl-Häufigkeiten.</p>
+          
+          <pre><code>best_k = ks[np.argmin(bics)]        # bestes Modell via BIC
+top3 = np.argsort(importances)[::-1][:3]
+np.bincount(labels)                 # Clustergrößen</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Bestes <code>k</code>/Hyperparameter wählen, Top-Features, Clustergrößen.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="kombinieren">
+        <div class="section-head">
+          <h2>1.4 Kombinieren & Mesh-Grid</h2>
+          <p>Arrays zusammenfügen und das Gitter für Plots bauen.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.meshgrid + np.c_</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p><code>meshgrid</code> erzeugt ein Koordinatengitter; <code>np.c_</code> stapelt Spalten. Zusammen bilden sie das Raster für Entscheidungsflächen.</p>
+          
+          <pre><code>xx, yy = np.meshgrid(np.linspace(x0, x1, 300),
+                     np.linspace(y0, y1, 300))
+gitter = np.c_[xx.ravel(), yy.ravel()]
+Z = model.predict(gitter).reshape(xx.shape)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Entscheidungsgrenzen visualisieren (SVM, Blatt 03 / Kapitel 3).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.vstack / np.concatenate</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Arrays zusammenfügen — <code>vstack</code> stapelt zeilenweise, <code>concatenate</code> entlang einer beliebigen Achse.</p>
+          
+          <pre><code>X = np.vstack([X_normal, X_anomalien])
+alle = np.concatenate([a, b])</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Normale + anomale Messpunkte kombinieren (Blatt 04).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.dot / np.linalg / np.interp</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p><code>dot</code> = Skalar-/Matrixprodukt, <code>linalg.norm</code> = Vektorlänge, <code>interp</code> = lineare Interpolation.</p>
+          
+          <pre><code>np.dot(w, x)               # Skalarprodukt
+np.linalg.norm(a - b)      # euklidischer Abstand
+tpr_i = np.interp(mean_fpr, fpr, tpr)   # ROC mitteln</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Abstände, ROC-Kurven über Folds mitteln (Kapitel 7).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">np.save / np.load</span>
+          <span class="ref-mod">numpy</span>
+        </div>
+        <div class="ref-body">
+          <p>Speichert/lädt Arrays im <code>.npy</code>-Format (binär, schnell).</p>
+          
+          <pre><code>np.save('daten.npy', X)
+X = np.load('daten.npy')</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Vorberechnete Datensätze laden (z.B. <code>anomaly_detection.npy</code>).</div>
+        </div>
+      </div>
+      </section>
+    </main>
+  </div>
+  <site-footer caption="Python-Referenz · NumPy &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Grundlagen&lt;/span&gt;"></site-footer>
+</body>
+</html>
