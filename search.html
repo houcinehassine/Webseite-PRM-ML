@@ -14,6 +14,8 @@
 
   <!-- Fuse.js – Client-seitige Fuzzy-Suche -->
   <script src="assets/vendor/fuse.min.js"></script>
+  <!-- Suchindex als JS-Variable (funktioniert auch mit file://) -->
+  <script src="search-index.js"></script>
 
   <style>
     /* ── Layout ─────────────────────────────────────── */
@@ -521,9 +523,8 @@
   // ── Index laden ───────────────────────────────
   async function loadSearchIndex() {
     try {
-      const resp = await fetch('search-index.json');
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      searchData = await resp.json();
+      if (!window.SEARCH_DATA) throw new Error('search-index.js nicht geladen');
+      searchData = window.SEARCH_DATA;
 
       fuseInstance = new Fuse(searchData, {
         keys: [
