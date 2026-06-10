@@ -2,31 +2,84 @@
 <html lang="de" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="description" content="Aufgabenblatt 01 – Quiz zu Kapitel 1 (Data Preparation & Feature Engineering): alle Konzepte mit Lösungserklärung und Skript-Links.">
+  <meta name="description" content="Aufgabenblatt 01 – Interaktives Multiple-Choice-Quiz zu Kapitel 1 (Data Preparation): Verständnisfragen mit Auswahl, Auswertung, Erklärung und Skript-Links.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PRM – Aufgabenblatt 01 · Kapitel 1 Quiz</title>
   <script type="module" src="../header.js"></script>
   <script type="module" src="../footer.js"></script>
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
-  <link rel="stylesheet" href="../assets/quiz.css">
   <style>
-    /* Seitenspezifisch: Link "Mehr im Skript" am Ende jeder Antwort */
+    /* ── Multiple-Choice-Quiz (seitenspezifisch, klassenbasiert) ── */
+    .mcq {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-5);
+      margin-bottom: var(--space-5);
+      box-shadow: var(--shadow-sm);
+      scroll-margin-top: 90px;
+    }
+    .mcq-head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-1); }
+    .mcq-badge {
+      font-size: 0.66rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+      padding: .14rem .5rem; border-radius: var(--radius-full);
+    }
+    .b-konzept   { background: color-mix(in oklab, #2563eb 14%, var(--color-surface)); color: #1d4ed8; }
+    .b-formel    { background: color-mix(in oklab, #7c3aed 14%, var(--color-surface)); color: #6d28d9; }
+    .b-anwendung { background: color-mix(in oklab, #16a34a 14%, var(--color-surface)); color: #15803d; }
+    .b-falle     { background: color-mix(in oklab, #dc2626 14%, var(--color-surface)); color: #b91c1c; }
+    .b-code      { background: color-mix(in oklab, #0891b2 14%, var(--color-surface)); color: #0e7490; }
+    .mcq-q { font-weight: 700; font-size: var(--text-base); line-height: 1.4; margin: var(--space-2) 0 var(--space-1); }
+    .mcq-hint { font-size: var(--text-xs); color: var(--color-text-muted); margin-bottom: var(--space-3); display:flex; align-items:center; gap:.4rem; }
+    .mcq-opt {
+      display: flex; gap: .65rem; align-items: flex-start;
+      padding: .7rem .9rem; border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md); margin-bottom: .55rem; cursor: pointer;
+      transition: background .12s, border-color .12s; font-size: var(--text-sm); line-height: 1.5;
+    }
+    .mcq-opt:hover { background: var(--color-surface-2); }
+    .mcq-opt input { margin-top: .15rem; flex: 0 0 auto; width: 17px; height: 17px; accent-color: var(--color-primary); cursor: pointer; }
+    .mcq-opt .opt-text { flex: 1; }
+    .mcq-opt .opt-mark { font-weight: 700; font-size: var(--text-xs); white-space: nowrap; opacity: 0; }
+    .mcq-opt.correct { border-color: #16a34a; background: color-mix(in oklab, #16a34a 9%, var(--color-surface)); }
+    .mcq-opt.correct .opt-mark { opacity: 1; color: #15803d; }
+    .mcq-opt.wrong   { border-color: #dc2626; background: color-mix(in oklab, #dc2626 9%, var(--color-surface)); }
+    .mcq-opt.wrong .opt-mark { opacity: 1; color: #b91c1c; }
+    .mcq-opt.missed  { border-color: #d97706; background: color-mix(in oklab, #d97706 10%, var(--color-surface)); }
+    .mcq-opt.missed .opt-mark { opacity: 1; color: #b45309; }
+    .mcq-actions { display: flex; gap: var(--space-2); margin-top: var(--space-2); flex-wrap: wrap; }
+    .mcq-check, .mcq-reset {
+      padding: .55rem 1.2rem; border-radius: var(--radius-md); font-weight: 700;
+      font-size: var(--text-sm); cursor: pointer; font-family: inherit; border: none;
+    }
+    .mcq-check { background: var(--color-primary); color: #fff; }
+    .mcq-check:hover { filter: brightness(1.07); }
+    .mcq-reset { background: var(--color-surface-2); color: var(--color-text-muted); border: 1px solid var(--color-border); }
+    .mcq-result { display: none; margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px dashed var(--color-border); }
+    .mcq-result.show { display: block; }
+    .mcq-verdict { font-weight: 700; margin-bottom: var(--space-2); font-size: var(--text-sm); }
+    .mcq-verdict.ok   { color: #15803d; }
+    .mcq-verdict.part { color: #b45309; }
+    .mcq-exp { font-size: var(--text-sm); line-height: 1.75; color: var(--color-text); }
+    .mcq-exp code { font-family: var(--font-mono); font-size: .85em; background: var(--color-surface-2); padding: .08em .35em; border-radius: 4px; color: var(--color-primary); }
     .frage-link {
-      display: inline-flex; align-items: center; gap: .4rem;
-      margin-top: var(--space-4);
-      font-size: var(--text-xs); font-weight: 700;
-      color: var(--color-primary); text-decoration: none;
+      display: inline-flex; align-items: center; gap: .4rem; margin-top: var(--space-4);
+      font-size: var(--text-xs); font-weight: 700; color: var(--color-primary); text-decoration: none;
       background: var(--color-primary-highlight);
       border: 1px solid color-mix(in oklab, var(--color-primary) 22%, transparent);
-      padding: .4rem .85rem; border-radius: var(--radius-full);
-      transition: background .15s, transform .15s;
+      padding: .4rem .85rem; border-radius: var(--radius-full); transition: background .15s, transform .15s;
     }
-    .frage-link:hover {
-      background: color-mix(in oklab, var(--color-primary) 16%, var(--color-surface));
-      transform: translateX(2px);
+    .frage-link:hover { background: color-mix(in oklab, var(--color-primary) 16%, var(--color-surface)); transform: translateX(2px); }
+    .quiz-progress {
+      position: sticky; top: 72px; z-index: 5;
+      background: color-mix(in oklab, var(--color-primary) 8%, var(--color-surface));
+      border: 1px solid var(--color-border); border-radius: var(--radius-lg);
+      padding: var(--space-3) var(--space-4); margin-bottom: var(--space-6);
+      font-size: var(--text-sm); font-weight: 600; display: flex; align-items: center; gap: var(--space-3);
     }
-    .badge-anwendung { background: color-mix(in oklab, #16a34a 14%, var(--color-surface)); color: #15803d; }
+    .quiz-progress .pbar { flex: 1; height: 8px; background: var(--color-surface-2); border-radius: 99px; overflow: hidden; }
+    .quiz-progress .pfill { height: 100%; width: 0; background: var(--color-primary); transition: width .3s; }
   </style>
 </head>
 <body>
@@ -42,487 +95,417 @@
             <span class="eyebrow">Aufgabenblatt 01 · Kapitel 1</span>
             <h1>Quiz – <span class="key" style="--key-color:var(--color-primary)">Data Preparation</span></h1>
             <p>
-              32 Fragen über den <strong>gesamten</strong> Stoff von Kapitel 1 – von der Feature-Definition
-              über Encoding, Autoencoder und Feature Selection bis zum Scaling. Jede Antwort wird
-              erklärt und verlinkt direkt zur passenden Stelle im Skript.
+              Interaktives Verständnis-Quiz über den <strong>gesamten</strong> Stoff von Kapitel 1.
+              Wähle bei jeder Frage alle zutreffenden Antworten aus – <strong>es können 1 bis alle richtig sein</strong>.
+              Klicke auf <strong>„Antworten prüfen"</strong> und du siehst sofort, was richtig und was falsch war,
+              mit Erklärung und Link ins Skript.
             </p>
             <div class="pill-row">
-              <span class="pill">Was ist ein Feature?</span>
-              <span class="pill">Feature-Matrix N×K</span>
-              <span class="pill">t-SNE</span>
-              <span class="pill">Encoding</span>
-              <span class="pill">Autoencoder</span>
-              <span class="pill">Feature Selection</span>
-              <span class="pill">Scaling</span>
+              <span class="pill">Mehrfachauswahl</span>
+              <span class="pill">Sofort-Feedback</span>
+              <span class="pill">Erklärung + Skript-Link</span>
             </div>
           </div>
           <aside class="hero-note">
             <h2 style="font-size:var(--text-lg)">So funktioniert's</h2>
             <p>
-              Lies jede Frage und überlege deine Antwort. Klicke dann auf die Frage,
-              um die <strong>Musterlösung mit Erklärung</strong> aufzuklappen. Über den
-              Link <strong>„→ Mehr im Skript"</strong> springst du direkt zur passenden Seite.
-              Wer alle 32 Fragen beantworten kann, beherrscht Kapitel 1 vollständig.
+              Die Antwortoptionen sind <strong>bewusst knifflig</strong> – mehrere klingen plausibel.
+              Kreuze alle an, die du für richtig hältst, und prüfe.
+              <span style="color:#15803d">✓ Grün</span> = richtig angekreuzt,
+              <span style="color:#b91c1c">✗ Rot</span> = falsch angekreuzt,
+              <span style="color:#b45309">● Orange</span> = richtig, aber übersehen.
             </p>
           </aside>
         </div>
       </section>
 
-      <!-- ═══════════════════════════════════════════════
-           1 · GRUNDLAGEN & FEATURE-DEFINITION (Seiten 1–2)
-      ════════════════════════════════════════════════════ -->
-      <section class="section" id="grundlagen">
-        <div class="section-head">
-          <h2>📚 1 · Grundlagen &amp; Feature-Definition</h2>
-          <p>Worum geht es im Feature Engineering – und was macht ein gutes Feature aus? (Seiten 1–2)</p>
-        </div>
+      <div class="quiz-progress">
+        <span id="prog-text">0 / 0 geprüft</span>
+        <span class="pbar"><span class="pfill" id="prog-fill"></span></span>
+        <span id="prog-score"></span>
+      </div>
 
-        <details class="frage" data-nr="1">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F1 · Warum ist Feature Engineering so entscheidend für die Modellgüte?</summary>
-          <div class="frage-answer">
-            Ein ML-Modell nutzt <strong>Features, um Labels vorherzusagen</strong> – die Güte des Modells
-            hängt <strong>maßgeblich von der Qualität der Features ab</strong>, unabhängig vom gewählten Algorithmus.
-            <ul>
-              <li>Der größte Aufwand im Data-Science-Prozess steckt in <strong>Datenbereinigung und Feature Engineering</strong>; die Modellierung macht gefühlt nur ~20 % aus.</li>
-              <li><strong>„Garbage in, garbage out"</strong>: Auch das beste Modell kann aus schlechten Features keine guten Vorhersagen machen.</li>
-              <li>Feature Engineering ist <strong>keine Vorstufe</strong>, sondern ein gleichwertiger Teil des ML-Projekts.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page01.html#warum">→ Mehr im Skript: Seite 1 · Warum Feature Engineering?</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="2">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F2 · Nenne die vier Themenblöcke (Agenda) von Kapitel 1.</summary>
-          <div class="frage-answer">
-            <ol>
-              <li><strong>Was ist ein Feature?</strong> – Definition, Eigenschaften, Feature-Matrix (Seiten 2–3)</li>
-              <li><strong>Feature-Extraktion</strong> – Zeitserien, Encoding, Bag-of-Words, Autoencoder, Haar (Seiten 4–6)</li>
-              <li><strong>Feature-Selektion</strong> – Curse of Dimensionality, VarianceThreshold, SelectKBest (Seite 7)</li>
-              <li><strong>Feature Scaling &amp; Normalisierung</strong> – MinMax, Standardisierung, Power Transformations (Seite 8)</li>
-            </ol>
-            <a class="frage-link" href="../Kapitel1/Page01.html#agenda">→ Mehr im Skript: Seite 1 · Die 4 Agenda-Punkte</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="3">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F3 · Definiere präzise, was ein „Feature" ist.</summary>
-          <div class="frage-answer">
-            Ein Feature ist eine <strong>individuelle, messbare Eigenschaft</strong> eines beobachteten Phänomens.
-            Formal: <strong>Feature Engineering bildet eine messbare Eigenschaft auf einen Skalar ab.</strong>
-            <ul>
-              <li>Features können die Daten selbst sein <em>oder</em> daraus abgeleitete Größen (meist aggregiert).</li>
-              <li>Durch das Ableiten von Features verringert man in der Regel bereits die <strong>Dimensionalität</strong> des Problems.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page02.html#definition">→ Mehr im Skript: Seite 2 · Was ist ein Feature?</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="4">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F4 · Welche drei Eigenschaften muss ein gutes Feature erfüllen?</summary>
-          <div class="frage-answer">
-            <ol>
-              <li><strong>Informativ</strong> – trägt Information über das Phänomen, das wir vorhersagen wollen.</li>
-              <li><strong>Diskriminativ</strong> – erklärt Unterschiede/Strukturen in den Daten (nicht für alle Klassen gleich).</li>
-              <li><strong>Unabhängig</strong> – korreliert nicht zu stark mit anderen Features (vermeidet Redundanz).</li>
-            </ol>
-            Merksatz: <em>Gute Features sind informativ, diskriminativ und (weitgehend) unabhängig.</em> Fehlt eine Eigenschaft, leidet die Modellgüte.
-            <a class="frage-link" href="../Kapitel1/Page02.html#eigenschaften">→ Mehr im Skript: Seite 2 · Drei Eigenschaften</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="5">
-          <summary><span class="badge badge-formel">Formel</span>&nbsp;F5 · Was bedeuten N und K in der Feature-Matrix N×K?</summary>
-          <div class="frage-answer">
-            <strong>N = Anzahl der Samples</strong> (Beobachtungen) → jede <strong>Zeile</strong> ist ein Datenpunkt
-            (z. B. eine Messung, ein Bild, ein Dokument).<br>
-            <strong>K = Anzahl der Features</strong> → jede <strong>Spalte</strong> ist ein Feature
-            (z. B. Temperatur, Frequenz, Pixel-Intensität, Worthäufigkeit).<br>
-            Der Eintrag x<sub>ik</sub> ist der Wert von Feature k für Sample i.
-            <a class="frage-link" href="../Kapitel1/Page02.html#feature-matrix">→ Mehr im Skript: Seite 2 · Feature-Matrix N×K</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="6">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F6 · Warum ist Feature Engineering ein iterativer Feedback-Loop?</summary>
-          <div class="frage-answer">
-            Features und Modell beeinflussen sich gegenseitig: Man erzeugt Features, trainiert das Modell,
-            bewertet die Güte und <strong>verbessert dann die Features</strong> – ein Kreislauf.
-            Im Erzeugen guter Features steckt <strong>Domänenwissen</strong>: Wir unterstützen das Modell durch
-            unser Verständnis der Daten. Die Pipeline: <em>Quellen → Rohdaten → (Bereinigen + Transformieren) → Features → Modell → Erkenntnisse.</em>
-            <a class="frage-link" href="../Kapitel1/Page02.html#feedback-loop">→ Mehr im Skript: Seite 2 · Iterativer Feedback-Loop</a>
-          </div>
-        </details>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-           2 · FEATURE-RAUM & t-SNE (Seite 3)
-      ════════════════════════════════════════════════════ -->
-      <section class="section" id="feature-raum">
-        <div class="section-head">
-          <h2>📐 2 · Feature-Raum &amp; Visualisierung</h2>
-          <p>Die Feature-Matrix als geometrischer Raum – und wie t-SNE hochdimensionale Daten sichtbar macht. (Seite 3)</p>
-        </div>
-
-        <details class="frage" data-nr="7">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F7 · Inwiefern ist eine Feature-Matrix mehr als nur eine Tabelle?</summary>
-          <div class="frage-answer">
-            Jede <strong>Zeile wird zu einem Punkt (Vektor) im K-dimensionalen Feature-Raum</strong> –
-            die K Feature-Werte sind die <strong>Koordinaten</strong> dieses Punktes.
-            <ul>
-              <li>Im Feature-Raum werden <strong>Cluster, Abstände und Strukturen</strong> sichtbar, die in der rohen Tabelle unsichtbar sind.</li>
-              <li>ML-Algorithmen operieren in diesem Raum: k-Means findet Cluster, SVM trennt Klassen durch Hyperebenen.</li>
-              <li>Kernidee: Feature Engineering = den Raum so formen, dass ähnliche Punkte nah beieinander und Klassen trennbar werden.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page03.html#geometrie">→ Mehr im Skript: Seite 3 · Geometrische Interpretation</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="8">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F8 · Was macht t-SNE, und welche Struktur bleibt dabei erhalten?</summary>
-          <div class="frage-answer">
-            <strong>t-SNE</strong> (t-distributed Stochastic Neighbor Embedding) ist eine <strong>nicht-lineare</strong>
-            Methode, die hochdimensionale Daten auf 2D/3D projiziert, <strong>ohne die lokale Nachbarschaftsstruktur zu zerstören</strong>.
-            <ul>
-              <li>Im Hochdim. wird je Punktepaar eine <strong>Ähnlichkeitswahrscheinlichkeit</strong> berechnet (Gauß-Verteilung der Abstände).</li>
-              <li>Im Zielraum werden Punkte iterativ so verschoben, dass diese Ähnlichkeitsstruktur erhalten bleibt (t-Verteilung).</li>
-              <li><strong>Lokale Struktur ≫ globale</strong>: nahe Nachbarn bleiben nah; globale Abstände zwischen Clustern sind weniger aussagekräftig.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page03.html#tsne">→ Mehr im Skript: Seite 3 · t-SNE Erklärung</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="9">
-          <summary><span class="badge badge-falle">Falle</span>&nbsp;F9 · Der Digits-Datensatz hat 8×8-Pixel-Bilder. Wie viele Features sind das – und warum braucht man t-SNE?</summary>
-          <div class="frage-answer">
-            8×8 = <strong>64 Features</strong> pro Bild. Ein 64-dimensionaler Raum ist <strong>nicht direkt visualisierbar</strong>
-            (Menschen sehen max. 3D). t-SNE projiziert die 64 Dimensionen auf 2D, sodass die Ziffern als
-            getrennte Cluster sichtbar werden – obwohl geometrische Konzepte (Abstände, Cluster, Hyperebenen) auch in 64D weiter gelten.
-            <a class="frage-link" href="../Kapitel1/Page03.html#digits">→ Mehr im Skript: Seite 3 · Embedding Digits</a>
-          </div>
-        </details>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-           3 · FEATURE EXTRACTION: ZEITSERIEN (Seite 4)
-      ════════════════════════════════════════════════════ -->
-      <section class="section" id="zeitserien">
-        <div class="section-head">
-          <h2>⏱️ 3 · Feature Extraction aus Zeitserien</h2>
-          <p>Vom Rohsignal zum Merkmalsvektor – Strategien zwischen Domänen- und Datengetrieben. (Seite 4)</p>
-        </div>
-
-        <details class="frage" data-nr="10">
-          <summary><span class="badge badge-formel">Formel</span>&nbsp;F10 · Wie lautet die formale Abbildung der Feature Extraction aus einer Zeitserie?</summary>
-          <div class="frage-answer">
-            <strong>f : ℝ<sup>T</sup> → ℝ<sup>K</sup></strong> – aus einem Rohsignal mit <strong>T Messpunkten</strong>
-            wird ein kompakter <strong>Feature-Vektor mit K Skalaren</strong> erzeugt (üblicherweise K ≪ T).
-            <a class="frage-link" href="../Kapitel1/Page04.html#mathematik">→ Mehr im Skript: Seite 4 · Mathematische Formulierung</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="11">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F11 · Beschreibe das Spektrum „domänengetrieben ↔ datengetrieben".</summary>
-          <div class="frage-answer">
-            Feature Extraction ist ein Spektrum zwischen zwei Polen:
-            <ul>
-              <li><strong>Domänengetrieben (links):</strong> statistische Features (Mittelwert, Varianz, Min, Max, RMS) und Frequenz-Features (FFT, Spektralleistung) – erfordern Domänenwissen, sind aber interpretierbar.</li>
-              <li><strong>Hybrid:</strong> Bibliotheken wie <code>tsfresh</code>/<code>TSFEL</code> berechnen hunderte Features automatisch.</li>
-              <li><strong>Datengetrieben (rechts):</strong> Autoencoder bzw. Deep Learning (CNN/RNN) lernen Features direkt aus den Rohdaten – flexibel, aber weniger interpretierbar.</li>
-            </ul>
-            Faustregel: <em>Je mehr Domänenwissen, desto weiter links kann man ansetzen.</em>
-            <a class="frage-link" href="../Kapitel1/Page04.html#spektrum">→ Mehr im Skript: Seite 4 · Domänen- vs. Datengetrieben</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="12">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F12 · Worin unterscheiden sich event-triggered und kontinuierliche Zeitserien?</summary>
-          <div class="frage-answer">
-            <strong>Event-triggered:</strong> Die Messung wird durch ein Ereignis ausgelöst (z. B. Motorstart).
-            Alle Zeitserien haben dieselbe <strong>feste Länge T</strong> und sind am Trigger ausgerichtet → direkt vergleichbar.<br>
-            <strong>Kontinuierlich:</strong> Die Messung läuft ununterbrochen, ohne klares Start-/Endereignis.
-            Für die Extraction schiebt man <strong>Fenster (Windows)</strong> über das Signal.
-            <a class="frage-link" href="../Kapitel1/Page04.html#event-triggered">→ Mehr im Skript: Seite 4 · Event vs. Kontinuierlich</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="13">
-          <summary><span class="badge badge-anwendung">Anwendung</span>&nbsp;F13 · Beschreibe das Motorausfall-Szenario als Feature-Extraction-Beispiel.</summary>
-          <div class="frage-answer">
-            Ziel: einen <strong>Motorausfall erkennen, bevor er passiert</strong>. Verfügbare Daten:
-            <strong>Stromverbrauch-Zeitserien</strong> (Ampere über Zeit). Aus dem Rohsignal (T Messpunkte) werden
-            <strong>K Features</strong> extrahiert, die einen Ausfall anzeigen (z. B. steigende Grundfrequenz,
-            veränderte Harmonische, zunehmende Varianz). Diese Features gehen dann an ein Klassifikationsmodell (z. B. Random Forest).
-            <a class="frage-link" href="../Kapitel1/Page04.html#szenario">→ Mehr im Skript: Seite 4 · Zeitserien-Szenario</a>
-          </div>
-        </details>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-           4 · ENCODING & TEXT (Seite 5)
-      ════════════════════════════════════════════════════ -->
-      <section class="section" id="encoding">
-        <div class="section-head">
-          <h2>🔤 4 · Encoding &amp; Text Features</h2>
-          <p>Kategoriale Variablen und Texte in Zahlen übersetzen – und die fit/transform-Regel. (Seite 5)</p>
-        </div>
-
-        <details class="frage" data-nr="14">
-          <summary><span class="badge badge-falle">Falle</span>&nbsp;F14 · Warum ist es falsch, Kategorien einfach als 1, 2, 3 … zu nummerieren?</summary>
-          <div class="frage-answer">
-            Weil das Modell die Zahlen als <strong>Reihenfolge/Größenordnung</strong> interpretiert. Bei
-            Apple=1, Banana=2, Coffee=3 schließt das Modell: „Coffee ist dreimal so viel wie Apple" –
-            eine <strong>künstliche Ordnung</strong>, die inhaltlich nicht existiert und das Modell verzerrt.
-            ML-Modelle sind Rechenmaschinen und brauchen Zahlen, aber die Kodierung darf keine falsche Struktur einführen.
-            <a class="frage-link" href="../Kapitel1/Page05.html#problem-kategoriale">→ Mehr im Skript: Seite 5 · Kategoriale Variablen</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="15">
-          <summary><span class="badge badge-code">Code</span>&nbsp;F15 · Was macht der LabelEncoder – und wann ist er trotz seines Problems OK?</summary>
-          <div class="frage-answer">
-            Der <code>LabelEncoder</code> weist jeder Kategorie eine <strong>eindeutige ganze Zahl</strong> zu –
-            <strong>alphabetisch sortiert</strong> (apple=0, banana=1, coffee=2, milk=3).
-            Problem: erzeugt eine <strong>künstliche Ordnung</strong>.
-            <ul>
-              <li>OK ist er nur bei <strong>ordinalen Variablen</strong>, die wirklich eine Reihenfolge haben (klein=1, mittel=2, groß=3).</li>
-              <li>Code: <code>LabelEncoder().fit_transform(categories)</code> → <code>array([0, 0, 3, 1, 2])</code>.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page05.html#label-encoding">→ Mehr im Skript: Seite 5 · Label-Encoding</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="16">
-          <summary><span class="badge badge-code">Code</span>&nbsp;F16 · Wie löst One-Hot-Encoding das Ordnungs-Problem – und was ist sein Nachteil?</summary>
-          <div class="frage-answer">
-            One-Hot-Encoding gibt <strong>jeder Kategorie eine eigene binäre Spalte</strong> (0/1). Dadurch sind
-            alle Kategorien <strong>gleichwertig</strong> – keine künstliche Ordnung.<br>
-            <strong>Nachteil:</strong> Aus 1 Spalte werden <strong>K Spalten</strong> (K = Anzahl Kategorien) → die Dimension steigt stark.
-            Bei sehr vielen Kategorien (z. B. 1000 Produkte) nutzt man stattdessen <strong>Feature Hashing</strong>.
-            <a class="frage-link" href="../Kapitel1/Page05.html#one-hot-encoding">→ Mehr im Skript: Seite 5 · One-Hot-Encoding</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="17">
-          <summary><span class="badge badge-falle">Falle</span>&nbsp;F17 · Was ist der Unterschied zwischen .fit(), .transform() und .fit_transform() – und wann ist .fit_transform() gefährlich?</summary>
-          <div class="frage-answer">
-            <code>.fit()</code> <strong>lernt</strong> die Parameter (z. B. die Kategorien, Mittelwert, Min/Max).
-            <code>.transform()</code> <strong>wendet</strong> sie an. <code>.fit_transform()</code> macht beides in einem Schritt.
-            <ul>
-              <li><strong>Gefährlich:</strong> <code>.fit_transform()</code> auf den <strong>Testdaten</strong> aufrufen → der Encoder/Scaler lernt aus den Testdaten = <strong>Data Leakage</strong>.</li>
-              <li>Korrekt: <code>fit_transform</code> nur auf <strong>Trainingsdaten</strong>, danach auf Testdaten nur <code>transform</code>.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page05.html#sklearn-syntax">→ Mehr im Skript: Seite 5 · sklearn .fit() / .transform()</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="18">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F18 · Was macht Bag-of-Words aus einem Text?</summary>
-          <div class="frage-answer">
-            Bag-of-Words zählt die <strong>Häufigkeit jedes Wortes</strong> in einem Text und repräsentiert das Dokument
-            als Vektor dieser Worthäufigkeiten – <strong>ohne die Reihenfolge der Wörter</strong> zu beachten.
-            In sklearn: <code>CountVectorizer</code>. Jede Spalte steht für ein Wort des Vokabulars, jeder Wert für dessen Anzahl.
-            <a class="frage-link" href="../Kapitel1/Page05.html#bag-of-words">→ Mehr im Skript: Seite 5 · Bag-of-Words</a>
-          </div>
-        </details>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-           5 · AUTOENCODER & HAAR (Seite 6)
-      ════════════════════════════════════════════════════ -->
-      <section class="section" id="autoencoder-haar">
-        <div class="section-head">
-          <h2>🧠 5 · Autoencoder &amp; Haar Features</h2>
-          <p>Zwei sehr unterschiedliche Wege, Features zu gewinnen – gelernt vs. geometrisch berechnet. (Seite 6)</p>
-        </div>
-
-        <details class="frage" data-nr="19">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F19 · Beschreibe die Autoencoder-Architektur. Welcher Teil liefert die Features?</summary>
-          <div class="frage-answer">
-            Ein Autoencoder besteht aus <strong>Encoder → Bottleneck → Decoder</strong>:
-            <ul>
-              <li><strong>Encoder</strong> komprimiert den Input Schicht für Schicht (wichtige Info behalten, Redundanz verwerfen).</li>
-              <li><strong>Bottleneck (Latent Space)</strong> – die schmalste Schicht – <strong>ist der Feature-Vektor</strong> (K Neuronen = K Features).</li>
-              <li><strong>Decoder</strong> rekonstruiert den Input; er wird <strong>nur fürs Training</strong> gebraucht. Für die Feature Extraction nutzt man danach nur den Encoder.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page06.html#autoencoder">→ Mehr im Skript: Seite 6 · Autoencoder-Architektur</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="20">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F20 · Worauf wird ein Autoencoder trainiert, und warum ist er „unüberwacht"?</summary>
-          <div class="frage-answer">
-            Er wird darauf trainiert, seinen <strong>Input möglichst genau zu rekonstruieren</strong>; als Verlust dient
-            typischerweise der <strong>Mean Squared Error</strong> zwischen Input und Output.
-            Da das Ziel der Input selbst ist, braucht man <strong>keine Labels → unüberwachtes Lernen</strong>.
-            Anwendungen: Dimensionsreduktion (Alternative zu PCA), Anomalie-Erkennung (hoher Rekonstruktionsfehler = Anomalie), Denoising, generatives Modellieren (VAE).
-            <a class="frage-link" href="../Kapitel1/Page06.html#autoencoder">→ Mehr im Skript: Seite 6 · Training &amp; Anwendungen</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="21">
-          <summary><span class="badge badge-formel">Formel</span>&nbsp;F21 · Wie berechnet ein Haar-Feature einen Skalar aus einem Bild?</summary>
-          <div class="frage-answer">
-            Ein Haar-Feature berechnet die <strong>Differenz der mittleren Pixelintensitäten</strong> zwischen einer
-            hellen (weißen) und einer dunklen (schwarzen) rechteckigen Region:
-            <br><strong>Haar = Σ(weiße Region) − Σ(schwarze Region)</strong> → ein einzelner Skalar.
-            <ul>
-              <li>Misst Hell-Dunkel-Muster (Kanten, Konturen, Texturen) und ist robust gegen Beleuchtungsschwankungen.</li>
-              <li>Bekannt aus dem <strong>Viola-Jones-Algorithmus</strong> zur Gesichtserkennung.</li>
-              <li>Mit dem <strong>Integral-Image-Trick</strong> in <strong>O(1)</strong> berechenbar – unabhängig von der Fenstergröße.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page06.html#haar-features">→ Mehr im Skript: Seite 6 · Haar-Features</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="22">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F22 · Wo im Spektrum (Seite 4) ordnet sich der Autoencoder ein?</summary>
-          <div class="frage-answer">
-            Der Autoencoder ist ein <strong>datengetriebener Ansatz</strong> (rechte Seite des Spektrums). Er lernt Features
-            direkt aus den Daten <strong>ohne Domänenwissen</strong> – das macht ihn sehr flexibel, aber
-            <strong>weniger interpretierbar</strong> als z. B. statistische Zeitserien-Features.
-            <a class="frage-link" href="../Kapitel1/Page06.html#autoencoder">→ Mehr im Skript: Seite 6 · Einordnung ins Spektrum</a>
-          </div>
-        </details>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-           6 · FEATURE SELECTION (Seite 7)
-      ════════════════════════════════════════════════════ -->
-      <section class="section" id="selection">
-        <div class="section-head">
-          <h2>🎯 6 · Feature Selection</h2>
-          <p>Welche Features sollen ins Modell? Curse of Dimensionality, Occam's Razor und drei Methoden. (Seite 7)</p>
-        </div>
-
-        <details class="frage" data-nr="23">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F23 · Nenne die vier Gründe für Feature Selection.</summary>
-          <div class="frage-answer">
-            <ol>
-              <li><strong>Curse of Dimensionality</strong> – der Feature-Raum wächst exponentiell, Daten werden spärlich.</li>
-              <li><strong>Garbage In / Garbage Out</strong> – irrelevante/rauschbehaftete Features fördern Overfitting.</li>
-              <li><strong>Occam's Razor</strong> – einfachere Modelle generalisieren besser und sind interpretierbarer.</li>
-              <li><strong>Effizienz</strong> – weniger Features = kürzeres Training, weniger Speicher, schnellere Inferenz.</li>
-            </ol>
-            <a class="frage-link" href="../Kapitel1/Page07.html#warum-selection">→ Mehr im Skript: Seite 7 · Warum überhaupt?</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="24">
-          <summary><span class="badge badge-falle">Falle</span>&nbsp;F24 · Was besagt der „Curse of Dimensionality" und welche Algorithmen leiden besonders?</summary>
-          <div class="frage-answer">
-            Mit jeder zusätzlichen Dimension wächst der Raum <strong>exponentiell</strong> (für gleiche Datendichte:
-            1 Feature ~10 Punkte, 2 → 100, 3 → 1.000, K → 10<sup>K</sup>). Dieselben N Punkte werden immer <strong>spärlicher</strong> verteilt.
-            <ul>
-              <li><strong>Abstandsbasierte Algorithmen (k-NN, SVM, k-Means) leiden besonders</strong>: in hohen Dimensionen werden alle Abstände fast gleich groß → „nächster Nachbar" wird bedeutungslos.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page07.html#curse-dimensionality">→ Mehr im Skript: Seite 7 · Curse of Dimensionality</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="25">
-          <summary><span class="badge badge-code">Code</span>&nbsp;F25 · Was macht VarianceThreshold – und berücksichtigt es das Label?</summary>
-          <div class="frage-answer">
-            <code>VarianceThreshold</code> entfernt Features, deren <strong>Varianz unter einem Schwellwert</strong> liegt –
-            <strong>ohne das Label zu berücksichtigen</strong> (unsupervised).
-            <ul>
-              <li><strong>Konstante Features</strong> (Varianz = 0, <code>threshold=0.0</code>) tragen keine Information → entfernen.</li>
-              <li><strong>Low Variance</strong>: fast konstante Features haben wenig Diskriminationskraft.</li>
-              <li>Vorher: Features mit sehr vielen <strong>fehlenden Werten</strong> behandeln/entfernen.</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page07.html#einfache-methoden">→ Mehr im Skript: Seite 7 · VarianceThreshold</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="26">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F26 · Was besagt Occam's Razor im Kontext von ML?</summary>
-          <div class="frage-answer">
-            „Wenn zwei Modelle gleich gut erklären, bevorzuge das <strong>einfachere</strong>." In ML heißt das:
-            das Modell mit den <strong>wenigsten relevanten Features</strong> generalisiert besser auf neue Daten und ist
-            weniger anfällig für Overfitting. Ziel der Selection: die <strong>minimale Feature-Menge mit maximalem Informationsgehalt</strong>
-            über das Label – ohne redundante oder irrelevante Features.
-            <a class="frage-link" href="../Kapitel1/Page07.html#occam">→ Mehr im Skript: Seite 7 · Occam's Razor</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="27">
-          <summary><span class="badge badge-code">Code</span>&nbsp;F27 · Wie wählt man mit SelectKBest die besten Features aus?</summary>
-          <div class="frage-answer">
-            <code>SelectKBest</code> behält die <strong>k Features mit dem höchsten Score</strong> bezüglich des Labels.
-            Der Score kommt von einer <strong>Scoring-Funktion</strong>, z. B. <code>mutual_info_classif</code>
-            (Transinformation für Klassifikation). Beispiel aus dem Skript: 64 Features → 20 auswählen.
-            Im Gegensatz zu VarianceThreshold ist dies <strong>supervised</strong> (nutzt das Label).
-            <a class="frage-link" href="../Kapitel1/Page07.html#selectkbest">→ Mehr im Skript: Seite 7 · SelectKBest</a>
-          </div>
-        </details>
-      </section>
-
-      <!-- ═══════════════════════════════════════════════
-           7 · FEATURE SCALING (Seite 8)
-      ════════════════════════════════════════════════════ -->
-      <section class="section" id="scaling">
-        <div class="section-head">
-          <h2>⚖️ 7 · Feature Scaling &amp; Normalisierung</h2>
-          <p>Gleiche Gewichtung für alle Features – MinMax, Z-Score und Power Transformations. (Seite 8)</p>
-        </div>
-
-        <details class="frage" data-nr="28">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F28 · Warum muss man Features oft skalieren?</summary>
-          <div class="frage-answer">
-            Features haben oft <strong>sehr unterschiedliche Wertebereiche</strong> (z. B. Alter 25 vs. Einkommen 45.000 €).
-            Ohne Skalierung <strong>dominiert das großskalige Feature</strong> alle Distanz- und Gradientenberechnungen –
-            kleine Features werden praktisch ignoriert. Nach dem Skalieren tragen alle Features <strong>gleichberechtigt</strong> bei.
-            <a class="frage-link" href="../Kapitel1/Page08.html#warum-scaling">→ Mehr im Skript: Seite 8 · Warum skalieren?</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="29">
-          <summary><span class="badge badge-falle">Falle</span>&nbsp;F29 · Welche Algorithmen sind skalensensitiv – und welche nicht?</summary>
-          <div class="frage-answer">
-            <strong>Skalensensitiv (immer skalieren):</strong> k-NN, SVM, k-Means, PCA, Lineare &amp; Logistische Regression,
-            Gradient Descent, Neuronale Netze – alle, die auf <strong>Abständen oder Gradienten</strong> beruhen.<br>
-            <strong>Nicht skalensensitiv (Skalieren optional):</strong> Decision Tree, Random Forest, Gradient Boosting, Naive Bayes –
-            sie treffen Entscheidungen über <strong>Schwellwerte pro Feature</strong>, unabhängig von der Skala.
-            <a class="frage-link" href="../Kapitel1/Page08.html#warum-scaling">→ Mehr im Skript: Seite 8 · Skalensensitivität</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="30">
-          <summary><span class="badge badge-formel">Formel</span>&nbsp;F30 · Wie lautet die MinMax-Formel – und was ist ihr größter Nachteil?</summary>
-          <div class="frage-answer">
-            <strong>X′ = (X − X<sub>min</sub>) / (X<sub>max</sub> − X<sub>min</sub>) × (max − min) + min</strong><br>
-            Skaliert auf einen festen Bereich, standardmäßig <strong>[0, 1]</strong>. X<sub>min</sub>/X<sub>max</sub> stammen aus den <strong>Trainingsdaten</strong>.
-            <ul>
-              <li><strong>Nachteil – Ausreißer:</strong> Ein einzelner Extremwert „streckt" die Skala, alle anderen Werte werden in einen engen Bereich gedrückt.</li>
-              <li>Lösung: <strong>RobustScaler</strong> (skaliert anhand von Quartilen).</li>
-            </ul>
-            <a class="frage-link" href="../Kapitel1/Page08.html#minmax">→ Mehr im Skript: Seite 8 · MinMax-Transformation</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="31">
-          <summary><span class="badge badge-formel">Formel</span>&nbsp;F31 · Wie lautet die Z-Score-Standardisierung, und auf welche Werte transformiert sie?</summary>
-          <div class="frage-answer">
-            <strong>Z = (X − μ) / σ</strong> mit μ = Mittelwert und σ = Standardabweichung der <strong>Trainingsdaten</strong>.
-            Sie transformiert Features auf <strong>Mittelwert 0 und Standardabweichung 1</strong> und ist die
-            <strong>robusteste und meistgenutzte</strong> Methode (sklearn: <code>StandardScaler</code>). Anders als MinMax ist sie unempfindlicher gegenüber Ausreißern.
-            <a class="frage-link" href="../Kapitel1/Page08.html#standardisierung">→ Mehr im Skript: Seite 8 · Standardisierung (Z-Score)</a>
-          </div>
-        </details>
-
-        <details class="frage" data-nr="32">
-          <summary><span class="badge badge-konzept">Konzept</span>&nbsp;F32 · Wozu dienen Power Transformations (z. B. Box-Cox)?</summary>
-          <div class="frage-answer">
-            Power Transformations (z. B. <strong>Box-Cox</strong>, sklearn: <code>PowerTransformer</code>) machen
-            <strong>schiefe Verteilungen normalverteilungsähnlicher</strong>. Das hilft Verfahren, die annähernd
-            normalverteilte Features erwarten, und stabilisiert die Varianz. Sie gehen über reines Skalieren hinaus,
-            weil sie die <strong>Form der Verteilung</strong> verändern.
-            <a class="frage-link" href="../Kapitel1/Page08.html#power-transformations">→ Mehr im Skript: Seite 8 · Power Transformations</a>
-          </div>
-        </details>
-      </section>
+      <div id="quiz-root"></div>
 
     </main>
   </div>
-  <site-footer caption="Aufgabenblatt 01 · Kapitel 1 – Quiz mit Lösungen &amp; Skript-Links"></site-footer>
+  <site-footer caption="Aufgabenblatt 01 · Kapitel 1 – Interaktives Quiz mit Lösungen &amp; Skript-Links"></site-footer>
+
+  <script>
+  /* ════════════════ QUIZ-DATEN (Kapitel 1) ════════════════
+     Jede Frage: badge, q, optionen [{t, c}], exp, link.
+     c:true = richtige Option. Anzahl richtiger Optionen variiert (1..alle). */
+  const SECTIONS = [
+  { id:'grundlagen', icon:'📚', title:'1 · Grundlagen & Feature-Definition',
+    intro:'Worum geht es im Feature Engineering – und was macht ein gutes Feature aus? (Seiten 1–2)',
+    questions:[
+    { badge:'konzept', q:'Was trifft auf die Rolle des Feature Engineerings im ML-Prozess zu?',
+      options:[
+        {t:'Die Modellgüte hängt maßgeblich von der Qualität der Features ab – unabhängig vom Algorithmus.', c:true},
+        {t:'Datenbereinigung und Feature Engineering machen den größten Teil des Aufwands aus, nicht die Modellierung.', c:true},
+        {t:'Feature Engineering ist nur eine optionale Vorstufe; das eigentliche Lernen passiert allein im Modell.', c:false},
+        {t:'„Garbage in, garbage out": schlechte Features kann auch das beste Modell nicht ausgleichen.', c:true},
+      ],
+      exp:'Feature Engineering ist ein <strong>gleichwertiger</strong> Teil des ML-Projekts (keine bloße Vorstufe). Der größte Aufwand steckt in Datenaufbereitung/Features; die Modellgüte hängt stark von der Feature-Qualität ab. Daher gilt „garbage in, garbage out".',
+      link:{h:'Page01.html#warum', l:'Seite 1 · Warum Feature Engineering?'} },
+
+    { badge:'konzept', q:'Welche Eigenschaften muss ein gutes Feature erfüllen?',
+      options:[
+        {t:'Informativ – trägt Information über das vorherzusagende Phänomen.', c:true},
+        {t:'Diskriminativ – kann Unterschiede/Strukturen in den Daten erklären.', c:true},
+        {t:'Möglichst stark mit anderen Features korreliert, um Redundanz/Sicherheit zu schaffen.', c:false},
+        {t:'(Weitgehend) unabhängig – geringe Korrelation mit anderen Features.', c:true},
+      ],
+      exp:'Gute Features sind <strong>informativ, diskriminativ und unabhängig</strong>. Starke Korrelation ist <em>schlecht</em>: sie liefert dieselbe Information doppelt und erhöht die Dimensionalität ohne Mehrwert.',
+      link:{h:'Page02.html#eigenschaften', l:'Seite 2 · Drei Eigenschaften'} },
+
+    { badge:'falle', q:'Was ist bei der Feature-Matrix N×K korrekt?',
+      options:[
+        {t:'N ist die Anzahl der Samples – jede Zeile ist ein Datenpunkt.', c:true},
+        {t:'K ist die Anzahl der Features – jede Spalte ist ein Feature.', c:true},
+        {t:'N ist die Anzahl der Features und K die Anzahl der Samples.', c:false},
+        {t:'Der Eintrag x_ik ist der Wert von Feature k für Sample i.', c:true},
+      ],
+      exp:'<strong>N = Samples (Zeilen), K = Features (Spalten)</strong> – die häufige Verwechslung ist, N und K zu vertauschen. x_ik = Wert von Feature k im Sample i.',
+      link:{h:'Page02.html#feature-matrix', l:'Seite 2 · Feature-Matrix N×K'} },
+
+    { badge:'konzept', q:'Was beschreibt das Feature Engineering treffend?',
+      options:[
+        {t:'Es bildet eine messbare Eigenschaft auf einen Skalar ab.', c:true},
+        {t:'Es erhöht grundsätzlich die Dimensionalität des Problems.', c:false},
+        {t:'Es ist ein iterativer Feedback-Loop zwischen Features und Modell.', c:true},
+        {t:'In gute Features fließt Domänenwissen ein.', c:true},
+      ],
+      exp:'Feature Engineering bildet Eigenschaften auf Skalare ab und <strong>verringert</strong> dabei in der Regel die Dimensionalität (nicht erhöhen). Es ist ein iterativer Prozess, in den Domänenwissen einfließt.',
+      link:{h:'Page02.html#definition', l:'Seite 2 · Was ist ein Feature?'} },
+    ]},
+
+  { id:'feature-raum', icon:'📐', title:'2 · Feature-Raum & Visualisierung',
+    intro:'Die Feature-Matrix als geometrischer Raum – und wie t-SNE hochdimensionale Daten sichtbar macht. (Seite 3)',
+    questions:[
+    { badge:'konzept', q:'Was gilt für den Feature-Raum?',
+      options:[
+        {t:'Jede Zeile der Feature-Matrix ist ein Punkt im K-dimensionalen Raum.', c:true},
+        {t:'Die K Feature-Werte sind die Koordinaten dieses Punktes.', c:true},
+        {t:'Ab K > 3 gelten geometrische Konzepte wie Abstände und Cluster nicht mehr.', c:false},
+        {t:'ML-Algorithmen operieren in diesem Raum (z. B. SVM trennt mit Hyperebenen).', c:true},
+      ],
+      exp:'Auch bei K > 3 (nicht mehr visualisierbar) gelten <strong>Abstände, Cluster und Hyperebenen weiterhin</strong> – nur sehen kann man sie nicht direkt. Dafür hilft t-SNE.',
+      link:{h:'Page03.html#geometrie', l:'Seite 3 · Geometrische Interpretation'} },
+
+    { badge:'falle', q:'Was trifft auf t-SNE zu?',
+      options:[
+        {t:'Es ist eine nicht-lineare Methode zur Projektion auf 2D/3D.', c:true},
+        {t:'Es erhält vor allem die lokale Nachbarschaftsstruktur.', c:true},
+        {t:'Globale Abstände zwischen Clustern sind danach exakt interpretierbar.', c:false},
+        {t:'Es ist ein Klassifikationsalgorithmus, der Labels vorhersagt.', c:false},
+      ],
+      exp:'t-SNE ist eine <strong>Visualisierungs-/Dimensionsreduktionsmethode</strong> (kein Klassifikator). Es bewahrt die <strong>lokale</strong> Struktur; globale Abstände zwischen Clustern sind <em>nicht</em> zuverlässig interpretierbar.',
+      link:{h:'Page03.html#tsne', l:'Seite 3 · t-SNE Erklärung'} },
+
+    { badge:'formel', q:'Der Digits-Datensatz besteht aus 8×8-Bildern. Was stimmt?',
+      options:[
+        {t:'Jedes Bild hat 64 Features.', c:true},
+        {t:'Der 64-dim. Raum ist nicht direkt visualisierbar – t-SNE projiziert auf 2D.', c:true},
+        {t:'8×8 ergibt 16 Features.', c:false},
+        {t:'Nach t-SNE werden die Ziffern als getrennte Cluster sichtbar.', c:true},
+      ],
+      exp:'8×8 = <strong>64 Features</strong>. Da 64D nicht darstellbar ist, projiziert t-SNE auf 2D, wo die Ziffern als Cluster sichtbar werden.',
+      link:{h:'Page03.html#digits', l:'Seite 3 · Embedding Digits'} },
+    ]},
+
+  { id:'zeitserien', icon:'⏱️', title:'3 · Feature Extraction aus Zeitserien',
+    intro:'Vom Rohsignal zum Merkmalsvektor – Strategien zwischen Domänen- und Datengetrieben. (Seite 4)',
+    questions:[
+    { badge:'formel', q:'Wie lässt sich Feature Extraction aus einer Zeitserie formal beschreiben?',
+      options:[
+        {t:'f : ℝ^T → ℝ^K  (T Messpunkte → K Features).', c:true},
+        {t:'Üblicherweise gilt K ≪ T (Verdichtung des Signals).', c:true},
+        {t:'f : ℝ^K → ℝ^T  (K Features → T Messpunkte).', c:false},
+        {t:'Die Anzahl der Features K ist immer gleich der Signallänge T.', c:false},
+      ],
+      exp:'Die Extraktion bildet ein langes Rohsignal (T Punkte) auf wenige aussagekräftige Skalare ab: <strong>f: ℝ^T → ℝ^K mit K ≪ T</strong>.',
+      link:{h:'Page04.html#mathematik', l:'Seite 4 · Mathematische Formulierung'} },
+
+    { badge:'konzept', q:'Was gilt im Spektrum „domänengetrieben ↔ datengetrieben"?',
+      options:[
+        {t:'Statistische Features (Mittelwert, Varianz, RMS) sind domänengetrieben und interpretierbar.', c:true},
+        {t:'Autoencoder/Deep Learning sind datengetrieben und lernen Features selbst.', c:true},
+        {t:'Datengetriebene Ansätze sind immer besser interpretierbar als domänengetriebene.', c:false},
+        {t:'Je mehr Domänenwissen vorhanden ist, desto weiter links kann man ansetzen.', c:true},
+      ],
+      exp:'Datengetriebene Methoden (Autoencoder, DL) sind <strong>flexibel, aber weniger interpretierbar</strong> – nicht besser interpretierbar. Mit viel Domänenwissen lohnen sich die interpretierbaren, domänengetriebenen Features.',
+      link:{h:'Page04.html#spektrum', l:'Seite 4 · Domänen- vs. Datengetrieben'} },
+
+    { badge:'konzept', q:'Event-triggered vs. kontinuierliche Zeitserien – was stimmt?',
+      options:[
+        {t:'Event-triggered: alle Serien haben dieselbe feste Länge T, am Trigger ausgerichtet.', c:true},
+        {t:'Kontinuierlich: man schiebt Fenster (Windows) über das Signal.', c:true},
+        {t:'Event-triggered Serien haben immer variable Länge.', c:false},
+        {t:'Kontinuierliche Serien sind am Start-Ereignis ausgerichtet und direkt vergleichbar.', c:false},
+      ],
+      exp:'<strong>Event-triggered</strong> = feste Länge, am Trigger ausgerichtet, direkt vergleichbar. <strong>Kontinuierlich</strong> = kein klares Ereignis → Fenster-Technik.',
+      link:{h:'Page04.html#event-triggered', l:'Seite 4 · Event vs. Kontinuierlich'} },
+
+    { badge:'anwendung', q:'Im Motorausfall-Szenario: was ist korrekt?',
+      options:[
+        {t:'Datenbasis sind Stromverbrauch-Zeitserien (Ampere über Zeit).', c:true},
+        {t:'Aus dem Rohsignal werden Features extrahiert, die einen Ausfall anzeigen.', c:true},
+        {t:'Die Features gehen anschließend an ein Klassifikationsmodell (z. B. Random Forest).', c:true},
+        {t:'Das Ziel ist, den Ausfall erst nach dem Stillstand zu dokumentieren.', c:false},
+      ],
+      exp:'Ziel ist <strong>vorausschauende Erkennung</strong> (vor dem Ausfall), nicht die Dokumentation danach. Aus Strom-Zeitserien extrahierte Features speisen einen Klassifikator.',
+      link:{h:'Page04.html#szenario', l:'Seite 4 · Zeitserien-Szenario'} },
+    ]},
+
+  { id:'encoding', icon:'🔤', title:'4 · Encoding & Text Features',
+    intro:'Kategoriale Variablen und Texte in Zahlen übersetzen – und die fit/transform-Regel. (Seite 5)',
+    questions:[
+    { badge:'falle', q:'Warum ist Label-Encoding bei nominalen Kategorien problematisch?',
+      options:[
+        {t:'Es erzeugt eine künstliche Ordnung (z. B. milk=3 > coffee=2 > banana=1).', c:true},
+        {t:'Das Modell interpretiert die Zahlen als Größenordnung/Reihenfolge.', c:true},
+        {t:'Es funktioniert grundsätzlich nicht, weil Modelle keine Zahlen verarbeiten können.', c:false},
+        {t:'Bei ordinalen Variablen mit echter Reihenfolge ist Label-Encoding dagegen ok.', c:true},
+      ],
+      exp:'Modelle brauchen Zahlen – das ist nicht das Problem. Das Problem ist die <strong>künstliche Ordnung</strong> bei nominalen Kategorien. Bei echten ordinalen Variablen (klein<mittel<groß) ist Label-Encoding sinnvoll.',
+      link:{h:'Page05.html#label-encoding', l:'Seite 5 · Label-Encoding'} },
+
+    { badge:'konzept', q:'Was gilt für One-Hot-Encoding?',
+      options:[
+        {t:'Jede Kategorie bekommt eine eigene binäre 0/1-Spalte.', c:true},
+        {t:'Es vermeidet die künstliche Ordnung – alle Kategorien sind gleichwertig.', c:true},
+        {t:'Es reduziert die Anzahl der Spalten gegenüber Label-Encoding.', c:false},
+        {t:'Bei sehr vielen Kategorien ist Feature Hashing eine Alternative.', c:true},
+      ],
+      exp:'One-Hot <strong>erhöht</strong> die Spaltenzahl (aus 1 Spalte werden K), reduziert sie nicht. Dafür gibt es keine künstliche Ordnung. Bei vielen Kategorien → Feature Hashing.',
+      link:{h:'Page05.html#one-hot-encoding', l:'Seite 5 · One-Hot-Encoding'} },
+
+    { badge:'falle', q:'fit() / transform() / fit_transform() – was ist korrekt?',
+      options:[
+        {t:'fit() lernt die Parameter, transform() wendet sie an.', c:true},
+        {t:'fit_transform() auf den Testdaten verursacht Data Leakage.', c:true},
+        {t:'Auf Testdaten sollte man nur transform() (nicht fit) verwenden.', c:true},
+        {t:'fit_transform() ist immer die sicherste Wahl, auch für Testdaten.', c:false},
+      ],
+      exp:'Korrekt: <code>fit_transform</code> nur auf <strong>Trainingsdaten</strong>, danach auf Testdaten nur <code>transform</code>. <code>fit_transform</code> auf Testdaten = Leakage.',
+      link:{h:'Page05.html#sklearn-syntax', l:'Seite 5 · sklearn .fit()/.transform()'} },
+
+    { badge:'konzept', q:'Was macht Bag-of-Words (CountVectorizer)?',
+      options:[
+        {t:'Es zählt die Häufigkeit jedes Wortes im Text.', c:true},
+        {t:'Es ignoriert die Reihenfolge der Wörter.', c:true},
+        {t:'Es bewahrt die genaue Satzstellung und Grammatik.', c:false},
+        {t:'Jede Spalte steht für ein Wort des Vokabulars.', c:true},
+      ],
+      exp:'Bag-of-Words = Worthäufigkeiten <strong>ohne Reihenfolge</strong>. Satzbau/Grammatik gehen dabei verloren.',
+      link:{h:'Page05.html#bag-of-words', l:'Seite 5 · Bag-of-Words'} },
+    ]},
+
+  { id:'autoencoder-haar', icon:'🧠', title:'5 · Autoencoder & Haar Features',
+    intro:'Zwei sehr unterschiedliche Wege, Features zu gewinnen – gelernt vs. geometrisch berechnet. (Seite 6)',
+    questions:[
+    { badge:'konzept', q:'Was gilt für die Autoencoder-Architektur?',
+      options:[
+        {t:'Der Bottleneck (Latent Space) ist der Feature-Vektor.', c:true},
+        {t:'Der Encoder komprimiert, der Decoder rekonstruiert den Input.', c:true},
+        {t:'Für die Feature Extraction braucht man nach dem Training nur den Encoder.', c:true},
+        {t:'Der Decoder liefert die finalen Features für das nachgelagerte Modell.', c:false},
+      ],
+      exp:'Die Features stecken im <strong>Bottleneck</strong> (Ausgang des Encoders). Der Decoder wird nur fürs Training gebraucht und danach verworfen.',
+      link:{h:'Page06.html#autoencoder', l:'Seite 6 · Autoencoder-Architektur'} },
+
+    { badge:'konzept', q:'Wie wird ein Autoencoder trainiert – und wie ist er einzuordnen?',
+      options:[
+        {t:'Er minimiert den Rekonstruktionsfehler (typisch MSE) zwischen Input und Output.', c:true},
+        {t:'Er benötigt keine Labels → unüberwachtes Lernen.', c:true},
+        {t:'Er ist ein domänengetriebener, gut interpretierbarer Ansatz.', c:false},
+        {t:'Anwendungen: Dimensionsreduktion, Anomalie-Erkennung, Denoising.', c:true},
+      ],
+      exp:'Der Autoencoder ist <strong>datengetrieben</strong> (rechte Seite des Spektrums) und <em>weniger</em> interpretierbar. Er lernt unüberwacht über den Rekonstruktionsfehler (MSE).',
+      link:{h:'Page06.html#autoencoder', l:'Seite 6 · Training & Einordnung'} },
+
+    { badge:'formel', q:'Was stimmt über Haar-Features?',
+      options:[
+        {t:'Haar = Σ(weiße Region) − Σ(schwarze Region) → ein Skalar.', c:true},
+        {t:'Sie messen Hell-Dunkel-Muster (Kanten, Konturen).', c:true},
+        {t:'Mit dem Integral-Image-Trick in O(1) berechenbar.', c:true},
+        {t:'Sie stammen aus rekurrenten neuronalen Netzen (RNN).', c:false},
+      ],
+      exp:'Haar-Features sind <strong>geometrisch</strong> (aus dem Viola-Jones-Algorithmus zur Gesichtserkennung), nicht aus RNNs. Sie berechnen eine Intensitätsdifferenz in O(1) via Integral Image.',
+      link:{h:'Page06.html#haar-features', l:'Seite 6 · Haar-Features'} },
+    ]},
+
+  { id:'selection', icon:'🎯', title:'6 · Feature Selection',
+    intro:'Welche Features ins Modell? Curse of Dimensionality, Occam und drei Methoden. (Seite 7)',
+    questions:[
+    { badge:'konzept', q:'Welche Aussagen begründen Feature Selection?',
+      options:[
+        {t:'Curse of Dimensionality: der Raum wächst exponentiell, Daten werden spärlich.', c:true},
+        {t:'Occam’s Razor: einfachere Modelle generalisieren besser.', c:true},
+        {t:'Mehr Features sind grundsätzlich besser für die Generalisierung.', c:false},
+        {t:'Weniger Features = kürzeres Training, weniger Speicher, schnellere Inferenz.', c:true},
+      ],
+      exp:'Mehr Features sind <strong>nicht</strong> automatisch besser – irrelevante Features fördern Overfitting. Selection adressiert Curse of Dimensionality, Occam und Effizienz.',
+      link:{h:'Page07.html#warum-selection', l:'Seite 7 · Warum überhaupt?'} },
+
+    { badge:'falle', q:'Was besagt der Curse of Dimensionality?',
+      options:[
+        {t:'Für gleiche Datendichte steigt der Stichprobenbedarf exponentiell (~10^K).', c:true},
+        {t:'Abstandsbasierte Algorithmen (k-NN, SVM, k-Means) leiden besonders.', c:true},
+        {t:'In hohen Dimensionen werden Abstände fast gleich groß → „nächster Nachbar" wird bedeutungslos.', c:true},
+        {t:'Mehr Dimensionen machen die Datenpunkte dichter und das Lernen leichter.', c:false},
+      ],
+      exp:'Genau umgekehrt: mehr Dimensionen → Punkte werden <strong>spärlicher</strong>, Abstände nivellieren sich. Das schadet besonders abstandsbasierten Verfahren.',
+      link:{h:'Page07.html#curse-dimensionality', l:'Seite 7 · Curse of Dimensionality'} },
+
+    { badge:'code', q:'VarianceThreshold vs. SelectKBest – was stimmt?',
+      options:[
+        {t:'VarianceThreshold entfernt Features mit Varianz unter einer Schwelle – ohne das Label.', c:true},
+        {t:'Mit threshold=0.0 entfernt VarianceThreshold konstante Features.', c:true},
+        {t:'SelectKBest nutzt das Label und behält die k bestbewerteten Features (z. B. mutual_info_classif).', c:true},
+        {t:'VarianceThreshold benötigt zwingend das Label (supervised).', c:false},
+      ],
+      exp:'VarianceThreshold ist <strong>unsupervised</strong> (ohne Label), SelectKBest ist <strong>supervised</strong> (mit Label, Scoring-Funktion).',
+      link:{h:'Page07.html#selectkbest', l:'Seite 7 · VarianceThreshold & SelectKBest'} },
+
+    { badge:'konzept', q:'Was ist das Ziel der Feature Selection (Occam / Garbage-In-Out)?',
+      options:[
+        {t:'Die minimale Feature-Menge mit maximalem Informationsgehalt über das Label.', c:true},
+        {t:'Redundante und irrelevante Features vermeiden.', c:true},
+        {t:'So viele Features wie möglich behalten, um nichts zu verlieren.', c:false},
+        {t:'Irrelevante Features erzeugen Rauschen und fördern Overfitting.', c:true},
+      ],
+      exp:'Ziel ist die <strong>kleinste Menge maximal informativer</strong> Features – nicht möglichst viele. Irrelevante Features schaden (Rauschen, Overfitting).',
+      link:{h:'Page07.html#occam', l:'Seite 7 · Occam’s Razor'} },
+    ]},
+
+  { id:'scaling', icon:'⚖️', title:'7 · Feature Scaling & Normalisierung',
+    intro:'Gleiche Gewichtung für alle Features – MinMax, Z-Score und Power Transformations. (Seite 8)',
+    questions:[
+    { badge:'falle', q:'Welche Algorithmen sind skalensensitiv (sollten skaliert werden)?',
+      options:[
+        {t:'k-NN, SVM, k-Means.', c:true},
+        {t:'PCA, lineare/logistische Regression, neuronale Netze (Gradient Descent).', c:true},
+        {t:'Decision Tree, Random Forest, Gradient Boosting.', c:false},
+        {t:'Naive Bayes.', c:false},
+      ],
+      exp:'Abstands-/gradientenbasierte Verfahren sind <strong>skalensensitiv</strong>. Baumbasierte Verfahren (Tree, RF, Boosting) und Naive Bayes sind es <strong>nicht</strong> – sie entscheiden über Schwellwerte pro Feature.',
+      link:{h:'Page08.html#warum-scaling', l:'Seite 8 · Skalensensitivität'} },
+
+    { badge:'formel', q:'Was stimmt zur MinMax-Transformation?',
+      options:[
+        {t:'X′ = (X − X_min)/(X_max − X_min) × (max − min) + min.', c:true},
+        {t:'Standardbereich ist [0, 1].', c:true},
+        {t:'Sie ist robust gegenüber einzelnen Ausreißern.', c:false},
+        {t:'Ein Ausreißer „streckt" die Skala – Alternative: RobustScaler (Quartile).', c:true},
+      ],
+      exp:'MinMax ist <strong>empfindlich gegenüber Ausreißern</strong> (ein Extremwert staucht den Rest). Bei Ausreißern besser RobustScaler.',
+      link:{h:'Page08.html#minmax', l:'Seite 8 · MinMax-Transformation'} },
+
+    { badge:'formel', q:'Was gilt für die Z-Score-Standardisierung?',
+      options:[
+        {t:'Z = (X − μ)/σ.', c:true},
+        {t:'Ergebnis: Mittelwert 0 und Standardabweichung 1.', c:true},
+        {t:'μ und σ werden aus den Trainingsdaten bestimmt.', c:true},
+        {t:'Sie skaliert garantiert exakt in den Bereich [0, 1].', c:false},
+      ],
+      exp:'Z-Score normiert auf <strong>μ=0, σ=1</strong> – es gibt <em>keinen</em> festen Bereich wie [0,1] (das macht MinMax). μ und σ kommen aus den Trainingsdaten.',
+      link:{h:'Page08.html#standardisierung', l:'Seite 8 · Standardisierung (Z-Score)'} },
+
+    { badge:'konzept', q:'Wozu dienen Power Transformations (z. B. Box-Cox)?',
+      options:[
+        {t:'Sie machen schiefe Verteilungen normalverteilungsähnlicher.', c:true},
+        {t:'Sie verändern die Form der Verteilung (mehr als reines Skalieren).', c:true},
+        {t:'Sie kodieren kategoriale Variablen in binäre Spalten.', c:false},
+        {t:'In sklearn umgesetzt durch den PowerTransformer.', c:true},
+      ],
+      exp:'Power Transformations (Box-Cox) verändern die <strong>Verteilungsform</strong> Richtung Normalverteilung. Mit Encoding kategorialer Variablen haben sie nichts zu tun.',
+      link:{h:'Page08.html#power-transformations', l:'Seite 8 · Power Transformations'} },
+    ]},
+  ];
+
+  /* ════════════════ RENDER ════════════════ */
+  const root = document.getElementById('quiz-root');
+  let total = 0;
+  SECTIONS.forEach(sec => {
+    total += sec.questions.length;
+    const s = document.createElement('section');
+    s.className = 'section';
+    s.id = sec.id;
+    s.innerHTML = `<div class="section-head"><h2>${sec.icon} ${sec.title}</h2><p>${sec.intro}</p></div>`;
+    sec.questions.forEach((qd, i) => {
+      const card = document.createElement('div');
+      card.className = 'mcq';
+      const opts = qd.options.map((o, j) => `
+        <label class="mcq-opt">
+          <input type="checkbox" data-correct="${o.c}">
+          <span class="opt-text">${o.t}</span>
+          <span class="opt-mark"></span>
+        </label>`).join('');
+      card.innerHTML = `
+        <div class="mcq-head"><span class="mcq-badge b-${qd.badge}">${qd.badge}</span></div>
+        <div class="mcq-q">${qd.q}</div>
+        <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+        <div class="mcq-options">${opts}</div>
+        <div class="mcq-actions">
+          <button class="mcq-check" type="button">Antworten prüfen</button>
+          <button class="mcq-reset" type="button">Zurücksetzen</button>
+        </div>
+        <div class="mcq-result">
+          <div class="mcq-verdict"></div>
+          <div class="mcq-exp">${qd.exp}<br><a class="frage-link" href="../Kapitel1/${qd.link.h}">→ Mehr im Skript: ${qd.link.l}</a></div>
+        </div>`;
+      s.appendChild(card);
+    });
+    root.appendChild(s);
+  });
+
+  /* ════════════════ INTERAKTION ════════════════ */
+  const checked = new Set();
+  function updateProgress() {
+    const n = checked.size;
+    document.getElementById('prog-text').textContent = `${n} / ${total} geprüft`;
+    document.getElementById('prog-fill').style.width = (n/total*100) + '%';
+  }
+  updateProgress();
+
+  root.addEventListener('click', (e) => {
+    const card = e.target.closest('.mcq');
+    if (!card) return;
+
+    if (e.target.classList.contains('mcq-check')) {
+      const opts = card.querySelectorAll('.mcq-opt');
+      let allCorrect = true;
+      opts.forEach(o => {
+        const inp = o.querySelector('input');
+        const isCorrect = inp.dataset.correct === 'true';
+        const mark = o.querySelector('.opt-mark');
+        o.classList.remove('correct','wrong','missed');
+        if (isCorrect && inp.checked)       { o.classList.add('correct'); mark.textContent = '✓ richtig'; }
+        else if (isCorrect && !inp.checked) { o.classList.add('missed');  mark.textContent = '● war richtig'; allCorrect = false; }
+        else if (!isCorrect && inp.checked) { o.classList.add('wrong');   mark.textContent = '✗ falsch'; allCorrect = false; }
+        else                                { mark.textContent = ''; }
+      });
+      const res = card.querySelector('.mcq-result');
+      res.classList.add('show');
+      const verdict = card.querySelector('.mcq-verdict');
+      if (allCorrect) { verdict.className = 'mcq-verdict ok';   verdict.textContent = '✓ Perfekt – genau richtig!'; }
+      else            { verdict.className = 'mcq-verdict part'; verdict.textContent = 'Noch nicht ganz – schau dir die Markierungen & die Erklärung an:'; }
+      const idx = [...root.querySelectorAll('.mcq')].indexOf(card);
+      checked.add(idx);
+      updateProgress();
+    }
+
+    if (e.target.classList.contains('mcq-reset')) {
+      card.querySelectorAll('.mcq-opt').forEach(o => {
+        o.classList.remove('correct','wrong','missed');
+        o.querySelector('input').checked = false;
+        o.querySelector('.opt-mark').textContent = '';
+      });
+      card.querySelector('.mcq-result').classList.remove('show');
+    }
+  });
+  </script>
 </body>
 </html>
