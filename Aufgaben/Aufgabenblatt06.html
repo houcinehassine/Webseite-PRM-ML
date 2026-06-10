@@ -329,6 +329,42 @@
 .acc-warmup .card-top{border-top:3px solid var(--warmup);}
 .acc-haupt .card-top{border-top:3px solid var(--haupt);}
 .acc-schnk .card-top{border-top:3px solid var(--schnk);}
+
+/* ── Multiple-Choice-Quiz (interaktiv) ───────────────────── */
+.mcq{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);margin-bottom:var(--space-5);box-shadow:var(--shadow-sm);}
+.mcq-head{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;}
+.mcq-badge{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.14rem .5rem;border-radius:var(--radius-full);}
+.b-konzept{background:color-mix(in oklab,#2563eb 14%,var(--color-surface));color:#1d4ed8;}
+.b-formel{background:color-mix(in oklab,#7c3aed 14%,var(--color-surface));color:#6d28d9;}
+.b-falle{background:color-mix(in oklab,#dc2626 14%,var(--color-surface));color:#b91c1c;}
+.b-code{background:color-mix(in oklab,#0891b2 14%,var(--color-surface));color:#0e7490;}
+.mcq-q{font-weight:700;font-size:var(--text-base);line-height:1.4;margin:var(--space-2) 0 var(--space-1);color:var(--color-text);}
+.mcq-hint{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);}
+.mcq-opt{display:flex;gap:.65rem;align-items:flex-start;padding:.7rem .9rem;border:1.5px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:.55rem;cursor:pointer;transition:background .12s,border-color .12s;font-size:var(--text-sm);line-height:1.5;color:var(--color-text);}
+.mcq-opt:hover{background:var(--color-surface-2);}
+.mcq-opt input{margin-top:.15rem;flex:0 0 auto;width:17px;height:17px;accent-color:var(--color-primary);cursor:pointer;}
+.mcq-opt .opt-text{flex:1;}
+.mcq-opt .opt-mark{font-weight:700;font-size:var(--text-xs);white-space:nowrap;opacity:0;}
+.mcq-opt.correct{border-color:#16a34a;background:color-mix(in oklab,#16a34a 9%,var(--color-surface));}
+.mcq-opt.correct .opt-mark{opacity:1;color:#15803d;}
+.mcq-opt.wrong{border-color:#dc2626;background:color-mix(in oklab,#dc2626 9%,var(--color-surface));}
+.mcq-opt.wrong .opt-mark{opacity:1;color:#b91c1c;}
+.mcq-opt.missed{border-color:#d97706;background:color-mix(in oklab,#d97706 10%,var(--color-surface));}
+.mcq-opt.missed .opt-mark{opacity:1;color:#b45309;}
+.mcq-actions{display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;}
+.mcq-check,.mcq-reset{padding:.55rem 1.2rem;border-radius:var(--radius-md);font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;border:none;}
+.mcq-check{background:var(--color-primary);color:#fff;}
+.mcq-check:hover{filter:brightness(1.07);}
+.mcq-reset{background:var(--color-surface-2);color:var(--color-text-muted);border:1px solid var(--color-border);}
+.mcq-result{display:none;margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border);}
+.mcq-result.show{display:block;}
+.mcq-verdict{font-weight:700;margin-bottom:var(--space-2);font-size:var(--text-sm);}
+.mcq-verdict.ok{color:#15803d;}
+.mcq-verdict.part{color:#b45309;}
+.mcq-exp{font-size:var(--text-sm);line-height:1.75;color:var(--color-text);}
+.mcq-exp code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary);}
+.frage-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:var(--space-4);font-size:var(--text-xs);font-weight:700;color:var(--color-primary);text-decoration:none;background:var(--color-primary-highlight);border:1px solid color-mix(in oklab,var(--color-primary) 22%,transparent);padding:.4rem .85rem;border-radius:var(--radius-full);transition:background .15s,transform .15s;}
+.frage-link:hover{background:color-mix(in oklab,var(--color-primary) 16%,var(--color-surface));transform:translateX(2px);}
 </style>
 </head>
 <body>
@@ -375,92 +411,105 @@
 <section id="warmup">
   <div class="sec-hdr">
     <span class="badge bw">WarmUp & Theorie</span>
-    <h2>§ 0 – WarmUp & Theoriefragen</h2>
+    <h2>§ 0 – WarmUp & Theoriefragen (interaktiv)</h2>
   </div>
 
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">W1</span>
-      <span class="card-title">GMM-Hyperparameter</span>
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
+    <div class="mcq-q">W1 · Welche Hyperparameter steuern ein GMM in sklearn?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">n_components – die Anzahl der Gauß-Komponenten.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">covariance_type ('full'/'tied'/'diag'/'spherical') – die Form der Kovarianzmatrizen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die optimale Komponentenzahl wählt man datengetrieben über BIC/AIC.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">n_components muss immer gleich der Anzahl der Features sein.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Welche zwei Hyperparameter steuern ein GMM in scikit-learn, und welche Startwerte wählen Sie?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q1',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q1"><code>n_components</code> (Anzahl Gaußkomponenten) und <code>covariance_type</code> (<code>full/tied/diag/spherical</code>). Startpunkt: <code>covariance_type='full'</code>, <code>n_components</code> datengetrieben über <strong>BIC/AIC</strong> bestimmen.</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">GMM-Hyperparameter: <code>n_components</code> und <code>covariance_type</code>. Die Komponentenzahl wählt man über BIC/AIC – sie hat nichts mit der Feature-Anzahl zu tun.<br><a class="frage-link" href="../Kapitel6/Page02.html#covariance-type">→ Mehr im Skript: Kap. 6 · Seite 2 – covariance_type</a></div></div>
   </div>
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">W2</span>
-      <span class="card-title">GMM One-Liner</span>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
+    <div class="mcq-q">W2 · Welcher Code fittet ein GMM mit 3 Komponenten und full-Kovarianz auf X_train?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GaussianMixture(n_components=3, covariance_type='full').fit(X_train)</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GaussianMixture(3, covariance_type='full').fit(X_train)</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">KMeans(n_components=3).fit(X_train)</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">GaussianMixture(clusters=3).fit(X_train)</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Schreiben Sie eine Zeile, die ein GMM mit 3 Komponenten und <em>full</em>-Kovarianz auf <code>X_train</code> fittet.</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q2',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q2"><code>gmm = GaussianMixture(n_components=3, covariance_type='full').fit(X_train)</code></div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Korrekt ist <code>GaussianMixture(n_components=3, covariance_type='full')</code> (auch positional). KMeans ist kein GMM; <code>clusters=</code> existiert nicht.<br><a class="frage-link" href="../Kapitel6/Page02.html#gmm-mechanik">→ Mehr im Skript: Kap. 6 · Seite 2 – GMM-Mechanik</a></div></div>
   </div>
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">W3</span>
-      <span class="card-title">predict vs. predict_proba</span>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">W3 · predict() vs. predict_proba() beim GMM?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">predict() liefert die harte Zuordnung (Label der wahrscheinlichsten Komponente).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">predict_proba() liefert die weichen Wahrscheinlichkeiten je Komponente.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">predict_proba() eignet sich, um unsichere Grenzfälle zu erkennen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">predict() und predict_proba() liefern stets identische Ergebnisse.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Unterschied zwischen <code>gmm.predict(X)</code> und <code>gmm.predict_proba(X)</code>?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q3',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q3"><code>predict</code> liefert die <strong>harte Zuordnung</strong> (Label der wahrscheinlichsten Komponente). <code>predict_proba</code> liefert die <strong>weichen Wahrscheinlichkeiten</strong> für jede Komponente — nützlich, um Unsicherheit / Grenzfälle zu erkennen.</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">predict = harte Zuordnung, predict_proba = weiche Wahrscheinlichkeiten (Soft Assignment) – nützlich für Unsicherheit/Grenzregionen.<br><a class="frage-link" href="../Kapitel6/Page02.html#predict-proba">→ Mehr im Skript: Kap. 6 · Seite 2 – predict_proba</a></div></div>
   </div>
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">W4</span>
-      <span class="card-title">k-Means vs. GMM</span>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">W4 · k-Means vs. GMM bei Maschinendaten – was stimmt?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means ist schneller und einfacher (Vorteil).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means nimmt kugelförmige, gleich große Cluster an und liefert keine Wahrscheinlichkeiten (Nachteil).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GMM modelliert beliebig orientierte Ellipsen und weiche Zuordnungen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">GMM ist immer schneller als k-Means.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Ein Vor- und ein Nachteil von k-Means gegenüber GMM bei Maschinendaten?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q4',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q4"><strong>Vorteil:</strong> k-Means ist schneller und einfacher. <strong>Nachteil:</strong> es nimmt kugelförmige, gleich große Cluster an und liefert keine Zuordnungswahrscheinlichkeiten — GMM modelliert beliebig orientierte Ellipsen und Unsicherheit.</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">k-Means: schnell, aber nur isotrope Cluster und harte Zuordnung. GMM: flexibler (Ellipsen, Soft Assignment), dafür rechenintensiver.<br><a class="frage-link" href="../Kapitel6/Page01.html#improving-kmeans">→ Mehr im Skript: Kap. 6 · Seite 1 – Improving k-Means</a></div></div>
   </div>
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">T1a</span>
-      <span class="card-title">k-Means vs. GMM Geometrie</span>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">T1a · Warum kreisförmig (k-Means) vs. Ellipsen (GMM)?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means nutzt die euklidische Distanz → kugelförmige (isotrope) Cluster.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GMM mit 'full'-Kovarianz modelliert beliebig orientierte Ellipsen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">covariance_type='spherical' (gleiche Varianzen) entspricht im Grenzfall k-Means.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">'diag'-Kovarianz erlaubt beliebig rotierte Ellipsen.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Warum erzeugt k-Means kreisförmige Cluster, GMM aber Ellipsen? Welche Kovarianzstruktur entspricht k-Means?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q5',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q5">k-Means nutzt die <strong>euklidische Distanz</strong> → kugelförmige (isotrope) Cluster. GMM mit <code>full</code>-Kovarianz modelliert beliebig orientierte Ellipsen. Der Grenzfall <code>covariance_type='spherical'</code> mit gleichen Varianzen entspricht k-Means.</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">k-Means = isotrop (Kugeln). 'full' = rotierte Ellipsen, 'spherical' ≈ k-Means. 'diag' erlaubt nur <em>achsenparallele</em> Ellipsen (keine Rotation).<br><a class="frage-link" href="../Kapitel6/Page02.html#covariance-type">→ Mehr im Skript: Kap. 6 · Seite 2 – covariance_type</a></div></div>
   </div>
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">T2a</span>
-      <span class="card-title">PCA vor GMM</span>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">T2a · Warum PCA vor GMM (z. B. auf Gesichtern), und was beim Sampling beachten?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">PCA reduziert die Dimension → vermeidet den Fluch der Dimensionalität.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Es vermeidet eine überparametrisierte Kovarianzmatrix (Overfitting in hohen Dimensionen).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Beim Sampling darf die Rücktransformation pca.inverse_transform() nicht vergessen werden.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Nach dem Sampling sind die Vektoren direkt Bilder – keine Rücktransformation nötig.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Warum PCA vor dem GMM-Training auf Gesichtern? Was beim Sampling beachten?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q6',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q6">PCA reduziert die Dimension → vermeidet den <strong>Fluch der Dimensionalität</strong> und eine <strong>überparametrisierte Kovarianzmatrix</strong> (Overfitting). Beim Sampling darf die <strong>Rücktransformation</strong> <code>pca.inverse_transform()</code> nicht vergessen werden.</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Hohe Dimensionen blähen die Kovarianzmatrix auf → PCA reduziert. Gesampelte Punkte liegen im PCA-Raum und müssen mit <code>inverse_transform</code> zurück in den Pixelraum.<br><a class="frage-link" href="../Kapitel6/Page05.html#generate-numbers">→ Mehr im Skript: Kap. 6 · Seite 5 – Generate Numbers</a></div></div>
   </div>
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">T3a</span>
-      <span class="card-title">GMM auf MRT-Histogramm</span>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-formel">Formel</span></div>
+    <div class="mcq-q">T3a · GMM für Dichteschätzung / Histogramme – was stimmt?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Jede Gaußkurve modelliert eine Teilpopulation (z. B. einen Peak im Histogramm).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die optimale Komponentenzahl wählt man über BIC/AIC (Anpassung vs. Überanpassung).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">BIC bestraft zusätzliche Komponenten stärker als die reine Log-Likelihood.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Man wählt einfach so viele Komponenten wie möglich für die beste Anpassung.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Wie dient das Voxel-Histogramm als GMM-Eingabe, und wie wählt man die Komponentenzahl?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q7',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q7">Jeder Gewebetyp erzeugt einen <strong>Peak im Intensitäts-Histogramm</strong>; jede Gaußkurve modelliert einen Gewebetyp. Die optimale Komponentenzahl wählt man über <strong>BIC/AIC</strong> (Balance zwischen Anpassung und Überanpassung).</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">GMM = Summe gewichteter Gaußkurven (Dichteschätzung). Mehr Komponenten passen immer besser → Overfitting; daher BIC/AIC, die Komplexität bestrafen.<br><a class="frage-link" href="../Kapitel6/Page04.html#bic-aic">→ Mehr im Skript: Kap. 6 · Seite 4 – BIC / AIC</a></div></div>
   </div>
 </section>
 <!-- ─────────────────────────────────── HAUPTAUFGABEN -->
@@ -916,6 +965,31 @@ function toggleQuiz(id, btn) {
     btn.textContent = 'Antwort verbergen';
   }
 }
+
+/* ─── MULTIPLE-CHOICE QUIZ (Auswertung) ─── */
+document.addEventListener('click', function(e){
+  if (e.target.classList && e.target.classList.contains('mcq-check')) {
+    var card = e.target.closest('.mcq'); var allCorrect = true;
+    card.querySelectorAll('.mcq-opt').forEach(function(o){
+      var inp=o.querySelector('input'); var isC=inp.dataset.correct==='true';
+      var mark=o.querySelector('.opt-mark'); o.classList.remove('correct','wrong','missed');
+      if(isC&&inp.checked){o.classList.add('correct');mark.textContent='\u2713 richtig';}
+      else if(isC&&!inp.checked){o.classList.add('missed');mark.textContent='\u25CF war richtig';allCorrect=false;}
+      else if(!isC&&inp.checked){o.classList.add('wrong');mark.textContent='\u2717 falsch';allCorrect=false;}
+      else{mark.textContent='';}
+    });
+    var res=card.querySelector('.mcq-result'); res.classList.add('show');
+    var v=card.querySelector('.mcq-verdict');
+    if(allCorrect){v.className='mcq-verdict ok';v.textContent='\u2713 Perfekt \u2013 genau richtig!';}
+    else{v.className='mcq-verdict part';v.textContent='Noch nicht ganz \u2013 schau dir die Markierungen & die Erkl\u00e4rung an:';}
+  }
+  if (e.target.classList && e.target.classList.contains('mcq-reset')) {
+    var card=e.target.closest('.mcq');
+    card.querySelectorAll('.mcq-opt').forEach(function(o){o.classList.remove('correct','wrong','missed');o.querySelector('input').checked=false;o.querySelector('.opt-mark').textContent='';});
+    card.querySelector('.mcq-result').classList.remove('show');
+  }
+});
+
 </script>
 
   </main>

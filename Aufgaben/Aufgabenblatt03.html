@@ -329,6 +329,42 @@
 .acc-warmup .card-top{border-top:3px solid var(--warmup);}
 .acc-haupt .card-top{border-top:3px solid var(--haupt);}
 .acc-schnk .card-top{border-top:3px solid var(--schnk);}
+
+/* ── Multiple-Choice-Quiz (interaktiv) ───────────────────── */
+.mcq{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);margin-bottom:var(--space-5);box-shadow:var(--shadow-sm);}
+.mcq-head{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;}
+.mcq-badge{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.14rem .5rem;border-radius:var(--radius-full);}
+.b-konzept{background:color-mix(in oklab,#2563eb 14%,var(--color-surface));color:#1d4ed8;}
+.b-formel{background:color-mix(in oklab,#7c3aed 14%,var(--color-surface));color:#6d28d9;}
+.b-falle{background:color-mix(in oklab,#dc2626 14%,var(--color-surface));color:#b91c1c;}
+.b-code{background:color-mix(in oklab,#0891b2 14%,var(--color-surface));color:#0e7490;}
+.mcq-q{font-weight:700;font-size:var(--text-base);line-height:1.4;margin:var(--space-2) 0 var(--space-1);color:var(--color-text);}
+.mcq-hint{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);}
+.mcq-opt{display:flex;gap:.65rem;align-items:flex-start;padding:.7rem .9rem;border:1.5px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:.55rem;cursor:pointer;transition:background .12s,border-color .12s;font-size:var(--text-sm);line-height:1.5;color:var(--color-text);}
+.mcq-opt:hover{background:var(--color-surface-2);}
+.mcq-opt input{margin-top:.15rem;flex:0 0 auto;width:17px;height:17px;accent-color:var(--color-primary);cursor:pointer;}
+.mcq-opt .opt-text{flex:1;}
+.mcq-opt .opt-mark{font-weight:700;font-size:var(--text-xs);white-space:nowrap;opacity:0;}
+.mcq-opt.correct{border-color:#16a34a;background:color-mix(in oklab,#16a34a 9%,var(--color-surface));}
+.mcq-opt.correct .opt-mark{opacity:1;color:#15803d;}
+.mcq-opt.wrong{border-color:#dc2626;background:color-mix(in oklab,#dc2626 9%,var(--color-surface));}
+.mcq-opt.wrong .opt-mark{opacity:1;color:#b91c1c;}
+.mcq-opt.missed{border-color:#d97706;background:color-mix(in oklab,#d97706 10%,var(--color-surface));}
+.mcq-opt.missed .opt-mark{opacity:1;color:#b45309;}
+.mcq-actions{display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;}
+.mcq-check,.mcq-reset{padding:.55rem 1.2rem;border-radius:var(--radius-md);font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;border:none;}
+.mcq-check{background:var(--color-primary);color:#fff;}
+.mcq-check:hover{filter:brightness(1.07);}
+.mcq-reset{background:var(--color-surface-2);color:var(--color-text-muted);border:1px solid var(--color-border);}
+.mcq-result{display:none;margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border);}
+.mcq-result.show{display:block;}
+.mcq-verdict{font-weight:700;margin-bottom:var(--space-2);font-size:var(--text-sm);}
+.mcq-verdict.ok{color:#15803d;}
+.mcq-verdict.part{color:#b45309;}
+.mcq-exp{font-size:var(--text-sm);line-height:1.75;color:var(--color-text);}
+.mcq-exp code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary);}
+.frage-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:var(--space-4);font-size:var(--text-xs);font-weight:700;color:var(--color-primary);text-decoration:none;background:var(--color-primary-highlight);border:1px solid color-mix(in oklab,var(--color-primary) 22%,transparent);padding:.4rem .85rem;border-radius:var(--radius-full);transition:background .15s,transform .15s;}
+.frage-link:hover{background:color-mix(in oklab,var(--color-primary) 16%,var(--color-surface));transform:translateX(2px);}
 </style>
 </head>
 <body>
@@ -375,56 +411,63 @@
 <section id="quiz">
   <div class="sec-hdr">
     <span class="badge bq">Quiz</span>
-    <h2>WarmUp – Theoriefragen</h2>
+    <h2>WarmUp – Theoriefragen (interaktiv)</h2>
   </div>
 
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">Q1</span>
-      <span class="card-title">Support Vector</span>
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">F1 · Was ist ein Support Vector und welche Rolle spielt er?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Ein Datenpunkt, der am nächsten zur Entscheidungsgrenze liegt (auf/innerhalb des Margins).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Nur die Support Vectors bestimmen die Lage der trennenden Hyperebene.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Entfernt man Punkte, die keine Support Vectors sind, ändert sich das Modell nicht.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Support Vectors sind die Punkte, die am weitesten von der Grenze entfernt liegen.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Was ist ein <code>Support Vector</code> und welche Rolle spielt er beim Training einer SVM?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q1',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q1">Ein Support Vector ist ein Datenpunkt, der <strong>am nächsten zur Entscheidungsgrenze</strong> liegt (auf oder innerhalb des Margins). Nur diese Punkte bestimmen die Lage der trennenden Hyperebene — entfernt man Punkte, die <em>keine</em> Support Vectors sind, ändert sich das Modell nicht.</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Support Vectors sind die <strong>grenznahen</strong> Punkte; sie definieren die Hyperebene. Weit entfernte Punkte sind irrelevant.<br><a class="frage-link" href="../Kapitel3/Page02.html#support-vectors">→ Mehr im Skript: Kap. 3 · Seite 2 – Support Vectors</a></div></div>
   </div>
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">Q2</span>
-      <span class="card-title">Hyperparameter C</span>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
+    <div class="mcq-q">F2 · Was beschreibt der Hyperparameter C bei einer SVC?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">C steuert den Strafterm für Fehlklassifikationen (Regularisierung).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Großes C → schmaler Margin, versucht alle Punkte korrekt zu trennen → Overfitting-Gefahr.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Kleines C → breiterer Margin, mehr erlaubte Fehler, bessere Generalisierung.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Ein großes C führt immer zu besserer Test-Genauigkeit.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Was beschreibt der Hyperparameter <code>C</code> bei einer <code>SVC</code> und wie beeinflusst ein sehr großes <code>C</code> das Modell?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q2',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q2"><code>C</code> steuert den <strong>Strafterm für Fehlklassifikationen</strong> (Regularisierung). Ein <strong>großes C</strong> erzwingt einen schmalen Margin und versucht, alle Trainingspunkte korrekt zu klassifizieren → Gefahr von <strong>Overfitting</strong>. Ein kleines C erlaubt mehr Fehler, dafür breiteren Margin und bessere Generalisierung.</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Großes C = harte Bestrafung von Fehlern = schmaler Margin = Overfitting-Risiko. Es verbessert <em>nicht</em> automatisch die Generalisierung.<br><a class="frage-link" href="../Kapitel3/Page04.html#vergleich-c">→ Mehr im Skript: Kap. 3 · Seite 4 – Vergleich C</a></div></div>
   </div>
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">Q3</span>
-      <span class="card-title">Linear vs. RBF-Kernel</span>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">F3 · Linearer vs. RBF-Kernel – was stimmt?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der lineare Kernel trennt mit einer Hyperebene – gut bei linear separierbaren/hochdim. Daten.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der RBF-Kernel erzeugt nichtlineare, gekrümmte Entscheidungsgrenzen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der Kernel-Trick bildet die Daten implizit in einen höherdim. Raum ab, ohne ihn explizit zu berechnen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Ein RBF-Kernel ist einem linearen Kernel grundsätzlich überlegen.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Was ist der Unterschied zwischen einem linearen und einem RBF-Kernel? Wann würden Sie welchen wählen?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q3',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q3">Der <strong>lineare Kernel</strong> trennt mit einer Geraden/Hyperebene — geeignet bei linear separierbaren oder hochdimensionalen, dünnbesetzten Daten (z.B. Text). Der <strong>RBF-Kernel</strong> bildet die Daten in einen unendlich-dimensionalen Raum ab und erzeugt nichtlineare, gekrümmte Grenzen — geeignet bei komplexer, nichtlinearer Struktur.</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Linear ist ideal bei (annähernd) linearer Trennbarkeit/hohen Dimensionen; RBF bei nichtlinearer Struktur. Keiner ist pauschal besser (No Free Lunch).<br><a class="frage-link" href="../Kapitel3/Page06.html#kernel-trick">→ Mehr im Skript: Kap. 3 · Seite 6 – Kernel-Trick</a></div></div>
   </div>
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">Q4</span>
-      <span class="card-title">accuracy_score</span>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
+    <div class="mcq-q">F4 · Was misst accuracy_score – und wann ist sie ungeeignet?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Den Anteil korrekt klassifizierter Samples.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bei stark unbalancierten Klassen ist sie irreführend (Mehrheitsklasse dominiert).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Dann sind Precision, Recall und F1 aussagekräftiger.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Accuracy ist bei unbalancierten Daten die zuverlässigste Metrik.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Was misst die <code>accuracy_score</code>-Funktion, und wann ist sie als alleinige Gütemetrik ungeeignet?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q4',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q4"><code>accuracy_score</code> misst den <strong>Anteil korrekt klassifizierter Samples</strong>. Bei <strong>unbalancierten Klassen</strong> ist sie irreführend: Bei 95 % Klasse A erreicht ein Modell, das immer A vorhersagt, 95 % Accuracy — ohne etwas gelernt zu haben. Dann besser <strong>Precision, Recall, F1</strong> verwenden.</div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Accuracy = Anteil korrekt. Bei 95 % einer Klasse erreicht ein triviales Modell 95 % – daher bei Unbalance besser Precision/Recall/F1.<br><a class="frage-link" href="../Kapitel7/Page01.html#motivation">→ Mehr im Skript: Kap. 7 · Seite 1 – Accuracy-Falle</a></div></div>
   </div>
 </section>
 <!-- ─────────────────────────────────── HAUPTAUFGABEN -->
@@ -936,6 +979,31 @@ function toggleQuiz(id, btn) {
     btn.textContent = 'Antwort verbergen';
   }
 }
+
+/* ─── MULTIPLE-CHOICE QUIZ (Auswertung) ─── */
+document.addEventListener('click', function(e){
+  if (e.target.classList && e.target.classList.contains('mcq-check')) {
+    var card = e.target.closest('.mcq'); var allCorrect = true;
+    card.querySelectorAll('.mcq-opt').forEach(function(o){
+      var inp=o.querySelector('input'); var isC=inp.dataset.correct==='true';
+      var mark=o.querySelector('.opt-mark'); o.classList.remove('correct','wrong','missed');
+      if(isC&&inp.checked){o.classList.add('correct');mark.textContent='\u2713 richtig';}
+      else if(isC&&!inp.checked){o.classList.add('missed');mark.textContent='\u25CF war richtig';allCorrect=false;}
+      else if(!isC&&inp.checked){o.classList.add('wrong');mark.textContent='\u2717 falsch';allCorrect=false;}
+      else{mark.textContent='';}
+    });
+    var res=card.querySelector('.mcq-result'); res.classList.add('show');
+    var v=card.querySelector('.mcq-verdict');
+    if(allCorrect){v.className='mcq-verdict ok';v.textContent='\u2713 Perfekt \u2013 genau richtig!';}
+    else{v.className='mcq-verdict part';v.textContent='Noch nicht ganz \u2013 schau dir die Markierungen & die Erkl\u00e4rung an:';}
+  }
+  if (e.target.classList && e.target.classList.contains('mcq-reset')) {
+    var card=e.target.closest('.mcq');
+    card.querySelectorAll('.mcq-opt').forEach(function(o){o.classList.remove('correct','wrong','missed');o.querySelector('input').checked=false;o.querySelector('.opt-mark').textContent='';});
+    card.querySelector('.mcq-result').classList.remove('show');
+  }
+});
+
 </script>
 
   </main>
