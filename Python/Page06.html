@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python-Referenz: Unsupervised &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Clustering&lt;/span&gt; – PRM Prüfungsvorbereitung." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python · Unsupervised &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Clustering&lt;/span&gt;</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ref-intro{color:var(--color-text-muted);max-width:72ch;margin-bottom:var(--space-6);line-height:1.7}
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-lg);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--color-surface-2);border-bottom:1px solid var(--color-border)}
+    .ref-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);font-size:.95rem}
+    .ref-mod{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.12rem .5rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary)}
+    .ref-body{padding:1rem 1.1rem 1.15rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.9rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary)}
+    .ref-body pre{margin:.4rem 0 0}
+    .ref-use{margin-top:.85rem;font-size:.84rem;line-height:1.6;border-left:3px solid var(--color-primary);padding:.5rem .85rem;background:var(--color-primary-highlight);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--color-text)}
+    .ref-use b{color:var(--color-primary)}
+    .ref-params{list-style:none;margin:.2rem 0 .6rem;padding:0;font-size:.85rem}
+    .ref-params li{padding:.15rem 0;border-bottom:1px dashed var(--color-border)}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+  </style>
+</head>
+<body>
+  <site-header active="pageP" title="Python · Unsupervised &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Clustering&lt;/span&gt;"></site-header>
+  <div class="layout">
+    <site-sidebar active="Page06"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Python · Modelle</span>
+            <h1>Unsupervised & <span class="key" style="--key-color:var(--color-primary)">Clustering</span></h1>
+            <p>Modelle ohne Labels: Strukturen in den Daten finden. KMeans, DBSCAN und Gaussian Mixture Models — plus die BIC-basierte Wahl der Cluster-/Komponentenzahl.</p>
+            <div class="pill-row">
+              <span class="pill">KMeans</span>
+              <span class="pill">DBSCAN</span>
+              <span class="pill">GaussianMixture</span>
+              <span class="pill">BIC / AIC</span>
+              <span class="pill">predict_proba</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Worum geht's?</h2>
+            <p>Die unüberwachten Verfahren des Kurses mit ihren Attributen (inertia_, labels_, bic) und Anwendungsfällen.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="kmeans">
+        <div class="section-head">
+          <h2>6.1 KMeans & DBSCAN</h2>
+          <p>Partitionierendes vs. dichtebasiertes Clustering.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">KMeans</span>
+          <span class="ref-mod">sklearn.cluster</span>
+        </div>
+        <div class="ref-body">
+          <p>Teilt Daten in <code>k</code> kugelförmige Cluster, indem die Distanz zu den Clusterzentren minimiert wird (Inertia).</p>
+          <ul class="ref-params"><li><code>n_clusters</code> — Anzahl Cluster k</li><li><code>n_init</code> — Anzahl Neustarts</li><li><code>inertia_</code> — Summe quadrierter Distanzen (Elbow)</li><li><code>labels_</code> — Cluster-Zuordnung</li></ul>
+          <pre><code>from sklearn.cluster import KMeans
+km = KMeans(n_clusters=4, n_init=10, random_state=42)
+km.fit(X)
+labels = km.labels_
+zentren = km.cluster_centers_
+inertia = km.inertia_   # für Elbow-Plot</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Segmentierung & Microtargeting (Kapitel 4, Blatt 04).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">DBSCAN</span>
+          <span class="ref-mod">sklearn.cluster</span>
+        </div>
+        <div class="ref-body">
+          <p>Dichtebasiertes Clustering: findet beliebig geformte Cluster und markiert Ausreißer mit Label <code>-1</code>. Braucht KEINE Clusterzahl.</p>
+          <ul class="ref-params"><li><code>eps</code> — Radius der Nachbarschaft</li><li><code>min_samples</code> — Mindest-Nachbarn für Core Point</li><li><code>labels_ == -1</code> — Rauschen / Anomalien</li></ul>
+          <pre><code>from sklearn.cluster import DBSCAN
+db = DBSCAN(eps=0.9, min_samples=5).fit(X)
+anomalien = (db.labels_ == -1)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Anomalie-Erkennung (Blatt 04), Halbmonde (Blatt 06).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">SpectralClustering / kneighbors_graph</span>
+          <span class="ref-mod">sklearn.cluster</span>
+        </div>
+        <div class="ref-body">
+          <p>Graph-/ähnlichkeitsbasiertes Clustering für nicht-konvexe Strukturen.</p>
+          
+          <pre><code>from sklearn.cluster import SpectralClustering
+sc = SpectralClustering(n_clusters=2).fit_predict(X)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Alternative zu KMeans bei komplexen Formen (Kapitel 4).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="gmm">
+        <div class="section-head">
+          <h2>6.2 Gaussian Mixture Models</h2>
+          <p>Weiche, generative Cluster.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">GaussianMixture</span>
+          <span class="ref-mod">sklearn.mixture</span>
+        </div>
+        <div class="ref-body">
+          <p>Modelliert Daten als Mischung von Gauß-Verteilungen (Ellipsen). Liefert weiche Zuordnungen und kann neue Daten generieren.</p>
+          <ul class="ref-params"><li><code>n_components</code> — Anzahl Gauß-Komponenten</li><li><code>covariance_type</code> — 'full'/'tied'/'diag'/'spherical'</li><li><code>bic(X) / aic(X)</code> — Kriterium zur Wahl von n_components</li><li><code>sample(n)</code> — n neue Datenpunkte generieren</li></ul>
+          <pre><code>from sklearn.mixture import GaussianMixture
+gmm = GaussianMixture(n_components=3,
+        covariance_type='full', random_state=42)
+gmm.fit(X)
+labels = gmm.predict(X)
+proba  = gmm.predict_proba(X).max(axis=1)
+neue, _ = gmm.sample(12)        # generieren
+print(gmm.bic(X), gmm.aic(X))   # Modellwahl</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Betriebszustände, Bildgenerator, MRT-Segmentierung (Kapitel 6, Blatt 06).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Modellwahl per BIC/AIC</span>
+          <span class="ref-mod">Rezept</span>
+        </div>
+        <div class="ref-body">
+          <p>Die optimale Komponenten-/Clusterzahl wählt man, indem man BIC über mehrere <code>k</code> berechnet und das Minimum nimmt.</p>
+          
+          <pre><code>bics = [GaussianMixture(k, random_state=42).fit(X).bic(X)
+        for k in range(1, 11)]
+best_k = np.argmin(bics) + 1</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Datengetriebene Wahl von <code>n_components</code> (Blatt 06).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="distanzen">
+        <div class="section-head">
+          <h2>6.3 Distanzen & Statistik</h2>
+          <p>scipy-Hilfsfunktionen.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">scipy.spatial.distance.cdist</span>
+          <span class="ref-mod">scipy</span>
+        </div>
+        <div class="ref-body">
+          <p>Berechnet paarweise Distanzen zwischen zwei Punktmengen.</p>
+          
+          <pre><code>from scipy.spatial.distance import cdist
+D = cdist(punkte, zentren)   # Distanzmatrix</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Manuelle Distanzberechnungen (Kapitel 4).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">scipy.stats: skew, kurtosis, norm</span>
+          <span class="ref-mod">scipy.stats</span>
+        </div>
+        <div class="ref-body">
+          <p>Statistische Kennzahlen (Schiefe, Wölbung) und die Normalverteilungs-Dichte.</p>
+          
+          <pre><code>from scipy.stats import skew, kurtosis, norm
+features = [sig.mean(), sig.std(), skew(sig), kurtosis(sig)]
+kurve = norm.pdf(x, mu, sigma)   # Gaußkurve zeichnen</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Signal-Features (Blatt 03), GMM-Komponenten plotten (Blatt 06).</div>
+        </div>
+      </div>
+      </section>
+    </main>
+  </div>
+  <site-footer caption="Python-Referenz · Unsupervised &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Clustering&lt;/span&gt;"></site-footer>
+</body>
+</html>

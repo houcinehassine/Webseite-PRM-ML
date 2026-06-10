@@ -9,7 +9,15 @@
   <script type="module" src="../footer.js"></script>
   <script type="module" src="sidebar.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
-  <style>.k7-hero{padding:clamp(3rem,10vw,5rem) 0 clamp(2rem,6vw,3rem);text-align:center}.k7-hero .k7-hero h1{font-family:var(--font-display);font-size:var(--text-2xl);line-height:1.08;text-transform:none;margin:var(--space-4) auto var(--space-4);max-width:22ch}.k7-hero p{color:var(--color-text-muted);font-size:var(--text-base);max-width:60ch;margin-inline:auto}.k7-pills{display:flex;flex-wrap:wrap;gap:var(--space-2);justify-content:center;margin-top:var(--space-6)}.pages-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--space-6);max-width:1120px;margin:var(--space-8) auto;padding:0 var(--space-8) var(--space-16)}.page-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);overflow:hidden;text-decoration:none;color:var(--color-text);transition:transform 0.15s,box-shadow 0.15s;box-shadow:var(--shadow-sm);display:flex;flex-direction:column}.page-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}.page-card .card-banner{width:100%;height:130px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:var(--color-primary-highlight);position:relative}.page-card .card-banner .card-num{position:absolute;top:var(--space-3);left:var(--space-4);font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-primary);background:color-mix(in oklab,var(--color-primary) 10%,var(--color-surface));padding:0.15rem 0.6rem;border-radius:var(--radius-full)}.page-card .card-body{padding:var(--space-5);flex:1;display:flex;flex-direction:column;gap:var(--space-2)}.page-card .card-titel{font-size:var(--text-base);font-weight:700;color:var(--color-text)}.page-card .card-desc{font-size:var(--text-xs);color:var(--color-text-muted);line-height:1.6;flex:1}.page-card .card-tags{display:flex;flex-wrap:wrap;gap:var(--space-1);margin-top:var(--space-2)}.page-card .card-tags .tag{font-size:0.7rem}.page-card .card-footer{display:flex;align-items:center;justify-content:space-between;padding:var(--space-3) var(--space-5);border-top:1px solid var(--color-border);font-size:var(--text-xs);color:var(--color-text-muted)}.card-arrow{font-size:1rem;color:var(--color-primary);transition:transform 0.15s}.page-card:hover .card-arrow{transform:translateX(4px)}.pages-grid .section-label{font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint);max-width:1120px;margin:0 auto;padding:0 var(--space-8);margin-bottom:var(--space-2)}.section-label-desc{font-size:var(--text-xs);color:var(--color-text-muted);max-width:1120px;margin:0 auto;padding:0 var(--space-8);margin-bottom:var(--space-5);margin-top:var(--space-1)}</style>
+  <link rel="stylesheet" href="../assets/kapitel-overview.css">
+  <style>
+    /* Seitenspezifisch: dezenter Farbverlauf für die Karten-Banner */
+    .card-banner {
+      background: linear-gradient(135deg,
+        color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-2)),
+        color-mix(in oklab, var(--color-primary)  4%, var(--color-surface-offset)));
+    }
+  </style>
   <meta property="og:type"        content="website">
   <meta property="og:site_name"   content="PRM Prüfungsvorbereitung">
   <meta property="og:title"       content="K7 · Prüfungsvorbereitung PRM – Übersicht">
@@ -25,29 +33,40 @@
   <site-header active="page7" title="Kapitel 7 · Evaluation"></site-header>
   <main id="main-content">
     <div class="container">
-      <section class="k7-hero">
+      <section class="kapitel-hero">
         <span class="eyebrow">✦ Kapitel 7 · Supervised Learning – Evaluation</span>
         <h1>Evaluation von Klassifikatoren</h1>
         <p>
           Confusion Matrix, ROC-Kurven, Decision Threshold, AUC, Precision-Recall –
           alle Werkzeuge zur fundierten Bewertung eines ML-Modells.
         </p>
-        <div class="k7-pills">
-          <span class="pill">Confusion Matrix</span>
-          <span class="pill">TPR / FPR</span>
-          <span class="pill">ROC Curve</span>
-          <span class="pill">Decision Threshold</span>
-          <span class="pill">AUC</span>
-          <span class="pill">Youden-Index</span>
-          <span class="pill">Precision-Recall</span>
-          <span class="pill">F1-Score</span>
-          <span class="pill">Multi-Class ROC</span>
+
+        <div class="overview-strip">
+          <span class="overview-pill">📋 Confusion Matrix</span>
+          <span class="overview-pill">🎯 TPR / FPR</span>
+          <span class="overview-pill">📈 ROC Curve</span>
+          <span class="overview-pill">🔧 Decision Threshold</span>
+          <span class="overview-pill">📐 AUC</span>
+          <span class="overview-pill">⚖️ Youden-Index</span>
+          <span class="overview-pill">🔍 Precision-Recall</span>
+          <span class="overview-pill">🏅 F1-Score</span>
+          <span class="overview-pill">🎓 Multi-Class ROC</span>
+        </div>
+
+        <div class="status-bar">
+          <span class="status-pill active"><span class="dot"></span>8 Seiten verfügbar</span>
+          <span class="status-pill"><span class="dot"></span>Cheatsheet &amp; Quiz</span>
+          <span class="status-pill">sklearn · numpy · matplotlib</span>
         </div>
       </section>
     </div>
 
     <!-- HAUPTSEITEN -->
-    <p class="section-label">Alle Seiten</p>
+    <div class="section-label">
+      <span class="section-label-icon">📚</span>
+      <span class="section-label-text">Alle Seiten</span>
+      <span class="section-label-line"></span>
+    </div>
     <div class="pages-grid">
 
       <!-- Page 01 -->
@@ -226,7 +245,11 @@
     </div>
 
     <!-- PRAXISBEISPIEL -->
-    <p class="section-label">Praxisbeispiel</p>
+    <div class="section-label">
+      <span class="section-label-icon">🔧</span>
+      <span class="section-label-text">Praxisbeispiel</span>
+      <span class="section-label-line"></span>
+    </div>
     <p class="section-label-desc">Vollständige Anwendung aller Konzepte in einer realitätsnahen Aufgabe.</p>
     <div class="pages-grid pruefung-grid">
       <a class="page-card" href="PageBeispiel.html">
@@ -260,7 +283,11 @@
     </div>
 
     <!-- PRÜFUNGSVORBEREITUNG -->
-    <p class="section-label">Prüfungsvorbereitung</p>
+    <div class="section-label">
+      <span class="section-label-icon">📋</span>
+      <span class="section-label-text">Prüfungsvorbereitung</span>
+      <span class="section-label-line"></span>
+    </div>
     <p class="section-label-desc">Schnellreferenz und Selbsttest – ideal kurz vor der Prüfung.</p>
     <div class="pages-grid pruefung-grid">
       <!-- Cheatsheet -->

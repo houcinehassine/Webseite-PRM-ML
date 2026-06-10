@@ -46,6 +46,12 @@ pre{background:var(--color-surface-2);border:1px solid var(--color-border);paddi
 .code-cell-split .output-side-body pre{background:transparent;border:none;padding:0;margin:0;font-size:var(--text-xs);color:var(--color-text-muted);white-space:pre-wrap}
 .run-btn{display:inline-flex;align-items:center;gap:0.35rem;padding:0.3rem 0.7rem;border-radius:var(--radius-md);border:1px solid var(--color-success);background:transparent;color:var(--color-success);font-size:var(--text-xs);font-weight:700;cursor:pointer;transition:background 0.15s,color 0.15s;flex:0 0 auto}
 .run-btn:hover{background:var(--color-success);color:white}
+.bare-code-wrap{position:relative}
+.bare-code-toolbar{position:absolute;top:6px;right:6px;display:flex;gap:4px;z-index:10}
+.bare-code-toolbar .copy-btn,.bare-code-toolbar .run-btn{min-height:28px;min-width:unset;padding:0.2rem 0.55rem;font-size:10px;opacity:0;transition:opacity 0.15s}
+.bare-code-wrap:hover .copy-btn,.bare-code-wrap:hover .run-btn{opacity:1}
+.bare-code-output{display:none;margin-top:4px;background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:var(--space-3);font-size:var(--text-xs);color:var(--color-text-muted);white-space:pre-wrap}
+.bare-code-output:not(:empty){display:block}
 .run-btn:disabled{opacity:0.5;cursor:not-allowed}
 @media (max-width:760px){.code-cell-split{grid-template-columns:1fr}
 .code-cell-split .code-side{border-right:none;border-bottom:1px solid var(--color-border)}
@@ -312,3 +318,22 @@ site-sidebar{display:block;height:100%;align-self:stretch}
 .matrix{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--color-border);font-size:var(--text-sm)}
 .matrix-header{display:grid;grid-template-columns:150px 1fr 1fr;background:var(--color-text);color:#fff;font-weight:700;font-size:var(--text-xs);letter-spacing:.05em}
 .fallen-icon{font-size:1.1rem;line-height:1.5;padding-top:2px}
+
+
+  /* Such-Button im Header */
+  .search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+  .search-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-2, var(--color-surface-offset));
+  }

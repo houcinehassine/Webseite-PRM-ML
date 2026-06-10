@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python-Referenz: Datensätze, &lt;span class="key" style="--key-color:var(--color-primary)"&gt;pandas&lt;/span&gt; &amp; seaborn – PRM Prüfungsvorbereitung." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python · Datensätze, &lt;span class="key" style="--key-color:var(--color-primary)"&gt;pandas&lt;/span&gt; &amp; seaborn</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ref-intro{color:var(--color-text-muted);max-width:72ch;margin-bottom:var(--space-6);line-height:1.7}
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-lg);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--color-surface-2);border-bottom:1px solid var(--color-border)}
+    .ref-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);font-size:.95rem}
+    .ref-mod{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.12rem .5rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary)}
+    .ref-body{padding:1rem 1.1rem 1.15rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.9rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary)}
+    .ref-body pre{margin:.4rem 0 0}
+    .ref-use{margin-top:.85rem;font-size:.84rem;line-height:1.6;border-left:3px solid var(--color-primary);padding:.5rem .85rem;background:var(--color-primary-highlight);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--color-text)}
+    .ref-use b{color:var(--color-primary)}
+    .ref-params{list-style:none;margin:.2rem 0 .6rem;padding:0;font-size:.85rem}
+    .ref-params li{padding:.15rem 0;border-bottom:1px dashed var(--color-border)}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+  </style>
+</head>
+<body>
+  <site-header active="pageP" title="Python · Datensätze, &lt;span class="key" style="--key-color:var(--color-primary)"&gt;pandas&lt;/span&gt; &amp; seaborn"></site-header>
+  <div class="layout">
+    <site-sidebar active="Page03"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Python · Daten</span>
+            <h1>Datensätze, <span class="key" style="--key-color:var(--color-primary)">pandas</span> & seaborn</h1>
+            <p>Woher die Daten kommen: <code>sklearn.datasets</code> liefert synthetische und echte Datensätze, <code>pandas</code> verwaltet Tabellen, <code>seaborn</code> macht statistische Plots.</p>
+            <div class="pill-row">
+              <span class="pill">make_blobs</span>
+              <span class="pill">make_classification</span>
+              <span class="pill">load_digits</span>
+              <span class="pill">pd.DataFrame</span>
+              <span class="pill">sns.heatmap</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Worum geht's?</h2>
+            <p>Alle Datenquellen des Kurses und die Werkzeuge, um sie zu laden und zu inspizieren.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="synthetisch">
+        <div class="section-head">
+          <h2>3.1 Synthetische Datensätze</h2>
+          <p>Künstliche Daten mit bekannten Eigenschaften — perfekt zum Üben.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">make_blobs</span>
+          <span class="ref-mod">sklearn.datasets</span>
+        </div>
+        <div class="ref-body">
+          <p>Erzeugt gut trennbare, kugelförmige Cluster (Gauß-Blobs). Der meistgenutzte Spielzeug-Datensatz im Kurs.</p>
+          <ul class="ref-params"><li><code>n_samples</code> — Anzahl Punkte</li><li><code>centers</code> — Anzahl Cluster/Zentren</li><li><code>cluster_std</code> — Streuung pro Cluster</li><li><code>random_state</code> — Reproduzierbarkeit</li></ul>
+          <pre><code>from sklearn.datasets import make_blobs
+X, y = make_blobs(n_samples=300, centers=4,
+                  cluster_std=0.5, random_state=42)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Clustering (KMeans, GMM, DBSCAN), Sensordaten simulieren.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">make_classification</span>
+          <span class="ref-mod">sklearn.datasets</span>
+        </div>
+        <div class="ref-body">
+          <p>Erzeugt einen Klassifikationsdatensatz mit steuerbarer Feature-Anzahl, Klassen und Informationsgehalt.</p>
+          <ul class="ref-params"><li><code>n_informative</code> — aussagekräftige Features</li><li><code>n_redundant</code> — redundante Features</li><li><code>n_clusters_per_class</code> — Cluster je Klasse</li></ul>
+          <pre><code>from sklearn.datasets import make_classification
+X, y = make_classification(n_samples=200, n_features=2,
+        n_classes=3, n_clusters_per_class=1, n_redundant=0,
+        random_state=42)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Klassifikator-Übungen, saubere 2D-Daten zum Plotten (Blatt 02).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">make_moons / make_circles</span>
+          <span class="ref-mod">sklearn.datasets</span>
+        </div>
+        <div class="ref-body">
+          <p>Nicht-linear trennbare Formen (Halbmonde, verschachtelte Kreise) — ideal, um RBF-Kernel und dichtebasiertes Clustering zu testen.</p>
+          
+          <pre><code>from sklearn.datasets import make_moons, make_circles
+X, y = make_moons(n_samples=500, noise=0.08, random_state=0)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> DBSCAN vs. GMM (Blatt 06), nichtlineare SVM-Grenzen.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">make_regression</span>
+          <span class="ref-mod">sklearn.datasets</span>
+        </div>
+        <div class="ref-body">
+          <p>Erzeugt ein lineares Regressionsproblem mit Rauschen.</p>
+          
+          <pre><code>from sklearn.datasets import make_regression
+X, y = make_regression(n_samples=200, n_features=5,
+                       random_state=42)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Skalierung & Data-Leakage demonstrieren (Blatt 02).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="echt">
+        <div class="section-head">
+          <h2>3.2 Echte Datensätze</h2>
+          <p>Eingebaute Standard-Datensätze.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">load_digits</span>
+          <span class="ref-mod">sklearn.datasets</span>
+        </div>
+        <div class="ref-body">
+          <p>8×8-Bilder handgeschriebener Ziffern (0–9), als 64-Feature-Vektoren. Klein genug, um offline im Browser zu laufen.</p>
+          
+          <pre><code>from sklearn.datasets import load_digits
+X, y = load_digits(return_X_y=True)   # X: (1797, 64)
+digits = load_digits()
+bild = digits.images[0]               # 8x8</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> SVM-/RandomForest-Klassifikation, PCA+GMM-Bildgenerator, Feature-Importance-Heatmap.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">load_iris</span>
+          <span class="ref-mod">sklearn.datasets</span>
+        </div>
+        <div class="ref-body">
+          <p>Der klassische Iris-Datensatz: 150 Blüten, 4 Features, 3 Arten.</p>
+          
+          <pre><code>from sklearn.datasets import load_iris
+X, y = load_iris(return_X_y=True)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Einfache Klassifikations-Demos.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">fetch_lfw_people / fetch_olivetti_faces</span>
+          <span class="ref-mod">sklearn.datasets</span>
+        </div>
+        <div class="ref-body">
+          <p>Lädt echte Gesichts-Datensätze (Download nötig). Hochdimensional → meist mit PCA reduziert.</p>
+          
+          <pre><code>from sklearn.datasets import fetch_lfw_people
+faces = fetch_lfw_people(min_faces_per_person=70)
+X = faces.data</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Gesichtserkennung (SVM) & Gesichts-Generierung (PCA+GMM). Hinweis: braucht Internet.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="pandas">
+        <div class="section-head">
+          <h2>3.3 pandas</h2>
+          <p>Tabellen laden und inspizieren.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">pd.DataFrame / pd.Series</span>
+          <span class="ref-mod">pandas</span>
+        </div>
+        <div class="ref-body">
+          <p>Tabellarische Datenstruktur mit benannten Spalten (<code>DataFrame</code>) bzw. eine einzelne Spalte (<code>Series</code>).</p>
+          
+          <pre><code>import pandas as pd
+df = pd.DataFrame(X, columns=['f1', 'f2', 'f3'])
+df['label'] = y
+print(df.head())
+print(df.describe())</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Daten inspizieren, Feature-Tabellen aufbauen.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">pd.read_csv / df.quantile</span>
+          <span class="ref-mod">pandas</span>
+        </div>
+        <div class="ref-body">
+          <p><code>read_csv</code> lädt eine CSV-Datei; <code>quantile</code> berechnet Perzentile (z.B. für Ausreißergrenzen).</p>
+          
+          <pre><code>df = pd.read_csv('songs.csv')
+grenze = df['tempo'].quantile(0.95)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Reale Datensätze laden (Songs, Citizen-DB), Schwellen bestimmen.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="seaborn">
+        <div class="section-head">
+          <h2>3.4 seaborn</h2>
+          <p>Statistische Visualisierung in einer Zeile.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">sns.heatmap / clustermap</span>
+          <span class="ref-mod">seaborn</span>
+        </div>
+        <div class="ref-body">
+          <p>Visualisiert eine Matrix farbcodiert. <code>clustermap</code> ordnet zusätzlich ähnliche Zeilen/Spalten gruppiert an.</p>
+          
+          <pre><code>import seaborn as sns
+sns.heatmap(confusion_matrix(y, pred), annot=True, fmt='d')
+sns.heatmap(param_grid_scores)   # Hyperparameter-Suche</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Confusion Matrix, Hyperparameter-Heatmap für DBSCAN-Suche (Blatt 04).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">sns.pairplot / sns.set</span>
+          <span class="ref-mod">seaborn</span>
+        </div>
+        <div class="ref-body">
+          <p><code>pairplot</code> zeichnet alle Feature-Paare gegeneinander (Streudiagramm-Matrix); <code>sns.set()</code> setzt ein schöneres Standard-Theme.</p>
+          
+          <pre><code>sns.set()
+sns.pairplot(df, hue='label')   # nach Klasse einfärben</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Feature-Verteilungen & Cluster überblicken (Blatt 04 Microtargeting).</div>
+        </div>
+      </div>
+      </section>
+    </main>
+  </div>
+  <site-footer caption="Python-Referenz · Datensätze, &lt;span class="key" style="--key-color:var(--color-primary)"&gt;pandas&lt;/span&gt; &amp; seaborn"></site-footer>
+</body>
+</html>

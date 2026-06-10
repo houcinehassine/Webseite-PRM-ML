@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRM – Aufgabenblatt 06 · GMM & Unsupervised Learning</title>
+
+<!-- Site Navigation -->
+<script type="module" src="../header.js"></script>
+<script type="module" src="../footer.js"></script>
+<script type="module" src="sidebar.js"></script>
+<link rel="stylesheet" href="../assets/style.css">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- CodeMirror (lokal) -->
+<link rel="stylesheet" href="../assets/vendor/codemirror.min.css">
+<link rel="stylesheet" href="../assets/vendor/codemirror-dracula.min.css">
+<script src="../assets/vendor/codemirror.min.js"></script>
+<script src="../assets/vendor/codemirror-python.min.js"></script>
+<script src="../assets/vendor/codemirror-matchbrackets.min.js"></script>
+<script src="../assets/vendor/codemirror-closebrackets.min.js"></script>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --bg:#F1F5F9;
+  --card:#FFFFFF;
+  --border:#E2E8F0;
+  --text:#0F172A;
+  --muted:#64748B;
+  --hdr1:#0F172A;
+  --hdr2:#1E3A5F;
+  --quiz:#6366F1;
+  --quiz-light:#EEF2FF;
+  --warmup:#059669;
+  --warmup-light:#ECFDF5;
+  --haupt:#DC2626;
+  --haupt-light:#FEF2F2;
+  --schnk:#D97706;
+  --schnk-light:#FFFBEB;
+  --run:#16A34A;
+  --run-h:#15803D;
+  --sol:#D97706;
+  --sol-h:#B45309;
+}
+
+#main-content{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  font-size:15px;
+}
+
+/* ─── LOADING OVERLAY ─────────────────────────────────── */
+#overlay{
+  position:fixed;inset:0;
+  background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:9999;gap:18px;
+}
+.ov-logo{font-size:2.6rem;filter:drop-shadow(0 0 20px #6366f1aa);}
+.ov-title{color:#F8FAFC;font-size:1.3rem;font-weight:700;letter-spacing:-.02em;}
+.ov-msg{color:#94A3B8;font-size:.88rem;min-height:1.2em;text-align:center;}
+.ov-bar{width:280px;height:4px;background:#1E293B;border-radius:4px;overflow:hidden;}
+.ov-fill{height:100%;background:linear-gradient(90deg,#6366F1,#10B981);border-radius:4px;width:0%;transition:width .4s ease;}
+.spinner{
+  width:36px;height:36px;
+  border:3px solid rgba(99,102,241,.25);
+  border-top-color:#6366F1;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── HEADER ─────────────────────────────────────────── */
+#main-content>header{
+  background:linear-gradient(150deg,var(--hdr1) 0%,var(--hdr2) 100%);
+  padding:52px 24px 44px;
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+#main-content>header::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(99,102,241,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(99,102,241,.07) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+#main-content>header *{position:relative;}
+#main-content>header h1{
+  font-size:2rem;font-weight:700;color:#F8FAFC;
+  letter-spacing:-.03em;margin-bottom:6px;
+}
+#main-content>header .sub{color:#94A3B8;font-size:.92rem;}
+.pills{
+  display:flex;gap:10px;justify-content:center;
+  flex-wrap:wrap;margin-top:22px;
+}
+.pill{
+  background:rgba(255,255,255,.08);
+  color:#CBD5E1;font-size:.8rem;
+  padding:5px 13px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.1);
+}
+
+/* ─── NAV BAR ────────────────────────────────────────── */
+#main-content>nav{
+  background:#1E293B;
+  display:flex;gap:0;justify-content:center;
+  flex-wrap:wrap;
+  position:static;
+  border-bottom:1px solid #334155;
+}
+#main-content>nav a{
+  color:#94A3B8;font-size:.8rem;font-weight:500;
+  padding:10px 18px;text-decoration:none;
+  transition:color .15s,background .15s;
+  white-space:nowrap;
+}
+#main-content>nav a:hover{color:#F8FAFC;background:rgba(255,255,255,.06);}
+
+/* ─── MAIN ───────────────────────────────────────────── */
+#main-content>main{
+  max-width:880px;margin:0 auto;
+  padding:36px 16px 72px;
+  display:flex;flex-direction:column;gap:36px;
+}
+
+/* ─── SECTION ────────────────────────────────────────── */
+.sec-hdr{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:18px;padding-bottom:12px;
+  border-bottom:2px solid var(--border);
+}
+.badge{
+  padding:4px 13px;border-radius:20px;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:#fff;flex-shrink:0;
+}
+.bq{background:var(--quiz);}
+.bw{background:var(--warmup);}
+.bh{background:var(--haupt);}
+.bs{background:var(--schnk);}
+
+.sec-hdr h2{font-size:1.15rem;font-weight:700;color:var(--text);}
+
+/* ─── TASK CARD ──────────────────────────────────────── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);
+  margin-bottom:14px;
+}
+.card:last-child{margin-bottom:0;}
+.card-top{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+}
+.num{
+  font-size:.75rem;font-weight:700;
+  color:#fff;padding:3px 9px;border-radius:5px;
+  flex-shrink:0;font-family:'JetBrains Mono',monospace;
+}
+.card-title{font-size:.98rem;font-weight:600;}
+.card-body{padding:18px 20px 20px;}
+
+/* ─── DESCRIPTION ────────────────────────────────────── */
+.desc{
+  font-size:.88rem;color:#334155;
+  margin-bottom:14px;line-height:1.75;
+}
+.desc ul{margin:7px 0 7px 20px;}
+.desc li{margin:3px 0;}
+.desc code,.hint code{
+  background:#F1F5F9;
+  padding:1px 5px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#6366F1;
+}
+.desc pre{
+  background:#F1F5F9;padding:10px 14px;
+  border-radius:7px;font-size:.83rem;
+  font-family:'JetBrains Mono',monospace;
+  margin:8px 0;overflow-x:auto;color:#334155;
+}
+.hint{
+  background:#EFF6FF;border-left:3px solid #3B82F6;
+  padding:8px 12px;border-radius:0 7px 7px 0;
+  font-size:.83rem;color:#1E40AF;margin-bottom:14px;
+}
+
+/* ─── EDITOR ──────────────────────────────────────────── */
+.elabel{
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.CodeMirror{
+  height:auto!important;min-height:150px;max-height:380px;
+  font-size:13px;
+  font-family:'JetBrains Mono','Fira Code',monospace!important;
+  border-radius:9px;
+  border:1px solid #374151!important;
+  line-height:1.6;
+}
+.CodeMirror-scroll{min-height:150px;max-height:380px;}
+.CodeMirror-linenumber{color:#4B5563;}
+
+/* ─── TOOLBAR ────────────────────────────────────────── */
+.toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.btn{
+  padding:7px 16px;border:none;border-radius:7px;
+  cursor:pointer;font-size:.83rem;font-weight:600;
+  font-family:'Inter',sans-serif;
+  transition:background .15s,transform .1s;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+.btn-run{background:var(--run);color:#fff;}
+.btn-run:hover:not(:disabled){background:var(--run-h);}
+.btn-clear{background:#475569;color:#fff;}
+.btn-clear:hover:not(:disabled){background:#334155;}
+.btn-sol{background:var(--sol);color:#fff;}
+.btn-sol:hover:not(:disabled){background:var(--sol-h);}
+.btn-sol.locked{background:#94A3B8;cursor:not-allowed;}
+.btn-sol.locked::after{content:" 🔒";}
+
+/* ─── OUTPUT ─────────────────────────────────────────── */
+.output-wrap{margin-top:13px;}
+.output{
+  background:#0D1117;border-radius:9px;
+  padding:12px 14px;min-height:38px;
+  border:1px solid #21262D;
+}
+.output pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;white-space:pre-wrap;word-break:break-word;
+}
+.out-text{color:#E2E8F0;}
+.out-err{color:#F87171;}
+.out-ok{color:#4ADE80;font-size:.82rem;}
+.out-wait{color:#475569;font-size:.82rem;}
+.out-run{color:#60A5FA;font-size:.82rem;}
+.out-fig img{
+  max-width:100%;border-radius:7px;
+  margin-top:10px;border:1px solid #21262D;
+  display:block;
+}
+
+/* ─── SOLUTION ───────────────────────────────────────── */
+.sol-panel{display:none;margin-top:13px;}
+.sol-panel.open{display:block;}
+.sol-hdr{
+  background:#FFFBEB;
+  border:1px solid #FCD34D;border-bottom:none;
+  padding:8px 14px;border-radius:9px 9px 0 0;
+  font-size:.75rem;font-weight:700;color:#92400E;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.sol-code{
+  background:#1E1E2E;
+  border:1px solid #FCD34D;
+  border-top:none;border-radius:0 0 9px 9px;
+  padding:14px 16px;overflow-x:auto;
+  position:relative;
+}
+.sol-code pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;color:#CDD6F4;
+  white-space:pre;
+  tab-size:4;
+}
+.copy-sol{
+  position:absolute;top:10px;right:10px;
+  background:rgba(99,102,241,.2);color:#A5B4FC;
+  border:1px solid rgba(99,102,241,.3);
+  border-radius:5px;padding:3px 9px;
+  font-size:.75rem;cursor:pointer;font-weight:600;
+  transition:background .15s;
+}
+.copy-sol:hover{background:rgba(99,102,241,.35);}
+
+/* ─── QUIZ ───────────────────────────────────────────── */
+.q-answer{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--border);border-radius:8px;
+  font-size:.88rem;font-family:'Inter',sans-serif;
+  resize:vertical;min-height:72px;color:var(--text);
+  transition:border-color .15s;margin-top:8px;
+}
+.q-answer:focus{outline:none;border-color:var(--quiz);}
+.q-reveal-btn{
+  margin-top:9px;padding:7px 16px;
+  background:var(--quiz);color:#fff;
+  border:none;border-radius:7px;cursor:pointer;
+  font-size:.83rem;font-weight:600;font-family:'Inter',sans-serif;
+  transition:background .15s;
+}
+.q-reveal-btn:hover{background:#4F46E5;}
+.q-ans-panel{
+  display:none;margin-top:10px;
+  background:var(--quiz-light);
+  border:1px solid #C7D2FE;border-radius:9px;
+  padding:13px 16px;font-size:.87rem;line-height:1.75;
+}
+.q-ans-panel.open{display:block;}
+.q-ans-panel strong{color:#4338CA;}
+.q-ans-panel code{
+  background:#E0E7FF;padding:1px 5px;
+  border-radius:4px;font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#4338CA;
+}
+
+/* ─── ACCENT BARS ─────────────────────────────────────── */
+.acc-quiz .card-top{border-top:3px solid var(--quiz);}
+.acc-warmup .card-top{border-top:3px solid var(--warmup);}
+.acc-haupt .card-top{border-top:3px solid var(--haupt);}
+.acc-schnk .card-top{border-top:3px solid var(--schnk);}
+
+/* ── Multiple-Choice-Quiz (interaktiv) ───────────────────── */
+.mcq{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);margin-bottom:var(--space-5);box-shadow:var(--shadow-sm);}
+.mcq-head{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;}
+.mcq-badge{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.14rem .5rem;border-radius:var(--radius-full);}
+.b-konzept{background:color-mix(in oklab,#2563eb 14%,var(--color-surface));color:#1d4ed8;}
+.b-formel{background:color-mix(in oklab,#7c3aed 14%,var(--color-surface));color:#6d28d9;}
+.b-falle{background:color-mix(in oklab,#dc2626 14%,var(--color-surface));color:#b91c1c;}
+.b-code{background:color-mix(in oklab,#0891b2 14%,var(--color-surface));color:#0e7490;}
+.mcq-q{font-weight:700;font-size:var(--text-base);line-height:1.4;margin:var(--space-2) 0 var(--space-1);color:var(--color-text);}
+.mcq-hint{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);}
+.mcq-opt{display:flex;gap:.65rem;align-items:flex-start;padding:.7rem .9rem;border:1.5px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:.55rem;cursor:pointer;transition:background .12s,border-color .12s;font-size:var(--text-sm);line-height:1.5;color:var(--color-text);}
+.mcq-opt:hover{background:var(--color-surface-2);}
+.mcq-opt input{margin-top:.15rem;flex:0 0 auto;width:17px;height:17px;accent-color:var(--color-primary);cursor:pointer;}
+.mcq-opt .opt-text{flex:1;}
+.mcq-opt .opt-mark{font-weight:700;font-size:var(--text-xs);white-space:nowrap;opacity:0;}
+.mcq-opt.correct{border-color:#16a34a;background:color-mix(in oklab,#16a34a 9%,var(--color-surface));}
+.mcq-opt.correct .opt-mark{opacity:1;color:#15803d;}
+.mcq-opt.wrong{border-color:#dc2626;background:color-mix(in oklab,#dc2626 9%,var(--color-surface));}
+.mcq-opt.wrong .opt-mark{opacity:1;color:#b91c1c;}
+.mcq-opt.missed{border-color:#d97706;background:color-mix(in oklab,#d97706 10%,var(--color-surface));}
+.mcq-opt.missed .opt-mark{opacity:1;color:#b45309;}
+.mcq-actions{display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;}
+.mcq-check,.mcq-reset{padding:.55rem 1.2rem;border-radius:var(--radius-md);font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;border:none;}
+.mcq-check{background:var(--color-primary);color:#fff;}
+.mcq-check:hover{filter:brightness(1.07);}
+.mcq-reset{background:var(--color-surface-2);color:var(--color-text-muted);border:1px solid var(--color-border);}
+.mcq-result{display:none;margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border);}
+.mcq-result.show{display:block;}
+.mcq-verdict{font-weight:700;margin-bottom:var(--space-2);font-size:var(--text-sm);}
+.mcq-verdict.ok{color:#15803d;}
+.mcq-verdict.part{color:#b45309;}
+.mcq-exp{font-size:var(--text-sm);line-height:1.75;color:var(--color-text);}
+.mcq-exp code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary);}
+.frage-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:var(--space-4);font-size:var(--text-xs);font-weight:700;color:var(--color-primary);text-decoration:none;background:var(--color-primary-highlight);border:1px solid color-mix(in oklab,var(--color-primary) 22%,transparent);padding:.4rem .85rem;border-radius:var(--radius-full);transition:background .15s,transform .15s;}
+.frage-link:hover{background:color-mix(in oklab,var(--color-primary) 16%,var(--color-surface));transform:translateX(2px);}
+</style>
+</head>
+<body>
+<site-header active="pageA" title="Aufgabenblatt 06 · GMM & Unsupervised Learning"></site-header>
+<div class="layout">
+  <site-sidebar active="blatt06"></site-sidebar>
+  <main class="content" id="main-content" style="padding:0;overflow:visible;">
+
+<!-- ═══════════════════════════════════ LOADING OVERLAY -->
+<div id="overlay">
+  <div class="ov-logo">🐍</div>
+  <div class="ov-title">Python-Umgebung wird geladen</div>
+  <div class="spinner"></div>
+  <div class="ov-bar"><div class="ov-fill" id="ov-fill"></div></div>
+  <div class="ov-msg" id="ov-msg">Initialisiere Pyodide...</div>
+  <div class="ov-msg" style="font-size:.78rem;color:#475569">scikit-learn lädt etwas länger (~30s) – kurz warten ☕</div>
+  <button id="ov-skip" onclick="closeOverlay()" style="margin-top:20px;background:rgba(255,255,255,.1);color:#CBD5E1;border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:9px 20px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">Überspringen &amp; nur lesen ✕</button>
+  <div class="ov-msg" style="font-size:.72rem;color:#475569;margin-top:4px">Ohne Internet kann Python nicht ausgeführt werden — Lesen &amp; Lösungen funktionieren trotzdem.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ HEADER -->
+<header>
+  <h1>Gaussian Mixture Models</h1>
+  <p class="sub">Interaktives Übungsblatt — GMM, Dichteschätzung & generative Modellierung im Browser</p>
+  <div class="pills">
+    <span class="pill">📚 4 Aufgaben</span>
+    <span class="pill">🧠 7 Quiz-Fragen</span>
+    <span class="pill">🐍 Python im Browser</span>
+    <span class="pill">🔒 Lösung nach Ausführen</span>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════ NAV -->
+<nav>
+  <a href="#warmup">🌡️ WarmUp</a>
+  <a href="#haupt">⚡ Hauptaufgaben</a>
+  <a href="#schmankerl">🥨 Bonus</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════ MAIN -->
+<main>
+
+<!-- ─────────────────────────────────── WARMUP & THEORIE -->
+<section id="warmup">
+  <div class="sec-hdr">
+    <span class="badge bw">WarmUp & Theorie</span>
+    <h2>§ 0 – WarmUp & Theoriefragen (interaktiv)</h2>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
+    <div class="mcq-q">W1 · Was gilt für die GMM-Hyperparameter in sklearn?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">n_components steuert die Anzahl der Gauß-Komponenten.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">covariance_type ('full'/'tied'/'diag'/'spherical') steuert die Form der Kovarianzmatrizen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die optimale Komponentenzahl wählt man datengetrieben über BIC/AIC.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">'full' erlaubt beliebig orientierte (rotierte) Ellipsen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">n_components muss gleich der Anzahl der Features sein.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">covariance_type bestimmt die Lernrate des EM-Algorithmus.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Vier stimmen. <strong>Zusatz:</strong> Das GMM wird mit dem <strong>EM-Algorithmus</strong> trainiert (kein Gradientenabstieg, keine Lernrate). 'spherical' ≈ k-means-artige Kugeln, 'diag' = achsenparallele Ellipsen.<br><a class="frage-link" href="../Kapitel6/Page02.html#covariance-type">→ Mehr im Skript: Kap. 6 · Seite 2 – covariance_type</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
+    <div class="mcq-q">W2 · Welche Code-Zeilen fitten ein GMM mit 3 Komponenten und full-Kovarianz korrekt?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GaussianMixture(n_components=3, covariance_type='full').fit(X_train)</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GaussianMixture(3, covariance_type='full').fit(X_train)</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">KMeans(n_components=3).fit(X_train)</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">GaussianMixture(clusters=3).fit(X_train)</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">GaussianMixture(n_components=3, cov='full').fit(X_train)</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Zwei korrekt (benannt oder positional). Falsch: KMeans ist kein GMM, und es heißt <code>covariance_type</code> – nicht <code>clusters</code> oder <code>cov</code>.<br><a class="frage-link" href="../Kapitel6/Page02.html#gmm-mechanik">→ Mehr im Skript: Kap. 6 · Seite 2 – GMM-Mechanik</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">W3 · Welche EINE Aussage zu predict() vs. predict_proba() stimmt?</div>
+    <div class="mcq-hint">✦ Genau <strong>1</strong> Antwort ist richtig.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">predict() liefert die harte Zuordnung, predict_proba() die weichen Wahrscheinlichkeiten je Komponente.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Beide liefern stets identische Ergebnisse.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">predict_proba() gibt genau ein Label pro Punkt zurück.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">predict() gibt eine Wahrscheinlichkeitsmatrix zurück.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die erste stimmt. <strong>Zusatz:</strong> <code>predict_proba</code> liefert pro Punkt einen Vektor von Zugehörigkeits­wahrscheinlichkeiten (Summe = 1) – ideal, um <strong>unsichere Grenzfälle</strong> zu erkennen (Soft Assignment).<br><a class="frage-link" href="../Kapitel6/Page02.html#predict-proba">→ Mehr im Skript: Kap. 6 · Seite 2 – predict_proba</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">W4 · k-Means vs. GMM – welche Aussagen stimmen?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means ist schneller und einfacher.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means nimmt kugelförmige, gleich große Cluster an und liefert nur harte Zuordnungen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GMM modelliert beliebig orientierte Ellipsen und weiche Zuordnungen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">GMM ist immer schneller als k-Means.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">k-Means liefert pro Punkt Zugehörigkeitswahrscheinlichkeiten.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Drei stimmen. <strong>Zusatz:</strong> k-Means kann man als Spezialfall eines GMM mit 'spherical'-Kovarianz und harter Zuordnung sehen – GMM ist die flexiblere, aber rechenintensivere Verallgemeinerung.<br><a class="frage-link" href="../Kapitel6/Page01.html#improving-kmeans">→ Mehr im Skript: Kap. 6 · Seite 1 – Improving k-Means</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">T1a · Warum kreisförmig (k-Means) vs. Ellipsen (GMM)?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means nutzt die euklidische Distanz → kugelförmige (isotrope) Cluster.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GMM mit 'full'-Kovarianz modelliert beliebig orientierte Ellipsen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">covariance_type='spherical' entspricht im Grenzfall k-Means.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">'diag'-Kovarianz erlaubt beliebig rotierte Ellipsen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">'full' erzwingt achsenparallele Ellipsen ohne Rotation.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Drei stimmen. <strong>Klarstellung:</strong> <code>diag</code> = nur achsenparallele Ellipsen (keine Rotation), <code>full</code> = beliebig rotierte Ellipsen – die letzten beiden Optionen vertauschen das.<br><a class="frage-link" href="../Kapitel6/Page02.html#covariance-type">→ Mehr im Skript: Kap. 6 · Seite 2 – covariance_type</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">T2a · Welche Aussagen zu PCA vor GMM (z. B. auf Gesichtern) stimmen?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">PCA reduziert die Dimension → vermeidet eine überparametrisierte Kovarianzmatrix (Overfitting).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Beim Sampling muss man mit pca.inverse_transform() in den Pixelraum zurück.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Nach dem Sampling sind die Vektoren direkt fertige Bilder – keine Rücktransformation nötig.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">PCA ersetzt das GMM vollständig.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">PCA wird nur auf die Labels angewandt, nicht auf die Features.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Zwei stimmen. <strong>Zusatz:</strong> In hohen Dimensionen wächst die Kovarianzmatrix quadratisch (Fluch der Dimensionalität) – PCA komprimiert vorher. Gesampelte Punkte liegen im PCA-Raum und müssen zurücktransformiert werden.<br><a class="frage-link" href="../Kapitel6/Page05.html#generate-numbers">→ Mehr im Skript: Kap. 6 · Seite 5 – Generate Numbers</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-formel">Formel</span></div>
+    <div class="mcq-q">T3a · Was gilt für GMM-Dichteschätzung und Modellwahl (BIC/AIC)?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Jede Gaußkurve modelliert eine Teilpopulation (z. B. einen Peak im Histogramm).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die optimale Komponentenzahl wählt man über BIC/AIC.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">BIC bestraft zusätzliche Komponenten stärker als die reine Log-Likelihood.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Man wählt das Modell mit dem niedrigsten BIC/AIC.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Man wählt einfach so viele Komponenten wie möglich für die beste Anpassung.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Vier stimmen. <strong>Wichtig:</strong> Mehr Komponenten erhöhen immer die Likelihood → reine Anpassung würde überanpassen. BIC/AIC bestrafen Komplexität; man nimmt das <strong>Minimum</strong>.<br><a class="frage-link" href="../Kapitel6/Page04.html#bic-aic">→ Mehr im Skript: Kap. 6 · Seite 4 – BIC / AIC</a></div></div>
+  </div>
+</section>
+<!-- ─────────────────────────────────── HAUPTAUFGABEN -->
+<section id="haupt">
+  <div class="sec-hdr">
+    <span class="badge bh">Hauptaufgaben</span>
+    <h2>§ 1–3 – Implementierung</h2>
+  </div>
+
+  <div class="card acc-haupt" id="card-task1">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">1b</span>
+      <span class="card-title">k-Means durch GMM ersetzen (8 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Ersetzen Sie k-Means durch ein <code>GaussianMixture</code> zur Betriebszustandserkennung.<ul><li>Komponentenzahl datengetrieben über <strong>BIC</strong> (k=1…10).</li><li>Im Featureraum einfärben nach Label.</li><li>Punktgröße ∝ <code>predict_proba(X).max(axis=1)</code>.</li></ul></div>
+      <div class="hint">💡 Sensordaten hier synthetisch via make_blobs.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task1"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task1" onclick="runCode('task1')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task1')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task1" onclick="toggleSol('task1')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task1"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task1">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task1')">Kopieren</button>
+          <pre id="solpre-task1"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-haupt" id="card-task2">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">2b</span>
+      <span class="card-title">Bild-Generator mit PCA + GMM (10 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Trainieren Sie ein GMM auf PCA-komprimierten Bildern und generieren Sie neue.<ul><li>PCA mit ≥ 95 % erklärter Varianz.</li><li>GMM-Komponentenzahl über BIC.</li><li>12 neue Bilder samplen (<code>gmm.sample(12)</code>), zurücktransformieren, im 3×4-Grid zeigen.</li></ul></div>
+      <div class="hint">💡 Original: Olivetti Faces (Download). Offline: <code>load_digits()</code> als 8×8-Bilddatensatz.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task2"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task2" onclick="runCode('task2')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task2')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task2" onclick="toggleSol('task2')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task2"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task2">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task2')">Kopieren</button>
+          <pre id="solpre-task2"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-haupt" id="card-task3">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">3b</span>
+      <span class="card-title">MRT-Segmentierung mit 1D-GMM (10 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Segmentieren Sie ein MRT-Bild über das Intensitäts-Histogramm.<ul><li>Voxelwerte extrahieren (Hintergrund ausblenden).</li><li>1D-GMM fitten (<code>X.reshape(-1,1)</code>).</li><li>Histogramm + überlagerte Gaußkurven, dann segmentiertes Bild.</li></ul></div>
+      <div class="hint">💡 Original: <code>brain_mrt.nii.gz</code> — hier synthetisches MRT mit 3 Gewebetypen.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task3"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task3" onclick="runCode('task3')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task3')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task3" onclick="toggleSol('task3')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task3"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task3">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task3')">Kopieren</button>
+          <pre id="solpre-task3"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ─────────────────────────────────── BONUS -->
+<section id="schmankerl">
+  <div class="sec-hdr">
+    <span class="badge bs">Bonus</span>
+    <h2>§ 4 – Bonus</h2>
+  </div>
+
+  <div class="card acc-schnk" id="card-task4">
+    <div class="card-top">
+      <span class="num" style="background:var(--schnk)">★</span>
+      <span class="card-title">Bonus – DBSCAN vs. GMM auf Moons (+5 P)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Wenden Sie <code>DBSCAN</code> und <code>GaussianMixture</code> auf <code>make_moons</code> (n=500, noise=0.08) an und stellen Sie die Ergebnisse nebeneinander dar.<ul><li>Welcher Algorithmus findet die Halbmonde?</li><li>Welche GMM-Grundannahme wird verletzt?</li></ul></div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task4"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task4" onclick="runCode('task4')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task4')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task4" onclick="toggleSol('task4')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task4"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task4">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task4')">Kopieren</button>
+          <pre id="solpre-task4"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ══════════════════════════════════════════ SCRIPT -->
+<script>
+/* ─── SOLUTIONS ──────────────────────────────────────── */
+const SOL = {
+task1:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.mixture import GaussianMixture
+from sklearn.datasets import make_blobs
+
+# Sensordaten (Betriebszustände)
+X_sensor, _ = make_blobs(n_samples=400, centers=4, cluster_std=1.3, random_state=42)
+
+# Optimale Komponentenzahl über BIC (k = 1..10)
+bics = [GaussianMixture(k, covariance_type='full', random_state=42)
+        .fit(X_sensor).bic(X_sensor) for k in range(1, 11)]
+best_k = int(np.argmin(bics)) + 1
+print("Optimale Komponentenzahl (BIC):", best_k)
+
+gmm = GaussianMixture(n_components=best_k, covariance_type='full',
+                      random_state=42).fit(X_sensor)
+labels = gmm.predict(X_sensor)
+proba  = gmm.predict_proba(X_sensor).max(axis=1)
+
+plt.figure(figsize=(7, 5))
+plt.scatter(X_sensor[:, 0], X_sensor[:, 1], c=labels, s=proba * 120,
+            cmap='viridis', edgecolor='k', alpha=0.7)
+plt.title("GMM Betriebszustände (Größe = Zuordnungswahrsch.)")
+plt.show()`,
+task2:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_digits
+from sklearn.decomposition import PCA
+from sklearn.mixture import GaussianMixture
+
+# Statt Olivetti Faces (Download): Digits als 8x8-Bilddatensatz
+X = load_digits().data
+
+# PCA mit >= 95% erklärter Varianz
+pca = PCA(n_components=0.95, whiten=True, random_state=42)
+X_pca = pca.fit_transform(X)
+print("PCA-Komponenten für 95% Varianz:", pca.n_components_)
+
+# GMM-Komponentenzahl über BIC
+ks = list(range(10, 60, 10))
+bics = [GaussianMixture(k, random_state=42).fit(X_pca).bic(X_pca) for k in ks]
+best_k = ks[int(np.argmin(bics))]
+gmm = GaussianMixture(n_components=best_k, random_state=42).fit(X_pca)
+print("GMM-Komponenten (BIC):", best_k)
+
+# 12 neue Bilder samplen + zurücktransformieren
+samples, _ = gmm.sample(12)
+imgs = pca.inverse_transform(samples)
+
+fig, axes = plt.subplots(3, 4, figsize=(7, 5))
+for ax, img in zip(axes.ravel(), imgs):
+    ax.imshow(np.clip(img, 0, 16).reshape(8, 8), cmap='gray')
+    ax.axis('off')
+plt.suptitle("Generierte Ziffern (PCA + GMM)")
+plt.show()`,
+task3:
+`import numpy as np
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+from sklearn.mixture import GaussianMixture
+
+rng = np.random.default_rng(0)
+H = W = 80
+img = rng.normal(30, 8, (H, W))            # gesundes Gewebe / Hintergrund
+yy, xx = np.mgrid[0:H, 0:W]
+
+m_tissue = (xx - 30)**2 + (yy - 40)**2 < 300
+m_tumor  = (xx - 55)**2 + (yy - 45)**2 < 120
+img[m_tissue] = rng.normal(90, 6, m_tissue.sum())   # Gewebe
+img[m_tumor]  = rng.normal(150, 5, m_tumor.sum())   # Tumor
+
+voxels_fg = img.flatten()[img.flatten() > 10]
+X_1d = voxels_fg.reshape(-1, 1)
+
+gmm = GaussianMixture(n_components=3, random_state=42).fit(X_1d)
+means = gmm.means_.ravel()
+print("Gauß-Mittelwerte (Intensität):", np.sort(means).round(1))
+
+x_range = np.linspace(voxels_fg.min(), voxels_fg.max(), 400)
+plt.figure(figsize=(11, 4))
+plt.subplot(1, 2, 1)
+plt.hist(voxels_fg, bins=60, density=True, alpha=0.4, color='gray')
+for k in range(3):
+    std_k = np.sqrt(gmm.covariances_[k].ravel()[0])
+    plt.plot(x_range, gmm.weights_[k] * norm.pdf(x_range, means[k], std_k))
+plt.title("Histogramm + GMM-Komponenten")
+
+seg = gmm.predict(img.flatten().reshape(-1, 1)).reshape(H, W)
+plt.subplot(1, 2, 2)
+plt.imshow(seg, cmap='viridis'); plt.title("Segmentierung"); plt.axis('off')
+plt.tight_layout(); plt.show()
+# Höchster Mittelwert = Tumorgewebe, mittlerer = Gewebe, niedrigster = gesund.`,
+task4:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_moons
+from sklearn.cluster import DBSCAN
+from sklearn.mixture import GaussianMixture
+
+X, _ = make_moons(n_samples=500, noise=0.08, random_state=0)
+db = DBSCAN(eps=0.2, min_samples=5).fit_predict(X)
+gm = GaussianMixture(n_components=2, random_state=42).fit_predict(X)
+
+fig, ax = plt.subplots(1, 2, figsize=(11, 4))
+ax[0].scatter(X[:, 0], X[:, 1], c=db, cmap='coolwarm', edgecolor='k', s=20)
+ax[0].set_title("DBSCAN")
+ax[1].scatter(X[:, 0], X[:, 1], c=gm, cmap='coolwarm', edgecolor='k', s=20)
+ax[1].set_title("GMM")
+plt.show()
+# DBSCAN findet die Halbmonde korrekt (dichtebasiert). GMM nimmt elliptische
+# Gauß-Cluster an -> diese Annahme ist bei Monden verletzt. GMM ist besser,
+# wenn die Cluster tatsächlich (annähernd) gaußförmig/elliptisch sind.`
+};
+
+const EDITORS = {};
+const TASK_IDS = ['task1', 'task2', 'task3', 'task4'];
+
+/* ─── INIT CODEMIRROR ─────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  TASK_IDS.forEach(id => {
+    EDITORS[id] = CodeMirror.fromTextArea(document.getElementById('code-' + id), {
+      mode: 'python',
+      theme: 'dracula',
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseBrackets: true,
+      indentUnit: 4,
+      tabSize: 4,
+      indentWithTabs: false,
+      extraKeys: {
+        'Tab': cm => cm.execCommand('insertSoftTab'),
+        'Shift-Enter': () => { /* handled per-task */ }
+      }
+    });
+    document.getElementById('solpre-' + id).textContent = SOL[id];
+  });
+  initPyodide();
+});
+
+/* ─── PYODIDE ─────────────────────────────────────────── */
+let pyodide = null;
+let pyodideReady = false;
+
+function setProgress(pct, msg) {
+  document.getElementById('ov-fill').style.width = pct + '%';
+  document.getElementById('ov-msg').textContent = msg;
+}
+
+async function initPyodide() {
+  try {
+    setProgress(10, 'Lade Pyodide-Runtime...');
+    pyodide = await loadPyodide();
+
+    setProgress(35, 'Lade numpy & matplotlib...');
+    await pyodide.loadPackage(['numpy', 'matplotlib']);
+
+    setProgress(60, 'Lade scikit-learn (dauert ~20s)...');
+    await pyodide.loadPackage(['scikit-learn']);
+
+    setProgress(90, 'Konfiguriere Python-Umgebung...');
+    pyodide.runPython(`import matplotlib\nmatplotlib.use('Agg')`);
+
+    setProgress(100, 'Bereit!');
+    await new Promise(r => setTimeout(r, 400));
+    document.getElementById('overlay').style.display = 'none';
+
+    pyodideReady = true;
+    TASK_IDS.forEach(id => {
+      const btn = document.getElementById('run-' + id);
+      if (btn) btn.disabled = false;
+    });
+  } catch(e) {
+    closeOverlay();
+    console.warn('Pyodide nicht geladen (offline?):', e.message);
+  }
+}
+
+/* Overlay schließen — Navigation/Lesen ist dann immer möglich */
+function closeOverlay() {
+  const o = document.getElementById('overlay');
+  if (o) o.style.display = 'none';
+}
+
+/* Fallback: Overlay nach 45s automatisch schließen (z.B. offline),
+   damit man nie blockiert ist. */
+setTimeout(() => { if (!pyodideReady) closeOverlay(); }, 45000);
+
+/* ─── RUN CODE ────────────────────────────────────────── */
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function runCode(id) {
+  if (!pyodideReady) { alert('Python lädt noch — bitte kurz warten.'); return; }
+  const code = EDITORS[id].getValue().trim();
+  if (!code || code === '# Dein Code hier') return;
+
+  const out   = document.getElementById('out-' + id);
+  const runBtn = document.getElementById('run-' + id);
+  out.innerHTML = '<span class="out-run">⏳ Code wird ausgeführt...</span>';
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ Läuft...';
+
+  pyodide.globals.set('_stu_code', code);
+
+  try {
+    await pyodide.runPythonAsync(`
+import sys, io, base64
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+_figs_out    = []
+_stdout_buf  = io.StringIO()
+_orig_stdout = sys.stdout
+
+def _cap_show(*a, **kw):
+    for fn in sorted(plt.get_fignums()):
+        fig = plt.figure(fn)
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+        buf.seek(0)
+        _figs_out.append(base64.b64encode(buf.read()).decode())
+    plt.close('all')
+
+_orig_show   = plt.show
+plt.show     = _cap_show
+sys.stdout   = _stdout_buf
+_run_error   = None
+
+try:
+    exec(compile(_stu_code, '<aufgabe>', 'exec'))
+    if plt.get_fignums():
+        _cap_show()
+except Exception as _e:
+    import traceback
+    _run_error = traceback.format_exc()
+finally:
+    sys.stdout = _orig_stdout
+    plt.show   = _orig_show
+
+_run_text = _stdout_buf.getvalue()
+`);
+
+    const txt   = pyodide.globals.get('_run_text') || '';
+    const fp    = pyodide.globals.get('_figs_out');
+    const figs  = fp ? fp.toJs() : [];
+    if (fp) fp.destroy();
+    const err   = pyodide.globals.get('_run_error');
+
+    let html = '';
+    if (txt.trim())
+      html += `<pre class="out-text">${esc(txt)}</pre>`;
+    figs.forEach(f => {
+      html += `<div class="out-fig"><img src="data:image/png;base64,${f}" alt="Plot"></div>`;
+    });
+    if (err)
+      html += `<pre class="out-err">${esc(err)}</pre>`;
+    if (!txt.trim() && !figs.length && !err)
+      html = '<span class="out-ok">✓ Code erfolgreich ausgeführt (keine Ausgabe)</span>';
+
+    out.innerHTML = html;
+
+    // Unlock solution button after first run
+    const sb = document.getElementById('sol-btn-' + id);
+    if (sb) sb.classList.remove('locked');
+
+  } catch(e) {
+    out.innerHTML = `<pre class="out-err">${esc(e.toString())}</pre>`;
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = '▶ Ausführen';
+  }
+}
+
+/* ─── HELPERS ─────────────────────────────────────────── */
+function clearCode(id) {
+  EDITORS[id].setValue('# Dein Code hier\n');
+  document.getElementById('out-' + id).innerHTML =
+    '<span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span>';
+}
+
+function toggleSol(id) {
+  const btn = document.getElementById('sol-btn-' + id);
+  if (btn.classList.contains('locked')) {
+    alert('Führe deinen Code zuerst aus — dann wird die Lösung freigeschaltet.');
+    return;
+  }
+  const panel = document.getElementById('sol-' + id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Lösung';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Lösung verbergen';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function copySol(id) {
+  navigator.clipboard.writeText(SOL[id]).then(() => {
+    const btn = document.querySelector(`#sol-${id} .copy-sol`);
+    btn.textContent = '✓ Kopiert';
+    setTimeout(() => btn.textContent = 'Kopieren', 1800);
+  });
+}
+
+function toggleQuiz(id, btn) {
+  const panel = document.getElementById(id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Antwort anzeigen';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Antwort verbergen';
+  }
+}
+
+/* ─── MULTIPLE-CHOICE QUIZ (Auswertung) ─── */
+document.addEventListener('click', function(e){
+  if (e.target.classList && e.target.classList.contains('mcq-check')) {
+    var card = e.target.closest('.mcq'); var allCorrect = true;
+    card.querySelectorAll('.mcq-opt').forEach(function(o){
+      var inp=o.querySelector('input'); var isC=inp.dataset.correct==='true';
+      var mark=o.querySelector('.opt-mark'); o.classList.remove('correct','wrong','missed');
+      if(isC&&inp.checked){o.classList.add('correct');mark.textContent='\u2713 richtig';}
+      else if(isC&&!inp.checked){o.classList.add('missed');mark.textContent='\u25CF war richtig';allCorrect=false;}
+      else if(!isC&&inp.checked){o.classList.add('wrong');mark.textContent='\u2717 falsch';allCorrect=false;}
+      else{mark.textContent='';}
+    });
+    var res=card.querySelector('.mcq-result'); res.classList.add('show');
+    var v=card.querySelector('.mcq-verdict');
+    if(allCorrect){v.className='mcq-verdict ok';v.textContent='\u2713 Perfekt \u2013 genau richtig!';}
+    else{v.className='mcq-verdict part';v.textContent='Noch nicht ganz \u2013 schau dir die Markierungen & die Erkl\u00e4rung an:';}
+  }
+  if (e.target.classList && e.target.classList.contains('mcq-reset')) {
+    var card=e.target.closest('.mcq');
+    card.querySelectorAll('.mcq-opt').forEach(function(o){o.classList.remove('correct','wrong','missed');o.querySelector('input').checked=false;o.querySelector('.opt-mark').textContent='';});
+    card.querySelector('.mcq-result').classList.remove('show');
+  }
+});
+
+</script>
+
+  </main>
+</div>
+<site-footer caption="Aufgabenblatt 06 · GMM & Unsupervised Learning"></site-footer>
+</body>
+</html>

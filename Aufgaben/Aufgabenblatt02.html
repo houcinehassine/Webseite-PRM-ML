@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRM – Aufgabenblatt 02 · ML Grundlagen</title>
+
+<!-- Site Navigation -->
+<script type="module" src="../header.js"></script>
+<script type="module" src="../footer.js"></script>
+<script type="module" src="sidebar.js"></script>
+<link rel="stylesheet" href="../assets/style.css">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- CodeMirror (lokal) -->
+<link rel="stylesheet" href="../assets/vendor/codemirror.min.css">
+<link rel="stylesheet" href="../assets/vendor/codemirror-dracula.min.css">
+<script src="../assets/vendor/codemirror.min.js"></script>
+<script src="../assets/vendor/codemirror-python.min.js"></script>
+<script src="../assets/vendor/codemirror-matchbrackets.min.js"></script>
+<script src="../assets/vendor/codemirror-closebrackets.min.js"></script>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --bg:#F1F5F9;
+  --card:#FFFFFF;
+  --border:#E2E8F0;
+  --text:#0F172A;
+  --muted:#64748B;
+  --hdr1:#0F172A;
+  --hdr2:#1E3A5F;
+  --quiz:#6366F1;
+  --quiz-light:#EEF2FF;
+  --warmup:#059669;
+  --warmup-light:#ECFDF5;
+  --haupt:#DC2626;
+  --haupt-light:#FEF2F2;
+  --schnk:#D97706;
+  --schnk-light:#FFFBEB;
+  --run:#16A34A;
+  --run-h:#15803D;
+  --sol:#D97706;
+  --sol-h:#B45309;
+}
+
+#main-content{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  font-size:15px;
+}
+
+/* ─── LOADING OVERLAY ─────────────────────────────────── */
+#overlay{
+  position:fixed;inset:0;
+  background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:9999;gap:18px;
+}
+.ov-logo{font-size:2.6rem;filter:drop-shadow(0 0 20px #6366f1aa);}
+.ov-title{color:#F8FAFC;font-size:1.3rem;font-weight:700;letter-spacing:-.02em;}
+.ov-msg{color:#94A3B8;font-size:.88rem;min-height:1.2em;text-align:center;}
+.ov-bar{width:280px;height:4px;background:#1E293B;border-radius:4px;overflow:hidden;}
+.ov-fill{height:100%;background:linear-gradient(90deg,#6366F1,#10B981);border-radius:4px;width:0%;transition:width .4s ease;}
+.spinner{
+  width:36px;height:36px;
+  border:3px solid rgba(99,102,241,.25);
+  border-top-color:#6366F1;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── HEADER ─────────────────────────────────────────── */
+#main-content>header{
+  background:linear-gradient(150deg,var(--hdr1) 0%,var(--hdr2) 100%);
+  padding:52px 24px 44px;
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+#main-content>header::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(99,102,241,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(99,102,241,.07) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+#main-content>header *{position:relative;}
+#main-content>header h1{
+  font-size:2rem;font-weight:700;color:#F8FAFC;
+  letter-spacing:-.03em;margin-bottom:6px;
+}
+#main-content>header .sub{color:#94A3B8;font-size:.92rem;}
+.pills{
+  display:flex;gap:10px;justify-content:center;
+  flex-wrap:wrap;margin-top:22px;
+}
+.pill{
+  background:rgba(255,255,255,.08);
+  color:#CBD5E1;font-size:.8rem;
+  padding:5px 13px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.1);
+}
+
+/* ─── NAV BAR ────────────────────────────────────────── */
+#main-content>nav{
+  background:#1E293B;
+  display:flex;gap:0;justify-content:center;
+  flex-wrap:wrap;
+  position:static;
+  border-bottom:1px solid #334155;
+}
+#main-content>nav a{
+  color:#94A3B8;font-size:.8rem;font-weight:500;
+  padding:10px 18px;text-decoration:none;
+  transition:color .15s,background .15s;
+  white-space:nowrap;
+}
+#main-content>nav a:hover{color:#F8FAFC;background:rgba(255,255,255,.06);}
+
+/* ─── MAIN ───────────────────────────────────────────── */
+#main-content>main{
+  max-width:880px;margin:0 auto;
+  padding:36px 16px 72px;
+  display:flex;flex-direction:column;gap:36px;
+}
+
+/* ─── SECTION ────────────────────────────────────────── */
+.sec-hdr{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:18px;padding-bottom:12px;
+  border-bottom:2px solid var(--border);
+}
+.badge{
+  padding:4px 13px;border-radius:20px;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:#fff;flex-shrink:0;
+}
+.bq{background:var(--quiz);}
+.bw{background:var(--warmup);}
+.bh{background:var(--haupt);}
+.bs{background:var(--schnk);}
+
+.sec-hdr h2{font-size:1.15rem;font-weight:700;color:var(--text);}
+
+/* ─── TASK CARD ──────────────────────────────────────── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);
+  margin-bottom:14px;
+}
+.card:last-child{margin-bottom:0;}
+.card-top{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+}
+.num{
+  font-size:.75rem;font-weight:700;
+  color:#fff;padding:3px 9px;border-radius:5px;
+  flex-shrink:0;font-family:'JetBrains Mono',monospace;
+}
+.card-title{font-size:.98rem;font-weight:600;}
+.card-body{padding:18px 20px 20px;}
+
+/* ─── DESCRIPTION ────────────────────────────────────── */
+.desc{
+  font-size:.88rem;color:#334155;
+  margin-bottom:14px;line-height:1.75;
+}
+.desc ul{margin:7px 0 7px 20px;}
+.desc li{margin:3px 0;}
+.desc code,.hint code{
+  background:#F1F5F9;
+  padding:1px 5px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#6366F1;
+}
+.desc pre{
+  background:#F1F5F9;padding:10px 14px;
+  border-radius:7px;font-size:.83rem;
+  font-family:'JetBrains Mono',monospace;
+  margin:8px 0;overflow-x:auto;color:#334155;
+}
+.hint{
+  background:#EFF6FF;border-left:3px solid #3B82F6;
+  padding:8px 12px;border-radius:0 7px 7px 0;
+  font-size:.83rem;color:#1E40AF;margin-bottom:14px;
+}
+
+/* ─── EDITOR ──────────────────────────────────────────── */
+.elabel{
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.CodeMirror{
+  height:auto!important;min-height:150px;max-height:380px;
+  font-size:13px;
+  font-family:'JetBrains Mono','Fira Code',monospace!important;
+  border-radius:9px;
+  border:1px solid #374151!important;
+  line-height:1.6;
+}
+.CodeMirror-scroll{min-height:150px;max-height:380px;}
+.CodeMirror-linenumber{color:#4B5563;}
+
+/* ─── TOOLBAR ────────────────────────────────────────── */
+.toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.btn{
+  padding:7px 16px;border:none;border-radius:7px;
+  cursor:pointer;font-size:.83rem;font-weight:600;
+  font-family:'Inter',sans-serif;
+  transition:background .15s,transform .1s;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+.btn-run{background:var(--run);color:#fff;}
+.btn-run:hover:not(:disabled){background:var(--run-h);}
+.btn-clear{background:#475569;color:#fff;}
+.btn-clear:hover:not(:disabled){background:#334155;}
+.btn-sol{background:var(--sol);color:#fff;}
+.btn-sol:hover:not(:disabled){background:var(--sol-h);}
+.btn-sol.locked{background:#94A3B8;cursor:not-allowed;}
+.btn-sol.locked::after{content:" 🔒";}
+
+/* ─── OUTPUT ─────────────────────────────────────────── */
+.output-wrap{margin-top:13px;}
+.output{
+  background:#0D1117;border-radius:9px;
+  padding:12px 14px;min-height:38px;
+  border:1px solid #21262D;
+}
+.output pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;white-space:pre-wrap;word-break:break-word;
+}
+.out-text{color:#E2E8F0;}
+.out-err{color:#F87171;}
+.out-ok{color:#4ADE80;font-size:.82rem;}
+.out-wait{color:#475569;font-size:.82rem;}
+.out-run{color:#60A5FA;font-size:.82rem;}
+.out-fig img{
+  max-width:100%;border-radius:7px;
+  margin-top:10px;border:1px solid #21262D;
+  display:block;
+}
+
+/* ─── SOLUTION ───────────────────────────────────────── */
+.sol-panel{display:none;margin-top:13px;}
+.sol-panel.open{display:block;}
+.sol-hdr{
+  background:#FFFBEB;
+  border:1px solid #FCD34D;border-bottom:none;
+  padding:8px 14px;border-radius:9px 9px 0 0;
+  font-size:.75rem;font-weight:700;color:#92400E;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.sol-code{
+  background:#1E1E2E;
+  border:1px solid #FCD34D;
+  border-top:none;border-radius:0 0 9px 9px;
+  padding:14px 16px;overflow-x:auto;
+  position:relative;
+}
+.sol-code pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;color:#CDD6F4;
+  white-space:pre;
+  tab-size:4;
+}
+.copy-sol{
+  position:absolute;top:10px;right:10px;
+  background:rgba(99,102,241,.2);color:#A5B4FC;
+  border:1px solid rgba(99,102,241,.3);
+  border-radius:5px;padding:3px 9px;
+  font-size:.75rem;cursor:pointer;font-weight:600;
+  transition:background .15s;
+}
+.copy-sol:hover{background:rgba(99,102,241,.35);}
+
+/* ─── QUIZ ───────────────────────────────────────────── */
+.q-answer{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--border);border-radius:8px;
+  font-size:.88rem;font-family:'Inter',sans-serif;
+  resize:vertical;min-height:72px;color:var(--text);
+  transition:border-color .15s;margin-top:8px;
+}
+.q-answer:focus{outline:none;border-color:var(--quiz);}
+.q-reveal-btn{
+  margin-top:9px;padding:7px 16px;
+  background:var(--quiz);color:#fff;
+  border:none;border-radius:7px;cursor:pointer;
+  font-size:.83rem;font-weight:600;font-family:'Inter',sans-serif;
+  transition:background .15s;
+}
+.q-reveal-btn:hover{background:#4F46E5;}
+.q-ans-panel{
+  display:none;margin-top:10px;
+  background:var(--quiz-light);
+  border:1px solid #C7D2FE;border-radius:9px;
+  padding:13px 16px;font-size:.87rem;line-height:1.75;
+}
+.q-ans-panel.open{display:block;}
+.q-ans-panel strong{color:#4338CA;}
+.q-ans-panel code{
+  background:#E0E7FF;padding:1px 5px;
+  border-radius:4px;font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#4338CA;
+}
+
+/* ─── ACCENT BARS ─────────────────────────────────────── */
+.acc-quiz .card-top{border-top:3px solid var(--quiz);}
+.acc-warmup .card-top{border-top:3px solid var(--warmup);}
+.acc-haupt .card-top{border-top:3px solid var(--haupt);}
+.acc-schnk .card-top{border-top:3px solid var(--schnk);}
+
+/* ── Multiple-Choice-Quiz (interaktiv) ───────────────────── */
+.mcq{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);margin-bottom:var(--space-5);box-shadow:var(--shadow-sm);}
+.mcq-head{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;}
+.mcq-badge{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.14rem .5rem;border-radius:var(--radius-full);}
+.b-konzept{background:color-mix(in oklab,#2563eb 14%,var(--color-surface));color:#1d4ed8;}
+.b-formel{background:color-mix(in oklab,#7c3aed 14%,var(--color-surface));color:#6d28d9;}
+.b-falle{background:color-mix(in oklab,#dc2626 14%,var(--color-surface));color:#b91c1c;}
+.b-code{background:color-mix(in oklab,#0891b2 14%,var(--color-surface));color:#0e7490;}
+.mcq-q{font-weight:700;font-size:var(--text-base);line-height:1.4;margin:var(--space-2) 0 var(--space-1);color:var(--color-text);}
+.mcq-hint{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);}
+.mcq-opt{display:flex;gap:.65rem;align-items:flex-start;padding:.7rem .9rem;border:1.5px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:.55rem;cursor:pointer;transition:background .12s,border-color .12s;font-size:var(--text-sm);line-height:1.5;color:var(--color-text);}
+.mcq-opt:hover{background:var(--color-surface-2);}
+.mcq-opt input{margin-top:.15rem;flex:0 0 auto;width:17px;height:17px;accent-color:var(--color-primary);cursor:pointer;}
+.mcq-opt .opt-text{flex:1;}
+.mcq-opt .opt-mark{font-weight:700;font-size:var(--text-xs);white-space:nowrap;opacity:0;}
+.mcq-opt.correct{border-color:#16a34a;background:color-mix(in oklab,#16a34a 9%,var(--color-surface));}
+.mcq-opt.correct .opt-mark{opacity:1;color:#15803d;}
+.mcq-opt.wrong{border-color:#dc2626;background:color-mix(in oklab,#dc2626 9%,var(--color-surface));}
+.mcq-opt.wrong .opt-mark{opacity:1;color:#b91c1c;}
+.mcq-opt.missed{border-color:#d97706;background:color-mix(in oklab,#d97706 10%,var(--color-surface));}
+.mcq-opt.missed .opt-mark{opacity:1;color:#b45309;}
+.mcq-actions{display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;}
+.mcq-check,.mcq-reset{padding:.55rem 1.2rem;border-radius:var(--radius-md);font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;border:none;}
+.mcq-check{background:var(--color-primary);color:#fff;}
+.mcq-check:hover{filter:brightness(1.07);}
+.mcq-reset{background:var(--color-surface-2);color:var(--color-text-muted);border:1px solid var(--color-border);}
+.mcq-result{display:none;margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border);}
+.mcq-result.show{display:block;}
+.mcq-verdict{font-weight:700;margin-bottom:var(--space-2);font-size:var(--text-sm);}
+.mcq-verdict.ok{color:#15803d;}
+.mcq-verdict.part{color:#b45309;}
+.mcq-exp{font-size:var(--text-sm);line-height:1.75;color:var(--color-text);}
+.mcq-exp code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary);}
+.frage-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:var(--space-4);font-size:var(--text-xs);font-weight:700;color:var(--color-primary);text-decoration:none;background:var(--color-primary-highlight);border:1px solid color-mix(in oklab,var(--color-primary) 22%,transparent);padding:.4rem .85rem;border-radius:var(--radius-full);transition:background .15s,transform .15s;}
+.frage-link:hover{background:color-mix(in oklab,var(--color-primary) 16%,var(--color-surface));transform:translateX(2px);}
+</style>
+</head>
+<body>
+<site-header active="pageA" title="Aufgabenblatt 02 · ML Grundlagen"></site-header>
+<div class="layout">
+  <site-sidebar active="blatt02"></site-sidebar>
+  <main class="content" id="main-content" style="padding:0;overflow:visible;">
+
+<!-- ═══════════════════════════════════ LOADING OVERLAY -->
+<div id="overlay">
+  <div class="ov-logo">🐍</div>
+  <div class="ov-title">Python-Umgebung wird geladen</div>
+  <div class="spinner"></div>
+  <div class="ov-bar"><div class="ov-fill" id="ov-fill"></div></div>
+  <div class="ov-msg" id="ov-msg">Initialisiere Pyodide...</div>
+  <div class="ov-msg" style="font-size:.78rem;color:#475569">scikit-learn lädt etwas länger (~30s) – kurz warten ☕</div>
+  <button id="ov-skip" onclick="closeOverlay()" style="margin-top:20px;background:rgba(255,255,255,.1);color:#CBD5E1;border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:9px 20px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">Überspringen &amp; nur lesen ✕</button>
+  <div class="ov-msg" style="font-size:.72rem;color:#475569;margin-top:4px">Ohne Internet kann Python nicht ausgeführt werden — Lesen &amp; Lösungen funktionieren trotzdem.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ HEADER -->
+<header>
+  <h1>Machine Learning Grundlagen</h1>
+  <p class="sub">Interaktives Übungsblatt — Schreibe und führe Python direkt im Browser aus</p>
+  <div class="pills">
+    <span class="pill">📚 8 Aufgaben</span>
+    <span class="pill">🧠 5 Quiz-Fragen</span>
+    <span class="pill">🐍 Python im Browser</span>
+    <span class="pill">🔒 Lösung nach Ausführen</span>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════ NAV -->
+<nav>
+  <a href="#quiz">🧠 Quiz</a>
+  <a href="#warmup">🌡️ WarmUp</a>
+  <a href="#haupt">⚡ Hauptaufgaben</a>
+  <a href="#schmankerl">🥨 Schmankerl</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════ MAIN -->
+<main>
+
+<!-- ─────────────────────────────────── QUIZ SECTION -->
+<section id="quiz">
+  <div class="sec-hdr">
+    <span class="badge bq">Quiz</span>
+    <h2>Theoretische Fragen — interaktiv</h2>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">F1 · Was trifft auf Overfitting und Underfitting zu?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Overfitting: Das Modell lernt Trainingsdaten inkl. Rauschen auswendig → hohe Varianz, schlechte Generalisierung.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Underfitting: Das Modell ist zu simpel und erfasst die Struktur nicht → hoher Bias.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Overfitting erkennt man an hoher Trainings- und deutlich niedrigerer Test-Genauigkeit.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Gegen Overfitting helfen mehr Trainingsdaten oder Regularisierung.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Underfitting bedeutet exzellente Trainings-, aber schlechte Test-Genauigkeit.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Overfitting behebt man, indem man das Modell noch komplexer macht.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Die letzten beiden sind falsch: hohe Train-/niedrige Test-Genauigkeit ist <em>Overfitting</em> (nicht Underfitting), und mehr Komplexität verstärkt Overfitting. <strong>Merke:</strong> Underfitting = hoher Bias, Overfitting = hohe Varianz – der Bias-Variance-Trade-off sucht das Optimum dazwischen.<br><a class="frage-link" href="../Kapitel2/Page08.html#high-variance">→ Mehr im Skript: Kap. 2 · Seite 8 – Bias-Variance</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
+    <div class="mcq-q">F2 · Welche EINE Aussage zum Testset ist korrekt?</div>
+    <div class="mcq-hint">✦ Genau <strong>1</strong> Antwort ist richtig.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Optimiert man Hyperparameter am Testset, ist das Data Leakage und die Schätzung wird überoptimistisch.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Solange man nur wenige Werte testet, ist Tuning am Testset unbedenklich.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Das Testset sollte zur Hyperparameter-Suche genutzt werden, weil es am repräsentativsten ist.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Tuning am Testset senkt die Varianz der Güteschätzung.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die erste Aussage stimmt. <strong>Zusatz (nicht in den Optionen):</strong> Für die Hyperparameter-Suche nimmt man ein separates <strong>Validierungsset</strong> oder <strong>Cross-Validation</strong>; das Testset wird erst ganz am Ende ein einziges Mal verwendet.<br><a class="frage-link" href="../Kapitel2/Page07.html#train-val-test">→ Mehr im Skript: Kap. 2 · Seite 7 – Train/Val/Test</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">F3 · Welche Vorteile hat k-Fold Cross-Validation?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Jedes Sample wird genau einmal zur Validierung und k−1 mal zum Training verwendet.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die Güteschätzung ist robuster und weniger varianzreich als bei einem einzelnen Split.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die Daten werden effizienter genutzt – wichtig bei kleinen Datensätzen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">k-Fold ist immer schneller als ein einzelner Train-Test-Split.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">k-Fold macht ein separates finales Testset komplett überflüssig.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Drei Vorteile stimmen. Falsch: k-Fold ist <em>teurer</em> (k-faches Training). <strong>Zusatz:</strong> Für eine ehrliche Endbewertung behält man trotzdem ein separates Testset (bzw. nutzt <em>nested</em> CV, wenn man zusätzlich tunt).<br><a class="frage-link" href="../Kapitel2/Page07.html#k-fold-loo">→ Mehr im Skript: Kap. 2 · Seite 7 – k-Fold & LOO</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
+    <div class="mcq-q">F4 · Wie wirkt die test_size auf Bias und Varianz der Schätzung?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Große test_size → weniger Trainingsdaten → höherer Bias.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Kleine test_size → weniger Testdaten → höhere Varianz des Scores.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Eine kleine test_size senkt die Varianz des geschätzten Scores.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Eine große test_size verbessert immer die Generalisierung.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Die test_size hat keinen Einfluss auf Bias/Varianz.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die ersten beiden stimmen. <strong>Zusatz:</strong> Übliche Praxis sind <strong>20–30 % Testanteil</strong> als Kompromiss zwischen zu wenig Trainings- und zu wenig Testdaten.<br><a class="frage-link" href="../Kapitel2/Page08.html#high-variance">→ Mehr im Skript: Kap. 2 · Seite 8 – Bias-Variance</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
+    <div class="mcq-q">F5 · Was gilt für ein sklearn-Pipeline-Objekt?</div>
+    <div class="mcq-hint">✦ <strong>Alle</strong> Antworten sind richtig – aber prüfe genau!</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Es verkettet mehrere Schritte (z. B. StandardScaler → KNN) zu einem Objekt.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bei Cross-Validation wird der Scaler in jedem Fold nur auf dem Trainingsteil gefittet → kein Leakage.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">fit() und predict() laufen als einheitlicher Workflow über alle Schritte.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">In GridSearchCV adressiert man Parameter eines Schritts mit Präfix, z. B. svc__C.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Hier sind <strong>alle vier</strong> Aussagen korrekt. <strong>Aber Vorsicht:</strong> Eine Pipeline garantiert <em>keine</em> bessere Genauigkeit – sie sorgt nur für sauberen, leckagefreien Ablauf.<br><a class="frage-link" href="../Kapitel2/Page05.html#generischer-aufbau">→ Mehr im Skript: Kap. 2 · Seite 5 – sklearn-Workflow</a></div></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────── WARMUP SECTION -->
+<section id="warmup">
+  <div class="sec-hdr">
+    <span class="badge bw">WarmUp</span>
+    <h2>Einführende Programmieraufgaben</h2>
+  </div>
+
+  <!-- A1 -->
+  <div class="card acc-warmup" id="card-task1">
+    <div class="card-top">
+      <span class="num" style="background:var(--warmup)">A1</span>
+      <span class="card-title">Daten-Inspektion</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">
+        Erzeugen Sie mit <code>make_classification</code> einen Datensatz mit <strong>200 Samples</strong>, <strong>2 Features</strong> und <strong>3 Klassen</strong>. Führen Sie folgende Schritte durch:
+        <ul>
+          <li>Geben Sie die <strong>Shape</strong> von <code>X</code> und <code>y</code> aus.</li>
+          <li>Prüfen Sie, wie viele Samples pro Klasse vorhanden sind (<code>np.unique</code> mit <code>return_counts=True</code>).</li>
+          <li>Visualisieren Sie die Daten als <strong>Scatter-Plot</strong> — jede Klasse in einer anderen Farbe.</li>
+        </ul>
+      </div>
+      <div class="hint">💡 Verwende <code>n_clusters_per_class=1</code> und <code>n_redundant=0</code> für saubere 2D-Daten.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task1"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task1" onclick="runCode('task1')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task1')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task1" onclick="toggleSol('task1')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task1"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task1">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task1')">Kopieren</button>
+          <pre id="solpre-task1"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A2 -->
+  <div class="card acc-warmup" id="card-task2">
+    <div class="card-top">
+      <span class="num" style="background:var(--warmup)">A2</span>
+      <span class="card-title">Stratifizierter Split</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">
+        Führen Sie einen <code>train_test_split</code> mit <code>test_size=0.3</code> auf dem Datensatz aus A1 durch.
+        <ul>
+          <li>Vergleichen Sie die <strong>Klassenverteilung</strong> im Train- und Testset — einmal <strong>ohne</strong> und einmal <strong>mit</strong> <code>stratify=y</code>.</li>
+          <li>Erklären Sie den Unterschied als Kommentar im Code.</li>
+        </ul>
+      </div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task2"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task2" onclick="runCode('task2')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task2')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task2" onclick="toggleSol('task2')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task2"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task2">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task2')">Kopieren</button>
+          <pre id="solpre-task2"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── HAUPTAUFGABEN -->
+<section id="haupt">
+  <div class="sec-hdr">
+    <span class="badge bh">Hauptaufgaben</span>
+    <h2>Kernaufgaben</h2>
+  </div>
+
+  <!-- A3 -->
+  <div class="card acc-haupt" id="card-task3">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A3</span>
+      <span class="card-title">Eigene Cross-Validation</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">
+        Schreiben Sie eine Funktion <code>my_cross_val_score(model, X, y, k)</code>, die eine <strong>k-Fold Cross-Validation manuell</strong> durchführt — ohne <code>cross_val_score</code> zu verwenden.
+        <ul>
+          <li>Nutzen Sie <code>KFold</code> aus sklearn, aber <strong>nicht</strong> <code>cross_val_score</code>.</li>
+          <li>Geben Sie <strong>mittleren Score</strong> und <strong>Standardabweichung</strong> zurück.</li>
+          <li>Vergleichen Sie Ihr Ergebnis mit der offiziellen <code>cross_val_score</code>-Funktion.</li>
+        </ul>
+      </div>
+      <div class="hint">💡 Modell: <code>KNeighborsClassifier(n_neighbors=3)</code> — Datensatz selbst erzeugen.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task3"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task3" onclick="runCode('task3')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task3')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task3" onclick="toggleSol('task3')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task3"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task3">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task3')">Kopieren</button>
+          <pre id="solpre-task3"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A4 -->
+  <div class="card acc-haupt" id="card-task4">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A4</span>
+      <span class="card-title">Hyperparameter-Suche mit Loop</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">
+        Schreiben Sie <code>find_best_k(X, y, k_values)</code>, die den besten <code>k</code>-Wert für einen <code>KNeighborsClassifier</code> findet — <strong>ohne</strong> <code>GridSearchCV</code>.
+        <ul>
+          <li>Für jeden Wert in <code>k_values</code>: <strong>3-Fold Cross-Validation</strong> durchführen.</li>
+          <li>Besten <code>k</code>-Wert und Score zurückgeben.</li>
+          <li>Alle Scores als <strong>Linienplot</strong> visualisieren (bestes k rot markiert).</li>
+        </ul>
+      </div>
+      <div class="hint">💡 Teste mit <code>k_values = range(1, 20)</code>.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task4"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task4" onclick="runCode('task4')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task4')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task4" onclick="toggleSol('task4')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task4"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task4">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task4')">Kopieren</button>
+          <pre id="solpre-task4"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A5 -->
+  <div class="card acc-haupt" id="card-task5">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A5</span>
+      <span class="card-title">Normalisierung — wann und wie?</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">
+        Erzeugen Sie einen Regressionsdatensatz (<code>make_regression</code>, 200 Samples, 5 Features) und wenden Sie <code>StandardScaler</code> in zwei Varianten an:
+        <ul>
+          <li><strong>Variante A (korrekt):</strong> Scaler auf <strong>Trainingsdaten</strong> fitten, Testdaten nur transformieren.</li>
+          <li><strong>Variante B (falsch):</strong> Scaler auf dem <strong>gesamten Datensatz</strong> fitten, dann splitten.</li>
+        </ul>
+        Vergleichen Sie die Feature-Mittelwerte. Erklären Sie den methodischen Fehler in Variante B.
+      </div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task5"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task5" onclick="runCode('task5')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task5')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task5" onclick="toggleSol('task5')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task5"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task5">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task5')">Kopieren</button>
+          <pre id="solpre-task5"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────────── SCHMANKERL -->
+<section id="schmankerl">
+  <div class="sec-hdr">
+    <span class="badge bs">🥨 Schmankerl</span>
+    <h2>Python-Herausforderungen</h2>
+  </div>
+
+  <!-- A6 -->
+  <div class="card acc-schnk" id="card-task6">
+    <div class="card-top">
+      <span class="num" style="background:var(--schnk)">A6</span>
+      <span class="card-title">Shuffle-Split from Scratch</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">
+        Schreiben Sie <code>shuffle_split(X, y, test_size, n_splits)</code>, die <code>n</code>-mal einen zufälligen Train-Test-Split durchführt.
+        <ul>
+          <li>Nur <code>numpy</code>-Funktionen verwenden (z.B. <code>np.random.permutation</code>).</li>
+          <li>Die Funktion muss ein <strong>Generator</strong> sein (mit <code>yield</code>).</li>
+          <li>In einem <code>for</code>-Loop testen und Shape jedes Splits ausgeben.</li>
+        </ul>
+      </div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task6"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task6" onclick="runCode('task6')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task6')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task6" onclick="toggleSol('task6')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task6"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task6">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task6')">Kopieren</button>
+          <pre id="solpre-task6"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A7 -->
+  <div class="card acc-schnk" id="card-task7">
+    <div class="card-top">
+      <span class="num" style="background:var(--schnk)">A7</span>
+      <span class="card-title">Garage revisited — Bedingter Split</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">
+        Gegeben:
+        <pre>X = np.array(['BMW']*4 + ['Audi']*4 + ['VW']*4 + ['Tesla']*4 + ['Opel']*4)
+y = np.array(['Auto'] * 20)</pre>
+        Führen Sie einen Split so lange aus (mit <code>while</code>-Loop), bis <strong>alle drei</strong> Bedingungen erfüllt sind:
+        <ul>
+          <li>Im Trainingsset mindestens <strong>ein Tesla</strong>.</li>
+          <li>Im Testset genau <strong>2 BMWs</strong>.</li>
+          <li>Im Trainingsset alle <strong>5 Fahrzeugtypen</strong> vertreten.</li>
+        </ul>
+        Anzahl der Iterationen und finalen Split ausgeben.
+      </div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task7"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task7" onclick="runCode('task7')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task7')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task7" onclick="toggleSol('task7')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task7"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task7">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task7')">Kopieren</button>
+          <pre id="solpre-task7"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- A8 -->
+  <div class="card acc-schnk" id="card-task8">
+    <div class="card-top">
+      <span class="num" style="background:var(--schnk)">A8</span>
+      <span class="card-title">Learning Curve from Scratch</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">
+        Schreiben Sie <code>plot_learning_curve(model, X, y, train_sizes)</code>, die für verschiedene Trainingsgrößen Train- und Validierungsscore berechnet und plottet.
+        <ul>
+          <li><strong>Keine</strong> <code>learning_curve</code>-Funktion aus sklearn verwenden.</li>
+          <li>Für jeden Wert in <code>train_sizes</code> (z.B. <code>[0.1, 0.2, ..., 0.9]</code>): splitten, trainieren, beide Scores berechnen.</li>
+          <li><span style="color:#2563EB">Trainings-Score blau</span> und <span style="color:#DC2626">Validierungs-Score rot</span> plotten.</li>
+          <li>Anhand des Plots: Erkläre ob das Modell over- oder underfit.</li>
+        </ul>
+      </div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task8"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task8" onclick="runCode('task8')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task8')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task8" onclick="toggleSol('task8')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task8"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task8">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task8')">Kopieren</button>
+          <pre id="solpre-task8"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ══════════════════════════════════════════ SCRIPT -->
+<script>
+/* ─── SOLUTIONS ──────────────────────────────────────── */
+const SOL = {
+task1:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+
+X, y = make_classification(
+    n_samples=200, n_features=2, n_classes=3,
+    n_clusters_per_class=1, n_redundant=0, random_state=42
+)
+
+print("Shape X:", X.shape)
+print("Shape y:", y.shape)
+
+klassen, anzahl = np.unique(y, return_counts=True)
+for k, a in zip(klassen, anzahl):
+    print(f"Klasse {k}: {a} Samples")
+
+plt.figure(figsize=(8, 5))
+farben = ['#E74C3C', '#3498DB', '#2ECC71']
+for i, k in enumerate(klassen):
+    plt.scatter(X[y==k, 0], X[y==k, 1],
+                color=farben[i], label=f"Klasse {k}", alpha=0.7)
+plt.legend()
+plt.title("Scatter-Plot der Klassen")
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+plt.tight_layout()
+plt.show()`,
+
+task2:
+`import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+
+X, y = make_classification(
+    n_samples=200, n_features=2, n_classes=3,
+    n_clusters_per_class=1, n_redundant=0, random_state=42
+)
+
+# Ohne stratify
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.3, random_state=42)
+print("=== Ohne stratify ===")
+print("Train:", np.unique(y_tr, return_counts=True)[1])
+print("Test: ", np.unique(y_te, return_counts=True)[1])
+
+# Mit stratify
+X_tr_s, X_te_s, y_tr_s, y_te_s = train_test_split(
+    X, y, test_size=0.3, stratify=y, random_state=42
+)
+print("\\n=== Mit stratify ===")
+print("Train:", np.unique(y_tr_s, return_counts=True)[1])
+print("Test: ", np.unique(y_te_s, return_counts=True)[1])
+# Beobachtung: stratify sorgt fuer proportionale Klassenverteilung`,
+
+task3:
+`import numpy as np
+from sklearn.datasets import make_classification
+from sklearn.model_selection import KFold, cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+
+X, y = make_classification(
+    n_samples=200, n_features=2, n_classes=3,
+    n_clusters_per_class=1, n_redundant=0, random_state=42
+)
+
+def my_cross_val_score(model, X, y, k):
+    kf = KFold(n_splits=k, shuffle=True, random_state=42)
+    scores = []
+    for train_idx, val_idx in kf.split(X):
+        X_tr, X_val = X[train_idx], X[val_idx]
+        y_tr, y_val = y[train_idx], y[val_idx]
+        model.fit(X_tr, y_tr)
+        scores.append(model.score(X_val, y_val))
+    return np.mean(scores), np.std(scores)
+
+model = KNeighborsClassifier(n_neighbors=3)
+
+mean, std = my_cross_val_score(model, X, y, 5)
+print(f"Eigene CV:     Mean={mean:.4f}, Std={std:.4f}")
+
+official = cross_val_score(model, X, y, cv=5)
+print(f"Offizielle CV: Mean={official.mean():.4f}, Std={official.std():.4f}")`,
+
+task4:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.model_selection import cross_val_score
+from sklearn.neighbors import KNeighborsClassifier
+
+X, y = make_classification(
+    n_samples=200, n_features=2, n_classes=3,
+    n_clusters_per_class=1, n_redundant=0, random_state=42
+)
+
+def find_best_k(X, y, k_values):
+    k_list = list(k_values)
+    scores = []
+    for k in k_list:
+        model = KNeighborsClassifier(n_neighbors=k)
+        cv_scores = cross_val_score(model, X, y, cv=3)
+        scores.append(cv_scores.mean())
+
+    best_idx = np.argmax(scores)
+    best_k   = k_list[best_idx]
+    best_sc  = scores[best_idx]
+
+    plt.figure(figsize=(9, 5))
+    plt.plot(k_list, scores, marker='o', color='steelblue', linewidth=2)
+    plt.axvline(best_k, color='red', linestyle='--', label=f"Bestes k={best_k}")
+    plt.xlabel("k (Anzahl Nachbarn)")
+    plt.ylabel("CV-Score")
+    plt.title("KNN: Score vs. k-Wert")
+    plt.legend()
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
+    return best_k, best_sc
+
+best_k, best_score = find_best_k(X, y, range(1, 20))
+print(f"Bestes k: {best_k}, Score: {best_score:.4f}")`,
+
+task5:
+`import numpy as np
+from sklearn.datasets import make_regression
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+X, y = make_regression(n_samples=200, n_features=5, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42
+)
+
+# Variante A – Korrekt: fit nur auf Trainingsdaten
+scaler_a = StandardScaler()
+X_train_a = scaler_a.fit_transform(X_train)
+X_test_a  = scaler_a.transform(X_test)   # nur transform!
+
+print("=== Variante A (korrekt) ===")
+print("Train-Mittelwert:", X_train_a.mean(axis=0).round(3))
+print("Test-Mittelwert: ", X_test_a.mean(axis=0).round(3))
+
+# Variante B – Data Leakage: fit auf gesamtem Datensatz
+scaler_b  = StandardScaler()
+X_all     = scaler_b.fit_transform(X)
+X_train_b = X_all[:140]
+X_test_b  = X_all[140:]
+
+print("\\n=== Variante B (Data Leakage!) ===")
+print("Train-Mittelwert:", X_train_b.mean(axis=0).round(3))
+print("Test-Mittelwert: ", X_test_b.mean(axis=0).round(3))
+print("\\nFehler in B: Scaler sieht Testdaten schon beim fit() -> Data Leakage!")`,
+
+task6:
+`import numpy as np
+from sklearn.datasets import make_classification
+
+X, y = make_classification(
+    n_samples=200, n_features=2, n_classes=3,
+    n_clusters_per_class=1, n_redundant=0, random_state=42
+)
+
+def shuffle_split(X, y, test_size, n_splits):
+    n      = len(X)
+    n_test = int(n * test_size)
+    for _ in range(n_splits):
+        idx       = np.random.permutation(n)
+        test_idx  = idx[:n_test]
+        train_idx = idx[n_test:]
+        yield X[train_idx], X[test_idx], y[train_idx], y[test_idx]
+
+for i, (X_tr, X_te, y_tr, y_te) in enumerate(shuffle_split(X, y, 0.3, 5)):
+    print(f"Split {i+1}: X_train={X_tr.shape}, X_test={X_te.shape}")`,
+
+task7:
+`import numpy as np
+from sklearn.model_selection import train_test_split
+
+X = np.array(['BMW']*4 + ['Audi']*4 + ['VW']*4 + ['Tesla']*4 + ['Opel']*4)
+y = np.array(['Auto'] * 20)
+
+iterations = 0
+while True:
+    iterations += 1
+    rs = np.random.randint(0, 100000)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.3, random_state=rs
+    )
+    cond1 = 'Tesla' in X_train
+    cond2 = list(X_test).count('BMW') == 2
+    cond3 = len(set(X_train)) == 5
+    if cond1 and cond2 and cond3:
+        break
+
+print(f"Gefunden nach {iterations} Iteration(en)!")
+print(f"Trainingsset ({len(X_train)}): {sorted(X_train)}")
+print(f"Testset      ({len(X_test)}):  {sorted(X_test)}")`,
+
+task8:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+
+X, y = make_classification(n_samples=500, n_features=10, n_classes=2, random_state=42)
+
+def plot_learning_curve(model, X, y, train_sizes):
+    train_sc, val_sc, sizes = [], [], []
+    for size in train_sizes:
+        n = int(len(X) * size)
+        if n < 20:
+            continue
+        X_p, y_p = X[:n], y[:n]
+        X_tr, X_val, y_tr, y_val = train_test_split(
+            X_p, y_p, test_size=0.3, random_state=42
+        )
+        model.fit(X_tr, y_tr)
+        train_sc.append(model.score(X_tr, y_tr))
+        val_sc.append(model.score(X_val, y_val))
+        sizes.append(n)
+
+    plt.figure(figsize=(9, 5))
+    plt.plot(sizes, train_sc, 'b-o', label='Train Score')
+    plt.plot(sizes, val_sc,   'r-o', label='Validation Score')
+    plt.xlabel("Anzahl Trainingsamples")
+    plt.ylabel("Score")
+    plt.title("Learning Curve")
+    plt.legend()
+    plt.grid(alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
+    gap = train_sc[-1] - val_sc[-1]
+    if gap > 0.1:
+        print(f"Overfitting erkannt: Train-Val-Gap = {gap:.3f}")
+    elif val_sc[-1] < 0.7:
+        print("Underfitting: Validierungsscore zu niedrig")
+    else:
+        print(f"Gutes Fitting: Gap = {gap:.3f}")
+
+model = KNeighborsClassifier(n_neighbors=3)
+plot_learning_curve(model, X, y, [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])`
+};
+
+/* ─── INIT CODEMIRROR ─────────────────────────────────── */
+const EDITORS = {};
+const TASK_IDS = ['task1','task2','task3','task4','task5','task6','task7','task8'];
+
+document.addEventListener('DOMContentLoaded', () => {
+  TASK_IDS.forEach(id => {
+    EDITORS[id] = CodeMirror.fromTextArea(document.getElementById('code-' + id), {
+      mode: 'python',
+      theme: 'dracula',
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseBrackets: true,
+      indentUnit: 4,
+      tabSize: 4,
+      indentWithTabs: false,
+      extraKeys: {
+        'Tab': cm => cm.execCommand('insertSoftTab'),
+        'Shift-Enter': () => { /* handled per-task */ }
+      }
+    });
+    document.getElementById('solpre-' + id).textContent = SOL[id];
+  });
+  initPyodide();
+});
+
+/* ─── PYODIDE ─────────────────────────────────────────── */
+let pyodide = null;
+let pyodideReady = false;
+
+function setProgress(pct, msg) {
+  document.getElementById('ov-fill').style.width = pct + '%';
+  document.getElementById('ov-msg').textContent = msg;
+}
+
+async function initPyodide() {
+  try {
+    setProgress(10, 'Lade Pyodide-Runtime...');
+    pyodide = await loadPyodide();
+
+    setProgress(35, 'Lade numpy & matplotlib...');
+    await pyodide.loadPackage(['numpy', 'matplotlib']);
+
+    setProgress(60, 'Lade scikit-learn (dauert ~20s)...');
+    await pyodide.loadPackage(['scikit-learn']);
+
+    setProgress(90, 'Konfiguriere Python-Umgebung...');
+    pyodide.runPython(`import matplotlib\nmatplotlib.use('Agg')`);
+
+    setProgress(100, 'Bereit!');
+    await new Promise(r => setTimeout(r, 400));
+    document.getElementById('overlay').style.display = 'none';
+
+    pyodideReady = true;
+    TASK_IDS.forEach(id => {
+      const btn = document.getElementById('run-' + id);
+      if (btn) btn.disabled = false;
+    });
+  } catch(e) {
+    closeOverlay();
+    console.warn('Pyodide nicht geladen (offline?):', e.message);
+  }
+}
+
+/* Overlay schließen — Navigation/Lesen ist dann immer möglich */
+function closeOverlay() {
+  const o = document.getElementById('overlay');
+  if (o) o.style.display = 'none';
+}
+
+/* Fallback: Overlay nach 45s automatisch schließen (z.B. offline),
+   damit man nie blockiert ist. */
+setTimeout(() => { if (!pyodideReady) closeOverlay(); }, 45000);
+
+/* ─── RUN CODE ────────────────────────────────────────── */
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function runCode(id) {
+  if (!pyodideReady) { alert('Python lädt noch — bitte kurz warten.'); return; }
+  const code = EDITORS[id].getValue().trim();
+  if (!code || code === '# Dein Code hier') return;
+
+  const out   = document.getElementById('out-' + id);
+  const runBtn = document.getElementById('run-' + id);
+  out.innerHTML = '<span class="out-run">⏳ Code wird ausgeführt...</span>';
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ Läuft...';
+
+  pyodide.globals.set('_stu_code', code);
+
+  try {
+    await pyodide.runPythonAsync(`
+import sys, io, base64
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+_figs_out    = []
+_stdout_buf  = io.StringIO()
+_orig_stdout = sys.stdout
+
+def _cap_show(*a, **kw):
+    for fn in sorted(plt.get_fignums()):
+        fig = plt.figure(fn)
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+        buf.seek(0)
+        _figs_out.append(base64.b64encode(buf.read()).decode())
+    plt.close('all')
+
+_orig_show   = plt.show
+plt.show     = _cap_show
+sys.stdout   = _stdout_buf
+_run_error   = None
+
+try:
+    exec(compile(_stu_code, '<aufgabe>', 'exec'))
+    if plt.get_fignums():
+        _cap_show()
+except Exception as _e:
+    import traceback
+    _run_error = traceback.format_exc()
+finally:
+    sys.stdout = _orig_stdout
+    plt.show   = _orig_show
+
+_run_text = _stdout_buf.getvalue()
+`);
+
+    const txt   = pyodide.globals.get('_run_text') || '';
+    const fp    = pyodide.globals.get('_figs_out');
+    const figs  = fp ? fp.toJs() : [];
+    if (fp) fp.destroy();
+    const err   = pyodide.globals.get('_run_error');
+
+    let html = '';
+    if (txt.trim())
+      html += `<pre class="out-text">${esc(txt)}</pre>`;
+    figs.forEach(f => {
+      html += `<div class="out-fig"><img src="data:image/png;base64,${f}" alt="Plot"></div>`;
+    });
+    if (err)
+      html += `<pre class="out-err">${esc(err)}</pre>`;
+    if (!txt.trim() && !figs.length && !err)
+      html = '<span class="out-ok">✓ Code erfolgreich ausgeführt (keine Ausgabe)</span>';
+
+    out.innerHTML = html;
+
+    // Unlock solution button after first run
+    const sb = document.getElementById('sol-btn-' + id);
+    if (sb) sb.classList.remove('locked');
+
+  } catch(e) {
+    out.innerHTML = `<pre class="out-err">${esc(e.toString())}</pre>`;
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = '▶ Ausführen';
+  }
+}
+
+/* ─── HELPERS ─────────────────────────────────────────── */
+function clearCode(id) {
+  EDITORS[id].setValue('# Dein Code hier\n');
+  document.getElementById('out-' + id).innerHTML =
+    '<span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span>';
+}
+
+function toggleSol(id) {
+  const btn = document.getElementById('sol-btn-' + id);
+  if (btn.classList.contains('locked')) {
+    alert('Führe deinen Code zuerst aus — dann wird die Lösung freigeschaltet.');
+    return;
+  }
+  const panel = document.getElementById('sol-' + id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Lösung';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Lösung verbergen';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function copySol(id) {
+  navigator.clipboard.writeText(SOL[id]).then(() => {
+    const btn = document.querySelector(`#sol-${id} .copy-sol`);
+    btn.textContent = '✓ Kopiert';
+    setTimeout(() => btn.textContent = 'Kopieren', 1800);
+  });
+}
+
+function toggleQuiz(id, btn) {
+  const panel = document.getElementById(id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Antwort anzeigen';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Antwort verbergen';
+  }
+}
+
+/* ─── MULTIPLE-CHOICE QUIZ (Auswertung) ─── */
+document.addEventListener('click', function(e){
+  if (e.target.classList && e.target.classList.contains('mcq-check')) {
+    var card = e.target.closest('.mcq'); var allCorrect = true;
+    card.querySelectorAll('.mcq-opt').forEach(function(o){
+      var inp=o.querySelector('input'); var isC=inp.dataset.correct==='true';
+      var mark=o.querySelector('.opt-mark'); o.classList.remove('correct','wrong','missed');
+      if(isC&&inp.checked){o.classList.add('correct');mark.textContent='\u2713 richtig';}
+      else if(isC&&!inp.checked){o.classList.add('missed');mark.textContent='\u25CF war richtig';allCorrect=false;}
+      else if(!isC&&inp.checked){o.classList.add('wrong');mark.textContent='\u2717 falsch';allCorrect=false;}
+      else{mark.textContent='';}
+    });
+    var res=card.querySelector('.mcq-result'); res.classList.add('show');
+    var v=card.querySelector('.mcq-verdict');
+    if(allCorrect){v.className='mcq-verdict ok';v.textContent='\u2713 Perfekt \u2013 genau richtig!';}
+    else{v.className='mcq-verdict part';v.textContent='Noch nicht ganz \u2013 schau dir die Markierungen & die Erkl\u00e4rung an:';}
+  }
+  if (e.target.classList && e.target.classList.contains('mcq-reset')) {
+    var card=e.target.closest('.mcq');
+    card.querySelectorAll('.mcq-opt').forEach(function(o){o.classList.remove('correct','wrong','missed');o.querySelector('input').checked=false;o.querySelector('.opt-mark').textContent='';});
+    card.querySelector('.mcq-result').classList.remove('show');
+  }
+});
+
+</script>
+
+  </main>
+</div>
+<site-footer caption="Aufgabenblatt 02 · ML Grundlagen"></site-footer>
+</body>
+</html>

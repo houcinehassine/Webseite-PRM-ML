@@ -9,7 +9,14 @@
   <script type="module" src="../footer.js"></script>
   <link rel="stylesheet" href="../assets/style.css">
   <link rel="stylesheet" href="../assets/kapitel-overview.css">
-  <style>.pages-grid</style>
+  <style>
+    /* Seitenspezifisch: dezenter Farbverlauf für die Karten-Banner */
+    .card-banner {
+      background: linear-gradient(135deg,
+        color-mix(in oklab, var(--color-primary) 12%, var(--color-surface-2)),
+        color-mix(in oklab, var(--color-primary)  4%, var(--color-surface-offset)));
+    }
+  </style>
   <meta property="og:type"        content="website">
   <meta property="og:site_name"   content="PRM Prüfungsvorbereitung">
   <meta property="og:title"       content="K4 · Entscheidungsbäume & Ensemble – Übersicht">
@@ -37,15 +44,21 @@
           Datenpunkte ohne Labels gruppieren – von k-means über DBSCAN bis hin zur
           Validierung und realen Anwendungen.
         </p>
-        <div class="kapitel-pills">
-          <span class="pill">k-means</span>
-          <span class="pill">EM-Algorithmus</span>
-          <span class="pill">DBSCAN</span>
-          <span class="pill">Silhouette Score</span>
-          <span class="pill">Elbow Plot</span>
-          <span class="pill">Spectral Clustering</span>
-          <span class="pill">Validierung</span>
-          <span class="pill">Anwendungsbeispiele</span>
+        <div class="overview-strip">
+          <span class="overview-pill">🔵 k-means</span>
+          <span class="overview-pill">🔄 EM-Algorithmus</span>
+          <span class="overview-pill">🌐 DBSCAN</span>
+          <span class="overview-pill">📊 Silhouette Score</span>
+          <span class="overview-pill">📐 Elbow Plot</span>
+          <span class="overview-pill">🕸️ Spectral Clustering</span>
+          <span class="overview-pill">✅ Validierung</span>
+          <span class="overview-pill">🔬 Anwendungsbeispiele</span>
+        </div>
+
+        <div class="status-bar">
+          <span class="status-pill active"><span class="dot"></span>8 Seiten verfügbar</span>
+          <span class="status-pill"><span class="dot"></span>Cheatsheet &amp; Quiz</span>
+          <span class="status-pill">sklearn · numpy · matplotlib</span>
         </div>
       </section>
     </div>
@@ -53,7 +66,11 @@
     <!-- ══════════════════════════════════════════════
          HAUPTSEITEN
     ══════════════════════════════════════════════════ -->
-    <p class="section-label">Alle Seiten</p>
+    <div class="section-label">
+      <span class="section-label-icon">📚</span>
+      <span class="section-label-text">Alle Seiten</span>
+      <span class="section-label-line"></span>
+    </div>
     <div class="pages-grid">
 
       <!-- Page 01 -->
@@ -242,7 +259,11 @@
     <!-- ══════════════════════════════════════════════
          ANWENDUNGSBEISPIELE
     ══════════════════════════════════════════════════ -->
-    <p class="section-label">Anwendungsbeispiele</p>
+    <div class="section-label">
+      <span class="section-label-icon">🔬</span>
+      <span class="section-label-text">Anwendungsbeispiele</span>
+      <span class="section-label-line"></span>
+    </div>
     <div class="pages-grid examples-grid">
 
       <!-- Page 08 (Übersicht) -->
@@ -341,7 +362,11 @@
     <!-- ══════════════════════════════════════════════
          PRÜFUNGSVORBEREITUNG
     ══════════════════════════════════════════════════ -->
-    <p class="section-label">Prüfungsvorbereitung</p>
+    <div class="section-label">
+      <span class="section-label-icon">📋</span>
+      <span class="section-label-text">Prüfungsvorbereitung</span>
+      <span class="section-label-line"></span>
+    </div>
     <p class="section-label-desc">
       Schnellreferenz und Selbsttest – ideal kurz vor der Prüfung.
     </p>

@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRM – Aufgabenblatt 03 · Support Vector Machines</title>
+
+<!-- Site Navigation -->
+<script type="module" src="../header.js"></script>
+<script type="module" src="../footer.js"></script>
+<script type="module" src="sidebar.js"></script>
+<link rel="stylesheet" href="../assets/style.css">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- CodeMirror (lokal) -->
+<link rel="stylesheet" href="../assets/vendor/codemirror.min.css">
+<link rel="stylesheet" href="../assets/vendor/codemirror-dracula.min.css">
+<script src="../assets/vendor/codemirror.min.js"></script>
+<script src="../assets/vendor/codemirror-python.min.js"></script>
+<script src="../assets/vendor/codemirror-matchbrackets.min.js"></script>
+<script src="../assets/vendor/codemirror-closebrackets.min.js"></script>
+
+<!-- Pyodide -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+
+:root{
+  --bg:#F1F5F9;
+  --card:#FFFFFF;
+  --border:#E2E8F0;
+  --text:#0F172A;
+  --muted:#64748B;
+  --hdr1:#0F172A;
+  --hdr2:#1E3A5F;
+  --quiz:#6366F1;
+  --quiz-light:#EEF2FF;
+  --warmup:#059669;
+  --warmup-light:#ECFDF5;
+  --haupt:#DC2626;
+  --haupt-light:#FEF2F2;
+  --schnk:#D97706;
+  --schnk-light:#FFFBEB;
+  --run:#16A34A;
+  --run-h:#15803D;
+  --sol:#D97706;
+  --sol-h:#B45309;
+}
+
+#main-content{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  font-size:15px;
+}
+
+/* ─── LOADING OVERLAY ─────────────────────────────────── */
+#overlay{
+  position:fixed;inset:0;
+  background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 100%);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:9999;gap:18px;
+}
+.ov-logo{font-size:2.6rem;filter:drop-shadow(0 0 20px #6366f1aa);}
+.ov-title{color:#F8FAFC;font-size:1.3rem;font-weight:700;letter-spacing:-.02em;}
+.ov-msg{color:#94A3B8;font-size:.88rem;min-height:1.2em;text-align:center;}
+.ov-bar{width:280px;height:4px;background:#1E293B;border-radius:4px;overflow:hidden;}
+.ov-fill{height:100%;background:linear-gradient(90deg,#6366F1,#10B981);border-radius:4px;width:0%;transition:width .4s ease;}
+.spinner{
+  width:36px;height:36px;
+  border:3px solid rgba(99,102,241,.25);
+  border-top-color:#6366F1;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── HEADER ─────────────────────────────────────────── */
+#main-content>header{
+  background:linear-gradient(150deg,var(--hdr1) 0%,var(--hdr2) 100%);
+  padding:52px 24px 44px;
+  text-align:center;
+  position:relative;overflow:hidden;
+}
+#main-content>header::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(99,102,241,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(99,102,241,.07) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+#main-content>header *{position:relative;}
+#main-content>header h1{
+  font-size:2rem;font-weight:700;color:#F8FAFC;
+  letter-spacing:-.03em;margin-bottom:6px;
+}
+#main-content>header .sub{color:#94A3B8;font-size:.92rem;}
+.pills{
+  display:flex;gap:10px;justify-content:center;
+  flex-wrap:wrap;margin-top:22px;
+}
+.pill{
+  background:rgba(255,255,255,.08);
+  color:#CBD5E1;font-size:.8rem;
+  padding:5px 13px;border-radius:20px;
+  border:1px solid rgba(255,255,255,.1);
+}
+
+/* ─── NAV BAR ────────────────────────────────────────── */
+#main-content>nav{
+  background:#1E293B;
+  display:flex;gap:0;justify-content:center;
+  flex-wrap:wrap;
+  position:static;
+  border-bottom:1px solid #334155;
+}
+#main-content>nav a{
+  color:#94A3B8;font-size:.8rem;font-weight:500;
+  padding:10px 18px;text-decoration:none;
+  transition:color .15s,background .15s;
+  white-space:nowrap;
+}
+#main-content>nav a:hover{color:#F8FAFC;background:rgba(255,255,255,.06);}
+
+/* ─── MAIN ───────────────────────────────────────────── */
+#main-content>main{
+  max-width:880px;margin:0 auto;
+  padding:36px 16px 72px;
+  display:flex;flex-direction:column;gap:36px;
+}
+
+/* ─── SECTION ────────────────────────────────────────── */
+.sec-hdr{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:18px;padding-bottom:12px;
+  border-bottom:2px solid var(--border);
+}
+.badge{
+  padding:4px 13px;border-radius:20px;
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:#fff;flex-shrink:0;
+}
+.bq{background:var(--quiz);}
+.bw{background:var(--warmup);}
+.bh{background:var(--haupt);}
+.bs{background:var(--schnk);}
+
+.sec-hdr h2{font-size:1.15rem;font-weight:700;color:var(--text);}
+
+/* ─── TASK CARD ──────────────────────────────────────── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.05);
+  margin-bottom:14px;
+}
+.card:last-child{margin-bottom:0;}
+.card-top{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 20px;
+  border-bottom:1px solid var(--border);
+}
+.num{
+  font-size:.75rem;font-weight:700;
+  color:#fff;padding:3px 9px;border-radius:5px;
+  flex-shrink:0;font-family:'JetBrains Mono',monospace;
+}
+.card-title{font-size:.98rem;font-weight:600;}
+.card-body{padding:18px 20px 20px;}
+
+/* ─── DESCRIPTION ────────────────────────────────────── */
+.desc{
+  font-size:.88rem;color:#334155;
+  margin-bottom:14px;line-height:1.75;
+}
+.desc ul{margin:7px 0 7px 20px;}
+.desc li{margin:3px 0;}
+.desc code,.hint code{
+  background:#F1F5F9;
+  padding:1px 5px;border-radius:4px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#6366F1;
+}
+.desc pre{
+  background:#F1F5F9;padding:10px 14px;
+  border-radius:7px;font-size:.83rem;
+  font-family:'JetBrains Mono',monospace;
+  margin:8px 0;overflow-x:auto;color:#334155;
+}
+.hint{
+  background:#EFF6FF;border-left:3px solid #3B82F6;
+  padding:8px 12px;border-radius:0 7px 7px 0;
+  font-size:.83rem;color:#1E40AF;margin-bottom:14px;
+}
+
+/* ─── EDITOR ──────────────────────────────────────────── */
+.elabel{
+  font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px;
+}
+.CodeMirror{
+  height:auto!important;min-height:150px;max-height:380px;
+  font-size:13px;
+  font-family:'JetBrains Mono','Fira Code',monospace!important;
+  border-radius:9px;
+  border:1px solid #374151!important;
+  line-height:1.6;
+}
+.CodeMirror-scroll{min-height:150px;max-height:380px;}
+.CodeMirror-linenumber{color:#4B5563;}
+
+/* ─── TOOLBAR ────────────────────────────────────────── */
+.toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.btn{
+  padding:7px 16px;border:none;border-radius:7px;
+  cursor:pointer;font-size:.83rem;font-weight:600;
+  font-family:'Inter',sans-serif;
+  transition:background .15s,transform .1s;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.btn:active{transform:scale(.97);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important;}
+.btn-run{background:var(--run);color:#fff;}
+.btn-run:hover:not(:disabled){background:var(--run-h);}
+.btn-clear{background:#475569;color:#fff;}
+.btn-clear:hover:not(:disabled){background:#334155;}
+.btn-sol{background:var(--sol);color:#fff;}
+.btn-sol:hover:not(:disabled){background:var(--sol-h);}
+.btn-sol.locked{background:#94A3B8;cursor:not-allowed;}
+.btn-sol.locked::after{content:" 🔒";}
+
+/* ─── OUTPUT ─────────────────────────────────────────── */
+.output-wrap{margin-top:13px;}
+.output{
+  background:#0D1117;border-radius:9px;
+  padding:12px 14px;min-height:38px;
+  border:1px solid #21262D;
+}
+.output pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;white-space:pre-wrap;word-break:break-word;
+}
+.out-text{color:#E2E8F0;}
+.out-err{color:#F87171;}
+.out-ok{color:#4ADE80;font-size:.82rem;}
+.out-wait{color:#475569;font-size:.82rem;}
+.out-run{color:#60A5FA;font-size:.82rem;}
+.out-fig img{
+  max-width:100%;border-radius:7px;
+  margin-top:10px;border:1px solid #21262D;
+  display:block;
+}
+
+/* ─── SOLUTION ───────────────────────────────────────── */
+.sol-panel{display:none;margin-top:13px;}
+.sol-panel.open{display:block;}
+.sol-hdr{
+  background:#FFFBEB;
+  border:1px solid #FCD34D;border-bottom:none;
+  padding:8px 14px;border-radius:9px 9px 0 0;
+  font-size:.75rem;font-weight:700;color:#92400E;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.sol-code{
+  background:#1E1E2E;
+  border:1px solid #FCD34D;
+  border-top:none;border-radius:0 0 9px 9px;
+  padding:14px 16px;overflow-x:auto;
+  position:relative;
+}
+.sol-code pre{
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.82rem;color:#CDD6F4;
+  white-space:pre;
+  tab-size:4;
+}
+.copy-sol{
+  position:absolute;top:10px;right:10px;
+  background:rgba(99,102,241,.2);color:#A5B4FC;
+  border:1px solid rgba(99,102,241,.3);
+  border-radius:5px;padding:3px 9px;
+  font-size:.75rem;cursor:pointer;font-weight:600;
+  transition:background .15s;
+}
+.copy-sol:hover{background:rgba(99,102,241,.35);}
+
+/* ─── QUIZ ───────────────────────────────────────────── */
+.q-answer{
+  width:100%;padding:10px 14px;
+  border:1.5px solid var(--border);border-radius:8px;
+  font-size:.88rem;font-family:'Inter',sans-serif;
+  resize:vertical;min-height:72px;color:var(--text);
+  transition:border-color .15s;margin-top:8px;
+}
+.q-answer:focus{outline:none;border-color:var(--quiz);}
+.q-reveal-btn{
+  margin-top:9px;padding:7px 16px;
+  background:var(--quiz);color:#fff;
+  border:none;border-radius:7px;cursor:pointer;
+  font-size:.83rem;font-weight:600;font-family:'Inter',sans-serif;
+  transition:background .15s;
+}
+.q-reveal-btn:hover{background:#4F46E5;}
+.q-ans-panel{
+  display:none;margin-top:10px;
+  background:var(--quiz-light);
+  border:1px solid #C7D2FE;border-radius:9px;
+  padding:13px 16px;font-size:.87rem;line-height:1.75;
+}
+.q-ans-panel.open{display:block;}
+.q-ans-panel strong{color:#4338CA;}
+.q-ans-panel code{
+  background:#E0E7FF;padding:1px 5px;
+  border-radius:4px;font-family:'JetBrains Mono',monospace;
+  font-size:.83em;color:#4338CA;
+}
+
+/* ─── ACCENT BARS ─────────────────────────────────────── */
+.acc-quiz .card-top{border-top:3px solid var(--quiz);}
+.acc-warmup .card-top{border-top:3px solid var(--warmup);}
+.acc-haupt .card-top{border-top:3px solid var(--haupt);}
+.acc-schnk .card-top{border-top:3px solid var(--schnk);}
+
+/* ── Multiple-Choice-Quiz (interaktiv) ───────────────────── */
+.mcq{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);margin-bottom:var(--space-5);box-shadow:var(--shadow-sm);}
+.mcq-head{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;}
+.mcq-badge{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.14rem .5rem;border-radius:var(--radius-full);}
+.b-konzept{background:color-mix(in oklab,#2563eb 14%,var(--color-surface));color:#1d4ed8;}
+.b-formel{background:color-mix(in oklab,#7c3aed 14%,var(--color-surface));color:#6d28d9;}
+.b-falle{background:color-mix(in oklab,#dc2626 14%,var(--color-surface));color:#b91c1c;}
+.b-code{background:color-mix(in oklab,#0891b2 14%,var(--color-surface));color:#0e7490;}
+.mcq-q{font-weight:700;font-size:var(--text-base);line-height:1.4;margin:var(--space-2) 0 var(--space-1);color:var(--color-text);}
+.mcq-hint{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);}
+.mcq-opt{display:flex;gap:.65rem;align-items:flex-start;padding:.7rem .9rem;border:1.5px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:.55rem;cursor:pointer;transition:background .12s,border-color .12s;font-size:var(--text-sm);line-height:1.5;color:var(--color-text);}
+.mcq-opt:hover{background:var(--color-surface-2);}
+.mcq-opt input{margin-top:.15rem;flex:0 0 auto;width:17px;height:17px;accent-color:var(--color-primary);cursor:pointer;}
+.mcq-opt .opt-text{flex:1;}
+.mcq-opt .opt-mark{font-weight:700;font-size:var(--text-xs);white-space:nowrap;opacity:0;}
+.mcq-opt.correct{border-color:#16a34a;background:color-mix(in oklab,#16a34a 9%,var(--color-surface));}
+.mcq-opt.correct .opt-mark{opacity:1;color:#15803d;}
+.mcq-opt.wrong{border-color:#dc2626;background:color-mix(in oklab,#dc2626 9%,var(--color-surface));}
+.mcq-opt.wrong .opt-mark{opacity:1;color:#b91c1c;}
+.mcq-opt.missed{border-color:#d97706;background:color-mix(in oklab,#d97706 10%,var(--color-surface));}
+.mcq-opt.missed .opt-mark{opacity:1;color:#b45309;}
+.mcq-actions{display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;}
+.mcq-check,.mcq-reset{padding:.55rem 1.2rem;border-radius:var(--radius-md);font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;border:none;}
+.mcq-check{background:var(--color-primary);color:#fff;}
+.mcq-check:hover{filter:brightness(1.07);}
+.mcq-reset{background:var(--color-surface-2);color:var(--color-text-muted);border:1px solid var(--color-border);}
+.mcq-result{display:none;margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border);}
+.mcq-result.show{display:block;}
+.mcq-verdict{font-weight:700;margin-bottom:var(--space-2);font-size:var(--text-sm);}
+.mcq-verdict.ok{color:#15803d;}
+.mcq-verdict.part{color:#b45309;}
+.mcq-exp{font-size:var(--text-sm);line-height:1.75;color:var(--color-text);}
+.mcq-exp code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary);}
+.frage-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:var(--space-4);font-size:var(--text-xs);font-weight:700;color:var(--color-primary);text-decoration:none;background:var(--color-primary-highlight);border:1px solid color-mix(in oklab,var(--color-primary) 22%,transparent);padding:.4rem .85rem;border-radius:var(--radius-full);transition:background .15s,transform .15s;}
+.frage-link:hover{background:color-mix(in oklab,var(--color-primary) 16%,var(--color-surface));transform:translateX(2px);}
+</style>
+</head>
+<body>
+<site-header active="pageA" title="Aufgabenblatt 03 · Support Vector Machines"></site-header>
+<div class="layout">
+  <site-sidebar active="blatt03"></site-sidebar>
+  <main class="content" id="main-content" style="padding:0;overflow:visible;">
+
+<!-- ═══════════════════════════════════ LOADING OVERLAY -->
+<div id="overlay">
+  <div class="ov-logo">🐍</div>
+  <div class="ov-title">Python-Umgebung wird geladen</div>
+  <div class="spinner"></div>
+  <div class="ov-bar"><div class="ov-fill" id="ov-fill"></div></div>
+  <div class="ov-msg" id="ov-msg">Initialisiere Pyodide...</div>
+  <div class="ov-msg" style="font-size:.78rem;color:#475569">scikit-learn lädt etwas länger (~30s) – kurz warten ☕</div>
+  <button id="ov-skip" onclick="closeOverlay()" style="margin-top:20px;background:rgba(255,255,255,.1);color:#CBD5E1;border:1px solid rgba(255,255,255,.22);border-radius:8px;padding:9px 20px;font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">Überspringen &amp; nur lesen ✕</button>
+  <div class="ov-msg" style="font-size:.72rem;color:#475569;margin-top:4px">Ohne Internet kann Python nicht ausgeführt werden — Lesen &amp; Lösungen funktionieren trotzdem.</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ HEADER -->
+<header>
+  <h1>Support Vector Machines</h1>
+  <p class="sub">Interaktives Übungsblatt — SVM-Klassifikation, GridSearchCV & Entscheidungsflächen</p>
+  <div class="pills">
+    <span class="pill">📚 5 Aufgaben</span>
+    <span class="pill">🧠 4 Quiz-Fragen</span>
+    <span class="pill">🐍 Python im Browser</span>
+    <span class="pill">🔒 Lösung nach Ausführen</span>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════ NAV -->
+<nav>
+  <a href="#quiz">🧠 Quiz</a>
+  <a href="#haupt">⚡ Hauptaufgaben</a>
+  <a href="#schmankerl">🥨 Schmankerl</a>
+</nav>
+
+<!-- ══════════════════════════════════════════════ MAIN -->
+<main>
+
+<!-- ─────────────────────────────────── QUIZ -->
+<section id="quiz">
+  <div class="sec-hdr">
+    <span class="badge bq">Quiz</span>
+    <h2>WarmUp – Theoriefragen (interaktiv)</h2>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">F1 · Was gilt für Support Vectors?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Es sind die Datenpunkte am nächsten zur Entscheidungsgrenze (auf/innerhalb des Margins).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Nur sie bestimmen die Lage der trennenden Hyperebene.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Entfernt man Punkte, die keine Support Vectors sind, bleibt das Modell gleich.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Es sind die Punkte, die am weitesten von der Grenze entfernt liegen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Je mehr Support Vectors, desto sicher besser ist das Modell.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Support Vectors sind die grenznahen, kritischen Punkte. <strong>Zusatz:</strong> Sehr <em>viele</em> Support Vectors können sogar auf Overfitting / zu kleinen Margin (großes C) hindeuten.<br><a class="frage-link" href="../Kapitel3/Page02.html#support-vectors">→ Mehr im Skript: Kap. 3 · Seite 2 – Support Vectors</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
+    <div class="mcq-q">F2 · Welche Aussagen zum Hyperparameter C sind korrekt?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Großes C → schmaler Margin, versucht alle Punkte korrekt zu trennen → Overfitting-Gefahr.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Kleines C → breiterer Margin, mehr erlaubte Fehler → bessere Generalisierung möglich.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">C steuert die Anzahl der verwendeten Kernel.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Ein großes C führt immer zu besserer Test-Genauigkeit.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">C ist die Lernrate des Gradientenabstiegs.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die ersten beiden stimmen. <strong>Zusatz:</strong> C ist der <strong>Regularisierungs-/Strafterm</strong> für Fehlklassifikationen – nicht die Kernelzahl und nicht die Lernrate. Der optimale C-Wert wird per Cross-Validation gesucht.<br><a class="frage-link" href="../Kapitel3/Page04.html#vergleich-c">→ Mehr im Skript: Kap. 3 · Seite 4 – Vergleich C</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">F3 · Was stimmt zu Kerneln und dem Kernel-Trick?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der lineare Kernel trennt mit einer Hyperebene – gut bei (annähernd) linear trennbaren/hochdim. Daten.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der RBF-Kernel erzeugt nichtlineare, gekrümmte Entscheidungsgrenzen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der Kernel-Trick bildet die Daten implizit in einen höherdim. Raum ab, ohne ihn explizit zu berechnen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">gamma steuert beim RBF-Kernel die Reichweite eines Trainingspunkts.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Ein RBF-Kernel ist einem linearen Kernel grundsätzlich überlegen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Der Kernel-Trick berechnet immer explizit alle neuen Koordinaten im Hochdim.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Vier Aussagen stimmen (inkl. gamma). Falsch: kein Kernel ist pauschal besser (No Free Lunch), und der Kernel-Trick vermeidet gerade die <em>explizite</em> Transformation (er nutzt nur Skalarprodukte).<br><a class="frage-link" href="../Kapitel3/Page06.html#kernel-trick">→ Mehr im Skript: Kap. 3 · Seite 6 – Kernel-Trick</a></div></div>
+  </div>
+
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
+    <div class="mcq-q">F4 · Welche EINE Aussage über accuracy_score ist korrekt?</div>
+    <div class="mcq-hint">✦ Genau <strong>1</strong> Antwort ist richtig.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bei stark unbalancierten Klassen kann sie irreführend sein – die Mehrheitsklasse dominiert.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Sie ist bei unbalancierten Daten die zuverlässigste Metrik.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Sie misst die Fläche unter der ROC-Kurve.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Sie ist identisch mit dem F1-Score.</span><span class="opt-mark"></span></label>
+    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die erste stimmt. <strong>Zusatz:</strong> accuracy = Anteil korrekt klassifizierter Samples. Bei Unbalance besser <strong>Precision, Recall, F1</strong> oder AUC. (AUC = Fläche unter ROC, F1 = harmonisches Mittel aus Precision/Recall – beides NICHT dasselbe wie Accuracy.)<br><a class="frage-link" href="../Kapitel7/Page01.html#motivation">→ Mehr im Skript: Kap. 7 · Seite 1 – Accuracy-Falle</a></div></div>
+  </div>
+</section>
+<!-- ─────────────────────────────────── HAUPTAUFGABEN -->
+<section id="haupt">
+  <div class="sec-hdr">
+    <span class="badge bh">Hauptaufgaben</span>
+    <h2>Kernaufgaben</h2>
+  </div>
+
+  <div class="card acc-haupt" id="card-task1">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A1</span>
+      <span class="card-title">Eignungstestklassifikation – Mini-SVM</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Automatisieren Sie die Auswertung von Hochschuleignungstests mit einer SVM.<ul><li>Laden Sie mit <code>make_blobs</code> (3 Features, 2 Klassen, <code>random_state=0</code>) einen Datensatz.</li><li>Trainieren und klassifizieren Sie neue Bewerber in <strong>einer Zeile</strong> (One-Liner), z.B. <code>[[3, 3, 6]]</code>.</li><li>Wiederholen Sie das mit <code>GridSearchCV</code> zur Hyperparameter-Optimierung.</li></ul></div>
+      <div class="hint">💡 Verkette <code>.fit()</code> und <code>.predict()</code> direkt auf einer neuen <code>SVC()</code>-Instanz.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task1"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task1" onclick="runCode('task1')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task1')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task1" onclick="toggleSol('task1')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task1"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task1">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task1')">Kopieren</button>
+          <pre id="solpre-task1"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-haupt" id="card-task2">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A2</span>
+      <span class="card-title">Digits-Modell mit GridSearchCV</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Optimieren Sie eine SVM für den Digits-Datensatz per Grid-Search.<ul><li>Laden Sie <code>load_digits()</code> und splitten Sie in Train/Test.</li><li>Trainieren Sie per <code>GridSearchCV</code> mit <code>verbose=1</code>, <code>n_jobs=-1</code>.</li><li>Bewerten Sie das beste Modell auf dem Testset.</li></ul></div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task2"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task2" onclick="runCode('task2')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task2')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task2" onclick="toggleSol('task2')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task2"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task2">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task2')">Kopieren</button>
+          <pre id="solpre-task2"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-haupt" id="card-task3">
+    <div class="card-top">
+      <span class="num" style="background:var(--haupt)">A3</span>
+      <span class="card-title">SVM reversed – Datensatz anpassen</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Passen Sie diesmal den <em>Testdatensatz</em> an das Modell an statt umgekehrt.<ul><li>Trainieren Sie eine <code>SVC</code> auf <code>make_blobs</code> (100 Samples, 2 Zentren, <code>cluster_std=2.6</code>, <code>random_state=42</code>).</li><li>Generieren Sie in einem <code>while</code>-Loop zufällige Testsets, bis <code>accuracy_score &gt; 0.8</code>.</li><li>Visualisieren Sie den gefundenen Testdatensatz.</li></ul></div>
+      <div class="hint">💡 Warum ist dieser Ansatz in der Praxis problematisch? (Kommentar im Code)</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task3"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task3" onclick="runCode('task3')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task3')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task3" onclick="toggleSol('task3')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task3"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task3">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task3')">Kopieren</button>
+          <pre id="solpre-task3"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ─────────────────────────────────── SCHMANKERL -->
+<section id="schmankerl">
+  <div class="sec-hdr">
+    <span class="badge bs">Schmankerl</span>
+    <h2>Vertiefung & Bonus</h2>
+  </div>
+
+  <div class="card acc-schnk" id="card-task4">
+    <div class="card-top">
+      <span class="num" style="background:var(--schnk)">A4</span>
+      <span class="card-title">Extremely Damaged Bearings (10 Klassen)</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Wälzlagerfehler-Klassifikation auf 9 Schadensklassen + 1 Gesundklasse — hier mit <strong>synthetischen Vibrationssignalen</strong>.<ul><li>Erzeugen Sie pro Klasse Signale mit eigener Frequenz/Amplitude.</li><li>Extrahieren Sie Features (Mittelwert, Std, RMS, <code>skew</code>, <code>kurtosis</code>, Peak).</li><li>Trainieren Sie eine SVM-Pipeline mit <code>GridSearchCV</code>. Nutzen Sie Variablen für Klassenzahl etc.</li></ul></div>
+      <div class="hint">💡 Ziel: ≥ 95 % Genauigkeit. <code>skew</code>/<code>kurtosis</code> kommen aus <code>scipy.stats</code>.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task4"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task4" onclick="runCode('task4')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task4')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task4" onclick="toggleSol('task4')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task4"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task4">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task4')">Kopieren</button>
+          <pre id="solpre-task4"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card acc-schnk" id="card-task5">
+    <div class="card-top">
+      <span class="num" style="background:var(--schnk)">★</span>
+      <span class="card-title">Bonus – Entscheidungsflächen</span>
+    </div>
+    <div class="card-body">
+      <div class="desc">Visualisieren Sie die Entscheidungsfläche eines trainierten 2D-SVM-Modells.<ul><li>Erzeugen Sie ein Mesh-Grid und sagen Sie für jeden Punkt die Klasse vorher.</li><li>Zeichnen Sie die Fläche mit <code>contourf</code> und heben Sie die Support Vectors hervor.</li></ul></div>
+      <div class="hint">💡 Hochdim. Modelle (A4) lassen sich erst nach PCA auf 2 Komponenten darstellen.</div>
+      <div class="elabel">Dein Code</div>
+      <textarea id="code-task5"># Dein Code hier
+</textarea>
+      <div class="toolbar">
+        <button class="btn btn-run" id="run-task5" onclick="runCode('task5')" disabled>▶ Ausführen</button>
+        <button class="btn btn-clear" onclick="clearCode('task5')">✕ Leeren</button>
+        <button class="btn btn-sol locked" id="sol-btn-task5" onclick="toggleSol('task5')">Lösung</button>
+      </div>
+      <div class="output-wrap">
+        <div class="output" id="out-task5"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
+      </div>
+      <div class="sol-panel" id="sol-task5">
+        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-code">
+          <button class="copy-sol" onclick="copySol('task5')">Kopieren</button>
+          <pre id="solpre-task5"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ══════════════════════════════════════════ SCRIPT -->
+<script>
+/* ─── SOLUTIONS ──────────────────────────────────────── */
+const SOL = {
+task1:
+`from sklearn.datasets import make_blobs
+from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
+
+# (a) Datensatz: 3 Features, 2 Klassen
+X, y = make_blobs(n_samples=100, n_features=3, centers=2, random_state=0)
+
+# (b) One-Liner: instanziieren, fitten, vorhersagen
+pred = SVC().fit(X, y).predict([[3, 3, 6]])
+print("One-Liner Vorhersage:", pred)
+
+# (c) Mit GridSearchCV
+param_grid = {
+    'C':      [0.1, 1, 10, 100],
+    'kernel': ['linear', 'rbf'],
+    'gamma':  ['scale', 'auto'],
+}
+grid = GridSearchCV(SVC(), param_grid, cv=5)
+grid.fit(X, y)
+print("Beste Parameter:   ", grid.best_params_)
+print("GridSearch Vorhersage:", grid.predict([[3, 3, 6]]))`,
+task2:
+`from sklearn.datasets import load_digits
+from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import accuracy_score
+
+# (a) Digits laden + splitten
+X, y = load_digits(return_X_y=True)
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X, y, test_size=0.3, random_state=42)
+
+# (b) GridSearchCV
+param_grid = {'C': [1, 10, 100], 'gamma': [0.001, 0.0001], 'kernel': ['rbf']}
+grid = GridSearchCV(SVC(), param_grid, cv=3, n_jobs=-1, verbose=1)
+grid.fit(X_tr, y_tr)
+
+# (c) Bewertung
+print("Beste Parameter:", grid.best_params_)
+print("Test-Genauigkeit:", round(accuracy_score(y_te, grid.predict(X_te)), 4))`,
+task3:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+
+# (a) Modell auf festen Trainingsdaten trainieren
+Xtrain_1, ytrain_1 = make_blobs(
+    n_samples=100, centers=2, cluster_std=2.6, random_state=42)
+model = SVC().fit(Xtrain_1, ytrain_1)
+
+# (b) Testdaten generieren bis accuracy > 0.8
+it, acc = 0, 0.0
+while acc <= 0.8 and it < 5000:
+    it += 1
+    Xtest, ytest = make_blobs(n_samples=100, centers=2, cluster_std=2.6)
+    acc = accuracy_score(ytest, model.predict(Xtest))
+
+print(f"Gefunden nach {it} Versuchen, Accuracy = {acc:.3f}")
+
+# (c) Visualisierung
+plt.figure(figsize=(7, 5))
+plt.scatter(Xtest[:, 0], Xtest[:, 1], c=ytest,
+            cmap='coolwarm', edgecolor='k')
+plt.title(f"Gefundener Testdatensatz (acc={acc:.2f})")
+plt.show()
+
+# Problematisch: Wir suchen Testdaten, die zum Modell passen, statt das
+# Modell an realen Daten zu testen -> Generalisierung wird nicht gemessen.`,
+task4:
+`import numpy as np
+from scipy.stats import skew, kurtosis
+from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import accuracy_score
+
+rng = np.random.default_rng(42)
+N_CLASSES = 10     # 9 Schadens- + 1 Gesundklasse
+N_PER     = 60     # Samples pro Klasse
+LEN       = 200    # Signal-Länge
+
+def signal(cls):
+    t = np.linspace(0, 1, LEN)
+    freq, amp = 5 + cls * 3, 1 + 0.2 * cls
+    return amp * np.sin(2*np.pi*freq*t) + rng.normal(0, 0.4 + 0.05*cls, LEN)
+
+def features(sig):
+    return [sig.mean(), sig.std(), np.sqrt((sig**2).mean()),
+            skew(sig), kurtosis(sig), np.abs(sig).max()]
+
+X, y = [], []
+for cls in range(N_CLASSES):
+    for _ in range(N_PER):
+        X.append(features(signal(cls)))
+        y.append(cls)
+X, y = np.array(X), np.array(y)
+print("Feature-Matrix:", X.shape)
+
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X, y, test_size=0.3, stratify=y, random_state=42)
+
+pipe = make_pipeline(StandardScaler(), SVC())
+grid = GridSearchCV(
+    pipe, {'svc__C': [1, 10, 100], 'svc__gamma': ['scale', 0.01, 0.1]}, cv=3)
+grid.fit(X_tr, y_tr)
+
+print("Beste Parameter:", grid.best_params_)
+print("Genauigkeit:    ", round(accuracy_score(y_te, grid.predict(X_te)), 4))`,
+task5:
+`import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_blobs
+from sklearn.svm import SVC
+
+X, y = make_blobs(n_samples=100, centers=2, cluster_std=2.6, random_state=42)
+model = SVC(kernel='rbf', C=1).fit(X, y)
+
+# Mesh-Grid über den Feature-Raum
+x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+xx, yy = np.meshgrid(np.linspace(x_min, x_max, 300),
+                     np.linspace(y_min, y_max, 300))
+Z = model.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+
+plt.figure(figsize=(7, 5))
+plt.contourf(xx, yy, Z, alpha=0.25, cmap='coolwarm')
+plt.scatter(X[:, 0], X[:, 1], c=y, cmap='coolwarm', edgecolor='k')
+
+# Support Vectors hervorheben
+sv = model.support_vectors_
+plt.scatter(sv[:, 0], sv[:, 1], s=120, facecolors='none',
+            edgecolors='k', linewidths=1.5, label='Support Vectors')
+plt.legend()
+plt.title("SVM Entscheidungsfläche (RBF-Kernel)")
+plt.show()
+
+# Hochdim. Modell (A4): nicht direkt 2D darstellbar
+# -> zuerst PCA auf 2 Komponenten reduzieren.`
+};
+
+const EDITORS = {};
+const TASK_IDS = ['task1', 'task2', 'task3', 'task4', 'task5'];
+
+/* ─── INIT CODEMIRROR ─────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  TASK_IDS.forEach(id => {
+    EDITORS[id] = CodeMirror.fromTextArea(document.getElementById('code-' + id), {
+      mode: 'python',
+      theme: 'dracula',
+      lineNumbers: true,
+      matchBrackets: true,
+      autoCloseBrackets: true,
+      indentUnit: 4,
+      tabSize: 4,
+      indentWithTabs: false,
+      extraKeys: {
+        'Tab': cm => cm.execCommand('insertSoftTab'),
+        'Shift-Enter': () => { /* handled per-task */ }
+      }
+    });
+    document.getElementById('solpre-' + id).textContent = SOL[id];
+  });
+  initPyodide();
+});
+
+/* ─── PYODIDE ─────────────────────────────────────────── */
+let pyodide = null;
+let pyodideReady = false;
+
+function setProgress(pct, msg) {
+  document.getElementById('ov-fill').style.width = pct + '%';
+  document.getElementById('ov-msg').textContent = msg;
+}
+
+async function initPyodide() {
+  try {
+    setProgress(10, 'Lade Pyodide-Runtime...');
+    pyodide = await loadPyodide();
+
+    setProgress(35, 'Lade numpy & matplotlib...');
+    await pyodide.loadPackage(['numpy', 'matplotlib']);
+
+    setProgress(60, 'Lade scikit-learn (dauert ~20s)...');
+    await pyodide.loadPackage(['scikit-learn']);
+
+    setProgress(90, 'Konfiguriere Python-Umgebung...');
+    pyodide.runPython(`import matplotlib\nmatplotlib.use('Agg')`);
+
+    setProgress(100, 'Bereit!');
+    await new Promise(r => setTimeout(r, 400));
+    document.getElementById('overlay').style.display = 'none';
+
+    pyodideReady = true;
+    TASK_IDS.forEach(id => {
+      const btn = document.getElementById('run-' + id);
+      if (btn) btn.disabled = false;
+    });
+  } catch(e) {
+    closeOverlay();
+    console.warn('Pyodide nicht geladen (offline?):', e.message);
+  }
+}
+
+/* Overlay schließen — Navigation/Lesen ist dann immer möglich */
+function closeOverlay() {
+  const o = document.getElementById('overlay');
+  if (o) o.style.display = 'none';
+}
+
+/* Fallback: Overlay nach 45s automatisch schließen (z.B. offline),
+   damit man nie blockiert ist. */
+setTimeout(() => { if (!pyodideReady) closeOverlay(); }, 45000);
+
+/* ─── RUN CODE ────────────────────────────────────────── */
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function runCode(id) {
+  if (!pyodideReady) { alert('Python lädt noch — bitte kurz warten.'); return; }
+  const code = EDITORS[id].getValue().trim();
+  if (!code || code === '# Dein Code hier') return;
+
+  const out   = document.getElementById('out-' + id);
+  const runBtn = document.getElementById('run-' + id);
+  out.innerHTML = '<span class="out-run">⏳ Code wird ausgeführt...</span>';
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ Läuft...';
+
+  pyodide.globals.set('_stu_code', code);
+
+  try {
+    await pyodide.runPythonAsync(`
+import sys, io, base64
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+_figs_out    = []
+_stdout_buf  = io.StringIO()
+_orig_stdout = sys.stdout
+
+def _cap_show(*a, **kw):
+    for fn in sorted(plt.get_fignums()):
+        fig = plt.figure(fn)
+        buf = io.BytesIO()
+        fig.savefig(buf, format='png', bbox_inches='tight', dpi=100)
+        buf.seek(0)
+        _figs_out.append(base64.b64encode(buf.read()).decode())
+    plt.close('all')
+
+_orig_show   = plt.show
+plt.show     = _cap_show
+sys.stdout   = _stdout_buf
+_run_error   = None
+
+try:
+    exec(compile(_stu_code, '<aufgabe>', 'exec'))
+    if plt.get_fignums():
+        _cap_show()
+except Exception as _e:
+    import traceback
+    _run_error = traceback.format_exc()
+finally:
+    sys.stdout = _orig_stdout
+    plt.show   = _orig_show
+
+_run_text = _stdout_buf.getvalue()
+`);
+
+    const txt   = pyodide.globals.get('_run_text') || '';
+    const fp    = pyodide.globals.get('_figs_out');
+    const figs  = fp ? fp.toJs() : [];
+    if (fp) fp.destroy();
+    const err   = pyodide.globals.get('_run_error');
+
+    let html = '';
+    if (txt.trim())
+      html += `<pre class="out-text">${esc(txt)}</pre>`;
+    figs.forEach(f => {
+      html += `<div class="out-fig"><img src="data:image/png;base64,${f}" alt="Plot"></div>`;
+    });
+    if (err)
+      html += `<pre class="out-err">${esc(err)}</pre>`;
+    if (!txt.trim() && !figs.length && !err)
+      html = '<span class="out-ok">✓ Code erfolgreich ausgeführt (keine Ausgabe)</span>';
+
+    out.innerHTML = html;
+
+    // Unlock solution button after first run
+    const sb = document.getElementById('sol-btn-' + id);
+    if (sb) sb.classList.remove('locked');
+
+  } catch(e) {
+    out.innerHTML = `<pre class="out-err">${esc(e.toString())}</pre>`;
+  } finally {
+    runBtn.disabled = false;
+    runBtn.textContent = '▶ Ausführen';
+  }
+}
+
+/* ─── HELPERS ─────────────────────────────────────────── */
+function clearCode(id) {
+  EDITORS[id].setValue('# Dein Code hier\n');
+  document.getElementById('out-' + id).innerHTML =
+    '<span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span>';
+}
+
+function toggleSol(id) {
+  const btn = document.getElementById('sol-btn-' + id);
+  if (btn.classList.contains('locked')) {
+    alert('Führe deinen Code zuerst aus — dann wird die Lösung freigeschaltet.');
+    return;
+  }
+  const panel = document.getElementById('sol-' + id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Lösung';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Lösung verbergen';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function copySol(id) {
+  navigator.clipboard.writeText(SOL[id]).then(() => {
+    const btn = document.querySelector(`#sol-${id} .copy-sol`);
+    btn.textContent = '✓ Kopiert';
+    setTimeout(() => btn.textContent = 'Kopieren', 1800);
+  });
+}
+
+function toggleQuiz(id, btn) {
+  const panel = document.getElementById(id);
+  if (panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    btn.textContent = 'Antwort anzeigen';
+  } else {
+    panel.classList.add('open');
+    btn.textContent = 'Antwort verbergen';
+  }
+}
+
+/* ─── MULTIPLE-CHOICE QUIZ (Auswertung) ─── */
+document.addEventListener('click', function(e){
+  if (e.target.classList && e.target.classList.contains('mcq-check')) {
+    var card = e.target.closest('.mcq'); var allCorrect = true;
+    card.querySelectorAll('.mcq-opt').forEach(function(o){
+      var inp=o.querySelector('input'); var isC=inp.dataset.correct==='true';
+      var mark=o.querySelector('.opt-mark'); o.classList.remove('correct','wrong','missed');
+      if(isC&&inp.checked){o.classList.add('correct');mark.textContent='\u2713 richtig';}
+      else if(isC&&!inp.checked){o.classList.add('missed');mark.textContent='\u25CF war richtig';allCorrect=false;}
+      else if(!isC&&inp.checked){o.classList.add('wrong');mark.textContent='\u2717 falsch';allCorrect=false;}
+      else{mark.textContent='';}
+    });
+    var res=card.querySelector('.mcq-result'); res.classList.add('show');
+    var v=card.querySelector('.mcq-verdict');
+    if(allCorrect){v.className='mcq-verdict ok';v.textContent='\u2713 Perfekt \u2013 genau richtig!';}
+    else{v.className='mcq-verdict part';v.textContent='Noch nicht ganz \u2013 schau dir die Markierungen & die Erkl\u00e4rung an:';}
+  }
+  if (e.target.classList && e.target.classList.contains('mcq-reset')) {
+    var card=e.target.closest('.mcq');
+    card.querySelectorAll('.mcq-opt').forEach(function(o){o.classList.remove('correct','wrong','missed');o.querySelector('input').checked=false;o.querySelector('.opt-mark').textContent='';});
+    card.querySelector('.mcq-result').classList.remove('show');
+  }
+});
+
+</script>
+
+  </main>
+</div>
+<site-footer caption="Aufgabenblatt 03 · Support Vector Machines"></site-footer>
+</body>
+</html>

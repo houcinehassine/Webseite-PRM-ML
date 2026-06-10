@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python-Referenz: Supervised &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Modelle&lt;/span&gt; – PRM Prüfungsvorbereitung." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python · Supervised &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Modelle&lt;/span&gt;</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ref-intro{color:var(--color-text-muted);max-width:72ch;margin-bottom:var(--space-6);line-height:1.7}
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-lg);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--color-surface-2);border-bottom:1px solid var(--color-border)}
+    .ref-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);font-size:.95rem}
+    .ref-mod{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.12rem .5rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary)}
+    .ref-body{padding:1rem 1.1rem 1.15rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.9rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary)}
+    .ref-body pre{margin:.4rem 0 0}
+    .ref-use{margin-top:.85rem;font-size:.84rem;line-height:1.6;border-left:3px solid var(--color-primary);padding:.5rem .85rem;background:var(--color-primary-highlight);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--color-text)}
+    .ref-use b{color:var(--color-primary)}
+    .ref-params{list-style:none;margin:.2rem 0 .6rem;padding:0;font-size:.85rem}
+    .ref-params li{padding:.15rem 0;border-bottom:1px dashed var(--color-border)}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+  </style>
+</head>
+<body>
+  <site-header active="pageP" title="Python · Supervised &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Modelle&lt;/span&gt;"></site-header>
+  <div class="layout">
+    <site-sidebar active="Page05"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Python · Modelle</span>
+            <h1>Supervised <span class="key" style="--key-color:var(--color-primary)">Modelle</span></h1>
+            <p>Modelle mit Labels: Klassifikation und Regression. SVM, Entscheidungsbäume, Random Forest, KNN — alle teilen sich dieselbe <code>.fit()</code>/<code>.predict()</code>-Schnittstelle.</p>
+            <div class="pill-row">
+              <span class="pill">SVC</span>
+              <span class="pill">RandomForest</span>
+              <span class="pill">DecisionTree</span>
+              <span class="pill">KNN</span>
+              <span class="pill">.fit / .predict</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Worum geht's?</h2>
+            <p>Die überwachten Modelle des Kurses mit ihren wichtigsten Hyperparametern — und die einheitliche API, die alle gemeinsam haben.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="svm">
+        <div class="section-head">
+          <h2>5.1 Support Vector Machines</h2>
+          <p>Maximaler Margin, linear oder mit Kernel.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">SVC</span>
+          <span class="ref-mod">sklearn.svm</span>
+        </div>
+        <div class="ref-body">
+          <p>Support Vector Classifier. Trennt Klassen mit maximalem Margin; mit Kerneln (linear, rbf) auch nichtlinear.</p>
+          <ul class="ref-params"><li><code>C</code> — Strafterm: groß = schmaler Margin (Overfit-Gefahr)</li><li><code>kernel</code> — 'linear' oder 'rbf'</li><li><code>gamma</code> — RBF-Reichweite: 'scale'/'auto'/Zahl</li></ul>
+          <pre><code>from sklearn.svm import SVC
+model = SVC(kernel='rbf', C=1, gamma='scale')
+model.fit(X_train, y_train)
+pred = model.predict(X_test)
+scores = model.decision_function(X_test)   # für ROC</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Klassifikation in Kapitel 3 & Blatt 03 (auch Wälzlager, Digits).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">SVR / LinearSVR</span>
+          <span class="ref-mod">sklearn.svm</span>
+        </div>
+        <div class="ref-body">
+          <p>Support-Vector-Regression — dieselbe Idee für kontinuierliche Zielwerte.</p>
+          
+          <pre><code>from sklearn.svm import SVR
+model = SVR(kernel='rbf', C=10).fit(X, y)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Regressions-Varianten der SVM.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="tree">
+        <div class="section-head">
+          <h2>5.2 Entscheidungsbäume</h2>
+          <p>Interpretierbare Schwellwert-Regeln.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">DecisionTreeClassifier / Regressor</span>
+          <span class="ref-mod">sklearn.tree</span>
+        </div>
+        <div class="ref-body">
+          <p>Entscheidungsbaum: teilt den Raum durch Schwellwert-Fragen. Interpretierbar, aber neigt zu Overfitting.</p>
+          <ul class="ref-params"><li><code>max_depth</code> — maximale Tiefe (begrenzt Overfitting)</li><li><code>min_samples_leaf</code> — Mindest-Samples pro Blatt</li></ul>
+          <pre><code>from sklearn.tree import DecisionTreeClassifier
+tree = DecisionTreeClassifier(max_depth=4, random_state=42)
+tree.fit(X, y)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Basis-Lerner für Ensembles, Interpretierbarkeit (Kapitel 4/5).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">plot_tree</span>
+          <span class="ref-mod">sklearn.tree</span>
+        </div>
+        <div class="ref-body">
+          <p>Zeichnet einen trainierten Entscheidungsbaum als Diagramm.</p>
+          
+          <pre><code>from sklearn.tree import plot_tree
+plt.figure(figsize=(12, 6))
+plot_tree(tree, filled=True, feature_names=namen)
+plt.show()</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Baumstruktur visualisieren (Kapitel 4).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="ensemble">
+        <div class="section-head">
+          <h2>5.3 Ensemble-Methoden</h2>
+          <p>Viele Modelle kombinieren.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">RandomForestClassifier / Regressor</span>
+          <span class="ref-mod">sklearn.ensemble</span>
+        </div>
+        <div class="ref-body">
+          <p>Viele Entscheidungsbäume auf Bootstrap-Stichproben + zufälliger Feature-Auswahl. Mittelt → robust gegen Rauschen & Overfitting.</p>
+          <ul class="ref-params"><li><code>n_estimators</code> — Anzahl Bäume</li><li><code>max_features</code> — Features pro Split</li><li><code>feature_importances_</code> — gelernte Feature-Wichtigkeit</li></ul>
+          <pre><code>from sklearn.ensemble import RandomForestClassifier
+rf = RandomForestClassifier(n_estimators=200, random_state=42)
+rf.fit(X_train, y_train)
+wichtig = rf.feature_importances_</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Robuste Klassifikation, Feature-Importance-Heatmaps (Blatt 05).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">AdaBoostClassifier</span>
+          <span class="ref-mod">sklearn.ensemble</span>
+        </div>
+        <div class="ref-body">
+          <p>Boosting: trainiert Lerner sequenziell, jeder korrigiert die Fehler des vorigen.</p>
+          
+          <pre><code>from sklearn.ensemble import AdaBoostClassifier
+ada = AdaBoostClassifier(n_estimators=50).fit(X, y)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Boosting-Ensemble (Kapitel 5).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="weitere">
+        <div class="section-head">
+          <h2>5.4 Weitere Modelle</h2>
+          <p>KNN, lineare Regression, Multi-Class.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">KNeighborsClassifier</span>
+          <span class="ref-mod">sklearn.neighbors</span>
+        </div>
+        <div class="ref-body">
+          <p>k-Nächste-Nachbarn: klassifiziert nach den <code>k</code> ähnlichsten Trainingspunkten. Kein echtes „Training", nur Speichern.</p>
+          
+          <pre><code>from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=5)
+knn.fit(X, y)
+knn.predict(neuer_punkt)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Anomalie-Klassifikator auf DBSCAN-Labels (Blatt 04), Baseline.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">LinearRegression</span>
+          <span class="ref-mod">sklearn.linear_model</span>
+        </div>
+        <div class="ref-body">
+          <p>Klassische lineare Regression (Methode der kleinsten Quadrate).</p>
+          
+          <pre><code>from sklearn.linear_model import LinearRegression
+lr = LinearRegression().fit(X, y)
+print(lr.coef_, lr.intercept_)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Regressions-Baseline.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">OneVsRestClassifier</span>
+          <span class="ref-mod">sklearn.multiclass</span>
+        </div>
+        <div class="ref-body">
+          <p>Wandelt einen binären Klassifikator in einen Mehrklassen-Klassifikator (ein Modell pro Klasse).</p>
+          
+          <pre><code>from sklearn.multiclass import OneVsRestClassifier
+clf = OneVsRestClassifier(SVC()).fit(X, Y_bin)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Multi-Class ROC (Kapitel 7).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="api">
+        <div class="section-head">
+          <h2>5.5 Die einheitliche API</h2>
+          <p>Ein Muster für alle Modelle.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">Die einheitliche sklearn-API</span>
+          <span class="ref-mod">Konzept</span>
+        </div>
+        <div class="ref-body">
+          <p>Jedes Modell folgt demselben Muster: <code>.fit()</code> trainiert, <code>.predict()</code> sagt vorher, <code>.score()</code> bewertet. Deshalb sind Modelle austauschbar.</p>
+          
+          <pre><code>model.fit(X_train, y_train)        # trainieren
+y_pred = model.predict(X_test)     # Klasse vorhersagen
+proba  = model.predict_proba(X_test)   # Wahrscheinlichkeiten
+score  = model.decision_function(X_test)  # Konfidenz (SVM)
+acc    = model.score(X_test, y_test)   # Accuracy</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Dieses Muster gilt für ALLE Modelle — einmal verstanden, überall anwendbar.</div>
+        </div>
+      </div>
+      </section>
+    </main>
+  </div>
+  <site-footer caption="Python-Referenz · Supervised &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Modelle&lt;/span&gt;"></site-footer>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python-Referenz: Metriken &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Evaluation&lt;/span&gt; – PRM Prüfungsvorbereitung." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python · Metriken &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Evaluation&lt;/span&gt;</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ref-intro{color:var(--color-text-muted);max-width:72ch;margin-bottom:var(--space-6);line-height:1.7}
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-lg);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--color-surface-2);border-bottom:1px solid var(--color-border)}
+    .ref-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);font-size:.95rem}
+    .ref-mod{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.12rem .5rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary)}
+    .ref-body{padding:1rem 1.1rem 1.15rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.9rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary)}
+    .ref-body pre{margin:.4rem 0 0}
+    .ref-use{margin-top:.85rem;font-size:.84rem;line-height:1.6;border-left:3px solid var(--color-primary);padding:.5rem .85rem;background:var(--color-primary-highlight);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--color-text)}
+    .ref-use b{color:var(--color-primary)}
+    .ref-params{list-style:none;margin:.2rem 0 .6rem;padding:0;font-size:.85rem}
+    .ref-params li{padding:.15rem 0;border-bottom:1px dashed var(--color-border)}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+  </style>
+</head>
+<body>
+  <site-header active="pageP" title="Python · Metriken &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Evaluation&lt;/span&gt;"></site-header>
+  <div class="layout">
+    <site-sidebar active="Page08"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Python · Evaluation</span>
+            <h1>Metriken & <span class="key" style="--key-color:var(--color-primary)">Evaluation</span></h1>
+            <p>Wie misst man Erfolg? Für Klassifikation (Accuracy, F1, ROC/AUC), Regression (MSE), Clustering (Silhouette, Davies-Bouldin) und Feature-Wichtigkeit.</p>
+            <div class="pill-row">
+              <span class="pill">accuracy_score</span>
+              <span class="pill">confusion_matrix</span>
+              <span class="pill">roc_auc_score</span>
+              <span class="pill">silhouette_score</span>
+              <span class="pill">feature_importances_</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Worum geht's?</h2>
+            <p>Alle Bewertungsmetriken des Kurses, geordnet nach Aufgabentyp — inklusive Feature-Importance.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="klassifikation">
+        <div class="section-head">
+          <h2>8.1 Klassifikations-Metriken</h2>
+          <p>Accuracy, F1 und die Confusion Matrix.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">accuracy_score / f1_score</span>
+          <span class="ref-mod">sklearn.metrics</span>
+        </div>
+        <div class="ref-body">
+          <p><code>accuracy</code> = Anteil korrekt; <code>f1</code> = harmonisches Mittel aus Precision & Recall (besser bei Unbalance).</p>
+          
+          <pre><code>from sklearn.metrics import accuracy_score, f1_score
+acc = accuracy_score(y_test, pred)
+f1  = f1_score(y_test, pred, average='macro')</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Standard-Bewertung von Klassifikatoren.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">confusion_matrix</span>
+          <span class="ref-mod">sklearn.metrics</span>
+        </div>
+        <div class="ref-body">
+          <p>Kreuztabelle aus wahren vs. vorhergesagten Klassen — die Basis aller Klassifikationsmetriken (TP/FP/TN/FN).</p>
+          
+          <pre><code>from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, pred)
+sns.heatmap(cm, annot=True, fmt='d')</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Fehleranalyse, Grundlage für TPR/FPR (Kapitel 7).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="roc">
+        <div class="section-head">
+          <h2>8.2 ROC, AUC & Regression</h2>
+          <p>Schwellwertunabhängige Bewertung & MSE.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">roc_curve / auc / roc_auc_score</span>
+          <span class="ref-mod">sklearn.metrics</span>
+        </div>
+        <div class="ref-body">
+          <p>ROC-Kurve trägt TPR gegen FPR über alle Schwellwerte auf; AUC ist die Fläche darunter (1.0 = perfekt, 0.5 = Zufall).</p>
+          
+          <pre><code>from sklearn.metrics import roc_curve, auc, roc_auc_score
+fpr, tpr, thr = roc_curve(y_test, scores)
+flaeche = auc(fpr, tpr)
+# kurz:
+roc_auc_score(y_test, scores)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Klassifikator-Güte schwellwertunabhängig bewerten (Kapitel 7).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">RocCurveDisplay / precision_recall_curve</span>
+          <span class="ref-mod">sklearn.metrics</span>
+        </div>
+        <div class="ref-body">
+          <p>Fertige ROC-Darstellung bzw. die Precision-Recall-Kurve (besser bei starker Klassen-Unbalance).</p>
+          
+          <pre><code>from sklearn.metrics import RocCurveDisplay, precision_recall_curve
+RocCurveDisplay.from_estimator(model, X_test, y_test)
+prec, rec, thr = precision_recall_curve(y_test, scores)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> ROC schnell plotten, PR-Kurve bei seltenen positiven Fällen.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">mean_squared_error</span>
+          <span class="ref-mod">sklearn.metrics</span>
+        </div>
+        <div class="ref-body">
+          <p>Mittlerer quadratischer Fehler — die Standardmetrik für Regression.</p>
+          
+          <pre><code>from sklearn.metrics import mean_squared_error
+mse = mean_squared_error(y_test, pred)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Regressionsmodelle bewerten.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="clustering">
+        <div class="section-head">
+          <h2>8.3 Clustering-Metriken</h2>
+          <p>Cluster-Güte ohne Labels messen.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">silhouette_score / silhouette_samples</span>
+          <span class="ref-mod">sklearn.metrics</span>
+        </div>
+        <div class="ref-body">
+          <p>Misst, wie gut Cluster getrennt sind (−1…+1, größer = besser). <code>samples</code> liefert den Wert pro Punkt.</p>
+          
+          <pre><code>from sklearn.metrics import silhouette_score
+s = silhouette_score(X, labels)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Clustering-Qualität bewerten (Blatt 04).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">davies_bouldin_score</span>
+          <span class="ref-mod">sklearn.metrics</span>
+        </div>
+        <div class="ref-body">
+          <p>Cluster-Gütemaß — hier gilt: <b>kleiner ist besser</b> (0 = ideal).</p>
+          
+          <pre><code>from sklearn.metrics import davies_bouldin_score
+db = davies_bouldin_score(X, labels)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Clusterzahl vergleichen (Blatt 04).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="importance">
+        <div class="section-head">
+          <h2>8.4 Feature-Importance</h2>
+          <p>Welche Features zählen?</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">feature_importances_</span>
+          <span class="ref-mod">sklearn.ensemble</span>
+        </div>
+        <div class="ref-body">
+          <p>Attribut trainierter Baum-Ensembles: wie stark jedes Feature die Unreinheit reduziert (über alle Bäume gemittelt).</p>
+          
+          <pre><code>rf.fit(X, y)
+wichtig = rf.feature_importances_
+top3 = np.argsort(wichtig)[::-1][:3]
+plt.imshow(wichtig.reshape(8, 8), cmap='hot')</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Welche Pixel/Features nutzt das Modell? Heatmap (Blatt 05).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">permutation_importance</span>
+          <span class="ref-mod">sklearn.inspection</span>
+        </div>
+        <div class="ref-body">
+          <p>Modell-unabhängig: misst den Score-Abfall, wenn ein Feature zufällig vertauscht wird.</p>
+          
+          <pre><code>from sklearn.inspection import permutation_importance
+r = permutation_importance(model, X_test, y_test, n_repeats=10)
+print(r.importances_mean)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Feature-Wichtigkeit für beliebige Modelle (Kapitel 5, Blatt 05).</div>
+        </div>
+      </div>
+      </section>
+    </main>
+  </div>
+  <site-footer caption="Python-Referenz · Metriken &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Evaluation&lt;/span&gt;"></site-footer>
+</body>
+</html>

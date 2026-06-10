@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python-Referenz: Modellauswahl &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Validierung&lt;/span&gt; – PRM Prüfungsvorbereitung." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python · Modellauswahl &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Validierung&lt;/span&gt;</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ref-intro{color:var(--color-text-muted);max-width:72ch;margin-bottom:var(--space-6);line-height:1.7}
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-lg);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--color-surface-2);border-bottom:1px solid var(--color-border)}
+    .ref-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);font-size:.95rem}
+    .ref-mod{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.12rem .5rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary)}
+    .ref-body{padding:1rem 1.1rem 1.15rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.9rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary)}
+    .ref-body pre{margin:.4rem 0 0}
+    .ref-use{margin-top:.85rem;font-size:.84rem;line-height:1.6;border-left:3px solid var(--color-primary);padding:.5rem .85rem;background:var(--color-primary-highlight);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--color-text)}
+    .ref-use b{color:var(--color-primary)}
+    .ref-params{list-style:none;margin:.2rem 0 .6rem;padding:0;font-size:.85rem}
+    .ref-params li{padding:.15rem 0;border-bottom:1px dashed var(--color-border)}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+  </style>
+</head>
+<body>
+  <site-header active="pageP" title="Python · Modellauswahl &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Validierung&lt;/span&gt;"></site-header>
+  <div class="layout">
+    <site-sidebar active="Page07"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Python · Validierung</span>
+            <h1>Modellauswahl & <span class="key" style="--key-color:var(--color-primary)">Validierung</span></h1>
+            <p>Wie gut ist ein Modell wirklich — und welche Hyperparameter sind optimal? Cross-Validation, GridSearch und Lernkurven geben verlässliche Antworten ohne Data Leakage.</p>
+            <div class="pill-row">
+              <span class="pill">train_test_split</span>
+              <span class="pill">cross_val_score</span>
+              <span class="pill">GridSearchCV</span>
+              <span class="pill">learning_curve</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Worum geht's?</h2>
+            <p>Die Werkzeuge zur fairen Modellbewertung und Hyperparameter-Optimierung.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="split">
+        <div class="section-head">
+          <h2>7.1 Splits & Cross-Validation</h2>
+          <p>Daten fair aufteilen und robust bewerten.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">train_test_split</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+        <div class="ref-body">
+          <p>Teilt Daten zufällig in Trainings- und Testset. <code>stratify=y</code> erhält die Klassenverteilung.</p>
+          <ul class="ref-params"><li><code>test_size</code> — Anteil Testdaten (z.B. 0.3)</li><li><code>stratify</code> — Klassenverteilung erhalten</li><li><code>random_state</code> — reproduzierbar</li></ul>
+          <pre><code>from sklearn.model_selection import train_test_split
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X, y, test_size=0.3, stratify=y, random_state=42)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Standard-Aufteilung in jedem Klassifikationsbeispiel.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">cross_val_score + KFold</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+        <div class="ref-body">
+          <p>Bewertet ein Modell über <code>k</code> Folds — robuster als ein einzelner Split. <code>KFold</code> steuert die Aufteilung.</p>
+          
+          <pre><code>from sklearn.model_selection import cross_val_score, KFold
+scores = cross_val_score(model, X, y, cv=5)
+print(scores.mean(), scores.std())
+kf = KFold(n_splits=5, shuffle=True, random_state=42)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Robuste Modellbewertung (Blatt 02/05), eigene CV implementieren.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">LeaveOneOut</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+        <div class="ref-body">
+          <p>Extremfall der Cross-Validation: jeder einzelne Punkt ist einmal das Testset.</p>
+          
+          <pre><code>from sklearn.model_selection import LeaveOneOut
+cross_val_score(model, X, y, cv=LeaveOneOut())</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Sehr kleine Datensätze.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="suche">
+        <div class="section-head">
+          <h2>7.2 Hyperparameter-Suche</h2>
+          <p>Die beste Konfiguration finden.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">GridSearchCV</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+        <div class="ref-body">
+          <p>Probiert systematisch alle Hyperparameter-Kombinationen per Cross-Validation und merkt sich die beste.</p>
+          <ul class="ref-params"><li><code>param_grid</code> — Dict der zu testenden Werte</li><li><code>best_params_</code> — beste Kombination</li><li><code>cv</code> — Anzahl Folds</li><li><code>n_jobs=-1</code> — alle CPU-Kerne</li></ul>
+          <pre><code>from sklearn.model_selection import GridSearchCV
+par = {'C': [1, 10, 100], 'gamma': [0.01, 0.1]}
+grid = GridSearchCV(SVC(), par, cv=5, n_jobs=-1, verbose=1)
+grid.fit(X_train, y_train)
+print(grid.best_params_, grid.best_score_)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Hyperparameter-Optimierung (Kapitel 3, Blatt 03/05).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">RandomizedSearchCV</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+        <div class="ref-body">
+          <p>Wie GridSearch, testet aber nur eine zufällige Auswahl — schneller bei großen Suchräumen.</p>
+          
+          <pre><code>from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import randint
+rs = RandomizedSearchCV(rf, {'n_estimators': randint(50, 300)},
+                        n_iter=20, cv=5)
+rs.fit(X, y)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Effiziente Suche, kombiniert mit Verteilungen aus <code>scipy.stats</code>.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">BayesSearchCV</span>
+          <span class="ref-mod">skopt</span>
+        </div>
+        <div class="ref-body">
+          <p>Bayes'sche Optimierung — wählt die nächsten Kombinationen klug statt zufällig.</p>
+          
+          <pre><code>from skopt import BayesSearchCV
+from skopt.space import Integer
+opt = BayesSearchCV(rf, {'n_estimators': Integer(50, 300)})</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Fortgeschrittene Hyperparameter-Suche.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="kurven">
+        <div class="section-head">
+          <h2>7.3 Validierungs- & Lernkurven</h2>
+          <p>Over-/Underfitting sichtbar machen.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">validation_curve</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+        <div class="ref-body">
+          <p>Zeigt Train- vs. Validierungs-Score als Funktion EINES Hyperparameters — deckt Over-/Underfitting auf.</p>
+          
+          <pre><code>from sklearn.model_selection import validation_curve
+tr, val = validation_curve(SVC(), X, y,
+    param_name='C', param_range=[0.1, 1, 10, 100], cv=5)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Wirkung eines Hyperparameters analysieren.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">learning_curve</span>
+          <span class="ref-mod">sklearn.model_selection</span>
+        </div>
+        <div class="ref-body">
+          <p>Zeigt Score als Funktion der Trainingsgröße — zeigt, ob mehr Daten helfen würden.</p>
+          
+          <pre><code>from sklearn.model_selection import learning_curve
+sizes, tr, val = learning_curve(model, X, y,
+    train_sizes=np.linspace(0.1, 1.0, 9), cv=5)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Lernkurven (Blatt 02 auch from scratch).</div>
+        </div>
+      </div>
+      </section>
+    </main>
+  </div>
+  <site-footer caption="Python-Referenz · Modellauswahl &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Validierung&lt;/span&gt;"></site-footer>
+</body>
+</html>

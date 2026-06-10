@@ -26,7 +26,7 @@ except ImportError:
 #  KONFIGURATION
 # ──────────────────────────────────────────────────────────────
 
-ROOT = Path(__file__).parent
+ROOT = Path(__file__).parent.parent  # Projektroot (nicht assets/)
 
 KAPITEL_NAMEN = {
     "Kapitel1": "K1 · Einführung ML",
@@ -216,16 +216,18 @@ def main():
                 total_files += 1
                 print(f"  ✓ {rel_url:50} {len(entries):3} Einträge")
 
-    # Ausgabe
-    out_path = ROOT / 'search-index.json'
-    out_path.write_text(
-        json.dumps(index, ensure_ascii=False, indent=2),
-        encoding='utf-8'
-    )
+    # Ausgabe JSON
+    json_str = json.dumps(index, ensure_ascii=False, indent=2)
+    out_json = ROOT / 'search-index.json'
+    out_json.write_text(json_str, encoding='utf-8')
+
+    # Ausgabe JS (für file://-Protokoll, kein fetch() nötig)
+    out_js = ROOT / 'search-index.js'
+    out_js.write_text(f'window.SEARCH_DATA = {json_str};', encoding='utf-8')
 
     print(f"\n{'─'*60}")
-    print(f"✅ {len(index)} Einträge aus {total_files} Seiten → {out_path.name}")
-    print(f"   Dateigröße: {out_path.stat().st_size / 1024:.1f} KB")
+    print(f"✅ {len(index)} Einträge aus {total_files} Seiten → {out_json.name} + {out_js.name}")
+    print(f"   Dateigröße: {out_json.stat().st_size / 1024:.1f} KB")
 
 
 if __name__ == '__main__':

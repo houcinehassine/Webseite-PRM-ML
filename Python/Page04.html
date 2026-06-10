@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python-Referenz: Preprocessing &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Pipelines&lt;/span&gt; – PRM Prüfungsvorbereitung." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python · Preprocessing &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Pipelines&lt;/span&gt;</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ref-intro{color:var(--color-text-muted);max-width:72ch;margin-bottom:var(--space-6);line-height:1.7}
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-lg);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--color-surface-2);border-bottom:1px solid var(--color-border)}
+    .ref-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);font-size:.95rem}
+    .ref-mod{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.12rem .5rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary)}
+    .ref-body{padding:1rem 1.1rem 1.15rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.9rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary)}
+    .ref-body pre{margin:.4rem 0 0}
+    .ref-use{margin-top:.85rem;font-size:.84rem;line-height:1.6;border-left:3px solid var(--color-primary);padding:.5rem .85rem;background:var(--color-primary-highlight);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--color-text)}
+    .ref-use b{color:var(--color-primary)}
+    .ref-params{list-style:none;margin:.2rem 0 .6rem;padding:0;font-size:.85rem}
+    .ref-params li{padding:.15rem 0;border-bottom:1px dashed var(--color-border)}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+  </style>
+</head>
+<body>
+  <site-header active="pageP" title="Python · Preprocessing &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Pipelines&lt;/span&gt;"></site-header>
+  <div class="layout">
+    <site-sidebar active="Page04"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Python · Vorverarbeitung</span>
+            <h1>Preprocessing & <span class="key" style="--key-color:var(--color-primary)">Pipelines</span></h1>
+            <p>Bevor ein Modell trainiert wird, müssen Daten vorbereitet werden: skalieren, kodieren, Features auswählen, Dimension reduzieren. Pipelines verketten das sauber und verhindern Data Leakage.</p>
+            <div class="pill-row">
+              <span class="pill">StandardScaler</span>
+              <span class="pill">OneHotEncoder</span>
+              <span class="pill">PCA</span>
+              <span class="pill">make_pipeline</span>
+              <span class="pill">fit/transform</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Worum geht's?</h2>
+            <p>Alle Vorverarbeitungs-Werkzeuge des Kurses — plus die zentrale fit/transform-Regel gegen Data Leakage.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="section" id="skalierung">
+        <div class="section-head">
+          <h2>4.1 Skalierung</h2>
+          <p>Features auf vergleichbare Größenordnungen bringen.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">StandardScaler</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
+        </div>
+        <div class="ref-body">
+          <p>Standardisiert Features auf Mittelwert 0 und Std 1. Wichtig für distanzbasierte Verfahren (SVM, KNN, KMeans).</p>
+          
+          <pre><code>from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_train_s = scaler.fit_transform(X_train)
+X_test_s  = scaler.transform(X_test)   # nur transform!</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Vor SVM/KNN/Clustering. <b>fit nur auf Trainingsdaten</b> — sonst Data Leakage.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">MinMaxScaler</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
+        </div>
+        <div class="ref-body">
+          <p>Skaliert Features linear in den Bereich [0, 1].</p>
+          
+          <pre><code>from sklearn.preprocessing import MinMaxScaler
+X_s = MinMaxScaler().fit_transform(X)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Skalierungseinfluss auf Clustering zeigen (Blatt 04), Inertia normalisieren.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">PolynomialFeatures / PowerTransformer</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
+        </div>
+        <div class="ref-body">
+          <p><code>PolynomialFeatures</code> erzeugt Polynom-/Interaktionsterme; <code>PowerTransformer</code> macht Verteilungen normaler.</p>
+          
+          <pre><code>from sklearn.preprocessing import PolynomialFeatures
+X_poly = PolynomialFeatures(degree=2).fit_transform(X)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Nichtlineare Regression, Feature-Engineering.</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="encoding">
+        <div class="section-head">
+          <h2>4.2 Encoding</h2>
+          <p>Kategoriale Daten in Zahlen umwandeln.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">LabelEncoder</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
+        </div>
+        <div class="ref-body">
+          <p>Wandelt kategoriale Labels in ganze Zahlen um (z.B. 'Hund'→0). <b>Achtung:</b> erzeugt eine künstliche Ordnung.</p>
+          
+          <pre><code>from sklearn.preprocessing import LabelEncoder
+enc = LabelEncoder()
+y_enc = enc.fit_transform(['a', 'b', 'a', 'c'])  # [0 1 0 2]</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Zielvariablen kodieren (Kapitel 1).</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">OneHotEncoder</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
+        </div>
+        <div class="ref-body">
+          <p>Wandelt jede Kategorie in eine eigene 0/1-Spalte — ohne künstliche Ordnung.</p>
+          
+          <pre><code>from sklearn.preprocessing import OneHotEncoder
+ohe = OneHotEncoder(sparse_output=False)
+X_ohe = ohe.fit_transform(kategorien.reshape(-1, 1))</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Kategoriale Features ohne Reihenfolge (Kapitel 1), bevorzugt gegenüber LabelEncoder.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">label_binarize</span>
+          <span class="ref-mod">sklearn.preprocessing</span>
+        </div>
+        <div class="ref-body">
+          <p>Wandelt Mehrklassen-Labels in eine binäre One-vs-Rest-Matrix — Basis für Multi-Class-ROC.</p>
+          
+          <pre><code>from sklearn.preprocessing import label_binarize
+Y = label_binarize(y, classes=[0, 1, 2])</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Multi-Class ROC-Kurven (Kapitel 7).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="auswahl">
+        <div class="section-head">
+          <h2>4.3 Feature-Auswahl & -Extraktion</h2>
+          <p>Die richtigen Features behalten.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">VarianceThreshold</span>
+          <span class="ref-mod">sklearn.feature_selection</span>
+        </div>
+        <div class="ref-body">
+          <p>Entfernt Features mit zu geringer Varianz (z.B. fast konstante Spalten).</p>
+          
+          <pre><code>from sklearn.feature_selection import VarianceThreshold
+X_sel = VarianceThreshold(threshold=0.01).fit_transform(X)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Uninformative Features entfernen.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">SelectKBest + mutual_info_classif</span>
+          <span class="ref-mod">sklearn.feature_selection</span>
+        </div>
+        <div class="ref-body">
+          <p>Wählt die <code>k</code> Features mit dem höchsten Zusammenhang zum Ziel (hier: Transinformation).</p>
+          
+          <pre><code>from sklearn.feature_selection import SelectKBest, mutual_info_classif
+X_best = SelectKBest(mutual_info_classif, k=10).fit_transform(X, y)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Feature-Auswahl vor dem Training.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">CountVectorizer / FeatureHasher</span>
+          <span class="ref-mod">sklearn.feature_extraction</span>
+        </div>
+        <div class="ref-body">
+          <p>Wandeln Text/kategoriale Daten in numerische Vektoren (Bag-of-Words bzw. Hashing-Trick).</p>
+          
+          <pre><code>from sklearn.feature_extraction.text import CountVectorizer
+X = CountVectorizer().fit_transform(texte)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Text-Features (Bag-of-Words, Kapitel 1).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="dimred">
+        <div class="section-head">
+          <h2>4.4 Dimensionsreduktion</h2>
+          <p>Viele Features auf wenige verdichten.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">PCA</span>
+          <span class="ref-mod">sklearn.decomposition</span>
+        </div>
+        <div class="ref-body">
+          <p>Hauptkomponentenanalyse — reduziert die Dimension, indem Richtungen größter Varianz behalten werden. <code>whiten=True</code> normiert die Komponenten.</p>
+          
+          <pre><code>from sklearn.decomposition import PCA
+pca = PCA(n_components=0.95, whiten=True)   # 95% Varianz
+X_pca = pca.fit_transform(X)
+print(pca.n_components_)
+X_back = pca.inverse_transform(X_pca)       # zurück in Pixelraum</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Dimensionsreduktion vor GMM-Bildgenerator (Blatt 06), Gesichtserkennung.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">TSNE</span>
+          <span class="ref-mod">sklearn.manifold</span>
+        </div>
+        <div class="ref-body">
+          <p>Nichtlineare Dimensionsreduktion auf 2D — gut zur Visualisierung von Clustern (nur zum Plotten, nicht zum Trainieren).</p>
+          
+          <pre><code>from sklearn.manifold import TSNE
+X_2d = TSNE(n_components=2).fit_transform(X)
+plt.scatter(X_2d[:,0], X_2d[:,1], c=y)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Hochdimensionale Daten visualisieren (Kapitel 1).</div>
+        </div>
+      </div>
+      </section>
+      <section class="section" id="pipeline">
+        <div class="section-head">
+          <h2>4.5 Pipelines & die fit/transform-Regel</h2>
+          <p>Sauber verketten, Leakage vermeiden.</p>
+        </div>
+        
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">make_pipeline / Pipeline</span>
+          <span class="ref-mod">sklearn.pipeline</span>
+        </div>
+        <div class="ref-body">
+          <p>Verkettet Vorverarbeitung + Modell zu einem Objekt. Bei Cross-Validation wird der Scaler in jedem Fold neu gefittet → <b>verhindert Data Leakage</b>.</p>
+          
+          <pre><code>from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+pipe = make_pipeline(StandardScaler(), SVC())
+pipe.fit(X_train, y_train)
+# benannt:
+Pipeline([('scaler', StandardScaler()), ('svc', SVC())])</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Scaler+Modell sauber kombinieren (Blatt 03/05), GridSearch mit <code>svc__C</code>.</div>
+        </div>
+      </div>
+      <div class="ref">
+        <div class="ref-head">
+          <span class="ref-name">fit vs. transform vs. fit_transform</span>
+          <span class="ref-mod">Konzept</span>
+        </div>
+        <div class="ref-body">
+          <p><code>fit</code> lernt Parameter (z.B. Mittelwert), <code>transform</code> wendet sie an, <code>fit_transform</code> macht beides. <b>Test-Daten nur transformieren!</b></p>
+          
+          <pre><code>scaler.fit(X_train)          # lernt mean/std aus Train
+X_tr = scaler.transform(X_train)
+X_te = scaler.transform(X_test)   # gleiche mean/std
+# Kurzform für Training:
+X_tr = scaler.fit_transform(X_train)</code></pre>
+          <div class="ref-use"><b>Im Kurs:</b> Die wichtigste Regel gegen Data Leakage im ganzen Kurs.</div>
+        </div>
+      </div>
+      </section>
+    </main>
+  </div>
+  <site-footer caption="Python-Referenz · Preprocessing &amp; &lt;span class="key" style="--key-color:var(--color-primary)"&gt;Pipelines&lt;/span&gt;"></site-footer>
+</body>
+</html>
