@@ -17,6 +17,21 @@ const chapter = {
 
     // ── Aufgabenblätter ───────────────────────────────────
     {
+      id: 'blatt01',
+      href: 'Aufgabenblatt01.html',
+      title: '01 · Data Preparation (Quiz)',
+      sections: [
+        { href: '#grundlagen',      title: '📚 Grundlagen & Features' },
+        { href: '#feature-raum',    title: '📐 Feature-Raum & t-SNE' },
+        { href: '#zeitserien',      title: '⏱️ Zeitserien' },
+        { href: '#encoding',        title: '🔤 Encoding & Text' },
+        { href: '#autoencoder-haar',title: '🧠 Autoencoder & Haar' },
+        { href: '#selection',       title: '🎯 Feature Selection' },
+        { href: '#scaling',         title: '⚖️ Feature Scaling' }
+      ]
+    },
+
+    {
       id: 'blatt02',
       href: 'Aufgabenblatt02.html',
       title: '02 · ML Grundlagen',
