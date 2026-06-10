@@ -262,3 +262,33 @@
   transition: transform 0.15s;
 }
 .page-card:hover .card-arrow { transform: translateX(4px); }
+
+
+/* ── Mobile (Handy/kleines Tablet) ────────────────────────────── */
+@media (max-width: 760px) {
+  /* Grids immer einspaltig – verhindert Overflow durch minmax-Mindestbreiten
+     (besonders .two-col mit 340px) auf schmalen Bildschirmen */
+  .pages-grid,
+  .pages-grid.two-col,
+  .pages-grid.examples-grid,
+  .pages-grid.pruefung-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  /* Seitenränder verkleinern: space-8 (2rem) frisst auf 375px zu viel Breite */
+  .pages-grid {
+    padding-inline: var(--space-4);
+  }
+  .section-label,
+  .section-label-desc {
+    padding-inline: var(--space-4);
+    margin-top: var(--space-8);
+  }
+  .section-label-desc {
+    margin-top: var(--space-1);
+  }
+  .overview-strip {
+    padding-inline: var(--space-4);
+  }
+}
