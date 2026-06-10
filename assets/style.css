@@ -337,3 +337,54 @@ site-sidebar{display:block;height:100%;align-self:stretch}
     color: var(--color-text);
     background: var(--color-surface-2, var(--color-surface-offset));
   }
+
+/* ── Responsive Header & Navigation (Handy & Tablet) ──────────── */
+@media (max-width:900px){
+  /* Header darf umbrechen: Brand + Buttons in Zeile 1, Navi in Zeile 2 */
+  .header-inner,.topbar-inner{flex-wrap:wrap;row-gap:var(--space-2)}
+
+  /* Kapitel-Navigation wird zu einer vollbreiten, horizontal wischbaren Leiste
+     statt einer überlaufenden, vertikal umbrechenden Spalte */
+  .chapter-nav-top,.chapter-nav{
+    order:10;
+    flex-basis:100%;
+    width:100%;
+    position:static;
+    justify-content:flex-start;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    padding:var(--space-1) 0 0;
+    margin-top:var(--space-1);
+    border-bottom:none;
+    background:transparent;
+    backdrop-filter:none;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  .chapter-nav-top::-webkit-scrollbar,.chapter-nav::-webkit-scrollbar{display:none}
+  .chapter-nav-top a,.chapter-nav a{white-space:nowrap;flex:0 0 auto}
+
+  /* Brand kompakter, damit Such-Button + Brand + Toggle in eine Zeile passen */
+  .brand-text small{display:none}
+  .brand{margin-right:auto}
+
+  /* Flexbox-Bug: Inhalt neben der Sidebar darf schrumpfen (sonst Überlauf) */
+  .content{min-width:0}
+
+  /* Zweispaltiges Hero/Grids einspaltig, solange Sidebar Platz wegnimmt */
+  .hero-grid{grid-template-columns:1fr}
+  .content section,.content pre,.content table,.formula-math{max-width:100%}
+}
+
+/* Handy: Sidebar/Inhaltsverzeichnis ausblenden, Inhalt volle Breite ───── */
+@media (max-width:700px){
+  .layout{display:block}
+  .sidebar{display:none}
+  .content{padding:var(--space-5) var(--space-4)}
+  .content section{padding:var(--space-5)}
+}
+
+/* Querformat-Überlauf grundsätzlich vermeiden */
+html{overflow-x:hidden}
