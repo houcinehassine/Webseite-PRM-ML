@@ -329,6 +329,42 @@
 .acc-warmup .card-top{border-top:3px solid var(--warmup);}
 .acc-haupt .card-top{border-top:3px solid var(--haupt);}
 .acc-schnk .card-top{border-top:3px solid var(--schnk);}
+
+/* ── Multiple-Choice-Quiz (interaktiv) ───────────────────── */
+.mcq{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-xl);padding:var(--space-5);margin-bottom:var(--space-5);box-shadow:var(--shadow-sm);}
+.mcq-head{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;}
+.mcq-badge{font-size:.66rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:.14rem .5rem;border-radius:var(--radius-full);}
+.b-konzept{background:color-mix(in oklab,#2563eb 14%,var(--color-surface));color:#1d4ed8;}
+.b-formel{background:color-mix(in oklab,#7c3aed 14%,var(--color-surface));color:#6d28d9;}
+.b-falle{background:color-mix(in oklab,#dc2626 14%,var(--color-surface));color:#b91c1c;}
+.b-code{background:color-mix(in oklab,#0891b2 14%,var(--color-surface));color:#0e7490;}
+.mcq-q{font-weight:700;font-size:var(--text-base);line-height:1.4;margin:var(--space-2) 0 var(--space-1);color:var(--color-text);}
+.mcq-hint{font-size:var(--text-xs);color:var(--color-text-muted);margin-bottom:var(--space-3);}
+.mcq-opt{display:flex;gap:.65rem;align-items:flex-start;padding:.7rem .9rem;border:1.5px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:.55rem;cursor:pointer;transition:background .12s,border-color .12s;font-size:var(--text-sm);line-height:1.5;color:var(--color-text);}
+.mcq-opt:hover{background:var(--color-surface-2);}
+.mcq-opt input{margin-top:.15rem;flex:0 0 auto;width:17px;height:17px;accent-color:var(--color-primary);cursor:pointer;}
+.mcq-opt .opt-text{flex:1;}
+.mcq-opt .opt-mark{font-weight:700;font-size:var(--text-xs);white-space:nowrap;opacity:0;}
+.mcq-opt.correct{border-color:#16a34a;background:color-mix(in oklab,#16a34a 9%,var(--color-surface));}
+.mcq-opt.correct .opt-mark{opacity:1;color:#15803d;}
+.mcq-opt.wrong{border-color:#dc2626;background:color-mix(in oklab,#dc2626 9%,var(--color-surface));}
+.mcq-opt.wrong .opt-mark{opacity:1;color:#b91c1c;}
+.mcq-opt.missed{border-color:#d97706;background:color-mix(in oklab,#d97706 10%,var(--color-surface));}
+.mcq-opt.missed .opt-mark{opacity:1;color:#b45309;}
+.mcq-actions{display:flex;gap:var(--space-2);margin-top:var(--space-2);flex-wrap:wrap;}
+.mcq-check,.mcq-reset{padding:.55rem 1.2rem;border-radius:var(--radius-md);font-weight:700;font-size:var(--text-sm);cursor:pointer;font-family:inherit;border:none;}
+.mcq-check{background:var(--color-primary);color:#fff;}
+.mcq-check:hover{filter:brightness(1.07);}
+.mcq-reset{background:var(--color-surface-2);color:var(--color-text-muted);border:1px solid var(--color-border);}
+.mcq-result{display:none;margin-top:var(--space-4);padding-top:var(--space-4);border-top:1px dashed var(--color-border);}
+.mcq-result.show{display:block;}
+.mcq-verdict{font-weight:700;margin-bottom:var(--space-2);font-size:var(--text-sm);}
+.mcq-verdict.ok{color:#15803d;}
+.mcq-verdict.part{color:#b45309;}
+.mcq-exp{font-size:var(--text-sm);line-height:1.75;color:var(--color-text);}
+.mcq-exp code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary);}
+.frage-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:var(--space-4);font-size:var(--text-xs);font-weight:700;color:var(--color-primary);text-decoration:none;background:var(--color-primary-highlight);border:1px solid color-mix(in oklab,var(--color-primary) 22%,transparent);padding:.4rem .85rem;border-radius:var(--radius-full);transition:background .15s,transform .15s;}
+.frage-link:hover{background:color-mix(in oklab,var(--color-primary) 16%,var(--color-surface));transform:translateX(2px);}
 </style>
 </head>
 <body>
@@ -376,90 +412,77 @@
 <section id="quiz">
   <div class="sec-hdr">
     <span class="badge bq">Quiz</span>
-    <h2>Theoretische Fragen</h2>
+    <h2>Theoretische Fragen — interaktiv</h2>
   </div>
 
-  <!-- F1 -->
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">F1</span>
-      <span class="card-title">Overfitting vs. Underfitting</span>
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">F1 · Was unterscheidet Overfitting von Underfitting?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Overfitting: Das Modell lernt die Trainingsdaten inkl. Rauschen auswendig und generalisiert schlecht (hohe Varianz).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Underfitting: Das Modell ist zu simpel und erfasst die Struktur der Daten nicht (hoher Bias).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Overfitting zeigt sich an hoher Trainings- aber niedriger Test-Genauigkeit.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Underfitting bedeutet exzellente Trainings-, aber schlechte Test-Genauigkeit.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Was ist der Unterschied zwischen <code>Overfitting</code> und <code>Underfitting</code>? Nennen Sie je ein konkretes Beispiel.</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q1',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q1">
-        <strong>Overfitting:</strong> Das Modell lernt Trainingsdaten inkl. Rauschen auswendig → generalisiert schlecht auf neue Daten. Beispiel: Ein tiefer Entscheidungsbaum ohne Pruning erreicht 99% Train-Accuracy, aber nur 58% Test-Accuracy.<br><br>
-        <strong>Underfitting:</strong> Das Modell ist zu simpel und kann die Struktur der Daten nicht erfassen. Beispiel: Lineare Regression auf Kreisdaten — die Entscheidungsgrenze passt strukturell nicht.
-      </div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Overfitting = hohe Varianz (Train gut, Test schlecht). Underfitting = hoher Bias (Modell zu simpel, auch Train schon schwach). Die letzte Option beschreibt fälschlich Overfitting.<br><a class="frage-link" href="../Kapitel2/Page08.html#high-variance">→ Mehr im Skript: Kap. 2 · Seite 8 – Bias-Variance</a></div></div>
   </div>
 
-  <!-- F2 -->
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">F2</span>
-      <span class="card-title">Testset & Hyperparameter-Optimierung</span>
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
+    <div class="mcq-q">F2 · Warum sollte man das Testset nicht zur Hyperparameter-Optimierung verwenden?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Optimiert man Hyperparameter am Testset, fließt dessen Information ins Modell → Data Leakage.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die gemessene Test-Genauigkeit wäre überoptimistisch und nicht repräsentativ für neue Daten.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Das Testset dient der finalen, objektiven Bewertung des fertigen Modells.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Mehrfaches Tuning am Testset ist unbedenklich, solange man am Ende neu splittet.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Warum sollte man den Testdatensatz <strong>nicht</strong> zur Hyperparameter-Optimierung verwenden?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q2',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q2">
-        Das Testset dient zur finalen, objektiven Bewertung des fertigen Modells. Optimiert man Hyperparameter anhand der Testdaten, "sieht" das Modell die Testdaten indirekt während des Trainings — das nennt sich <strong>Data Leakage</strong>. Die gemessene Genauigkeit wäre überoptimistisch und nicht repräsentativ für echte ungesehene Daten. Für die Hyperparameter-Suche verwendet man stattdessen ein separates <strong>Validierungsset</strong> oder <strong>Cross-Validation</strong>.
-      </div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Das Testset darf nur einmal ganz am Ende verwendet werden. Tuning daran ist Data Leakage und macht die Schätzung überoptimistisch. Für die Suche nutzt man ein Validierungsset oder Cross-Validation.<br><a class="frage-link" href="../Kapitel2/Page07.html#train-val-test">→ Mehr im Skript: Kap. 2 · Seite 7 – Train/Val/Test-Split</a></div></div>
   </div>
 
-  <!-- F3 -->
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">F3</span>
-      <span class="card-title">k-Fold vs. einfacher Train-Test-Split</span>
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
+    <div class="mcq-q">F3 · Welche Vorteile hat k-Fold Cross-Validation gegenüber einem einzelnen Train-Test-Split?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Jedes Sample wird genau einmal zur Validierung und k−1 mal zum Training verwendet.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die Schätzung der Modellgüte ist robuster und weniger varianzreich (nicht von einem zufälligen Split abhängig).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der Datensatz wird effizienter genutzt – besonders wichtig bei kleinen Datensätzen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">k-Fold ist immer schneller als ein einzelner Train-Test-Split.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Was ist der Vorteil von <code>k-Fold Cross-Validation</code> gegenüber einem einfachen Train-Test-Split?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q3',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q3">
-        Bei k-Fold wird jedes Sample genau <strong>einmal zur Validierung</strong> und k-1 mal zum Training verwendet. Das führt zu einer robusteren, weniger varianzreichen Schätzung der Modellgüte, da sie nicht von einem einzigen zufälligen Split abhängt. Außerdem wird der Datensatz effizienter genutzt — besonders wichtig bei kleinen Datensätzen.
-      </div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">k-Fold liefert eine robustere Güteschätzung und nutzt die Daten effizienter. Es ist aber rechenintensiver (k-faches Training), nicht schneller.<br><a class="frage-link" href="../Kapitel2/Page07.html#k-fold-loo">→ Mehr im Skript: Kap. 2 · Seite 7 – k-Fold & LOO</a></div></div>
   </div>
 
-  <!-- F4 -->
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">F4</span>
-      <span class="card-title">Einfluss von test_size auf Bias &amp; Varianz</span>
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
+    <div class="mcq-q">F4 · Wie beeinflusst die test_size Bias und Varianz des geschätzten Scores?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Große test_size → weniger Trainingsdaten → höherer Bias (Modell lernt zu wenig).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Kleine test_size → weniger Testdaten → höhere Varianz des Scores (unzuverlässiger).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Übliche Praxis: 20–30 % Testanteil als Kompromiss zwischen beiden Extremen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Eine kleine test_size senkt die Varianz des geschätzten Scores.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Welchen Einfluss hat die <code>test_size</code> auf Bias und Varianz des geschätzten Modell-Scores?</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q4',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q4">
-        <strong>Große test_size</strong> → weniger Trainingsdaten → höherer Bias (Modell lernt zu wenig, schlechtere Anpassung an die Daten).<br>
-        <strong>Kleine test_size</strong> → weniger Validierungsdaten → höhere Varianz des Scores (zufälliger, unzuverlässiger — 1 Ausreißer im Testset verzerrt das Ergebnis stark).<br><br>
-        Übliche Praxis: 20–30% Testanteil als Kompromiss zwischen beiden Extremen.
-      </div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Großer Testanteil entzieht dem Training Daten (Bias↑); kleiner Testanteil macht den Score zufälliger (Varianz↑). 20–30 % sind ein guter Kompromiss.<br><a class="frage-link" href="../Kapitel2/Page08.html#high-variance">→ Mehr im Skript: Kap. 2 · Seite 8 – Bias-Variance</a></div></div>
   </div>
 
-  <!-- F5 -->
-  <div class="card acc-quiz">
-    <div class="card-top">
-      <span class="num" style="background:var(--quiz)">F5</span>
-      <span class="card-title">Pipeline-Objekt in sklearn</span>
+  <div class="mcq">
+    <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
+    <div class="mcq-q">F5 · Was bewirkt ein Pipeline-Objekt in sklearn – und warum ist es bei Cross-Validation wichtig?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-options">
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Es verkettet mehrere Schritte (z. B. StandardScaler → KNN) zu einem einzigen Objekt.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bei Cross-Validation wird der Scaler in jedem Fold nur auf dem Trainingsteil gefittet → verhindert Data Leakage.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">fit() und predict() laufen als einheitlicher Workflow über alle Schritte.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Eine Pipeline verbessert garantiert die Genauigkeit des Modells.</span><span class="opt-mark"></span></label>
     </div>
-    <div class="card-body">
-      <div class="desc">Erklären Sie in einem Satz, was ein <code>Pipeline</code>-Objekt in <code>sklearn</code> bewirkt und warum es bei Cross-Validation wichtig ist.</div>
-      <textarea class="q-answer" placeholder="Deine Antwort hier..."></textarea>
-      <button class="q-reveal-btn" onclick="toggleQuiz('q5',this)">Antwort anzeigen</button>
-      <div class="q-ans-panel" id="q5">
-        Eine <code>Pipeline</code> verkettet mehrere Verarbeitungsschritte (z.B. <code>StandardScaler → KNN</code>) zu einem einzigen Objekt, sodass <code>fit()</code> und <code>predict()</code> als einheitlicher Workflow laufen — und verhindert bei Cross-Validation automatisch <strong>Data Leakage</strong>, weil der Scaler in jedem Fold nur auf dem jeweiligen Trainingsset gefittet wird.
-      </div>
-    </div>
+    <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Die Pipeline bündelt Vorverarbeitung + Modell und sorgt dafür, dass der Scaler pro Fold nur auf Trainingsdaten gefittet wird (kein Leakage). Eine Genauigkeitsverbesserung garantiert sie nicht.<br><a class="frage-link" href="../Kapitel2/Page05.html#generischer-aufbau">→ Mehr im Skript: Kap. 2 · Seite 5 – sklearn-Workflow</a></div></div>
   </div>
 </section>
 
@@ -1238,6 +1261,31 @@ function toggleQuiz(id, btn) {
     btn.textContent = 'Antwort verbergen';
   }
 }
+
+/* ─── MULTIPLE-CHOICE QUIZ (Auswertung) ─── */
+document.addEventListener('click', function(e){
+  if (e.target.classList && e.target.classList.contains('mcq-check')) {
+    var card = e.target.closest('.mcq'); var allCorrect = true;
+    card.querySelectorAll('.mcq-opt').forEach(function(o){
+      var inp=o.querySelector('input'); var isC=inp.dataset.correct==='true';
+      var mark=o.querySelector('.opt-mark'); o.classList.remove('correct','wrong','missed');
+      if(isC&&inp.checked){o.classList.add('correct');mark.textContent='\u2713 richtig';}
+      else if(isC&&!inp.checked){o.classList.add('missed');mark.textContent='\u25CF war richtig';allCorrect=false;}
+      else if(!isC&&inp.checked){o.classList.add('wrong');mark.textContent='\u2717 falsch';allCorrect=false;}
+      else{mark.textContent='';}
+    });
+    var res=card.querySelector('.mcq-result'); res.classList.add('show');
+    var v=card.querySelector('.mcq-verdict');
+    if(allCorrect){v.className='mcq-verdict ok';v.textContent='\u2713 Perfekt \u2013 genau richtig!';}
+    else{v.className='mcq-verdict part';v.textContent='Noch nicht ganz \u2013 schau dir die Markierungen & die Erkl\u00e4rung an:';}
+  }
+  if (e.target.classList && e.target.classList.contains('mcq-reset')) {
+    var card=e.target.closest('.mcq');
+    card.querySelectorAll('.mcq-opt').forEach(function(o){o.classList.remove('correct','wrong','missed');o.querySelector('input').checked=false;o.querySelector('.opt-mark').textContent='';});
+    card.querySelector('.mcq-result').classList.remove('show');
+  }
+});
+
 </script>
 
   </main>
