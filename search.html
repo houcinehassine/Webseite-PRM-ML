@@ -413,6 +413,7 @@
           <button class="filter-btn" data-filter="beispiel">🔍 Beispiel</button>
           <button class="filter-btn" data-filter="quiz">🧠 Quiz</button>
           <button class="filter-btn" data-filter="cheatsheet">📋 Cheatsheet</button>
+          <button class="filter-btn" data-filter="python">🐍 Python</button>
         </div>
       </section>
 
@@ -580,7 +581,13 @@
     let results = fuseInstance.search(currentQuery).map(r => r.item);
 
     // Typ-Filter anwenden
-    if (currentFilter !== 'all') {
+    if (currentFilter === 'python') {
+      // Python ist kein Typ, sondern ein Kapitel → über URL/Kapitel filtern
+      results = results.filter(r =>
+        (r.url && r.url.startsWith('Python/')) ||
+        (r.chapter && r.chapter.includes('Python'))
+      );
+    } else if (currentFilter !== 'all') {
       results = results.filter(r => r.type === currentFilter);
     }
 
