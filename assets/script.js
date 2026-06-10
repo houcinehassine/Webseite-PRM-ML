@@ -219,12 +219,62 @@ export function renderSidebar(chapter, activePage = 'page1') {
   );
   aside.appendChild(topBtn);
 
+  // ── Schließen-Button (nur Mobile sichtbar) ────
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'sidebar-close';
+  closeBtn.setAttribute('aria-label', 'Sidebar schließen');
+  closeBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+    <path d="M18 6 6 18M6 6l12 12"/>
+  </svg>`;
+  aside.appendChild(closeBtn);
+
   // ── Observer + Progress nach DOM-Insert ───────
   setTimeout(() => {
     const fillEl = document.getElementById('toc-progress-fill');
     const pctEl  = document.getElementById('toc-pct-label');
     if (fillEl && pctEl) initScrollProgress(fillEl, pctEl);
     initSectionObserver(allLinkEls);
+
+    // Mobile Drawer-Logik ──────────────────────────────────
+    const overlay = document.createElement('div');
+    overlay.className = 'sidebar-overlay';
+    document.body.appendChild(overlay);
+
+    const fab = document.createElement('button');
+    fab.className = 'sidebar-fab';
+    fab.setAttribute('aria-label', 'Inhaltsverzeichnis öffnen');
+    fab.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <line x1="3" y1="6"  x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="15" y2="18"/>
+    </svg>`;
+    document.body.appendChild(fab);
+
+    const openSidebar = () => {
+      aside.classList.add('sidebar--open');
+      overlay.classList.add('sidebar--open');
+      document.body.classList.add('sidebar--open');
+      fab.setAttribute('aria-label', 'Inhaltsverzeichnis schließen');
+    };
+    const closeSidebar = () => {
+      aside.classList.remove('sidebar--open');
+      overlay.classList.remove('sidebar--open');
+      document.body.classList.remove('sidebar--open');
+      fab.setAttribute('aria-label', 'Inhaltsverzeichnis öffnen');
+    };
+
+    fab.addEventListener('click', () =>
+      aside.classList.contains('sidebar--open') ? closeSidebar() : openSidebar()
+    );
+    overlay.addEventListener('click', closeSidebar);
+    closeBtn.addEventListener('click', closeSidebar);
+
+    // Toc-Links schließen die Sidebar automatisch auf Mobile
+    allLinkEls.forEach(a => a.addEventListener('click', () => {
+      if (window.innerWidth <= 700) closeSidebar();
+    }));
   }, 0);
 
   return aside;
