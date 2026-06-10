@@ -417,72 +417,76 @@
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
-    <div class="mcq-q">F1 · Was unterscheidet Overfitting von Underfitting?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F1 · Was trifft auf Overfitting und Underfitting zu?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Overfitting: Das Modell lernt die Trainingsdaten inkl. Rauschen auswendig und generalisiert schlecht (hohe Varianz).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Underfitting: Das Modell ist zu simpel und erfasst die Struktur der Daten nicht (hoher Bias).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Overfitting zeigt sich an hoher Trainings- aber niedriger Test-Genauigkeit.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Overfitting: Das Modell lernt Trainingsdaten inkl. Rauschen auswendig → hohe Varianz, schlechte Generalisierung.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Underfitting: Das Modell ist zu simpel und erfasst die Struktur nicht → hoher Bias.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Overfitting erkennt man an hoher Trainings- und deutlich niedrigerer Test-Genauigkeit.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Gegen Overfitting helfen mehr Trainingsdaten oder Regularisierung.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Underfitting bedeutet exzellente Trainings-, aber schlechte Test-Genauigkeit.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Overfitting behebt man, indem man das Modell noch komplexer macht.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Overfitting = hohe Varianz (Train gut, Test schlecht). Underfitting = hoher Bias (Modell zu simpel, auch Train schon schwach). Die letzte Option beschreibt fälschlich Overfitting.<br><a class="frage-link" href="../Kapitel2/Page08.html#high-variance">→ Mehr im Skript: Kap. 2 · Seite 8 – Bias-Variance</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Die letzten beiden sind falsch: hohe Train-/niedrige Test-Genauigkeit ist <em>Overfitting</em> (nicht Underfitting), und mehr Komplexität verstärkt Overfitting. <strong>Merke:</strong> Underfitting = hoher Bias, Overfitting = hohe Varianz – der Bias-Variance-Trade-off sucht das Optimum dazwischen.<br><a class="frage-link" href="../Kapitel2/Page08.html#high-variance">→ Mehr im Skript: Kap. 2 · Seite 8 – Bias-Variance</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
-    <div class="mcq-q">F2 · Warum sollte man das Testset nicht zur Hyperparameter-Optimierung verwenden?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F2 · Welche EINE Aussage zum Testset ist korrekt?</div>
+    <div class="mcq-hint">✦ Genau <strong>1</strong> Antwort ist richtig.</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Optimiert man Hyperparameter am Testset, fließt dessen Information ins Modell → Data Leakage.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die gemessene Test-Genauigkeit wäre überoptimistisch und nicht repräsentativ für neue Daten.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Das Testset dient der finalen, objektiven Bewertung des fertigen Modells.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Mehrfaches Tuning am Testset ist unbedenklich, solange man am Ende neu splittet.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Optimiert man Hyperparameter am Testset, ist das Data Leakage und die Schätzung wird überoptimistisch.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Solange man nur wenige Werte testet, ist Tuning am Testset unbedenklich.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Das Testset sollte zur Hyperparameter-Suche genutzt werden, weil es am repräsentativsten ist.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Tuning am Testset senkt die Varianz der Güteschätzung.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Das Testset darf nur einmal ganz am Ende verwendet werden. Tuning daran ist Data Leakage und macht die Schätzung überoptimistisch. Für die Suche nutzt man ein Validierungsset oder Cross-Validation.<br><a class="frage-link" href="../Kapitel2/Page07.html#train-val-test">→ Mehr im Skript: Kap. 2 · Seite 7 – Train/Val/Test-Split</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die erste Aussage stimmt. <strong>Zusatz (nicht in den Optionen):</strong> Für die Hyperparameter-Suche nimmt man ein separates <strong>Validierungsset</strong> oder <strong>Cross-Validation</strong>; das Testset wird erst ganz am Ende ein einziges Mal verwendet.<br><a class="frage-link" href="../Kapitel2/Page07.html#train-val-test">→ Mehr im Skript: Kap. 2 · Seite 7 – Train/Val/Test</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
-    <div class="mcq-q">F3 · Welche Vorteile hat k-Fold Cross-Validation gegenüber einem einzelnen Train-Test-Split?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F3 · Welche Vorteile hat k-Fold Cross-Validation?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Jedes Sample wird genau einmal zur Validierung und k−1 mal zum Training verwendet.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die Schätzung der Modellgüte ist robuster und weniger varianzreich (nicht von einem zufälligen Split abhängig).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der Datensatz wird effizienter genutzt – besonders wichtig bei kleinen Datensätzen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die Güteschätzung ist robuster und weniger varianzreich als bei einem einzelnen Split.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die Daten werden effizienter genutzt – wichtig bei kleinen Datensätzen.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">k-Fold ist immer schneller als ein einzelner Train-Test-Split.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">k-Fold macht ein separates finales Testset komplett überflüssig.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">k-Fold liefert eine robustere Güteschätzung und nutzt die Daten effizienter. Es ist aber rechenintensiver (k-faches Training), nicht schneller.<br><a class="frage-link" href="../Kapitel2/Page07.html#k-fold-loo">→ Mehr im Skript: Kap. 2 · Seite 7 – k-Fold & LOO</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Drei Vorteile stimmen. Falsch: k-Fold ist <em>teurer</em> (k-faches Training). <strong>Zusatz:</strong> Für eine ehrliche Endbewertung behält man trotzdem ein separates Testset (bzw. nutzt <em>nested</em> CV, wenn man zusätzlich tunt).<br><a class="frage-link" href="../Kapitel2/Page07.html#k-fold-loo">→ Mehr im Skript: Kap. 2 · Seite 7 – k-Fold & LOO</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
-    <div class="mcq-q">F4 · Wie beeinflusst die test_size Bias und Varianz des geschätzten Scores?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F4 · Wie wirkt die test_size auf Bias und Varianz der Schätzung?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Große test_size → weniger Trainingsdaten → höherer Bias (Modell lernt zu wenig).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Kleine test_size → weniger Testdaten → höhere Varianz des Scores (unzuverlässiger).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Übliche Praxis: 20–30 % Testanteil als Kompromiss zwischen beiden Extremen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Große test_size → weniger Trainingsdaten → höherer Bias.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Kleine test_size → weniger Testdaten → höhere Varianz des Scores.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Eine kleine test_size senkt die Varianz des geschätzten Scores.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Eine große test_size verbessert immer die Generalisierung.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Die test_size hat keinen Einfluss auf Bias/Varianz.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Großer Testanteil entzieht dem Training Daten (Bias↑); kleiner Testanteil macht den Score zufälliger (Varianz↑). 20–30 % sind ein guter Kompromiss.<br><a class="frage-link" href="../Kapitel2/Page08.html#high-variance">→ Mehr im Skript: Kap. 2 · Seite 8 – Bias-Variance</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die ersten beiden stimmen. <strong>Zusatz:</strong> Übliche Praxis sind <strong>20–30 % Testanteil</strong> als Kompromiss zwischen zu wenig Trainings- und zu wenig Testdaten.<br><a class="frage-link" href="../Kapitel2/Page08.html#high-variance">→ Mehr im Skript: Kap. 2 · Seite 8 – Bias-Variance</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
-    <div class="mcq-q">F5 · Was bewirkt ein Pipeline-Objekt in sklearn – und warum ist es bei Cross-Validation wichtig?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F5 · Was gilt für ein sklearn-Pipeline-Objekt?</div>
+    <div class="mcq-hint">✦ <strong>Alle</strong> Antworten sind richtig – aber prüfe genau!</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Es verkettet mehrere Schritte (z. B. StandardScaler → KNN) zu einem einzigen Objekt.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bei Cross-Validation wird der Scaler in jedem Fold nur auf dem Trainingsteil gefittet → verhindert Data Leakage.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Es verkettet mehrere Schritte (z. B. StandardScaler → KNN) zu einem Objekt.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bei Cross-Validation wird der Scaler in jedem Fold nur auf dem Trainingsteil gefittet → kein Leakage.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">fit() und predict() laufen als einheitlicher Workflow über alle Schritte.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Eine Pipeline verbessert garantiert die Genauigkeit des Modells.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">In GridSearchCV adressiert man Parameter eines Schritts mit Präfix, z. B. svc__C.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Die Pipeline bündelt Vorverarbeitung + Modell und sorgt dafür, dass der Scaler pro Fold nur auf Trainingsdaten gefittet wird (kein Leakage). Eine Genauigkeitsverbesserung garantiert sie nicht.<br><a class="frage-link" href="../Kapitel2/Page05.html#generischer-aufbau">→ Mehr im Skript: Kap. 2 · Seite 5 – sklearn-Workflow</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Hier sind <strong>alle vier</strong> Aussagen korrekt. <strong>Aber Vorsicht:</strong> Eine Pipeline garantiert <em>keine</em> bessere Genauigkeit – sie sorgt nur für sauberen, leckagefreien Ablauf.<br><a class="frage-link" href="../Kapitel2/Page05.html#generischer-aufbau">→ Mehr im Skript: Kap. 2 · Seite 5 – sklearn-Workflow</a></div></div>
   </div>
 </section>
 

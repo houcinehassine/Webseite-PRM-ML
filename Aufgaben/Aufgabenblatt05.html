@@ -417,57 +417,60 @@
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
     <div class="mcq-q">F1 · Welche Aussagen über Random Forest sind korrekt?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Durch Bagging (Bootstrap) + zufällige Feature-Auswahl pro Split sinkt die Varianz ggü. einem Einzelbaum.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Durch Bagging + zufällige Feature-Auswahl pro Split sinkt die Varianz ggü. einem Einzelbaum.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Ein Random Forest kann mehrklassig klassifizieren.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Alle Bäume werden auf demselben identischen Datensatz trainiert.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Die Hyperparameter haben keinen Einfluss auf die Genauigkeit.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Random Forest braucht zwingend skalierte Features.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">RF mittelt über viele dekorrelierte Bäume (Bagging + zufällige Features) → Varianzreduktion. Bäume sehen unterschiedliche Bootstrap-Stichproben; Hyperparameter zählen sehr wohl.<br><a class="frage-link" href="../Kapitel5/Page03.html#bagging">→ Mehr im Skript: Kap. 5 · Seite 3 – Bagging</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Zwei stimmen. <strong>Zusatz:</strong> Bäume sehen verschiedene Bootstrap-Stichproben; Hyperparameter (z. B. <code>n_estimators</code>, <code>max_features</code>) zählen sehr wohl. Baumbasierte Modelle sind <strong>nicht skalensensitiv</strong> – Skalierung ist optional.<br><a class="frage-link" href="../Kapitel5/Page03.html#bagging">→ Mehr im Skript: Kap. 5 · Seite 3 – Bagging</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
-    <div class="mcq-q">F2 · Welcher Klassifikator ist robuster gegen Rauschen – und warum?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F2 · Welche Aussagen zur Robustheit gegen Rauschen stimmen?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Random Forest, weil über viele Bäume gemittelt wird (Varianzreduktion).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Ein einzelner tiefer, unbeschnittener Entscheidungsbaum überanpasst Rauschen leicht.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Random Forest ist robuster, weil über viele Bäume gemittelt wird (Varianzreduktion).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Ein einzelner tiefer, unbeschnittener Baum überanpasst Rauschen leicht.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-NN mit k=1 ist sehr empfindlich gegenüber Rauschen/Ausreißern.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Ein einzelner Decision Tree ist robuster als ein ganzes Ensemble.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Mehr Bäume im Random Forest führen typischerweise zu Overfitting.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Das Ensemble (RF) ist robuster als ein Einzelbaum, weil das Mitteln die Varianz senkt. k=1-NN und tiefe Einzelbäume sind besonders rauschanfällig.<br><a class="frage-link" href="../Kapitel5/Page02.html#overfitting-decision-trees">→ Mehr im Skript: Kap. 5 · Seite 2 – Overfitting bei Bäumen</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Drei stimmen. <strong>Zusatz:</strong> Mehr Bäume (<code>n_estimators</code>) machen RF <em>stabiler</em>, nicht overfittender – die Vorhersage konvergiert. Overfitting steuert man eher über Baumtiefe / min_samples.<br><a class="frage-link" href="../Kapitel5/Page02.html#overfitting-decision-trees">→ Mehr im Skript: Kap. 5 · Seite 2 – Overfitting bei Bäumen</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
-    <div class="mcq-q">F3 · feature_importances_ vs. permutation_importance – was stimmt?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F3 · feature_importances_ vs. permutation_importance?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">feature_importances_ misst die mittlere Unreinheitsreduktion (Gini) über alle Bäume.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">permutation_importance misst den Score-Abfall, wenn ein Feature zufällig permutiert wird.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">permutation_importance ist modellunabhängig anwendbar.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">permutation_importance wird auf (Test-)Daten ausgewertet, nicht aus der Baumstruktur.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">feature_importances_ gibt die Korrelation jedes Features mit dem Label an.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">feature_importances_ = Gini-/Unreinheitsreduktion (modellintern). permutation_importance = Score-Abfall bei Permutation (modellunabhängig). Mit Korrelation hat keines direkt zu tun.<br><a class="frage-link" href="../Kapitel5/Page05.html#permutation-importance">→ Mehr im Skript: Kap. 5 · Seite 5 – Permutation Importance</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Vier stimmen. <strong>Zusatz:</strong> Die baum-interne <code>feature_importances_</code> kann hochkardinale Features überschätzen – <code>permutation_importance</code> auf Testdaten ist oft die fairere Einschätzung.<br><a class="frage-link" href="../Kapitel5/Page05.html#permutation-importance">→ Mehr im Skript: Kap. 5 · Seite 5 – Permutation Importance</a></div></div>
   </div>
 
   <div class="mcq">
-    <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
-    <div class="mcq-q">F4 · Bagging vs. Boosting – was ist korrekt?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
+    <div class="mcq-q">F4 · Bagging vs. Boosting – welche Aussagen stimmen?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bagging trainiert Bäume parallel auf Bootstrap-Stichproben (Random Forest).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bagging trainiert Lerner parallel auf Bootstrap-Stichproben (Random Forest).</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Boosting trainiert Lerner sequenziell, jeder korrigiert die Fehler des vorigen (AdaBoost).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der OOB-Error nutzt die nicht gezogenen Samples zur Validierung (bei Bagging).</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Boosting reduziert primär die Varianz, Bagging primär den Bias.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Bagging und Boosting sind nur zwei Namen für denselben Algorithmus.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Umgekehrt: <strong>Bagging senkt die Varianz</strong> (Mitteln), <strong>Boosting senkt den Bias</strong> (sequenzielle Fehlerkorrektur). OOB ist ein Bagging-Nebenprodukt.<br><a class="frage-link" href="../Kapitel5/Page07.html#bagging-vs-boosting">→ Mehr im Skript: Kap. 5 · Seite 7 – Bagging vs. Boosting</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Zwei stimmen. <strong>Wichtig (umgekehrt zur falschen Option):</strong> <strong>Bagging senkt die Varianz</strong> (Mitteln unabhängiger Bäume), <strong>Boosting senkt den Bias</strong> (sequenzielle Fehlerkorrektur). Der OOB-Error ist ein Bagging-Nebenprodukt.<br><a class="frage-link" href="../Kapitel5/Page07.html#bagging-vs-boosting">→ Mehr im Skript: Kap. 5 · Seite 7 – Bagging vs. Boosting</a></div></div>
   </div>
 </section>
 <!-- ─────────────────────────────────── PROGRAMMIERAUFGABEN -->

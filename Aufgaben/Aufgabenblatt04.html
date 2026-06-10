@@ -417,44 +417,47 @@
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
-    <div class="mcq-q">F1 · k-means und Cluster-Gütemaße – was ist korrekt?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F1 · Was gilt für k-means und Cluster-Gütemaße?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-means minimiert die Summe quadrierter Distanzen zu den Clusterzentren (Inertia/SSE).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-means minimiert die Summe quadrierter Distanzen zu den Zentren (Inertia/SSE).</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Davies-Bouldin-Index: je kleiner, desto besser.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Silhouette-Score: je größer (max 1), desto besser.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Beim Davies-Bouldin-Index gilt: je größer, desto besser.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Der Silhouette-Score kann beliebig groß werden (kein Maximum).</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">k-means minimiert die Inertia. Silhouette → größer besser (max 1), Davies-Bouldin → kleiner besser (Verwechslungsgefahr!).<br><a class="frage-link" href="../Kapitel4/Page04.html#davies-bouldin">→ Mehr im Skript: Kap. 4 · Seite 4 – Validierung</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Drei stimmen. <strong>Achtung Verwechslung:</strong> Silhouette ∈ [−1, 1] (größer besser), Davies-Bouldin ≥ 0 (kleiner besser). <strong>Zusatz:</strong> Der Elbow-Plot der Inertia hilft zusätzlich, ein gutes k zu finden.<br><a class="frage-link" href="../Kapitel4/Page04.html#davies-bouldin">→ Mehr im Skript: Kap. 4 · Seite 4 – Validierung</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
     <div class="mcq-q">F2 · Welche Aussagen über Clustering sind WAHR?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Ein Silhouette-Score von 1.0 bedeutet perfekte Cluster-Trennung.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der Elbow-Plot zeigt die Inertia als Funktion von k.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">k-means kann Cluster beliebiger Form erkennen.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">DBSCAN benötigt die Anzahl der Cluster als Eingabeparameter.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">k-means findet garantiert das globale Optimum.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">k-means findet nur konvexe, kugelförmige Cluster; DBSCAN bestimmt die Clusterzahl selbst (nur eps/min_samples). Silhouette 1.0 = perfekt, Elbow zeigt Inertia(k).<br><a class="frage-link" href="../Kapitel4/Page04.html#silhouette-score">→ Mehr im Skript: Kap. 4 · Seite 4 – Silhouette Score</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die ersten beiden sind wahr. <strong>Zusatz:</strong> k-means findet nur konvexe/kugelförmige Cluster und konvergiert nur zu einem <em>lokalen</em> Optimum (daher mehrere Neustarts via <code>n_init</code>). DBSCAN bestimmt die Clusterzahl selbst.<br><a class="frage-link" href="../Kapitel4/Page04.html#silhouette-score">→ Mehr im Skript: Kap. 4 · Seite 4 – Silhouette Score</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
-    <div class="mcq-q">F3 · Was stimmt zu den DBSCAN-Parametern?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F3 · Was stimmt zu DBSCAN?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">eps definiert den Radius der Nachbarschaft.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">min_samples ist die Mindestanzahl Punkte in der eps-Nachbarschaft eines Core Points.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Rauschpunkte erhalten Label -1 und werden als Anomalien interpretiert.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Rauschpunkte erhalten Label −1 und können als Anomalien interpretiert werden.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">DBSCAN findet Cluster beliebiger Form (dichtebasiert).</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">DBSCAN braucht – wie k-means – die Clusterzahl k als Eingabe.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">DBSCAN ist dichtebasiert: <code>eps</code> (Radius) + <code>min_samples</code> definieren Core Points; Rauschen = Label -1. Eine Clusterzahl wird NICHT vorgegeben.<br><a class="frage-link" href="../Kapitel4/Page06.html#dbscan-hyperparameter">→ Mehr im Skript: Kap. 4 · Seite 6 – DBSCAN-Hyperparameter</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Vier Aussagen stimmen. <strong>Zusatz:</strong> DBSCAN ist gerade deshalb stark, weil es <em>keine</em> Clusterzahl braucht und Ausreißer explizit als Rauschen (−1) markiert – ideal für Anomalie-Erkennung.<br><a class="frage-link" href="../Kapitel4/Page06.html#dbscan-hyperparameter">→ Mehr im Skript: Kap. 4 · Seite 6 – DBSCAN</a></div></div>
   </div>
 </section>
 <!-- ─────────────────────────────────── WARMUP -->

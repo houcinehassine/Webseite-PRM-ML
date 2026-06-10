@@ -416,58 +416,62 @@
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
-    <div class="mcq-q">F1 · Was ist ein Support Vector und welche Rolle spielt er?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F1 · Was gilt für Support Vectors?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Ein Datenpunkt, der am nächsten zur Entscheidungsgrenze liegt (auf/innerhalb des Margins).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Nur die Support Vectors bestimmen die Lage der trennenden Hyperebene.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Entfernt man Punkte, die keine Support Vectors sind, ändert sich das Modell nicht.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Support Vectors sind die Punkte, die am weitesten von der Grenze entfernt liegen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Es sind die Datenpunkte am nächsten zur Entscheidungsgrenze (auf/innerhalb des Margins).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Nur sie bestimmen die Lage der trennenden Hyperebene.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Entfernt man Punkte, die keine Support Vectors sind, bleibt das Modell gleich.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Es sind die Punkte, die am weitesten von der Grenze entfernt liegen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Je mehr Support Vectors, desto sicher besser ist das Modell.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Support Vectors sind die <strong>grenznahen</strong> Punkte; sie definieren die Hyperebene. Weit entfernte Punkte sind irrelevant.<br><a class="frage-link" href="../Kapitel3/Page02.html#support-vectors">→ Mehr im Skript: Kap. 3 · Seite 2 – Support Vectors</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Support Vectors sind die grenznahen, kritischen Punkte. <strong>Zusatz:</strong> Sehr <em>viele</em> Support Vectors können sogar auf Overfitting / zu kleinen Margin (großes C) hindeuten.<br><a class="frage-link" href="../Kapitel3/Page02.html#support-vectors">→ Mehr im Skript: Kap. 3 · Seite 2 – Support Vectors</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
-    <div class="mcq-q">F2 · Was beschreibt der Hyperparameter C bei einer SVC?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F2 · Welche Aussagen zum Hyperparameter C sind korrekt?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">C steuert den Strafterm für Fehlklassifikationen (Regularisierung).</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Großes C → schmaler Margin, versucht alle Punkte korrekt zu trennen → Overfitting-Gefahr.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Kleines C → breiterer Margin, mehr erlaubte Fehler, bessere Generalisierung.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Kleines C → breiterer Margin, mehr erlaubte Fehler → bessere Generalisierung möglich.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">C steuert die Anzahl der verwendeten Kernel.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Ein großes C führt immer zu besserer Test-Genauigkeit.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">C ist die Lernrate des Gradientenabstiegs.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Großes C = harte Bestrafung von Fehlern = schmaler Margin = Overfitting-Risiko. Es verbessert <em>nicht</em> automatisch die Generalisierung.<br><a class="frage-link" href="../Kapitel3/Page04.html#vergleich-c">→ Mehr im Skript: Kap. 3 · Seite 4 – Vergleich C</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die ersten beiden stimmen. <strong>Zusatz:</strong> C ist der <strong>Regularisierungs-/Strafterm</strong> für Fehlklassifikationen – nicht die Kernelzahl und nicht die Lernrate. Der optimale C-Wert wird per Cross-Validation gesucht.<br><a class="frage-link" href="../Kapitel3/Page04.html#vergleich-c">→ Mehr im Skript: Kap. 3 · Seite 4 – Vergleich C</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
-    <div class="mcq-q">F3 · Linearer vs. RBF-Kernel – was stimmt?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F3 · Was stimmt zu Kerneln und dem Kernel-Trick?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der lineare Kernel trennt mit einer Hyperebene – gut bei linear separierbaren/hochdim. Daten.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der lineare Kernel trennt mit einer Hyperebene – gut bei (annähernd) linear trennbaren/hochdim. Daten.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der RBF-Kernel erzeugt nichtlineare, gekrümmte Entscheidungsgrenzen.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Der Kernel-Trick bildet die Daten implizit in einen höherdim. Raum ab, ohne ihn explizit zu berechnen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">gamma steuert beim RBF-Kernel die Reichweite eines Trainingspunkts.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Ein RBF-Kernel ist einem linearen Kernel grundsätzlich überlegen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Der Kernel-Trick berechnet immer explizit alle neuen Koordinaten im Hochdim.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Linear ist ideal bei (annähernd) linearer Trennbarkeit/hohen Dimensionen; RBF bei nichtlinearer Struktur. Keiner ist pauschal besser (No Free Lunch).<br><a class="frage-link" href="../Kapitel3/Page06.html#kernel-trick">→ Mehr im Skript: Kap. 3 · Seite 6 – Kernel-Trick</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Vier Aussagen stimmen (inkl. gamma). Falsch: kein Kernel ist pauschal besser (No Free Lunch), und der Kernel-Trick vermeidet gerade die <em>explizite</em> Transformation (er nutzt nur Skalarprodukte).<br><a class="frage-link" href="../Kapitel3/Page06.html#kernel-trick">→ Mehr im Skript: Kap. 3 · Seite 6 – Kernel-Trick</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-falle">Falle</span></div>
-    <div class="mcq-q">F4 · Was misst accuracy_score – und wann ist sie ungeeignet?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">F4 · Welche EINE Aussage über accuracy_score ist korrekt?</div>
+    <div class="mcq-hint">✦ Genau <strong>1</strong> Antwort ist richtig.</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Den Anteil korrekt klassifizierter Samples.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bei stark unbalancierten Klassen ist sie irreführend (Mehrheitsklasse dominiert).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Dann sind Precision, Recall und F1 aussagekräftiger.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Accuracy ist bei unbalancierten Daten die zuverlässigste Metrik.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Bei stark unbalancierten Klassen kann sie irreführend sein – die Mehrheitsklasse dominiert.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Sie ist bei unbalancierten Daten die zuverlässigste Metrik.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Sie misst die Fläche unter der ROC-Kurve.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Sie ist identisch mit dem F1-Score.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Accuracy = Anteil korrekt. Bei 95 % einer Klasse erreicht ein triviales Modell 95 % – daher bei Unbalance besser Precision/Recall/F1.<br><a class="frage-link" href="../Kapitel7/Page01.html#motivation">→ Mehr im Skript: Kap. 7 · Seite 1 – Accuracy-Falle</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die erste stimmt. <strong>Zusatz:</strong> accuracy = Anteil korrekt klassifizierter Samples. Bei Unbalance besser <strong>Precision, Recall, F1</strong> oder AUC. (AUC = Fläche unter ROC, F1 = harmonisches Mittel aus Precision/Recall – beides NICHT dasselbe wie Accuracy.)<br><a class="frage-link" href="../Kapitel7/Page01.html#motivation">→ Mehr im Skript: Kap. 7 · Seite 1 – Accuracy-Falle</a></div></div>
   </div>
 </section>
 <!-- ─────────────────────────────────── HAUPTAUFGABEN -->

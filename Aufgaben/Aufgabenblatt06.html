@@ -416,100 +416,107 @@
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
-    <div class="mcq-q">W1 · Welche Hyperparameter steuern ein GMM in sklearn?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">W1 · Was gilt für die GMM-Hyperparameter in sklearn?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">n_components – die Anzahl der Gauß-Komponenten.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">covariance_type ('full'/'tied'/'diag'/'spherical') – die Form der Kovarianzmatrizen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">n_components steuert die Anzahl der Gauß-Komponenten.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">covariance_type ('full'/'tied'/'diag'/'spherical') steuert die Form der Kovarianzmatrizen.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die optimale Komponentenzahl wählt man datengetrieben über BIC/AIC.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">n_components muss immer gleich der Anzahl der Features sein.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">'full' erlaubt beliebig orientierte (rotierte) Ellipsen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">n_components muss gleich der Anzahl der Features sein.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">covariance_type bestimmt die Lernrate des EM-Algorithmus.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">GMM-Hyperparameter: <code>n_components</code> und <code>covariance_type</code>. Die Komponentenzahl wählt man über BIC/AIC – sie hat nichts mit der Feature-Anzahl zu tun.<br><a class="frage-link" href="../Kapitel6/Page02.html#covariance-type">→ Mehr im Skript: Kap. 6 · Seite 2 – covariance_type</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Vier stimmen. <strong>Zusatz:</strong> Das GMM wird mit dem <strong>EM-Algorithmus</strong> trainiert (kein Gradientenabstieg, keine Lernrate). 'spherical' ≈ k-means-artige Kugeln, 'diag' = achsenparallele Ellipsen.<br><a class="frage-link" href="../Kapitel6/Page02.html#covariance-type">→ Mehr im Skript: Kap. 6 · Seite 2 – covariance_type</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-code">Code</span></div>
-    <div class="mcq-q">W2 · Welcher Code fittet ein GMM mit 3 Komponenten und full-Kovarianz auf X_train?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">W2 · Welche Code-Zeilen fitten ein GMM mit 3 Komponenten und full-Kovarianz korrekt?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GaussianMixture(n_components=3, covariance_type='full').fit(X_train)</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GaussianMixture(3, covariance_type='full').fit(X_train)</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">KMeans(n_components=3).fit(X_train)</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">GaussianMixture(clusters=3).fit(X_train)</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">GaussianMixture(n_components=3, cov='full').fit(X_train)</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Korrekt ist <code>GaussianMixture(n_components=3, covariance_type='full')</code> (auch positional). KMeans ist kein GMM; <code>clusters=</code> existiert nicht.<br><a class="frage-link" href="../Kapitel6/Page02.html#gmm-mechanik">→ Mehr im Skript: Kap. 6 · Seite 2 – GMM-Mechanik</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Zwei korrekt (benannt oder positional). Falsch: KMeans ist kein GMM, und es heißt <code>covariance_type</code> – nicht <code>clusters</code> oder <code>cov</code>.<br><a class="frage-link" href="../Kapitel6/Page02.html#gmm-mechanik">→ Mehr im Skript: Kap. 6 · Seite 2 – GMM-Mechanik</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
-    <div class="mcq-q">W3 · predict() vs. predict_proba() beim GMM?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">W3 · Welche EINE Aussage zu predict() vs. predict_proba() stimmt?</div>
+    <div class="mcq-hint">✦ Genau <strong>1</strong> Antwort ist richtig.</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">predict() liefert die harte Zuordnung (Label der wahrscheinlichsten Komponente).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">predict_proba() liefert die weichen Wahrscheinlichkeiten je Komponente.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">predict_proba() eignet sich, um unsichere Grenzfälle zu erkennen.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">predict() und predict_proba() liefern stets identische Ergebnisse.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">predict() liefert die harte Zuordnung, predict_proba() die weichen Wahrscheinlichkeiten je Komponente.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Beide liefern stets identische Ergebnisse.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">predict_proba() gibt genau ein Label pro Punkt zurück.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">predict() gibt eine Wahrscheinlichkeitsmatrix zurück.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">predict = harte Zuordnung, predict_proba = weiche Wahrscheinlichkeiten (Soft Assignment) – nützlich für Unsicherheit/Grenzregionen.<br><a class="frage-link" href="../Kapitel6/Page02.html#predict-proba">→ Mehr im Skript: Kap. 6 · Seite 2 – predict_proba</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Nur die erste stimmt. <strong>Zusatz:</strong> <code>predict_proba</code> liefert pro Punkt einen Vektor von Zugehörigkeits­wahrscheinlichkeiten (Summe = 1) – ideal, um <strong>unsichere Grenzfälle</strong> zu erkennen (Soft Assignment).<br><a class="frage-link" href="../Kapitel6/Page02.html#predict-proba">→ Mehr im Skript: Kap. 6 · Seite 2 – predict_proba</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
-    <div class="mcq-q">W4 · k-Means vs. GMM bei Maschinendaten – was stimmt?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">W4 · k-Means vs. GMM – welche Aussagen stimmen?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means ist schneller und einfacher (Vorteil).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means nimmt kugelförmige, gleich große Cluster an und liefert keine Wahrscheinlichkeiten (Nachteil).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means ist schneller und einfacher.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means nimmt kugelförmige, gleich große Cluster an und liefert nur harte Zuordnungen.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GMM modelliert beliebig orientierte Ellipsen und weiche Zuordnungen.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">GMM ist immer schneller als k-Means.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">k-Means liefert pro Punkt Zugehörigkeitswahrscheinlichkeiten.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">k-Means: schnell, aber nur isotrope Cluster und harte Zuordnung. GMM: flexibler (Ellipsen, Soft Assignment), dafür rechenintensiver.<br><a class="frage-link" href="../Kapitel6/Page01.html#improving-kmeans">→ Mehr im Skript: Kap. 6 · Seite 1 – Improving k-Means</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Drei stimmen. <strong>Zusatz:</strong> k-Means kann man als Spezialfall eines GMM mit 'spherical'-Kovarianz und harter Zuordnung sehen – GMM ist die flexiblere, aber rechenintensivere Verallgemeinerung.<br><a class="frage-link" href="../Kapitel6/Page01.html#improving-kmeans">→ Mehr im Skript: Kap. 6 · Seite 1 – Improving k-Means</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
     <div class="mcq-q">T1a · Warum kreisförmig (k-Means) vs. Ellipsen (GMM)?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">k-Means nutzt die euklidische Distanz → kugelförmige (isotrope) Cluster.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">GMM mit 'full'-Kovarianz modelliert beliebig orientierte Ellipsen.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">covariance_type='spherical' (gleiche Varianzen) entspricht im Grenzfall k-Means.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">covariance_type='spherical' entspricht im Grenzfall k-Means.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">'diag'-Kovarianz erlaubt beliebig rotierte Ellipsen.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">'full' erzwingt achsenparallele Ellipsen ohne Rotation.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">k-Means = isotrop (Kugeln). 'full' = rotierte Ellipsen, 'spherical' ≈ k-Means. 'diag' erlaubt nur <em>achsenparallele</em> Ellipsen (keine Rotation).<br><a class="frage-link" href="../Kapitel6/Page02.html#covariance-type">→ Mehr im Skript: Kap. 6 · Seite 2 – covariance_type</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Drei stimmen. <strong>Klarstellung:</strong> <code>diag</code> = nur achsenparallele Ellipsen (keine Rotation), <code>full</code> = beliebig rotierte Ellipsen – die letzten beiden Optionen vertauschen das.<br><a class="frage-link" href="../Kapitel6/Page02.html#covariance-type">→ Mehr im Skript: Kap. 6 · Seite 2 – covariance_type</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-konzept">Konzept</span></div>
-    <div class="mcq-q">T2a · Warum PCA vor GMM (z. B. auf Gesichtern), und was beim Sampling beachten?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">T2a · Welche Aussagen zu PCA vor GMM (z. B. auf Gesichtern) stimmen?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">PCA reduziert die Dimension → vermeidet den Fluch der Dimensionalität.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Es vermeidet eine überparametrisierte Kovarianzmatrix (Overfitting in hohen Dimensionen).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Beim Sampling darf die Rücktransformation pca.inverse_transform() nicht vergessen werden.</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Nach dem Sampling sind die Vektoren direkt Bilder – keine Rücktransformation nötig.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">PCA reduziert die Dimension → vermeidet eine überparametrisierte Kovarianzmatrix (Overfitting).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Beim Sampling muss man mit pca.inverse_transform() in den Pixelraum zurück.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Nach dem Sampling sind die Vektoren direkt fertige Bilder – keine Rücktransformation nötig.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">PCA ersetzt das GMM vollständig.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">PCA wird nur auf die Labels angewandt, nicht auf die Features.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Hohe Dimensionen blähen die Kovarianzmatrix auf → PCA reduziert. Gesampelte Punkte liegen im PCA-Raum und müssen mit <code>inverse_transform</code> zurück in den Pixelraum.<br><a class="frage-link" href="../Kapitel6/Page05.html#generate-numbers">→ Mehr im Skript: Kap. 6 · Seite 5 – Generate Numbers</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Zwei stimmen. <strong>Zusatz:</strong> In hohen Dimensionen wächst die Kovarianzmatrix quadratisch (Fluch der Dimensionalität) – PCA komprimiert vorher. Gesampelte Punkte liegen im PCA-Raum und müssen zurücktransformiert werden.<br><a class="frage-link" href="../Kapitel6/Page05.html#generate-numbers">→ Mehr im Skript: Kap. 6 · Seite 5 – Generate Numbers</a></div></div>
   </div>
 
   <div class="mcq">
     <div class="mcq-head"><span class="mcq-badge b-formel">Formel</span></div>
-    <div class="mcq-q">T3a · GMM für Dichteschätzung / Histogramme – was stimmt?</div>
-    <div class="mcq-hint">✦ Mehrfachauswahl – 1 bis alle Antworten können richtig sein.</div>
+    <div class="mcq-q">T3a · Was gilt für GMM-Dichteschätzung und Modellwahl (BIC/AIC)?</div>
+    <div class="mcq-hint">✦ Mehrfachauswahl – kreuze <strong>alle</strong> zutreffenden an (Anzahl variiert).</div>
     <div class="mcq-options">
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Jede Gaußkurve modelliert eine Teilpopulation (z. B. einen Peak im Histogramm).</span><span class="opt-mark"></span></label>
-      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die optimale Komponentenzahl wählt man über BIC/AIC (Anpassung vs. Überanpassung).</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Die optimale Komponentenzahl wählt man über BIC/AIC.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">BIC bestraft zusätzliche Komponenten stärker als die reine Log-Likelihood.</span><span class="opt-mark"></span></label>
+      <label class="mcq-opt"><input type="checkbox" data-correct="true"><span class="opt-text">Man wählt das Modell mit dem niedrigsten BIC/AIC.</span><span class="opt-mark"></span></label>
       <label class="mcq-opt"><input type="checkbox" data-correct="false"><span class="opt-text">Man wählt einfach so viele Komponenten wie möglich für die beste Anpassung.</span><span class="opt-mark"></span></label>
     </div>
     <div class="mcq-actions"><button class="mcq-check" type="button">Antworten prüfen</button><button class="mcq-reset" type="button">Zurücksetzen</button></div>
-    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">GMM = Summe gewichteter Gaußkurven (Dichteschätzung). Mehr Komponenten passen immer besser → Overfitting; daher BIC/AIC, die Komplexität bestrafen.<br><a class="frage-link" href="../Kapitel6/Page04.html#bic-aic">→ Mehr im Skript: Kap. 6 · Seite 4 – BIC / AIC</a></div></div>
+    <div class="mcq-result"><div class="mcq-verdict"></div><div class="mcq-exp">Vier stimmen. <strong>Wichtig:</strong> Mehr Komponenten erhöhen immer die Likelihood → reine Anpassung würde überanpassen. BIC/AIC bestrafen Komplexität; man nimmt das <strong>Minimum</strong>.<br><a class="frage-link" href="../Kapitel6/Page04.html#bic-aic">→ Mehr im Skript: Kap. 6 · Seite 4 – BIC / AIC</a></div></div>
   </div>
 </section>
 <!-- ─────────────────────────────────── HAUPTAUFGABEN -->
