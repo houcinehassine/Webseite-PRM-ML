@@ -1,5 +1,461 @@
 [
   {
+    "id": "Aufgaben/Aufgaben.html",
+    "chapter": "✏️ Aufgaben",
+    "page": "Übersicht",
+    "title": "Übungsblätter",
+    "description": "✏️ Aufgaben · Übersicht",
+    "type": "konzept",
+    "url": "Aufgaben/Aufgaben.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt01.html",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 01",
+    "title": "Quiz – Data Preparation",
+    "description": "✏️ Aufgaben · Blatt 01",
+    "type": "konzept",
+    "url": "Aufgaben/Aufgabenblatt01.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt02.html",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 02",
+    "title": "Machine Learning Grundlagen",
+    "description": "✏️ Aufgaben · Blatt 02",
+    "type": "konzept",
+    "url": "Aufgaben/Aufgabenblatt02.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt02.html#quiz",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 02",
+    "title": "Theoretische Fragen — interaktiv",
+    "description": "",
+    "text": "Quiz Theoretische Fragen — interaktiv Konzept F1 · Was trifft auf Overfitting und Underfitting zu? ✦ Mehrfachauswahl – kreuze alle zutreffenden an (Anzahl variiert). Overfitting: Das Modell lernt Trainingsdaten inkl. Rauschen auswendig → hohe Varianz, schlechte Generalisierung. Underfitting: Das Modell ist zu simpel und erfasst die Struktur nicht → hoher Bias. Overfitting erkennt man an hoher Trainings- und deutlich niedrigerer Test-Genauigkeit. Gegen Overfitting helfen mehr Trainingsdaten oder…",
+    "type": "formel",
+    "url": "Aufgaben/Aufgabenblatt02.html",
+    "anchor": "#quiz",
+    "tags": [
+      "Code",
+      "Falle",
+      "Fragen",
+      "Konzept",
+      "Quiz",
+      "Theoretische",
+      "interaktiv"
+    ],
+    "snippet": ""
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt02.html#warmup",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 02",
+    "title": "Einführende Programmieraufgaben",
+    "description": "make_classification",
+    "text": "WarmUp Einführende Programmieraufgaben A1 Daten-Inspektion Erzeugen Sie mit make_classification einen Datensatz mit 200 Samples, 2 Features und 3 Klassen. Führen Sie folgende Schritte durch: Geben Sie die Shape von X und y aus. Prüfen Sie, wie viele Samples pro Klasse vorhanden sind (np.unique mit return_counts=True). Visualisieren Sie die Daten als Scatter-Plot — jede Klasse in einer anderen Farbe. 💡 Verwende n_clusters_per_class=1 und n_redundant=0 für saubere 2D-Daten. Dein Code # Dein Code…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt02.html",
+    "anchor": "#warmup",
+    "tags": [
+      "Einführende",
+      "Programmieraufgaben",
+      "WarmUp",
+      "make_classification",
+      "n_clusters_per_class=1",
+      "n_redundant=0",
+      "np.unique",
+      "return_counts=True",
+      "stratify=y",
+      "test_size=0.3",
+      "train_test_split"
+    ],
+    "snippet": "make_classification"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt02.html#haupt",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 02",
+    "title": "Kernaufgaben",
+    "description": "my_cross_val_score(model, X, y, k)",
+    "text": "Hauptaufgaben Kernaufgaben A3 Eigene Cross-Validation Schreiben Sie eine Funktion my_cross_val_score(model, X, y, k), die eine k-Fold Cross-Validation manuell durchführt — ohne cross_val_score zu verwenden. Nutzen Sie KFold aus sklearn, aber nicht cross_val_score. Geben Sie mittleren Score und Standardabweichung zurück. Vergleichen Sie Ihr Ergebnis mit der offiziellen cross_val_score-Funktion. 💡 Modell: KNeighborsClassifier(n_neighbors=3) — Datensatz selbst erzeugen. Dein Code # Dein Code hier…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt02.html",
+    "anchor": "#haupt",
+    "tags": [
+      "GridSearchCV",
+      "Hauptaufgaben",
+      "KFold",
+      "KNeighborsClassifier",
+      "Kernaufgaben",
+      "StandardScaler",
+      "cross_val_score",
+      "find_best_k(X, y, k_values)",
+      "k_values",
+      "k_values = range(1, 20)",
+      "make_regression"
+    ],
+    "snippet": "my_cross_val_score(model, X, y, k)"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt02.html#schmankerl",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 02",
+    "title": "Python-Herausforderungen",
+    "description": "shuffle_split(X, y, test_size, n_splits)",
+    "text": "🥨 Schmankerl Python-Herausforderungen A6 Shuffle-Split from Scratch Schreiben Sie shuffle_split(X, y, test_size, n_splits), die n-mal einen zufälligen Train-Test-Split durchführt. Nur numpy-Funktionen verwenden (z.B. np.random.permutation). Die Funktion muss ein Generator sein (mit yield). In einem for-Loop testen und Shape jedes Splits ausgeben. Dein Code # Dein Code hier ▶ Ausführen ✕ Leeren Lösung Ausgabe erscheint hier nach dem Ausführen... ✅ Musterlösung Kopieren A7 Garage revisited —…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt02.html",
+    "anchor": "#schmankerl",
+    "tags": [
+      "Herausforderungen",
+      "Python",
+      "[0.1, 0.2, ..., 0.9]",
+      "for",
+      "learning_curve",
+      "np.random.permutation",
+      "numpy",
+      "train_sizes",
+      "while",
+      "yield",
+      "🥨 Schmankerl"
+    ],
+    "snippet": "shuffle_split(X, y, test_size, n_splits)"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt03.html",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 03",
+    "title": "Support Vector Machines",
+    "description": "✏️ Aufgaben · Blatt 03",
+    "type": "konzept",
+    "url": "Aufgaben/Aufgabenblatt03.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt03.html#quiz",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 03",
+    "title": "WarmUp – Theoriefragen (interaktiv)",
+    "description": "",
+    "text": "Quiz WarmUp – Theoriefragen (interaktiv) Konzept F1 · Was gilt für Support Vectors? ✦ Mehrfachauswahl – kreuze alle zutreffenden an (Anzahl variiert). Es sind die Datenpunkte am nächsten zur Entscheidungsgrenze (auf/innerhalb des Margins). Nur sie bestimmen die Lage der trennenden Hyperebene. Entfernt man Punkte, die keine Support Vectors sind, bleibt das Modell gleich. Es sind die Punkte, die am weitesten von der Grenze entfernt liegen. Je mehr Support Vectors, desto sicher besser ist das…",
+    "type": "formel",
+    "url": "Aufgaben/Aufgabenblatt03.html",
+    "anchor": "#quiz",
+    "tags": [
+      "Falle",
+      "Konzept",
+      "Quiz",
+      "Theoriefragen",
+      "WarmUp",
+      "interaktiv"
+    ],
+    "snippet": ""
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt03.html#haupt",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 03",
+    "title": "Kernaufgaben",
+    "description": "make_blobs",
+    "text": "Hauptaufgaben Kernaufgaben A1 Eignungstestklassifikation – Mini-SVM Automatisieren Sie die Auswertung von Hochschuleignungstests mit einer SVM.Laden Sie mit make_blobs (3 Features, 2 Klassen, random_state=0) einen Datensatz.Trainieren und klassifizieren Sie neue Bewerber in einer Zeile (One-Liner), z.B. [[3, 3, 6]].Wiederholen Sie das mit GridSearchCV zur Hyperparameter-Optimierung. 💡 Verkette .fit() und .predict() direkt auf einer neuen SVC()-Instanz. Dein Code # Dein Code hier ▶ Ausführen ✕…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt03.html",
+    "anchor": "#haupt",
+    "tags": [
+      ".fit()",
+      ".predict()",
+      "GridSearchCV",
+      "Hauptaufgaben",
+      "Kernaufgaben",
+      "SVC",
+      "SVC()",
+      "[[3, 3, 6]]",
+      "accuracy_score > 0.8",
+      "cluster_std=2.6",
+      "load_digits()",
+      "make_blobs"
+    ],
+    "snippet": "make_blobs"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt03.html#schmankerl",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 03",
+    "title": "Vertiefung & Bonus",
+    "description": "skew",
+    "text": "Schmankerl Vertiefung & Bonus A4 Extremely Damaged Bearings (10 Klassen) Wälzlagerfehler-Klassifikation auf 9 Schadensklassen + 1 Gesundklasse — hier mit synthetischen Vibrationssignalen.Erzeugen Sie pro Klasse Signale mit eigener Frequenz/Amplitude.Extrahieren Sie Features (Mittelwert, Std, RMS, skew, kurtosis, Peak).Trainieren Sie eine SVM-Pipeline mit GridSearchCV. Nutzen Sie Variablen für Klassenzahl etc. 💡 Ziel: ≥ 95 % Genauigkeit. skew/kurtosis kommen aus scipy.stats. Dein Code # Dein…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt03.html",
+    "anchor": "#schmankerl",
+    "tags": [
+      "Bonus",
+      "GridSearchCV",
+      "Schmankerl",
+      "Vertiefung",
+      "contourf",
+      "kurtosis",
+      "scipy.stats",
+      "skew"
+    ],
+    "snippet": "skew"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt04.html",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 04",
+    "title": "Clustering & Anomaliedetektion",
+    "description": "✏️ Aufgaben · Blatt 04",
+    "type": "konzept",
+    "url": "Aufgaben/Aufgabenblatt04.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt04.html#quiz",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 04",
+    "title": "Teil 1 – Theoriefragen (interaktiv)",
+    "description": "n_init",
+    "text": "Quiz Teil 1 – Theoriefragen (interaktiv) Konzept F1 · Was gilt für k-means und Cluster-Gütemaße? ✦ Mehrfachauswahl – kreuze alle zutreffenden an (Anzahl variiert). k-means minimiert die Summe quadrierter Distanzen zu den Zentren (Inertia/SSE). Davies-Bouldin-Index: je kleiner, desto besser. Silhouette-Score: je größer (max 1), desto besser. Beim Davies-Bouldin-Index gilt: je größer, desto besser. Der Silhouette-Score kann beliebig groß werden (kein Maximum). Antworten prüfenZurücksetzen Drei…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt04.html",
+    "anchor": "#quiz",
+    "tags": [
+      "Code",
+      "Falle",
+      "Konzept",
+      "Quiz",
+      "Theoriefragen",
+      "interaktiv",
+      "n_init"
+    ],
+    "snippet": "n_init"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt04.html#warmup",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 04",
+    "title": "Teil 2 – WarmUp",
+    "description": "make_blobs",
+    "text": "WarmUp Teil 2 – WarmUp A1 make_blobs + KMeans Erstellen Sie mit make_blobs 300 Samples, 4 Zentren, cluster_std=0.5, random_state=42.Trainieren Sie KMeans(k=4).Berechnen Sie Silhouette Score und Davies-Bouldin Index. Dein Code # Dein Code hier ▶ Ausführen ✕ Leeren Lösung Ausgabe erscheint hier nach dem Ausführen... ✅ Musterlösung Kopieren A2 Skalierung & Clustering Skalieren Sie X aus A1 mit MinMaxScaler auf [0, 1].Trainieren Sie erneut KMeans(k=4) und berechnen Sie beide Scores.Vergleichen Sie…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt04.html",
+    "anchor": "#warmup",
+    "tags": [
+      "KMeans(k=4)",
+      "MinMaxScaler",
+      "WarmUp",
+      "cluster_std=0.5",
+      "make_blobs",
+      "random_state=42"
+    ],
+    "snippet": "make_blobs"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt04.html#haupt",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 04",
+    "title": "Teil 3 – Kernaufgaben",
+    "description": "StandardScaler",
+    "text": "Hauptaufgaben Teil 3 – Kernaufgaben A3 Microtargeting mit k-means (10 P) Segmentieren Sie Wählergruppen (synthetische citizen-Daten: 4 Features).Daten skalieren (StandardScaler).Elbow-Plot für k=2…10 erstellen und optimales k wählen.Finales KMeans trainieren und Clustergrößen ausgeben. 💡 Im Original liegt citizen_database.csv vor — hier synthetisch via make_blobs. Dein Code # Dein Code hier ▶ Ausführen ✕ Leeren Lösung Ausgabe erscheint hier nach dem Ausführen... ✅ Musterlösung Kopieren A4…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt04.html",
+    "anchor": "#haupt",
+    "tags": [
+      "Hauptaufgaben",
+      "KMeans",
+      "KMeans(k).fit(X).inertia_",
+      "Kernaufgaben",
+      "StandardScaler",
+      "citizen_database.csv",
+      "plt.plot()"
+    ],
+    "snippet": "StandardScaler"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt04.html#schmankerl",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 04",
+    "title": "Vertiefung & Bonus",
+    "description": "-1",
+    "text": "Schmankerl Vertiefung & Bonus A5 Anomaliedetektion mit DBSCAN + kNN (7 P) Roboterarm-Messungen (3D-Kraft) mit ~15 % Anomalien.DBSCAN anwenden, Anomalien (Label -1) finden.kNN auf den DBSCAN-Labels trainieren (anomal vs. normal).Mit einem normalen und einem anomalen Testpunkt prüfen. 💡 Original: anomaly_detection.npy — hier synthetisch mit injizierten Ausreißern. Dein Code # Dein Code hier ▶ Ausführen ✕ Leeren Lösung Ausgabe erscheint hier nach dem Ausführen... ✅ Musterlösung Kopieren ★ Bonus –…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt04.html",
+    "anchor": "#schmankerl",
+    "tags": [
+      "Bonus",
+      "Schmankerl",
+      "Vertiefung",
+      "anomaly_detection.npy"
+    ],
+    "snippet": "-1"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt05.html",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 05",
+    "title": "Klassifikation & Modellanalyse",
+    "description": "✏️ Aufgaben · Blatt 05",
+    "type": "konzept",
+    "url": "Aufgaben/Aufgabenblatt05.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt05.html#quiz",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 05",
+    "title": "Abschnitt A – Verständnisfragen (interaktiv)",
+    "description": "n_estimators",
+    "text": "Quiz Abschnitt A – Verständnisfragen (interaktiv) Konzept F1 · Welche Aussagen über Random Forest sind korrekt? ✦ Mehrfachauswahl – kreuze alle zutreffenden an (Anzahl variiert). Durch Bagging + zufällige Feature-Auswahl pro Split sinkt die Varianz ggü. einem Einzelbaum. Ein Random Forest kann mehrklassig klassifizieren. Alle Bäume werden auf demselben identischen Datensatz trainiert. Die Hyperparameter haben keinen Einfluss auf die Genauigkeit. Random Forest braucht zwingend skalierte…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt05.html",
+    "anchor": "#quiz",
+    "tags": [
+      "Abschnitt",
+      "Code",
+      "Falle",
+      "Konzept",
+      "Quiz",
+      "Verständnisfragen",
+      "feature_importances_",
+      "interaktiv",
+      "max_features",
+      "n_estimators",
+      "permutation_importance"
+    ],
+    "snippet": "n_estimators"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt05.html#haupt",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 05",
+    "title": "Abschnitt B – Programmieraufgaben",
+    "description": "explore_noise_behavior(X, y, list_of_noise_levels)",
+    "text": "Programmieraufgaben Abschnitt B – Programmieraufgaben A2 SVM vs. Random Forest – Rauschverhalten (12 P) Schreiben Sie explore_noise_behavior(X, y, list_of_noise_levels):Pro Rauschgrad Gauß-Rauschen noise_level · std(X) hinzufügen.80/20-Split, RandomForestClassifier und SVC trainieren.Test-Scores beider Modelle als Linienplot darstellen.Welches Modell ist stabiler — und warum? 💡 Getestet mit load_digits(). Rauschen: np.random.normal(0, nl*X.std(), X.shape). Dein Code # Dein Code hier ▶ Ausführen…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt05.html",
+    "anchor": "#haupt",
+    "tags": [
+      "Abschnitt",
+      "Programmieraufgaben",
+      "RandomForestClassifier",
+      "SVC",
+      "feature_importances_",
+      "fetch_openml",
+      "imshow",
+      "load_digits()",
+      "noise_level · std(X)",
+      "reshape"
+    ],
+    "snippet": "explore_noise_behavior(X, y, list_of_noise_levels)"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt05.html#schmankerl",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 05",
+    "title": "Abschnitt C – Anwendung & Bonus",
+    "description": "StandardScaler",
+    "text": "Anwendung Abschnitt C – Anwendung & Bonus A4 Musik-Genre-Klassifikation (12 P) Audio-Features (Tempo, Energie, Tanzbarkeit …) von 5000 Songs, 5 Genres.Klassenverteilung prüfen — balanciert?StandardScaler + 5-fache Kreuzvalidierung für RF und SVC.Die 3 wichtigsten Features identifizieren. 💡 Original: songs_5genres.csv — hier synthetisch via make_classification. Dein Code # Dein Code hier ▶ Ausführen ✕ Leeren Lösung Ausgabe erscheint hier nach dem Ausführen... ✅ Musterlösung Kopieren ★ Bonus –…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt05.html",
+    "anchor": "#schmankerl",
+    "tags": [
+      "Abschnitt",
+      "Anwendung",
+      "Bonus",
+      "StandardScaler",
+      "songs_5genres.csv",
+      "tau"
+    ],
+    "snippet": "StandardScaler"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt06.html",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 06",
+    "title": "Gaussian Mixture Models",
+    "description": "✏️ Aufgaben · Blatt 06",
+    "type": "konzept",
+    "url": "Aufgaben/Aufgabenblatt06.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt06.html#warmup",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 06",
+    "title": "§ 0 – WarmUp & Theoriefragen (interaktiv)",
+    "description": "covariance_type",
+    "text": "WarmUp & Theorie § 0 – WarmUp & Theoriefragen (interaktiv) Code W1 · Was gilt für die GMM-Hyperparameter in sklearn? ✦ Mehrfachauswahl – kreuze alle zutreffenden an (Anzahl variiert). n_components steuert die Anzahl der Gauß-Komponenten. covariance_type ('full'/'tied'/'diag'/'spherical') steuert die Form der Kovarianzmatrizen. Die optimale Komponentenzahl wählt man datengetrieben über BIC/AIC. 'full' erlaubt beliebig orientierte (rotierte) Ellipsen. n_components muss gleich der Anzahl der…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt06.html",
+    "anchor": "#warmup",
+    "tags": [
+      "Code",
+      "Formel",
+      "Konzept",
+      "Theoriefragen",
+      "WarmUp",
+      "WarmUp & Theorie",
+      "clusters",
+      "cov",
+      "covariance_type",
+      "diag",
+      "full",
+      "interaktiv"
+    ],
+    "snippet": "covariance_type"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt06.html#haupt",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 06",
+    "title": "§ 1–3 – Implementierung",
+    "description": "GaussianMixture",
+    "text": "Hauptaufgaben § 1–3 – Implementierung 1b k-Means durch GMM ersetzen (8 P) Ersetzen Sie k-Means durch ein GaussianMixture zur Betriebszustandserkennung.Komponentenzahl datengetrieben über BIC (k=1…10).Im Featureraum einfärben nach Label.Punktgröße ∝ predict_proba(X).max(axis=1). 💡 Sensordaten hier synthetisch via make_blobs. Dein Code # Dein Code hier ▶ Ausführen ✕ Leeren Lösung Ausgabe erscheint hier nach dem Ausführen... ✅ Musterlösung Kopieren 2b Bild-Generator mit PCA + GMM (10 P) Trainieren…",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt06.html",
+    "anchor": "#haupt",
+    "tags": [
+      "GaussianMixture",
+      "Hauptaufgaben",
+      "Implementierung",
+      "X.reshape(-1,1)",
+      "brain_mrt.nii.gz",
+      "gmm.sample(12)",
+      "load_digits()",
+      "predict_proba(X).max(axis=1)"
+    ],
+    "snippet": "GaussianMixture"
+  },
+  {
+    "id": "Aufgaben/Aufgabenblatt06.html#schmankerl",
+    "chapter": "✏️ Aufgaben",
+    "page": "Blatt 06",
+    "title": "§ 4 – Bonus",
+    "description": "DBSCAN",
+    "text": "Bonus § 4 – Bonus ★ Bonus – DBSCAN vs. GMM auf Moons (+5 P) Wenden Sie DBSCAN und GaussianMixture auf make_moons (n=500, noise=0.08) an und stellen Sie die Ergebnisse nebeneinander dar.Welcher Algorithmus findet die Halbmonde?Welche GMM-Grundannahme wird verletzt? Dein Code # Dein Code hier ▶ Ausführen ✕ Leeren Lösung Ausgabe erscheint hier nach dem Ausführen... ✅ Musterlösung Kopieren",
+    "type": "code",
+    "url": "Aufgaben/Aufgabenblatt06.html",
+    "anchor": "#schmankerl",
+    "tags": [
+      "Bonus",
+      "DBSCAN",
+      "GaussianMixture",
+      "make_moons"
+    ],
+    "snippet": "DBSCAN"
+  },
+  {
     "id": "Kapitel1/Page01.html",
     "chapter": "K1 · Einführung ML",
     "page": "Seite 01",
@@ -8450,5 +8906,712 @@
       "Seite"
     ],
     "snippet": ""
+  },
+  {
+    "id": "Python/Page01.html",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 01",
+    "title": "NumPy Grundlagen",
+    "description": "🐍 Python-Referenz · Seite 01",
+    "type": "konzept",
+    "url": "Python/Page01.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Python/Page01.html#erzeugen",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 01",
+    "title": "1.1 Arrays erzeugen",
+    "description": "ndarray",
+    "text": "1.1 Arrays erzeugen Die Grundlage: Daten als ndarray. np.array(liste) numpy Erzeugt ein ndarray aus einer Python-Liste. Das zentrale Datenobjekt für Features (X) und Labels (y). import numpy as np X = np.array([[1, 2], [3, 4], [5, 6]]) # Form (3, 2) y = np.array([0, 1, 0]) print(X.shape, y.shape) # (3, 2) (3,) Im Kurs: Grundbaustein jeder Feature-Matrix X (N×K) und jedes Label-Vektors y. np.arange / np.linspace numpy arange(start, stop, step) erzeugt gleichmäßige Werte mit Schrittweite,…",
+    "type": "code",
+    "url": "Python/Page01.html",
+    "anchor": "#erzeugen",
+    "tags": [
+      "Arrays",
+      "_like",
+      "arange",
+      "arange(start, stop, step)",
+      "default_rng(seed)",
+      "erzeugen",
+      "linspace",
+      "linspace(start, stop, n)",
+      "ndarray",
+      "normal(loc, scale, size)",
+      "uniform(low, high, size)"
+    ],
+    "snippet": "ndarray"
+  },
+  {
+    "id": "Python/Page01.html#indexing",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 01",
+    "title": "1.2 Slicing, Indexing & Masken",
+    "description": "X[zeile, spalte]",
+    "text": "1.2 Slicing, Indexing & Masken Auf Teile von Arrays zugreifen und filtern. Slicing & Indexing numpy Zugriff auf Zeilen/Spalten. X[zeile, spalte], : wählt alles. Negative Indizes zählen von hinten. X[0] # erste Zeile X[:, 0] # erste Spalte (alle Zeilen) X[:5] # erste 5 Zeilen X[-1] # letzte Zeile Im Kurs: Features/Labels aufteilen, Spalten auswählen. Boolesche Masken numpy Ein Vergleich liefert ein Array aus True/False, mit dem gefiltert wird — das Herzstück von Klassen-Scatter-Plots. maske = (y…",
+    "type": "code",
+    "url": "Python/Page01.html",
+    "anchor": "#indexing",
+    "tags": [
+      "Indexing",
+      "Masken",
+      "Slicing",
+      "True",
+      "True/False",
+      "X[y==k]",
+      "X[zeile, spalte]",
+      "labels == -1"
+    ],
+    "snippet": "X[zeile, spalte]"
+  },
+  {
+    "id": "Python/Page01.html#aggregation",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 01",
+    "title": "1.3 Aggregationen & Statistik",
+    "description": "klassen, anzahl = np.unique(y, return_counts=True) for k, a in zip(klassen, anzahl): print(f'Klasse {k}: {a} Samples')",
+    "text": "1.3 Aggregationen & Statistik Werte zusammenfassen — pro Achse oder gesamt. np.unique(y, return_counts=True) numpy Liefert die eindeutigen Werte und (optional) deren Häufigkeiten — die Standardmethode, um die Klassenverteilung zu prüfen. klassen, anzahl = np.unique(y, return_counts=True) for k, a in zip(klassen, anzahl): print(f'Klasse {k}: {a} Samples') Im Kurs: Klassenbalance prüfen, stratify-Effekt zeigen (Blatt 02). Aggregationen: mean, std, sum, median … numpy Statistik über ganze Arrays…",
+    "type": "code",
+    "url": "Python/Page01.html",
+    "anchor": "#aggregation",
+    "tags": [
+      "Aggregationen",
+      "Statistik",
+      "argmax/argmin",
+      "argsort",
+      "axis=0",
+      "bincount",
+      "noise·std(X)"
+    ],
+    "snippet": "klassen, anzahl = np.unique(y, return_counts=True) for k, a in zip(klassen, anzahl): print(f'Klasse {k}: {a} Samples')"
+  },
+  {
+    "id": "Python/Page01.html#kombinieren",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 01",
+    "title": "1.4 Kombinieren & Mesh-Grid",
+    "description": "meshgrid",
+    "text": "1.4 Kombinieren & Mesh-Grid Arrays zusammenfügen und das Gitter für Plots bauen. np.meshgrid + np.c_ numpy meshgrid erzeugt ein Koordinatengitter; np.c_ stapelt Spalten. Zusammen bilden sie das Raster für Entscheidungsflächen. xx, yy = np.meshgrid(np.linspace(x0, x1, 300), np.linspace(y0, y1, 300)) gitter = np.c_[xx.ravel(), yy.ravel()] Z = model.predict(gitter).reshape(xx.shape) Im Kurs: Entscheidungsgrenzen visualisieren (SVM, Blatt 03 / Kapitel 3). np.vstack / np.concatenate numpy Arrays…",
+    "type": "code",
+    "url": "Python/Page01.html",
+    "anchor": "#kombinieren",
+    "tags": [
+      ".npy",
+      "Kombinieren",
+      "anomaly_detection.npy",
+      "concatenate",
+      "dot",
+      "interp",
+      "linalg.norm",
+      "meshgrid",
+      "np.c_",
+      "vstack"
+    ],
+    "snippet": "meshgrid"
+  },
+  {
+    "id": "Python/Page02.html",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 02",
+    "title": "Matplotlib Plotten",
+    "description": "🐍 Python-Referenz · Seite 02",
+    "type": "konzept",
+    "url": "Python/Page02.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Python/Page02.html#figur",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 02",
+    "title": "2.1 Figur & Achsen",
+    "description": "figure(figsize=(b,h))",
+    "text": "2.1 Figur & Achsen Abbildung anlegen und abschließen. plt.figure / plt.subplots matplotlib figure(figsize=(b,h)) öffnet eine neue Abbildung; subplots(zeilen, spalten) erzeugt ein Raster aus Achsen (ax). import matplotlib.pyplot as plt plt.figure(figsize=(8, 5)) # ... oder mehrere Achsen: fig, axes = plt.subplots(1, 2, figsize=(11, 4)) axes[0].plot(x, y) Im Kurs: Jede Visualisierung startet hier — Größe steuern, mehrere Plots nebeneinander. plt.show / tight_layout / close matplotlib show() zeigt…",
+    "type": "code",
+    "url": "Python/Page02.html",
+    "anchor": "#figur",
+    "tags": [
+      "Achsen",
+      "Figur",
+      "close('all')",
+      "figure(figsize=(b,h))",
+      "plt.tight_layout()\nplt.show()",
+      "show()",
+      "subplots(zeilen, spalten)",
+      "tight_layout()"
+    ],
+    "snippet": "figure(figsize=(b,h))"
+  },
+  {
+    "id": "Python/Page02.html#plottypen",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 02",
+    "title": "2.2 Plot-Typen",
+    "description": "c=labels",
+    "text": "2.2 Plot-Typen Die Diagrammarten, die im Kurs vorkommen. plt.scatter(x, y, c=..., cmap=...) matplotlib Punktwolke. Mit c=labels und cmap färbt man Punkte nach Klasse/Cluster; s=... steuert die Größe. plt.scatter(X[:, 0], X[:, 1], c=y, cmap='coolwarm', edgecolor='k', s=25) # Größe ~ Wahrscheinlichkeit: plt.scatter(X[:,0], X[:,1], s=proba*120) Im Kurs: Klassen/Cluster visualisieren, GMM-Wahrscheinlichkeit als Punktgröße (Blatt 06). plt.plot(x, y, fmt) matplotlib Linien-/Punktdiagramm. Das…",
+    "type": "code",
+    "url": "Python/Page02.html",
+    "anchor": "#plottypen",
+    "tags": [
+      "'o-'",
+      "'r--'",
+      "Typen",
+      "c=labels",
+      "cmap",
+      "contourf",
+      "hist",
+      "imshow",
+      "s=..."
+    ],
+    "snippet": "c=labels"
+  },
+  {
+    "id": "Python/Page02.html#deko",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 02",
+    "title": "2.3 Beschriftung & Deko",
+    "description": "suptitle",
+    "text": "2.3 Beschriftung & Deko Plots lesbar machen. Titel & Achsen matplotlib Beschriftungen für Lesbarkeit. suptitle setzt einen übergeordneten Titel über mehrere Subplots. plt.title('SVM Entscheidungsfläche') plt.xlabel('Feature 1'); plt.ylabel('Feature 2') plt.suptitle('Generierte Ziffern') Im Kurs: Jeder Plot bekommt aussagekräftige Beschriftungen. legend / colorbar / grid / axvline matplotlib legend() zeigt Labels, colorbar() die Farbskala, grid() ein Gitter, axvline(x) eine vertikale Markierung.…",
+    "type": "code",
+    "url": "Python/Page02.html",
+    "anchor": "#deko",
+    "tags": [
+      "Beschriftung",
+      "axis('off')",
+      "axvline(x)",
+      "colorbar()",
+      "grid()",
+      "legend()",
+      "suptitle"
+    ],
+    "snippet": "suptitle"
+  },
+  {
+    "id": "Python/Page02.html#muster",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 02",
+    "title": "2.4 Wiederkehrende Rezepte",
+    "description": "contourf",
+    "text": "2.4 Wiederkehrende Rezepte Zwei Muster, die du immer wieder brauchst. Muster: Entscheidungsfläche Rezept Das wiederkehrende Rezept, um zu zeigen, wie ein Modell den Raum aufteilt: Gitter bauen → vorhersagen → contourf. xx, yy = np.meshgrid(np.linspace(x0, x1, 300), np.linspace(y0, y1, 300)) Z = model.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape) plt.contourf(xx, yy, Z, alpha=0.25, cmap='coolwarm') plt.scatter(X[:,0], X[:,1], c=y, edgecolor='k') plt.show() Im Kurs:…",
+    "type": "code",
+    "url": "Python/Page02.html",
+    "anchor": "#muster",
+    "tags": [
+      "Rezepte",
+      "Wiederkehrende",
+      "contourf"
+    ],
+    "snippet": "contourf"
+  },
+  {
+    "id": "Python/Page03.html",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 03",
+    "title": "Datensätze, pandas & seaborn",
+    "description": "🐍 Python-Referenz · Seite 03",
+    "type": "konzept",
+    "url": "Python/Page03.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Python/Page03.html#synthetisch",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 03",
+    "title": "3.1 Synthetische Datensätze",
+    "description": "n_samples",
+    "text": "3.1 Synthetische Datensätze Künstliche Daten mit bekannten Eigenschaften — perfekt zum Üben. make_blobs sklearn.datasets Erzeugt gut trennbare, kugelförmige Cluster (Gauß-Blobs). Der meistgenutzte Spielzeug-Datensatz im Kurs. n_samples — Anzahl Punktecenters — Anzahl Cluster/Zentrencluster_std — Streuung pro Clusterrandom_state — Reproduzierbarkeit from sklearn.datasets import make_blobs X, y = make_blobs(n_samples=300, centers=4, cluster_std=0.5, random_state=42) Im Kurs: Clustering (KMeans,…",
+    "type": "code",
+    "url": "Python/Page03.html",
+    "anchor": "#synthetisch",
+    "tags": [
+      "Datensätze",
+      "Synthetische",
+      "centers",
+      "cluster_std",
+      "n_clusters_per_class",
+      "n_informative",
+      "n_redundant",
+      "n_samples",
+      "random_state"
+    ],
+    "snippet": "n_samples"
+  },
+  {
+    "id": "Python/Page03.html#echt",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 03",
+    "title": "3.2 Echte Datensätze",
+    "description": "from sklearn.datasets import load_digits X, y = load_digits(return_X_y=True) # X: (1797, 64) digits = load_digits() bild = digits.images[0] # 8x8",
+    "text": "3.2 Echte Datensätze Eingebaute Standard-Datensätze. load_digits sklearn.datasets 8×8-Bilder handgeschriebener Ziffern (0–9), als 64-Feature-Vektoren. Klein genug, um offline im Browser zu laufen. from sklearn.datasets import load_digits X, y = load_digits(return_X_y=True) # X: (1797, 64) digits = load_digits() bild = digits.images[0] # 8x8 Im Kurs: SVM-/RandomForest-Klassifikation, PCA+GMM-Bildgenerator, Feature-Importance-Heatmap. load_iris sklearn.datasets Der klassische Iris-Datensatz: 150…",
+    "type": "code",
+    "url": "Python/Page03.html",
+    "anchor": "#echt",
+    "tags": [
+      "Datensätze",
+      "Echte"
+    ],
+    "snippet": "from sklearn.datasets import load_digits X, y = load_digits(return_X_y=True) # X: (1797, 64) digits = load_digits() bild = digits.images[0] # 8x8"
+  },
+  {
+    "id": "Python/Page03.html#pandas",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 03",
+    "title": "3.3 pandas",
+    "description": "DataFrame",
+    "text": "3.3 pandas Tabellen laden und inspizieren. pd.DataFrame / pd.Series pandas Tabellarische Datenstruktur mit benannten Spalten (DataFrame) bzw. eine einzelne Spalte (Series). import pandas as pd df = pd.DataFrame(X, columns=['f1', 'f2', 'f3']) df['label'] = y print(df.head()) print(df.describe()) Im Kurs: Daten inspizieren, Feature-Tabellen aufbauen. pd.read_csv / df.quantile pandas read_csv lädt eine CSV-Datei; quantile berechnet Perzentile (z.B. für Ausreißergrenzen). df =…",
+    "type": "code",
+    "url": "Python/Page03.html",
+    "anchor": "#pandas",
+    "tags": [
+      "DataFrame",
+      "Series",
+      "pandas",
+      "quantile",
+      "read_csv"
+    ],
+    "snippet": "DataFrame"
+  },
+  {
+    "id": "Python/Page03.html#seaborn",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 03",
+    "title": "3.4 seaborn",
+    "description": "clustermap",
+    "text": "3.4 seaborn Statistische Visualisierung in einer Zeile. sns.heatmap / clustermap seaborn Visualisiert eine Matrix farbcodiert. clustermap ordnet zusätzlich ähnliche Zeilen/Spalten gruppiert an. import seaborn as sns sns.heatmap(confusion_matrix(y, pred), annot=True, fmt='d') sns.heatmap(param_grid_scores) # Hyperparameter-Suche Im Kurs: Confusion Matrix, Hyperparameter-Heatmap für DBSCAN-Suche (Blatt 04). sns.pairplot / sns.set seaborn pairplot zeichnet alle Feature-Paare gegeneinander…",
+    "type": "code",
+    "url": "Python/Page03.html",
+    "anchor": "#seaborn",
+    "tags": [
+      "clustermap",
+      "pairplot",
+      "seaborn",
+      "sns.set()"
+    ],
+    "snippet": "clustermap"
+  },
+  {
+    "id": "Python/Page04.html",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 04",
+    "title": "Preprocessing & Pipelines",
+    "description": "🐍 Python-Referenz · Seite 04",
+    "type": "konzept",
+    "url": "Python/Page04.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Python/Page04.html#skalierung",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 04",
+    "title": "4.1 Skalierung",
+    "description": "from sklearn.preprocessing import StandardScaler scaler = StandardScaler() X_train_s = scaler.fit_transform(X_train) X_test_s = scaler.transform(X_test) # nur transform!",
+    "text": "4.1 Skalierung Features auf vergleichbare Größenordnungen bringen. StandardScaler sklearn.preprocessing Standardisiert Features auf Mittelwert 0 und Std 1. Wichtig für distanzbasierte Verfahren (SVM, KNN, KMeans). from sklearn.preprocessing import StandardScaler scaler = StandardScaler() X_train_s = scaler.fit_transform(X_train) X_test_s = scaler.transform(X_test) # nur transform! Im Kurs: Vor SVM/KNN/Clustering. fit nur auf Trainingsdaten — sonst Data Leakage. MinMaxScaler…",
+    "type": "code",
+    "url": "Python/Page04.html",
+    "anchor": "#skalierung",
+    "tags": [
+      "PolynomialFeatures",
+      "PowerTransformer",
+      "Skalierung"
+    ],
+    "snippet": "from sklearn.preprocessing import StandardScaler scaler = StandardScaler() X_train_s = scaler.fit_transform(X_train) X_test_s = scaler.transform(X_test) # nur transform!"
+  },
+  {
+    "id": "Python/Page04.html#encoding",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 04",
+    "title": "4.2 Encoding",
+    "description": "from sklearn.preprocessing import LabelEncoder enc = LabelEncoder() y_enc = enc.fit_transform(['a', 'b', 'a', 'c']) # [0 1 0 2]",
+    "text": "4.2 Encoding Kategoriale Daten in Zahlen umwandeln. LabelEncoder sklearn.preprocessing Wandelt kategoriale Labels in ganze Zahlen um (z.B. 'Hund'→0). Achtung: erzeugt eine künstliche Ordnung. from sklearn.preprocessing import LabelEncoder enc = LabelEncoder() y_enc = enc.fit_transform(['a', 'b', 'a', 'c']) # [0 1 0 2] Im Kurs: Zielvariablen kodieren (Kapitel 1). OneHotEncoder sklearn.preprocessing Wandelt jede Kategorie in eine eigene 0/1-Spalte — ohne künstliche Ordnung. from…",
+    "type": "code",
+    "url": "Python/Page04.html",
+    "anchor": "#encoding",
+    "tags": [
+      "Encoding"
+    ],
+    "snippet": "from sklearn.preprocessing import LabelEncoder enc = LabelEncoder() y_enc = enc.fit_transform(['a', 'b', 'a', 'c']) # [0 1 0 2]"
+  },
+  {
+    "id": "Python/Page04.html#auswahl",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 04",
+    "title": "4.3 Feature-Auswahl & -Extraktion",
+    "description": "from sklearn.feature_selection import VarianceThreshold X_sel = VarianceThreshold(threshold=0.01).fit_transform(X)",
+    "text": "4.3 Feature-Auswahl & -Extraktion Die richtigen Features behalten. VarianceThreshold sklearn.feature_selection Entfernt Features mit zu geringer Varianz (z.B. fast konstante Spalten). from sklearn.feature_selection import VarianceThreshold X_sel = VarianceThreshold(threshold=0.01).fit_transform(X) Im Kurs: Uninformative Features entfernen. SelectKBest + mutual_info_classif sklearn.feature_selection Wählt die k Features mit dem höchsten Zusammenhang zum Ziel (hier: Transinformation). from…",
+    "type": "code",
+    "url": "Python/Page04.html",
+    "anchor": "#auswahl",
+    "tags": [
+      "Auswahl",
+      "Extraktion",
+      "Feature"
+    ],
+    "snippet": "from sklearn.feature_selection import VarianceThreshold X_sel = VarianceThreshold(threshold=0.01).fit_transform(X)"
+  },
+  {
+    "id": "Python/Page04.html#dimred",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 04",
+    "title": "4.4 Dimensionsreduktion",
+    "description": "whiten=True",
+    "text": "4.4 Dimensionsreduktion Viele Features auf wenige verdichten. PCA sklearn.decomposition Hauptkomponentenanalyse — reduziert die Dimension, indem Richtungen größter Varianz behalten werden. whiten=True normiert die Komponenten. from sklearn.decomposition import PCA pca = PCA(n_components=0.95, whiten=True) # 95% Varianz X_pca = pca.fit_transform(X) print(pca.n_components_) X_back = pca.inverse_transform(X_pca) # zurück in Pixelraum Im Kurs: Dimensionsreduktion vor GMM-Bildgenerator (Blatt 06),…",
+    "type": "code",
+    "url": "Python/Page04.html",
+    "anchor": "#dimred",
+    "tags": [
+      "Dimensionsreduktion",
+      "whiten=True"
+    ],
+    "snippet": "whiten=True"
+  },
+  {
+    "id": "Python/Page04.html#pipeline",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 04",
+    "title": "4.5 Pipelines & die fit/transform-Regel",
+    "description": "from sklearn.pipeline import make_pipeline from sklearn.preprocessing import StandardScaler from sklearn.svm import SVC pipe = make_pipeline(StandardScaler(), SVC()) pipe.fit(X_train, y_train) #…",
+    "text": "4.5 Pipelines & die fit/transform-Regel Sauber verketten, Leakage vermeiden. make_pipeline / Pipeline sklearn.pipeline Verkettet Vorverarbeitung + Modell zu einem Objekt. Bei Cross-Validation wird der Scaler in jedem Fold neu gefittet → verhindert Data Leakage. from sklearn.pipeline import make_pipeline from sklearn.preprocessing import StandardScaler from sklearn.svm import SVC pipe = make_pipeline(StandardScaler(), SVC()) pipe.fit(X_train, y_train) # benannt: Pipeline([('scaler',…",
+    "type": "code",
+    "url": "Python/Page04.html",
+    "anchor": "#pipeline",
+    "tags": [
+      "Pipelines",
+      "Regel",
+      "fit",
+      "fit_transform",
+      "svc__C",
+      "transform"
+    ],
+    "snippet": "from sklearn.pipeline import make_pipeline from sklearn.preprocessing import StandardScaler from sklearn.svm import SVC pipe = make_pipeline(StandardScaler(), SVC()) pipe.fit(X_train, y_train) #…"
+  },
+  {
+    "id": "Python/Page05.html",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 05",
+    "title": "Supervised Modelle",
+    "description": "🐍 Python-Referenz · Seite 05",
+    "type": "konzept",
+    "url": "Python/Page05.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Python/Page05.html#svm",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 05",
+    "title": "5.1 Support Vector Machines",
+    "description": "C",
+    "text": "5.1 Support Vector Machines Maximaler Margin, linear oder mit Kernel. SVC sklearn.svm Support Vector Classifier. Trennt Klassen mit maximalem Margin; mit Kerneln (linear, rbf) auch nichtlinear. C — Strafterm: groß = schmaler Margin (Overfit-Gefahr)kernel — 'linear' oder 'rbf'gamma — RBF-Reichweite: 'scale'/'auto'/Zahl from sklearn.svm import SVC model = SVC(kernel='rbf', C=1, gamma='scale') model.fit(X_train, y_train) pred = model.predict(X_test) scores = model.decision_function(X_test) # für…",
+    "type": "code",
+    "url": "Python/Page05.html",
+    "anchor": "#svm",
+    "tags": [
+      "Machines",
+      "Support",
+      "Vector",
+      "gamma",
+      "kernel"
+    ],
+    "snippet": "C"
+  },
+  {
+    "id": "Python/Page05.html#tree",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 05",
+    "title": "5.2 Entscheidungsbäume",
+    "description": "max_depth",
+    "text": "5.2 Entscheidungsbäume Interpretierbare Schwellwert-Regeln. DecisionTreeClassifier / Regressor sklearn.tree Entscheidungsbaum: teilt den Raum durch Schwellwert-Fragen. Interpretierbar, aber neigt zu Overfitting. max_depth — maximale Tiefe (begrenzt Overfitting)min_samples_leaf — Mindest-Samples pro Blatt from sklearn.tree import DecisionTreeClassifier tree = DecisionTreeClassifier(max_depth=4, random_state=42) tree.fit(X, y) Im Kurs: Basis-Lerner für Ensembles, Interpretierbarkeit (Kapitel…",
+    "type": "code",
+    "url": "Python/Page05.html",
+    "anchor": "#tree",
+    "tags": [
+      "Entscheidungsbäume",
+      "max_depth",
+      "min_samples_leaf"
+    ],
+    "snippet": "max_depth"
+  },
+  {
+    "id": "Python/Page05.html#ensemble",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 05",
+    "title": "5.3 Ensemble-Methoden",
+    "description": "n_estimators",
+    "text": "5.3 Ensemble-Methoden Viele Modelle kombinieren. RandomForestClassifier / Regressor sklearn.ensemble Viele Entscheidungsbäume auf Bootstrap-Stichproben + zufälliger Feature-Auswahl. Mittelt → robust gegen Rauschen & Overfitting. n_estimators — Anzahl Bäumemax_features — Features pro Splitfeature_importances_ — gelernte Feature-Wichtigkeit from sklearn.ensemble import RandomForestClassifier rf = RandomForestClassifier(n_estimators=200, random_state=42) rf.fit(X_train, y_train) wichtig =…",
+    "type": "code",
+    "url": "Python/Page05.html",
+    "anchor": "#ensemble",
+    "tags": [
+      "Ensemble",
+      "Methoden",
+      "feature_importances_",
+      "max_features",
+      "n_estimators"
+    ],
+    "snippet": "n_estimators"
+  },
+  {
+    "id": "Python/Page05.html#weitere",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 05",
+    "title": "5.4 Weitere Modelle",
+    "description": "k",
+    "text": "5.4 Weitere Modelle KNN, lineare Regression, Multi-Class. KNeighborsClassifier sklearn.neighbors k-Nächste-Nachbarn: klassifiziert nach den k ähnlichsten Trainingspunkten. Kein echtes „Training\", nur Speichern. from sklearn.neighbors import KNeighborsClassifier knn = KNeighborsClassifier(n_neighbors=5) knn.fit(X, y) knn.predict(neuer_punkt) Im Kurs: Anomalie-Klassifikator auf DBSCAN-Labels (Blatt 04), Baseline. LinearRegression sklearn.linear_model Klassische lineare Regression (Methode der…",
+    "type": "code",
+    "url": "Python/Page05.html",
+    "anchor": "#weitere",
+    "tags": [
+      "Modelle",
+      "Weitere"
+    ],
+    "snippet": "k"
+  },
+  {
+    "id": "Python/Page05.html#api",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 05",
+    "title": "5.5 Die einheitliche API",
+    "description": ".fit()",
+    "text": "5.5 Die einheitliche API Ein Muster für alle Modelle. Die einheitliche sklearn-API Konzept Jedes Modell folgt demselben Muster: .fit() trainiert, .predict() sagt vorher, .score() bewertet. Deshalb sind Modelle austauschbar. model.fit(X_train, y_train) # trainieren y_pred = model.predict(X_test) # Klasse vorhersagen proba = model.predict_proba(X_test) # Wahrscheinlichkeiten score = model.decision_function(X_test) # Konfidenz (SVM) acc = model.score(X_test, y_test) # Accuracy Im Kurs: Dieses…",
+    "type": "code",
+    "url": "Python/Page05.html",
+    "anchor": "#api",
+    "tags": [
+      ".fit()",
+      ".predict()",
+      ".score()",
+      "einheitliche"
+    ],
+    "snippet": ".fit()"
+  },
+  {
+    "id": "Python/Page06.html",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 06",
+    "title": "Unsupervised & Clustering",
+    "description": "🐍 Python-Referenz · Seite 06",
+    "type": "konzept",
+    "url": "Python/Page06.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Python/Page06.html#kmeans",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 06",
+    "title": "6.1 KMeans & DBSCAN",
+    "description": "k",
+    "text": "6.1 KMeans & DBSCAN Partitionierendes vs. dichtebasiertes Clustering. KMeans sklearn.cluster Teilt Daten in k kugelförmige Cluster, indem die Distanz zu den Clusterzentren minimiert wird (Inertia). n_clusters — Anzahl Cluster kn_init — Anzahl Neustartsinertia_ — Summe quadrierter Distanzen (Elbow)labels_ — Cluster-Zuordnung from sklearn.cluster import KMeans km = KMeans(n_clusters=4, n_init=10, random_state=42) km.fit(X) labels = km.labels_ zentren = km.cluster_centers_ inertia = km.inertia_ #…",
+    "type": "code",
+    "url": "Python/Page06.html",
+    "anchor": "#kmeans",
+    "tags": [
+      "DBSCAN",
+      "KMeans",
+      "eps",
+      "inertia_",
+      "labels_",
+      "labels_ == -1",
+      "min_samples",
+      "n_clusters",
+      "n_init"
+    ],
+    "snippet": "k"
+  },
+  {
+    "id": "Python/Page06.html#gmm",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 06",
+    "title": "6.2 Gaussian Mixture Models",
+    "description": "n_components",
+    "text": "6.2 Gaussian Mixture Models Weiche, generative Cluster. GaussianMixture sklearn.mixture Modelliert Daten als Mischung von Gauß-Verteilungen (Ellipsen). Liefert weiche Zuordnungen und kann neue Daten generieren. n_components — Anzahl Gauß-Komponentencovariance_type — 'full'/'tied'/'diag'/'spherical'bic(X) / aic(X) — Kriterium zur Wahl von n_componentssample(n) — n neue Datenpunkte generieren from sklearn.mixture import GaussianMixture gmm = GaussianMixture(n_components=3, covariance_type='full',…",
+    "type": "code",
+    "url": "Python/Page06.html",
+    "anchor": "#gmm",
+    "tags": [
+      "Gaussian",
+      "Mixture",
+      "Models",
+      "bic(X) / aic(X)",
+      "covariance_type",
+      "n_components",
+      "sample(n)"
+    ],
+    "snippet": "n_components"
+  },
+  {
+    "id": "Python/Page06.html#distanzen",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 06",
+    "title": "6.3 Distanzen & Statistik",
+    "description": "from scipy.spatial.distance import cdist D = cdist(punkte, zentren) # Distanzmatrix",
+    "text": "6.3 Distanzen & Statistik scipy-Hilfsfunktionen. scipy.spatial.distance.cdist scipy Berechnet paarweise Distanzen zwischen zwei Punktmengen. from scipy.spatial.distance import cdist D = cdist(punkte, zentren) # Distanzmatrix Im Kurs: Manuelle Distanzberechnungen (Kapitel 4). scipy.stats: skew, kurtosis, norm scipy.stats Statistische Kennzahlen (Schiefe, Wölbung) und die Normalverteilungs-Dichte. from scipy.stats import skew, kurtosis, norm features = [sig.mean(), sig.std(), skew(sig),…",
+    "type": "code",
+    "url": "Python/Page06.html",
+    "anchor": "#distanzen",
+    "tags": [
+      "Distanzen",
+      "Statistik"
+    ],
+    "snippet": "from scipy.spatial.distance import cdist D = cdist(punkte, zentren) # Distanzmatrix"
+  },
+  {
+    "id": "Python/Page07.html",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 07",
+    "title": "Modellauswahl & Validierung",
+    "description": "🐍 Python-Referenz · Seite 07",
+    "type": "konzept",
+    "url": "Python/Page07.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Python/Page07.html#split",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 07",
+    "title": "7.1 Splits & Cross-Validation",
+    "description": "stratify=y",
+    "text": "7.1 Splits & Cross-Validation Daten fair aufteilen und robust bewerten. train_test_split sklearn.model_selection Teilt Daten zufällig in Trainings- und Testset. stratify=y erhält die Klassenverteilung. test_size — Anteil Testdaten (z.B. 0.3)stratify — Klassenverteilung erhaltenrandom_state — reproduzierbar from sklearn.model_selection import train_test_split X_tr, X_te, y_tr, y_te = train_test_split( X, y, test_size=0.3, stratify=y, random_state=42) Im Kurs: Standard-Aufteilung in jedem…",
+    "type": "code",
+    "url": "Python/Page07.html",
+    "anchor": "#split",
+    "tags": [
+      "Cross",
+      "KFold",
+      "Splits",
+      "Validation",
+      "random_state",
+      "stratify",
+      "stratify=y",
+      "test_size"
+    ],
+    "snippet": "stratify=y"
+  },
+  {
+    "id": "Python/Page07.html#suche",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 07",
+    "title": "7.2 Hyperparameter-Suche",
+    "description": "param_grid",
+    "text": "7.2 Hyperparameter-Suche Die beste Konfiguration finden. GridSearchCV sklearn.model_selection Probiert systematisch alle Hyperparameter-Kombinationen per Cross-Validation und merkt sich die beste. param_grid — Dict der zu testenden Wertebest_params_ — beste Kombinationcv — Anzahl Foldsn_jobs=-1 — alle CPU-Kerne from sklearn.model_selection import GridSearchCV par = {'C': [1, 10, 100], 'gamma': [0.01, 0.1]} grid = GridSearchCV(SVC(), par, cv=5, n_jobs=-1, verbose=1) grid.fit(X_train, y_train)…",
+    "type": "code",
+    "url": "Python/Page07.html",
+    "anchor": "#suche",
+    "tags": [
+      "Hyperparameter",
+      "Suche",
+      "best_params_",
+      "n_jobs=-1",
+      "param_grid",
+      "scipy.stats"
+    ],
+    "snippet": "param_grid"
+  },
+  {
+    "id": "Python/Page07.html#kurven",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 07",
+    "title": "7.3 Validierungs- & Lernkurven",
+    "description": "from sklearn.model_selection import validation_curve tr, val = validation_curve(SVC(), X, y, param_name='C', param_range=[0.1, 1, 10, 100], cv=5)",
+    "text": "7.3 Validierungs- & Lernkurven Over-/Underfitting sichtbar machen. validation_curve sklearn.model_selection Zeigt Train- vs. Validierungs-Score als Funktion EINES Hyperparameters — deckt Over-/Underfitting auf. from sklearn.model_selection import validation_curve tr, val = validation_curve(SVC(), X, y, param_name='C', param_range=[0.1, 1, 10, 100], cv=5) Im Kurs: Wirkung eines Hyperparameters analysieren. learning_curve sklearn.model_selection Zeigt Score als Funktion der Trainingsgröße —…",
+    "type": "code",
+    "url": "Python/Page07.html",
+    "anchor": "#kurven",
+    "tags": [
+      "Lernkurven",
+      "Validierungs"
+    ],
+    "snippet": "from sklearn.model_selection import validation_curve tr, val = validation_curve(SVC(), X, y, param_name='C', param_range=[0.1, 1, 10, 100], cv=5)"
+  },
+  {
+    "id": "Python/Page08.html",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 08",
+    "title": "Metriken & Evaluation",
+    "description": "🐍 Python-Referenz · Seite 08",
+    "type": "konzept",
+    "url": "Python/Page08.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Python/Page08.html#klassifikation",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 08",
+    "title": "8.1 Klassifikations-Metriken",
+    "description": "accuracy",
+    "text": "8.1 Klassifikations-Metriken Accuracy, F1 und die Confusion Matrix. accuracy_score / f1_score sklearn.metrics accuracy = Anteil korrekt; f1 = harmonisches Mittel aus Precision & Recall (besser bei Unbalance). from sklearn.metrics import accuracy_score, f1_score acc = accuracy_score(y_test, pred) f1 = f1_score(y_test, pred, average='macro') Im Kurs: Standard-Bewertung von Klassifikatoren. confusion_matrix sklearn.metrics Kreuztabelle aus wahren vs. vorhergesagten Klassen — die Basis aller…",
+    "type": "code",
+    "url": "Python/Page08.html",
+    "anchor": "#klassifikation",
+    "tags": [
+      "Klassifikations",
+      "Metriken",
+      "accuracy"
+    ],
+    "snippet": "accuracy"
+  },
+  {
+    "id": "Python/Page08.html#roc",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 08",
+    "title": "8.2 ROC, AUC & Regression",
+    "description": "from sklearn.metrics import roc_curve, auc, roc_auc_score fpr, tpr, thr = roc_curve(y_test, scores) flaeche = auc(fpr, tpr) # kurz: roc_auc_score(y_test, scores)",
+    "text": "8.2 ROC, AUC & Regression Schwellwertunabhängige Bewertung & MSE. roc_curve / auc / roc_auc_score sklearn.metrics ROC-Kurve trägt TPR gegen FPR über alle Schwellwerte auf; AUC ist die Fläche darunter (1.0 = perfekt, 0.5 = Zufall). from sklearn.metrics import roc_curve, auc, roc_auc_score fpr, tpr, thr = roc_curve(y_test, scores) flaeche = auc(fpr, tpr) # kurz: roc_auc_score(y_test, scores) Im Kurs: Klassifikator-Güte schwellwertunabhängig bewerten (Kapitel 7). RocCurveDisplay /…",
+    "type": "code",
+    "url": "Python/Page08.html",
+    "anchor": "#roc",
+    "tags": [
+      "Regression"
+    ],
+    "snippet": "from sklearn.metrics import roc_curve, auc, roc_auc_score fpr, tpr, thr = roc_curve(y_test, scores) flaeche = auc(fpr, tpr) # kurz: roc_auc_score(y_test, scores)"
+  },
+  {
+    "id": "Python/Page08.html#clustering",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 08",
+    "title": "8.3 Clustering-Metriken",
+    "description": "samples",
+    "text": "8.3 Clustering-Metriken Cluster-Güte ohne Labels messen. silhouette_score / silhouette_samples sklearn.metrics Misst, wie gut Cluster getrennt sind (−1…+1, größer = besser). samples liefert den Wert pro Punkt. from sklearn.metrics import silhouette_score s = silhouette_score(X, labels) Im Kurs: Clustering-Qualität bewerten (Blatt 04). davies_bouldin_score sklearn.metrics Cluster-Gütemaß — hier gilt: kleiner ist besser (0 = ideal). from sklearn.metrics import davies_bouldin_score db =…",
+    "type": "code",
+    "url": "Python/Page08.html",
+    "anchor": "#clustering",
+    "tags": [
+      "Clustering",
+      "Metriken",
+      "samples"
+    ],
+    "snippet": "samples"
+  },
+  {
+    "id": "Python/Page08.html#importance",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Seite 08",
+    "title": "8.4 Feature-Importance",
+    "description": "rf.fit(X, y) wichtig = rf.feature_importances_ top3 = np.argsort(wichtig)[::-1][:3] plt.imshow(wichtig.reshape(8, 8), cmap='hot')",
+    "text": "8.4 Feature-Importance Welche Features zählen? feature_importances_ sklearn.ensemble Attribut trainierter Baum-Ensembles: wie stark jedes Feature die Unreinheit reduziert (über alle Bäume gemittelt). rf.fit(X, y) wichtig = rf.feature_importances_ top3 = np.argsort(wichtig)[::-1][:3] plt.imshow(wichtig.reshape(8, 8), cmap='hot') Im Kurs: Welche Pixel/Features nutzt das Modell? Heatmap (Blatt 05). permutation_importance sklearn.inspection Modell-unabhängig: misst den Score-Abfall, wenn ein…",
+    "type": "code",
+    "url": "Python/Page08.html",
+    "anchor": "#importance",
+    "tags": [
+      "Feature",
+      "Importance"
+    ],
+    "snippet": "rf.fit(X, y) wichtig = rf.feature_importances_ top3 = np.argsort(wichtig)[::-1][:3] plt.imshow(wichtig.reshape(8, 8), cmap='hot')"
+  },
+  {
+    "id": "Python/Python.html",
+    "chapter": "🐍 Python-Referenz",
+    "page": "Übersicht",
+    "title": "Python-Referenz",
+    "description": "🐍 Python-Referenz · Übersicht",
+    "type": "konzept",
+    "url": "Python/Python.html",
+    "anchor": "",
+    "tags": []
   }
 ]

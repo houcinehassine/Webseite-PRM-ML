@@ -36,7 +36,12 @@ KAPITEL_NAMEN = {
     "Kapitel5": "K5 · Random Forest & Boosting",
     "Kapitel6": "K6 · Modellbewertung & Workflow",
     "Kapitel7": "K7 · Evaluation",
+    "Aufgaben": "✏️ Aufgaben",
+    "Python":   "🐍 Python-Referenz",
 }
+
+# Ordner, die zusätzlich zu den Kapitel-Ordnern indiziert werden
+EXTRA_DIRS = {"Aufgaben", "Python"}
 
 # Seiten die übersprungen werden (reine Übersichtsseiten ohne Sections)
 SKIP_FILES = {"Kapitel1.html", "Kapitel2.html", "Kapitel3.html",
@@ -117,6 +122,7 @@ def page_label(filename: str) -> str:
         'Kapitel3': 'Übersicht', 'Kapitel4': 'Übersicht',
         'Kapitel5': 'Übersicht', 'Kapitel6': 'Übersicht',
         'Kapitel7': 'Übersicht',
+        'Aufgaben': 'Übersicht', 'Python': 'Übersicht',
         'PageCheatsheet': 'Cheatsheet',
         'PageQuiz': 'Quiz',
         'Pagebeispiel': 'Praxisbeispiel',
@@ -124,6 +130,9 @@ def page_label(filename: str) -> str:
     }
     if name in mapping:
         return mapping[name]
+    m = re.match(r'Aufgabenblatt(\d+)$', name)
+    if m:
+        return f"Blatt {m.group(1)}"
     m = re.match(r'Page(\d+)(?:_(\d+))?$', name)
     if m:
         return f"Seite {m.group(1)}" + (f".{m.group(2)}" if m.group(2) else "")
@@ -199,7 +208,9 @@ def main():
     total_files = 0
 
     for kapitel_dir in sorted(ROOT.iterdir()):
-        if not kapitel_dir.is_dir() or not kapitel_dir.name.startswith('Kapitel'):
+        if not kapitel_dir.is_dir():
+            continue
+        if not (kapitel_dir.name.startswith('Kapitel') or kapitel_dir.name in EXTRA_DIRS):
             continue
         kapitel = kapitel_dir.name
 
