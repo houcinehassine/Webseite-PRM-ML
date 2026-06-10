@@ -381,9 +381,79 @@ site-sidebar{display:block;height:100%;align-self:stretch}
 /* Handy: Sidebar/Inhaltsverzeichnis ausblenden, Inhalt volle Breite ───── */
 @media (max-width:700px){
   .layout{display:block}
-  .sidebar{display:none}
   .content{padding:var(--space-5) var(--space-4)}
   .content section{padding:var(--space-5)}
+
+  /* Sidebar als Slide-in Drawer ─────────────────────── */
+  .sidebar{
+    display:block;
+    position:fixed;
+    left:0;top:0;
+    width:min(280px,85vw);
+    height:100dvh;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:var(--space-12) 0 var(--space-16);
+    background:var(--color-surface);
+    border-right:1px solid var(--color-border);
+    box-shadow:var(--shadow-md);
+    z-index:300;
+    transform:translateX(-105%);
+    transition:transform 0.28s cubic-bezier(0.4,0,0.2,1);
+    border-radius:0 var(--radius-xl) var(--radius-xl) 0;
+  }
+  .sidebar.sidebar--open{transform:translateX(0)}
+  body.sidebar--open{overflow:hidden}
+
+  /* Dunkles Overlay ──────────────────────────────────── */
+  .sidebar-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:oklch(0 0 0/0.45);
+    z-index:299;
+    backdrop-filter:blur(2px);
+    -webkit-backdrop-filter:blur(2px);
+  }
+  .sidebar-overlay.sidebar--open{display:block}
+
+  /* Floating Action Button (links unten) ─────────────── */
+  .sidebar-fab{
+    position:fixed;
+    left:var(--space-4);
+    bottom:var(--space-6);
+    z-index:298;
+    width:48px;height:48px;
+    border-radius:var(--radius-full);
+    background:var(--color-primary);
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 16px oklch(0.2 0.05 200/0.35);
+    transition:background 0.15s,transform 0.15s;
+  }
+  .sidebar-fab:active{transform:scale(0.92)}
+
+  /* Schließen-Button oben in der Sidebar ─────────────── */
+  .sidebar-close{
+    position:absolute;
+    top:var(--space-3);right:var(--space-3);
+    width:36px;height:36px;
+    border-radius:var(--radius-full);
+    border:none;background:var(--color-surface-offset);
+    color:var(--color-text-muted);
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+}
+@media (min-width:701px){
+  .sidebar-fab{display:none}
+  .sidebar-overlay{display:none}
+  .sidebar-close{display:none}
 }
 
 /* Querformat-Überlauf grundsätzlich vermeiden */
