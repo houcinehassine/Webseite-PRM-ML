@@ -239,21 +239,30 @@
   border-top:none;
 }
 .output pre{
+  /* Explizit dunklen Terminal-Hintergrund setzen –
+     überschreibt den globalen pre{background:var(--color-surface-2)} aus style.css */
+  background:#0D1117 !important;
+  border:none !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  /* Schrift */
   font-family:'JetBrains Mono','Fira Code',monospace;
-  font-size:.88rem;          /* größer als vorher (.82rem) */
+  font-size:.88rem;
   line-height:1.7;
   white-space:pre-wrap;
   word-break:break-word;
-  margin:0;
 }
 /* Normaler Text – hell auf dunklem Hintergrund */
-.out-text{color:#E6EDF3;}
+.out-text{
+  color:#E6EDF3 !important; /* !important schützt vor style.css color:var(--color-text) */
+}
 
 /* Fehlermeldung – klar rot, mit linker Akzentlinie */
 .out-err{
   display:block;
-  color:#FF7B72;
-  background:rgba(255,62,46,.08);
+  color:#FF7B72 !important;
+  background:#1a0a0a !important; /* dunkles Rot-Schwarz, kein Durchscheinen */
   border-left:3px solid #F85149;
   padding:8px 12px;
   border-radius:0 5px 5px 0;
@@ -261,22 +270,26 @@
   line-height:1.65;
   white-space:pre-wrap;
   word-break:break-word;
+  font-family:'JetBrains Mono','Fira Code',monospace;
 }
 
 /* Erfolgsmeldung / Hinweis */
 .out-ok{
   display:flex;align-items:center;gap:8px;
-  color:#3FB950;font-size:.85rem;font-weight:600;
+  color:#3FB950 !important;
+  font-size:.88rem;font-weight:600;
 }
 .out-ok::before{content:'✓';font-size:1rem;}
 
 /* Warte-/Lauf-Status */
 .out-wait{
-  color:#6E7681;font-size:.85rem;
+  color:#8B949E !important; /* heller als vorher für besseren Kontrast auf #0D1117 */
+  font-size:.85rem;
   display:flex;align-items:center;gap:7px;
 }
 .out-run{
-  color:#58A6FF;font-size:.85rem;font-weight:600;
+  color:#58A6FF !important;
+  font-size:.85rem;font-weight:600;
   display:flex;align-items:center;gap:7px;
   animation:pulse-out .9s ease-in-out infinite alternate;
 }
@@ -315,13 +328,20 @@
   position:relative;
 }
 .sol-code pre{
+  /* Explizit dunklen Terminal-Hintergrund setzen –
+     überschreibt den globalen pre{background:var(--color-surface-2)} aus style.css */
+  background:#0D1117 !important;
+  border:none !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  margin:0 !important;
+  /* Schrift */
   font-family:'JetBrains Mono','Fira Code',monospace;
-  font-size:.9rem;           /* größer als vorher (.82rem) */
+  font-size:.9rem;
   line-height:1.7;
-  color:#E6EDF3;
+  color:#E6EDF3 !important; /* !important schützt vor style.css color:var(--color-text) */
   white-space:pre;
   tab-size:4;
-  margin:0;
 }
 
 /* Python-Syntax-Highlighting per CSS (ohne externe Lib) */
