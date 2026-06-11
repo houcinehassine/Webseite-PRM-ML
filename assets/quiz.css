@@ -453,6 +453,12 @@ details.frage[open] summary {
 .answer-correct { color: var(--color-success); font-weight: 700; }
 .answer-wrong   { color: #e55; font-weight: 700; text-decoration: line-through; }
 
+/* Mobil: lange Quiz-Kategorietitel dürfen umbrechen statt zu überlaufen */
+@media (max-width:700px) {
+  .quiz-cat{flex-wrap:wrap}
+  .quiz-cat-title{white-space:normal}
+}
+
 @media print {
   site-header, site-sidebar { display: none !important; }
   .layout { display: block !important; }

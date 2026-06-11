@@ -83,7 +83,7 @@ tr:last-child td{border-bottom:none}
 .key{display:inline-block;padding:.08rem .38rem;border-radius:.45rem;font-weight:700;background:color-mix(in oklab,var(--key-color,var(--color-primary)) 16%,transparent);color:var(--key-color,var(--color-primary))}
 .overview{display:grid;gap:var(--space-4)}
 .overview-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-4)}
-@media (max-width:900px){.overview-3{grid-template-columns:1fr}
+@media (max-width:900px){.overview-3{grid-template-columns:minmax(0,1fr)}
 }
 .topic{display:grid;grid-template-columns:auto 1fr;gap:var(--space-4);align-items:start;background:var(--color-surface);border-radius:var(--radius-lg);border:1px solid color-mix(in oklab,var(--color-text) 10%,transparent);padding:var(--space-5)}
 .topic + .topic{margin-top:var(--space-3)}
@@ -374,7 +374,7 @@ site-sidebar{display:block;height:100%;align-self:stretch}
   .content{min-width:0}
 
   /* Zweispaltiges Hero/Grids einspaltig, solange Sidebar Platz wegnimmt */
-  .hero-grid{grid-template-columns:1fr}
+  .hero-grid{grid-template-columns:minmax(0,1fr)}
   .content section,.content pre,.content table,.formula-math{max-width:100%}
 }
 
@@ -449,6 +449,67 @@ site-sidebar{display:block;height:100%;align-self:stretch}
     display:flex;align-items:center;justify-content:center;
     flex-shrink:0;
   }
+
+  /* ── Breite Elemente: horizontal scrollbar statt Overflow ─ */
+
+  /* Agenda-Grid: auf Mobile immer einspaltig (2 × 1fr à ~150px
+     expandiert Browser auf min-content der Cards → Overflow) */
+  .agenda-row{grid-template-columns:1fr}
+  /* Grid-Items dürfen schrumpfen; overflow:hidden verhindert
+     dass Kinder (ag-pages etc.) die Seite horizontal ausweiten */
+  .agenda-card{min-width:0; max-width:100%; overflow:hidden}
+  .agenda-card .ag-pages{margin-top:0}
+
+  /* Feature-Matrix: horizontales Scrollen statt Seitenüberlauf.
+     min-width:0 erlaubt der Box auf Parent-Breite zu schrumpfen;
+     overflow-x:auto öffnet die Scrollbar; die direkten Kinder
+     (matrix-header, matrix-row) behalten ihren Mindestplatz. */
+  .matrix-wrap{
+    display:block;
+    min-width:0;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:4px;
+  }
+  .matrix-wrap > *{min-width:460px}
+
+  /* Formula-Row: stapeln auf kleinen Screens */
+  .formula-row{flex-wrap:wrap}
+
+  /* Tabellen und Formeln: nie breiter als Content-Bereich */
+  .content table,.content pre,.content .formula-math,
+  .content .formula-display,.content .formula-row{
+    max-width:100%;
+    overflow-x:auto;
+  }
+
+  /* Note-Boxen mit &nbsp;-Ketten können nicht umbrechen – scroll statt overflow */
+  .content .note{overflow-x:auto}
+
+  /* Lange Tokens (Inline-Code, LaTeX-Quelltext in Headings) dürfen umbrechen */
+  .content code,.content h1,.content h2,.content h3,.content h4{overflow-wrap:anywhere}
+  .card{min-width:0}
+
+  /* topic-Grid: 1fr-Spalte explizit auf minmax(0,1fr) setzen,
+     damit MathJax-Formeln den Grid-Track nicht auf ihre intrinsische Breite dehnen */
+  .topic{min-width:0;grid-template-columns:auto minmax(0,1fr)}
+  .math-display{min-width:0;max-width:100%}
+  .formula-block{overflow-x:auto}
+
+  /* timeline-Grid (K5): gleiche Ursache wie .topic –
+     .timeline-step darf den auto-Track nicht aufblasen;
+     1fr-Content-Div bekommt min-width:0 + overflow-x:auto
+     damit eingebettete MathJax-Formeln scrollen statt überlaufen */
+  .timeline-step{min-width:0}
+  .timeline-step > div{min-width:0;overflow-x:auto}
+
+  /* Inline-MathJax in qa-answer-Listen kann breiter als die li-Box werden;
+     overflow-x:auto auf dem Answer-Container statt clipping durch html{overflow-x:hidden} */
+  .qa-answer{overflow-x:auto}
+
+  /* Inline-Styles: code-cell-split wird bereits bei 760px
+     einspaltig – hier nur sicherstellen dass pre scrollt */
+  .code-cell-split .code-side pre{overflow-x:auto}
 }
 @media (min-width:701px){
   .sidebar-fab{display:none}
