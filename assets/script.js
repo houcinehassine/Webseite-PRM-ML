@@ -435,6 +435,29 @@ export function registerSidebar(chapter) {
     document.getElementById('quiz-reset').addEventListener('click', doReset);
     document.getElementById('btn-retry').addEventListener('click', doReset);
 
+    // ── Tastatur-Shortcuts: 1–4 / A–D wählen aktuelle Antwort ──
+    // Findet die erste noch unbeantwortete Frage im Viewport
+    document.addEventListener('keydown', function(e) {
+      // Nicht auslösen wenn User in Eingabefeld tippt
+      if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+      const key = e.key.toUpperCase();
+      const idx = ['1','A','2','B','3','C','4','D'].indexOf(key);
+      if (idx === -1) return;
+      const optIdx = Math.floor(idx / 2); // 1/A=0, 2/B=1, 3/C=2, 4/D=3
+
+      // Erste unbeantwortete Frage suchen die im Viewport sichtbar ist
+      let target = null;
+      const questions = document.querySelectorAll('.quiz-question:not([data-answered])');
+      for (const q of questions) {
+        const rect = q.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) { target = q; break; }
+      }
+      if (!target) return;
+
+      const opts = target.querySelectorAll('.quiz-option:not(:disabled)');
+      if (opts[optIdx]) { e.preventDefault(); opts[optIdx].click(); }
+    });
+
     updateHUD();
   })();
 
