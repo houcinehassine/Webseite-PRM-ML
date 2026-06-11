@@ -756,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'Shift-Enter': () => { /* handled per-task */ }
       }
     });
-    document.getElementById('solpre-' + id).textContent = SOL[id];
+    document.getElementById('solpre-' + id).innerHTML = highlightPy(SOL[id]);
   });
   initWorker();
 });
@@ -819,6 +819,40 @@ function esc(s) {
   return String(s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+
+/* ── Python-Syntax-Highlighter für Musterlösungen ───────────
+   Arbeitet auf bereits HTML-escaptem Text (esc() wurde vorher aufgerufen).
+   Reihenfolge: Triple-Strings → Strings → Kommentare → Keywords → Zahlen
+   So werden Schlüsselwörter INNERHALB von Strings nicht eingefärbt.
+────────────────────────────────────────────────────────────── */
+function highlightPy(raw) {
+  const src = esc(raw);
+
+  // Regex-Alternation: längste/frühere Alternative gewinnt
+  const RE = new RegExp(
+    // 1) Triple-quoted strings (multi-line)
+    '("""[\\s\\S]*?"""|\'\'\'[\\s\\S]*?\'\'\')'
+    // 2) Single-line strings
+    + '|("(?:[^"\\\\]|\\\\.)*"|\'(?:[^\'\\\\]|\\\\.)*\')'
+    // 3) Comments  (# bis Zeilenende; &amp; etc. in esc()-Ausgabe kein Problem)
+    + '|(#[^\\n]*)'
+    // 4) Keywords
+    + '|\\b(False|None|True|and|as|assert|async|await|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield)\\b'
+    // 5) Numbers (int, float, complex)
+    + '|(\\b\\d+\\.?\\d*(?:[eE][+-]?\\d+)?[jJ]?\\b)',
+    'g'
+  );
+
+  return src.replace(RE, function(m, tqs, str, cmt, kw, num) {
+    if (tqs !== undefined) return '<span class="st">' + m + '</span>';
+    if (str !== undefined) return '<span class="st">' + m + '</span>';
+    if (cmt !== undefined) return '<span class="cm">' + m + '</span>';
+    if (kw  !== undefined) return '<span class="kw">' + m + '</span>';
+    if (num !== undefined) return '<span class="nb">' + m + '</span>';
+    return m;
+  });
+}
+
 
 function runCode(id) {
   if (!pyodideReady) { alert('Python lädt noch — bitte kurz warten.'); return; }
