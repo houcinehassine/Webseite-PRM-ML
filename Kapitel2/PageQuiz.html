@@ -371,6 +371,8 @@ function nextQ(qi) {
   }
 }
 
+const SK2 = 'prm-quiz-k2-score';
+
 function showResult() {
   document.getElementById('progressFill').style.width = '100%';
   const result = document.getElementById('quizResult');
@@ -395,6 +397,9 @@ function showResult() {
   ).join('');
 
   result.scrollIntoView({ behavior: 'smooth' });
+
+  // localStorage: Ergebnis speichern
+  localStorage.setItem(SK2, score + '/' + questions.length);
 }
 
 function restartQuiz() {
@@ -407,6 +412,21 @@ function restartQuiz() {
 }
 
 buildQuiz();
+
+// Letztes Ergebnis in Hero-Pills anzeigen
+(function() {
+  const saved = localStorage.getItem(SK2);
+  if (saved && !saved.startsWith('0/')) {
+    const pillRow = document.querySelector('.hero .pill-row');
+    if (pillRow) {
+      const chip = document.createElement('span');
+      chip.className = 'pill';
+      chip.style.cssText = 'background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface));color:var(--color-primary);font-weight:700';
+      chip.textContent = '↩ Letztes Ergebnis: ' + saved;
+      pillRow.appendChild(chip);
+    }
+  }
+})();
 </script>
 </body>
 </html>
