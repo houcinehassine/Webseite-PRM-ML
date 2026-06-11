@@ -611,6 +611,21 @@
   /* ── Start ──────────────────────────────────────────────── */
   buildQuiz();
   updateScore();
+
+  /* ── Tastatur: Enter löst "Antwort prüfen" für fokussierte Frage aus ── */
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    if (['INPUT','TEXTAREA','SELECT','BUTTON'].includes(document.activeElement?.tagName)) return;
+    // Erste sichtbare, noch nicht geprüfte Frage finden
+    const cards = document.querySelectorAll('.mcq');
+    for (const card of cards) {
+      const rect = card.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        const btn = card.querySelector('.mcq-check:not([disabled])');
+        if (btn) { e.preventDefault(); btn.click(); break; }
+      }
+    }
+  });
   </script>
 </body>
 </html>

@@ -211,7 +211,7 @@ def index_file(html_path: Path, kapitel: str, base_url: str) -> list[dict]:
         sec_type    = detect_type(section)
         snippet     = extract_snippet(section, sec_type)
         tags        = extract_tags(section, title)
-        full_text   = clean_text(section.get_text(), 500)
+        full_text   = clean_text(section.get_text(), 220)
 
         entries.append({
             "id":          f"{kapitel}/{html_path.name}#{sec_id}",
