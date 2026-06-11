@@ -408,35 +408,41 @@ export function registerSidebar(chapter) {
 
 /* ============================================================
    PRM – mathjax.js  |  Stand 30.05.2026
-   Lädt MathJax und rendert alle Formeln auf der Seite
+   Lädt MathJax NUR wenn die Seite LaTeX-Formeln enthält.
+   Spart ~1,1 MB auf Seiten ohne Formeln (Übersichten, Quizze …)
    ============================================================ */
 
-// Config MUSS vor dem Script-Tag gesetzt werden
-window.MathJax = {
-  tex: {
-    inlineMath:  [['\\(', '\\)']],
-    displayMath: [['\\[', '\\]']],
-    tags: 'ams'
-  },
-  options: {
-    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-  },
-  startup: {
-    ready() {
-      MathJax.startup.defaultReady();
-      // Nach vollständigem Laden alle Formeln rendern
-      MathJax.startup.promise.then(() => {
-        MathJax.typesetPromise();
-      });
-    }
-  }
-};
+(function initMathJaxIfNeeded() {
+  // Seiten ohne \( … \) oder \[ … \] brauchen kein MathJax
+  const html = document.body ? document.body.innerHTML : '';
+  if (!html.includes('\\(') && !html.includes('\\[')) return;
 
-// MathJax Script laden (lokal)
-const script = document.createElement('script');
-script.src = new URL('./vendor/mathjax-tex-chtml.js', import.meta.url).href;
-script.async = true;
-document.head.appendChild(script);
+  // Config MUSS vor dem Script-Tag gesetzt werden
+  window.MathJax = {
+    tex: {
+      inlineMath:  [['\\(', '\\)']],
+      displayMath: [['\\[', '\\]']],
+      tags: 'ams'
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    },
+    startup: {
+      ready() {
+        MathJax.startup.defaultReady();
+        MathJax.startup.promise.then(() => {
+          MathJax.typesetPromise();
+        });
+      }
+    }
+  };
+
+  // MathJax Script laden (lokal, 1,1 MB)
+  const mjScript = document.createElement('script');
+  mjScript.src   = new URL('./vendor/mathjax-tex-chtml.js', import.meta.url).href;
+  mjScript.async = true;
+  document.head.appendChild(mjScript);
+})();
 
 /* ============================================================
    PRM – copy.js (Kopieren & Ausführen)
