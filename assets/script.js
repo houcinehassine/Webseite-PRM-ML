@@ -343,6 +343,10 @@ export function registerSidebar(chapter) {
     let score = 0;
     let answered = 0;
 
+    // localStorage-Key aus Kapitel ableiten (z.B. "Kapitel1" → "prm-quiz-k1-score")
+    const kMatch = location.pathname.match(/Kapitel(\d)/);
+    const SK = kMatch ? 'prm-quiz-k' + kMatch[1] + '-score' : null;
+
     // ── DOM refs
     const elScore    = document.getElementById('quiz-score');
     const elAnswered = document.getElementById('quiz-answered');
@@ -380,6 +384,24 @@ export function registerSidebar(chapter) {
         bar.style.width = pct + '%';
       }));
       elResult.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // localStorage: letztes Ergebnis speichern
+      if (SK) localStorage.setItem(SK, score + '/' + TOTAL);
+    }
+
+    // Letztes Ergebnis in Hero anzeigen
+    if (SK) {
+      const saved = localStorage.getItem(SK);
+      if (saved) {
+        const heroNote = document.querySelector('.hero .pill-row, .quiz-hud');
+        if (heroNote) {
+          const chip = document.createElement('span');
+          chip.className = 'pill';
+          chip.style.cssText = 'background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface));color:var(--color-primary);font-weight:700';
+          chip.textContent = '↩ Letztes Ergebnis: ' + saved;
+          heroNote.appendChild(chip);
+        }
+      }
     }
 
     // ── Option click handler

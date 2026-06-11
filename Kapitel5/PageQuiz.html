@@ -233,6 +233,54 @@
         <div class="mc-grid" id="grid-code"></div>
       </section>
 
+      <!-- ── ERGEBNIS-SCREEN ──────────────────────────────── -->
+      <section class="section" id="quiz-ergebnis" style="display:none;text-align:center">
+        <div style="padding:var(--space-12) var(--space-4)">
+          <div id="ergebnis-emoji" style="font-size:3.5rem;line-height:1;margin-bottom:var(--space-4)">🎉</div>
+          <h2 style="font-size:var(--text-xl);margin-bottom:var(--space-3)">Quiz abgeschlossen!</h2>
+          <p style="color:var(--color-text-muted);max-width:480px;margin:0 auto var(--space-6)">
+            Du hast alle 18 Fragen bearbeitet. Hier ist dein Ergebnis:
+          </p>
+          <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;
+                      background:var(--color-surface-2);border:1px solid var(--color-border);
+                      border-radius:var(--radius-xl);padding:var(--space-5) var(--space-10);
+                      margin-bottom:var(--space-4)">
+            <span id="ergebnis-zahl"
+                  style="font-size:var(--text-2xl);font-weight:800;color:var(--color-primary)">
+              0 / 18
+            </span>
+            <span style="font-size:var(--text-sm);color:var(--color-text-muted)">
+              richtig beantwortet
+            </span>
+          </div>
+          <div style="margin-bottom:var(--space-8)">
+            <div style="width:100%;max-width:320px;height:8px;background:var(--color-border);
+                        border-radius:4px;overflow:hidden;margin:0 auto">
+              <div id="ergebnis-bar"
+                   style="height:100%;background:var(--color-primary);border-radius:4px;
+                          width:0%;transition:width .6s ease"></div>
+            </div>
+            <p id="ergebnis-msg" style="margin-top:var(--space-3);font-size:var(--text-sm);
+               font-weight:600;color:var(--color-text-muted)"></p>
+          </div>
+          <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
+            <button id="ergebnis-retry"
+                    style="padding:var(--space-3) var(--space-6);background:var(--color-primary);
+                           color:#fff;border:none;border-radius:var(--radius-md);
+                           font-size:var(--text-sm);font-weight:700;cursor:pointer">
+              ↺ Nochmal versuchen
+            </button>
+            <a href="PageCheatsheet.html"
+               style="display:inline-block;padding:var(--space-3) var(--space-6);
+                      background:var(--color-surface-2);border:1px solid var(--color-border);
+                      border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:700;
+                      text-decoration:none;color:var(--color-text)">
+              📋 Cheatsheet öffnen
+            </a>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
   <site-footer caption="Kapitel 5 · Ensemble Methods Quiz"></site-footer>
@@ -490,11 +538,38 @@
     return arr;
   }
 
+  const TOTAL_Q = 18;
+  const SK5 = 'prm-quiz-k5-score';
   let stats = { correct: 0, checked: 0 };
 
   function updateScore() {
     document.getElementById('score-correct').textContent = stats.correct;
-    document.getElementById('score-total').textContent   = `${stats.checked} / 18`;
+    document.getElementById('score-total').textContent   = `${stats.checked} / ${TOTAL_Q}`;
+
+    // Ergebnis-Screen anzeigen wenn alle beantwortet
+    if (stats.checked >= TOTAL_Q) {
+      const pct  = Math.round(stats.correct / TOTAL_Q * 100);
+      const res  = document.getElementById('quiz-ergebnis');
+      const zahl = document.getElementById('ergebnis-zahl');
+      const bar  = document.getElementById('ergebnis-bar');
+      const msg  = document.getElementById('ergebnis-msg');
+      const emoji = document.getElementById('ergebnis-emoji');
+
+      zahl.textContent  = `${stats.correct} / ${TOTAL_Q} (${pct}%)`;
+      bar.style.width   = pct + '%';
+      bar.style.background = pct >= 80 ? 'var(--color-success)'
+                           : pct >= 50 ? 'var(--color-primary)'
+                           : 'var(--color-warning)';
+      emoji.textContent = pct >= 80 ? '🎉' : pct >= 50 ? '💪' : '📚';
+      msg.textContent   = pct >= 80 ? 'Ausgezeichnet – prüfungsfit!'
+                        : pct >= 50 ? 'Gut – nochmal die schwachen Punkte wiederholen.'
+                        : 'Weiter üben – schau dir das Cheatsheet an!';
+      res.style.display = 'block';
+      setTimeout(() => res.scrollIntoView({ behavior: 'smooth', block: 'start' }), 400);
+
+      // localStorage speichern
+      localStorage.setItem(SK5, `${stats.correct}/${TOTAL_Q}`);
+    }
   }
 
   /* ── Einzelne Frage rendern ─────────────────────────────── */
@@ -611,6 +686,28 @@
   /* ── Start ──────────────────────────────────────────────── */
   buildQuiz();
   updateScore();
+
+  /* ── Ergebnis-Retry ─────────────────────────────────────── */
+  document.getElementById('ergebnis-retry').addEventListener('click', () => {
+    stats = { correct: 0, checked: 0 };
+    updateScore();
+    document.getElementById('quiz-ergebnis').style.display = 'none';
+    buildQuiz();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ── Letztes Ergebnis in Hero anzeigen ──────────────────── */
+  const savedK5 = localStorage.getItem(SK5);
+  if (savedK5) {
+    const heroNote = document.querySelector('.hero .pill-row');
+    if (heroNote) {
+      const chip = document.createElement('span');
+      chip.className = 'pill';
+      chip.style.cssText = 'background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface));color:var(--color-primary);font-weight:700';
+      chip.textContent = '↩ Letztes Ergebnis: ' + savedK5;
+      heroNote.appendChild(chip);
+    }
+  }
 
   /* ── Tastatur: Enter löst "Antwort prüfen" für fokussierte Frage aus ── */
   document.addEventListener('keydown', function(e) {
