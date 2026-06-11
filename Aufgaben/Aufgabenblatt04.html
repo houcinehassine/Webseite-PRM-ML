@@ -150,10 +150,11 @@
         <button class="btn btn-sol locked" id="sol-btn-task1" onclick="toggleSol('task1')">Lösung</button>
       </div>
       <div class="output-wrap">
+        <div class="output-label">Ausgabe</div>
         <div class="output" id="out-task1"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
       </div>
       <div class="sol-panel" id="sol-task1">
-        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-hdr">Musterlösung</div>
         <div class="sol-code">
           <button class="copy-sol" onclick="copySol('task1')">Kopieren</button>
           <pre id="solpre-task1"></pre>
@@ -177,10 +178,11 @@
         <button class="btn btn-sol locked" id="sol-btn-task2" onclick="toggleSol('task2')">Lösung</button>
       </div>
       <div class="output-wrap">
+        <div class="output-label">Ausgabe</div>
         <div class="output" id="out-task2"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
       </div>
       <div class="sol-panel" id="sol-task2">
-        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-hdr">Musterlösung</div>
         <div class="sol-code">
           <button class="copy-sol" onclick="copySol('task2')">Kopieren</button>
           <pre id="solpre-task2"></pre>
@@ -213,10 +215,11 @@
         <button class="btn btn-sol locked" id="sol-btn-task3" onclick="toggleSol('task3')">Lösung</button>
       </div>
       <div class="output-wrap">
+        <div class="output-label">Ausgabe</div>
         <div class="output" id="out-task3"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
       </div>
       <div class="sol-panel" id="sol-task3">
-        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-hdr">Musterlösung</div>
         <div class="sol-code">
           <button class="copy-sol" onclick="copySol('task3')">Kopieren</button>
           <pre id="solpre-task3"></pre>
@@ -241,10 +244,11 @@
         <button class="btn btn-sol locked" id="sol-btn-task4" onclick="toggleSol('task4')">Lösung</button>
       </div>
       <div class="output-wrap">
+        <div class="output-label">Ausgabe</div>
         <div class="output" id="out-task4"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
       </div>
       <div class="sol-panel" id="sol-task4">
-        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-hdr">Musterlösung</div>
         <div class="sol-code">
           <button class="copy-sol" onclick="copySol('task4')">Kopieren</button>
           <pre id="solpre-task4"></pre>
@@ -277,10 +281,11 @@
         <button class="btn btn-sol locked" id="sol-btn-task5" onclick="toggleSol('task5')">Lösung</button>
       </div>
       <div class="output-wrap">
+        <div class="output-label">Ausgabe</div>
         <div class="output" id="out-task5"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
       </div>
       <div class="sol-panel" id="sol-task5">
-        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-hdr">Musterlösung</div>
         <div class="sol-code">
           <button class="copy-sol" onclick="copySol('task5')">Kopieren</button>
           <pre id="solpre-task5"></pre>
@@ -304,10 +309,11 @@
         <button class="btn btn-sol locked" id="sol-btn-task6" onclick="toggleSol('task6')">Lösung</button>
       </div>
       <div class="output-wrap">
+        <div class="output-label">Ausgabe</div>
         <div class="output" id="out-task6"><span class="out-wait">Ausgabe erscheint hier nach dem Ausführen...</span></div>
       </div>
       <div class="sol-panel" id="sol-task6">
-        <div class="sol-hdr">✅ Musterlösung</div>
+        <div class="sol-hdr">Musterlösung</div>
         <div class="sol-code">
           <button class="copy-sol" onclick="copySol('task6')">Kopieren</button>
           <pre id="solpre-task6"></pre>
@@ -551,8 +557,13 @@ function runCode(id) {
     (figs || []).forEach(f => {
       html += `<div class="out-fig"><img src="data:image/png;base64,${f}" alt="Plot"></div>`;
     });
-    if (error) html += `<pre class="out-err">${esc(error)}</pre>`;
-    if (!html)  html  = '<span class="out-ok">✓ Code erfolgreich ausgeführt (keine Ausgabe)</span>';
+    if (error) {
+      // Fehler hervorheben: erste Zeile fett (Fehlertyp), Rest als Block
+      const lines = esc(error).split('\n');
+      const headline = lines[lines.length - 2] || lines[0] || '';
+      html += `<span class="out-err">${esc(error)}</span>`;
+    }
+    if (!html) html = '<span class="out-ok">Code erfolgreich ausgeführt (keine Ausgabe)</span>';
 
     out.innerHTML = html;
 
@@ -593,8 +604,17 @@ function toggleSol(id) {
 function copySol(id) {
   navigator.clipboard.writeText(SOL[id]).then(() => {
     const btn = document.querySelector(`#sol-${id} .copy-sol`);
-    btn.textContent = '✓ Kopiert';
-    setTimeout(() => btn.textContent = 'Kopieren', 1800);
+    btn.textContent = 'Kopiert!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Kopieren'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    // Fallback für Browser ohne Clipboard-API
+    const ta = document.createElement('textarea');
+    ta.value = SOL[id]; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    const btn = document.querySelector(`#sol-${id} .copy-sol`);
+    btn.textContent = 'Kopiert!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Kopieren'; btn.classList.remove('copied'); }, 2000);
   });
 }
 

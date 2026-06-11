@@ -211,59 +211,143 @@
 .btn-sol.locked::after{content:" 🔒";}
 
 /* ─── OUTPUT ─────────────────────────────────────────── */
-.output-wrap{margin-top:13px;}
+.output-wrap{margin-top:16px;}
+
+/* Beschriftungszeile über der Ausgabe */
+.output-label{
+  display:flex;align-items:center;gap:7px;
+  background:#161B22;
+  border:1px solid #30363D;border-bottom:none;
+  border-radius:9px 9px 0 0;
+  padding:7px 14px;
+  font-family:'JetBrains Mono','Fira Code',monospace;
+  font-size:.78rem;font-weight:600;
+  color:#8B949E;
+  letter-spacing:.04em;
+  user-select:none;
+}
+.output-label::before{
+  content:'▶';font-size:.6rem;color:#3FB950;
+}
+
 .output{
-  background:#0D1117;border-radius:9px;
-  padding:12px 14px;min-height:38px;
-  border:1px solid #21262D;
+  background:#0D1117;
+  border-radius:0 0 9px 9px;
+  padding:14px 16px;
+  min-height:56px;
+  border:1px solid #30363D;
+  border-top:none;
 }
 .output pre{
   font-family:'JetBrains Mono','Fira Code',monospace;
-  font-size:.82rem;white-space:pre-wrap;word-break:break-word;
+  font-size:.88rem;          /* größer als vorher (.82rem) */
+  line-height:1.7;
+  white-space:pre-wrap;
+  word-break:break-word;
+  margin:0;
 }
-.out-text{color:#E2E8F0;}
-.out-err{color:#F87171;}
-.out-ok{color:#4ADE80;font-size:.82rem;}
-.out-wait{color:#475569;font-size:.82rem;}
-.out-run{color:#60A5FA;font-size:.82rem;}
-.out-fig img{
-  max-width:100%;border-radius:7px;
-  margin-top:10px;border:1px solid #21262D;
+/* Normaler Text – hell auf dunklem Hintergrund */
+.out-text{color:#E6EDF3;}
+
+/* Fehlermeldung – klar rot, mit linker Akzentlinie */
+.out-err{
   display:block;
+  color:#FF7B72;
+  background:rgba(255,62,46,.08);
+  border-left:3px solid #F85149;
+  padding:8px 12px;
+  border-radius:0 5px 5px 0;
+  font-size:.87rem;
+  line-height:1.65;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+/* Erfolgsmeldung / Hinweis */
+.out-ok{
+  display:flex;align-items:center;gap:8px;
+  color:#3FB950;font-size:.85rem;font-weight:600;
+}
+.out-ok::before{content:'✓';font-size:1rem;}
+
+/* Warte-/Lauf-Status */
+.out-wait{
+  color:#6E7681;font-size:.85rem;
+  display:flex;align-items:center;gap:7px;
+}
+.out-run{
+  color:#58A6FF;font-size:.85rem;font-weight:600;
+  display:flex;align-items:center;gap:7px;
+  animation:pulse-out .9s ease-in-out infinite alternate;
+}
+@keyframes pulse-out{from{opacity:.6}to{opacity:1}}
+
+/* Plots */
+.out-fig{margin-top:14px;}
+.out-fig img{
+  max-width:100%;border-radius:8px;
+  border:1px solid #30363D;
+  display:block;
+  box-shadow:0 2px 12px rgba(0,0,0,.4);
 }
 
 /* ─── SOLUTION ───────────────────────────────────────── */
-.sol-panel{display:none;margin-top:13px;}
+.sol-panel{display:none;margin-top:18px;}
 .sol-panel.open{display:block;}
+
 .sol-hdr{
-  background:#FFFBEB;
-  border:1px solid #FCD34D;border-bottom:none;
-  padding:8px 14px;border-radius:9px 9px 0 0;
-  font-size:.75rem;font-weight:700;color:#92400E;
-  text-transform:uppercase;letter-spacing:.06em;
+  display:flex;align-items:center;gap:8px;
+  background:#161B22;
+  border:1px solid #3D9A54;border-bottom:none;
+  padding:9px 16px;border-radius:9px 9px 0 0;
+  font-size:.82rem;font-weight:700;
+  color:#3FB950;
+  letter-spacing:.03em;
 }
+.sol-hdr::before{content:'✅';font-size:.9rem;}
+
 .sol-code{
-  background:#1E1E2E;
-  border:1px solid #FCD34D;
+  background:#0D1117;
+  border:1px solid #3D9A54;
   border-top:none;border-radius:0 0 9px 9px;
-  padding:14px 16px;overflow-x:auto;
+  padding:18px 20px 18px 16px;
+  overflow-x:auto;
   position:relative;
 }
 .sol-code pre{
   font-family:'JetBrains Mono','Fira Code',monospace;
-  font-size:.82rem;color:#CDD6F4;
+  font-size:.9rem;           /* größer als vorher (.82rem) */
+  line-height:1.7;
+  color:#E6EDF3;
   white-space:pre;
   tab-size:4;
+  margin:0;
 }
+
+/* Python-Syntax-Highlighting per CSS (ohne externe Lib) */
+/* Farben ähnlich wie GitHub Dark */
+.sol-code .kw{color:#FF7B72;}   /* keywords */
+.sol-code .fn{color:#D2A8FF;}   /* function names */
+.sol-code .st{color:#A5D6FF;}   /* strings */
+.sol-code .cm{color:#8B949E;font-style:italic;} /* comments */
+.sol-code .nb{color:#79C0FF;}   /* builtins / numbers */
+
+/* Kopieren-Button */
 .copy-sol{
-  position:absolute;top:10px;right:10px;
-  background:rgba(99,102,241,.2);color:#A5B4FC;
-  border:1px solid rgba(99,102,241,.3);
-  border-radius:5px;padding:3px 9px;
-  font-size:.75rem;cursor:pointer;font-weight:600;
-  transition:background .15s;
+  position:absolute;top:12px;right:12px;
+  display:flex;align-items:center;gap:5px;
+  background:rgba(61,154,84,.15);
+  color:#3FB950;
+  border:1px solid rgba(61,154,84,.35);
+  border-radius:6px;padding:4px 11px;
+  font-size:.78rem;cursor:pointer;font-weight:600;
+  font-family:'Inter',sans-serif;
+  transition:background .15s,color .15s;
+  white-space:nowrap;
 }
-.copy-sol:hover{background:rgba(99,102,241,.35);}
+.copy-sol:hover{background:rgba(61,154,84,.28);color:#4ac960;}
+.copy-sol.copied{background:rgba(61,154,84,.3);color:#4ac960;}
+.copy-sol::before{content:'⎘';font-size:.9rem;}
 
 /* ─── QUIZ ───────────────────────────────────────────── */
 .q-answer{
