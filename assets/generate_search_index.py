@@ -95,23 +95,40 @@ def extract_snippet(section_el: Tag, section_type: str) -> str:
     return ''
 
 
+_PY_STOPWORDS = {
+    'True','False','None','import','from','class','def','for','while',
+    'if','else','elif','try','except','finally','with','return','print',
+    'range','len','self','args','kwargs','pass','raise','yield','lambda',
+    'assert','break','continue','global','nonlocal','and','not','or','in',
+    'type','list','dict','tuple','set','str','int','float','bool',
+}
+_PY_IDENT = re.compile(r'\b([a-z][a-z0-9_]{3,35})\b')
+
 def extract_tags(section_el: Tag, title: str) -> list[str]:
     """Extrahiert relevante Schlüsselwörter als Tags."""
     tags = set()
-    # Aus .key, .pill, .badge-Elementen
-    for el in section_el.find_all(class_=re.compile(r'key|pill|badge|tag', re.I)):
+    # Aus .key, .pill, .badge, .ref-name-Elementen
+    for el in section_el.find_all(class_=re.compile(r'key|pill|badge|tag|ref-name|ref-mod', re.I)):
+        t = el.get_text(strip=True)
+        if 2 < len(t) < 50:
+            tags.add(t)
+    # Aus inline <code>-Elementen (kurze Tokens, nicht <pre>-Kinder)
+    for el in section_el.find_all('code'):
+        if el.find_parent('pre'):
+            continue   # Nur inline-code, nicht Codeblock-Token
         t = el.get_text(strip=True)
         if 2 < len(t) < 40:
             tags.add(t)
-    # Aus code-Elementen (kurze Tokens)
-    for el in section_el.find_all('code'):
-        t = el.get_text(strip=True)
-        if 2 < len(t) < 30:
-            tags.add(t)
+    # Python-Identifier aus <pre><code>-Blöcken (API-Namen wie train_test_split)
+    for pre in section_el.find_all('pre'):
+        code_text = pre.get_text()
+        for ident in _PY_IDENT.findall(code_text):
+            if ident not in _PY_STOPWORDS and '_' in ident:
+                tags.add(ident)
     # Titelwörter (Wörter > 4 Buchstaben)
     for word in re.findall(r'\b\w{5,}\b', title):
         tags.add(word)
-    return sorted(tags)[:12]
+    return sorted(tags)[:20]
 
 
 def page_label(filename: str) -> str:
@@ -159,6 +176,16 @@ def index_file(html_path: Path, kapitel: str, base_url: str) -> list[dict]:
     # ── Gesamte Seite als Einstiegspunkt (ohne Anker) ──────────
     page_title_el = soup.find('h1')
     page_title = clean_text(page_title_el.get_text()) if page_title_el else page_name
+
+    # Pills aus der Hero-Section als Tags des Seiteneintrags sammeln
+    hero_tags = []
+    hero = soup.find('section', class_='hero')
+    if hero:
+        for el in hero.find_all(class_=re.compile(r'pill|key|badge|ref-name', re.I)):
+            t = el.get_text(strip=True)
+            if 2 < len(t) < 50:
+                hero_tags.append(t)
+
     entries.append({
         "id":          f"{kapitel}/{html_path.name}",
         "chapter":     chapter_name,
@@ -168,7 +195,7 @@ def index_file(html_path: Path, kapitel: str, base_url: str) -> list[dict]:
         "type":        "konzept",
         "url":         base_url,
         "anchor":      "",
-        "tags":        [],
+        "tags":        sorted(set(hero_tags))[:20],
     })
 
     # ── Alle Sektionen mit ID ───────────────────────────────────

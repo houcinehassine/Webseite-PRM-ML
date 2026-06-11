@@ -19,7 +19,12 @@
     "type": "konzept",
     "url": "Aufgaben/Aufgabenblatt01.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Data Preparation",
+      "Erklärung + Skript-Link",
+      "Mehrfachauswahl",
+      "Sofort-Feedback"
+    ]
   },
   {
     "id": "Aufgaben/Aufgabenblatt02.html",
@@ -93,13 +98,15 @@
       "Hauptaufgaben",
       "KFold",
       "KNeighborsClassifier",
+      "KNeighborsClassifier(n_neighbors=3)",
       "Kernaufgaben",
       "StandardScaler",
       "cross_val_score",
       "find_best_k(X, y, k_values)",
       "k_values",
       "k_values = range(1, 20)",
-      "make_regression"
+      "make_regression",
+      "my_cross_val_score(model, X, y, k)"
     ],
     "snippet": "my_cross_val_score(model, X, y, k)"
   },
@@ -181,7 +188,12 @@
       "accuracy_score > 0.8",
       "cluster_std=2.6",
       "load_digits()",
-      "make_blobs"
+      "make_blobs",
+      "n_jobs=-1",
+      "random_state=0",
+      "random_state=42",
+      "verbose=1",
+      "while"
     ],
     "snippet": "make_blobs"
   },
@@ -411,7 +423,8 @@
       "covariance_type",
       "diag",
       "full",
-      "interaktiv"
+      "interaktiv",
+      "predict_proba"
     ],
     "snippet": "covariance_type"
   },
@@ -464,7 +477,14 @@
     "type": "konzept",
     "url": "Kapitel1/Page01.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "4-Punkte-Agenda",
+      "Motivation",
+      "Navigation",
+      "Standard-Setup",
+      "Was erwartet dich?",
+      "Wochenplan"
+    ]
   },
   {
     "id": "Kapitel1/Page01.html#wochenplan",
@@ -527,6 +547,7 @@
     "anchor": "#setup",
     "tags": [
       "(N, K)",
+      "01_data_preparation_core.ipynb",
       "Kapitel",
       "Setup",
       "Standard",
@@ -563,7 +584,17 @@
     "type": "konzept",
     "url": "Kapitel1/Page02.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Definition",
+      "Diskriminativ",
+      "Domänenwissen",
+      "Feature-Matrix N×K",
+      "Features",
+      "Feedback-Loop",
+      "Informativ",
+      "Pipeline",
+      "Unabhängig"
+    ]
   },
   {
     "id": "Kapitel1/Page02.html#definition",
@@ -690,7 +721,16 @@
     "type": "konzept",
     "url": "Kapitel1/Page03.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "& Visualisierung",
+      "3D-Beispiel",
+      "Digits-Datensatz",
+      "Dimensionsreduktion",
+      "Feature-Raum",
+      "K-dimensionaler Raum",
+      "TF Projector",
+      "t-SNE"
+    ]
   },
   {
     "id": "Kapitel1/Page03.html#geometrie",
@@ -760,13 +800,17 @@
     "url": "Kapitel1/Page03.html",
     "anchor": "#digits",
     "tags": [
-      "(1797, 64)\n(1797,)",
+      "01_data_preparation_core.ipynb",
       "10 Cluster",
       "8 × 8",
       "= 64 dim",
       "Beispiel",
       "Digits",
       "Embedding",
+      "fit_transform",
+      "load_digits",
+      "n_components",
+      "random_state",
       "→ 2D"
     ],
     "snippet": "01_data_preparation_core.ipynb"
@@ -797,7 +841,17 @@
     "type": "konzept",
     "url": "Kapitel1/Page04.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "38.190 Zeitserien",
+      "9.613 Methoden",
+      "BirdNET",
+      "CompEngine",
+      "Domänen- vs. Datengetrieben",
+      "Event-triggered",
+      "Zeitserien-Szenario",
+      "aus Zeitserien",
+      "f: ℝᵀ → ℝᴷ"
+    ]
   },
   {
     "id": "Kapitel1/Page04.html#spektrum",
@@ -930,7 +984,16 @@
     "type": "konzept",
     "url": "Kapitel1/Page05.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "& Text Features",
+      ".fit() .transform()",
+      "Bag-of-Words",
+      "CountVectorizer",
+      "Feature Hashing",
+      "Kategoriale Variablen",
+      "LabelEncoder",
+      "OneHotEncoder"
+    ]
   },
   {
     "id": "Kapitel1/Page05.html#problem-kategoriale",
@@ -963,7 +1026,9 @@
     "anchor": "#label-encoding",
     "tags": [
       "Encoding",
-      "Label"
+      "Label",
+      "fit_transform",
+      "label_encoded"
     ],
     "snippet": "import numpy as np from sklearn.preprocessing import LabelEncoder # Kategorien als NumPy-Array categories = np.array(['apple', 'apple', 'milk', 'banana', 'coffee']) # Instanz erstellen labelencoder =…"
   },
@@ -980,7 +1045,10 @@
     "tags": [
       "Encoding",
       "Nachteil: Dimension steigt",
-      "Vorteil: Keine Ordnung"
+      "Vorteil: Keine Ordnung",
+      "fit_transform",
+      "handle_unknown",
+      "label_encoded"
     ],
     "snippet": "from sklearn.preprocessing import OneHotEncoder # Instanz erstellen ohe = OneHotEncoder(handle_unknown='ignore') # Variante A: mit numerischen Labels (aus LabelEncoder)…"
   },
@@ -1003,10 +1071,9 @@
       ".transform()",
       ".transform(X)",
       "Syntax",
-      "enc.fit(X_train)",
-      "enc.fit_transform(X_train)",
-      "enc.transform(X_test)",
-      "fit_transform"
+      "fit_transform",
+      "sklearn",
+      "transform"
     ],
     "snippet": ".fit()"
   },
@@ -1026,7 +1093,13 @@
       "Nachteil",
       "Vektor",
       "Vorteil",
-      "Words"
+      "Words",
+      "count_vectors",
+      "feature_extraction",
+      "fit_transform",
+      "hash_encoded",
+      "input_type",
+      "n_features"
     ],
     "snippet": "from sklearn.feature_extraction.text import CountVectorizer # Unser Korpus: 4 Dokumente corpus = [ 'This is the first document.', 'This is the second second document.', 'And the third one.', 'Is this…"
   },
@@ -1039,7 +1112,16 @@
     "type": "konzept",
     "url": "Kapitel1/Page06.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "& Haar Features",
+      "Bottleneck",
+      "Decoder",
+      "Encoder",
+      "Haar Features",
+      "Intensitätsdifferenz",
+      "Latent Space",
+      "Viola-Jones"
+    ]
   },
   {
     "id": "Kapitel1/Page06.html#einordnung",
@@ -1077,6 +1159,7 @@
       "Encoder",
       "Extraction",
       "Feature",
+      "Training: Rekonstruktionsfehler minimieren",
       "basierte"
     ],
     "snippet": ""
@@ -1147,7 +1230,17 @@
     "type": "konzept",
     "url": "Kapitel1/Page07.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "64 → 20",
+      "Clustermap",
+      "Curse of Dimensionality",
+      "Korrelation",
+      "Occam's Razor",
+      "SelectKBest",
+      "Selection",
+      "VarianceThreshold",
+      "mutual_info_classif"
+    ]
   },
   {
     "id": "Kapitel1/Page07.html#warum-selection",
@@ -1215,8 +1308,11 @@
     "tags": [
       "Einfache",
       "Feature",
+      "NaN-Anteil ≥ Schwelle → entfernen",
       "Selection",
       "VarianceThreshold",
+      "feature_selection",
+      "fit_transform",
       "threshold = 0.0",
       "threshold = 0.15 (Beispiel)"
     ],
@@ -1258,7 +1354,11 @@
       "chi2",
       "f_classif",
       "f_regression",
-      "mutual_info_*"
+      "feature_selection",
+      "fit_transform",
+      "load_digits",
+      "mutual_info_*",
+      "mutual_info_classif"
     ],
     "snippet": "from sklearn.datasets import load_digits from sklearn.feature_selection import SelectKBest, mutual_info_classif # Digits laden: 1797 Samples × 64 Features X, y = load_digits(return_X_y=True)…"
   },
@@ -1271,7 +1371,17 @@
     "type": "konzept",
     "url": "Kapitel1/Page08.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "& Normalisierung",
+      "Box-Cox",
+      "MinMax-Transformation",
+      "MinMaxScaler",
+      "PowerTransformer",
+      "Quantisierung",
+      "Skalensensitivität",
+      "StandardScaler",
+      "Z-Score"
+    ]
   },
   {
     "id": "Kapitel1/Page08.html#warum-scaling",
@@ -1295,7 +1405,9 @@
       "Random Forest",
       "SVM",
       "Warum",
-      "k-Means"
+      "k-Means",
+      "k-NN",
+      "skalieren"
     ],
     "snippet": ""
   },
@@ -1314,7 +1426,11 @@
       "MinMax-Formel",
       "Nachteil: Ausreißer",
       "Transformation",
-      "Vorteil"
+      "Vorteil",
+      "feature_range",
+      "fit_transform",
+      "max_value",
+      "min_value"
     ],
     "snippet": "import numpy as np from sklearn.preprocessing import MinMaxScaler # Zufällige Daten (10 Samples, 5 Features) X = np.random.randn(10, 5) # ── Variante A: From Scratch ─────────────────────── max_value…"
   },
@@ -1331,7 +1447,8 @@
     "tags": [
       "Score",
       "Standardisierung",
-      "Z-Score Formel"
+      "Z-Score Formel",
+      "fit_transform"
     ],
     "snippet": "from sklearn.preprocessing import StandardScaler # Daten (200 Samples, 1 Feature) – uniform verteilt X = np.random.rand(200, 1) # Vor der Skalierung print(X.mean()) # 0.4732... print(X.std()) #…"
   },
@@ -1348,7 +1465,10 @@
     "tags": [
       "Box-Coxλ ≈ 0.006",
       "Power",
-      "Transformations"
+      "PowerTransformer(method='yeo-johnson')",
+      "Transformations",
+      "fit_transform",
+      "lambdas_"
     ],
     "snippet": "Box-Coxλ ≈ 0.006"
   },
@@ -1450,7 +1570,13 @@
     "url": "Kapitel1/PageCheatsheet.html",
     "anchor": "#cs-encoding",
     "tags": [
-      "Encoding"
+      "Encoding",
+      "feature_extraction",
+      "fit_transform",
+      "handle_unknown",
+      "hash_encoded",
+      "input_type",
+      "n_features"
     ],
     "snippet": "from sklearn.preprocessing import LabelEncoder enc = LabelEncoder() # alphabetisch: apple=0,banana=1,coffee=2,milk=3 X_enc = enc.fit_transform(categories) # array([0, 0, 3, 1, 2]) # ⚠️ Künstliche…"
   },
@@ -1467,7 +1593,8 @@
     "tags": [
       "enc.fit(X_train)",
       "enc.fit_transform(X_train)",
-      "enc.transform(X_test)"
+      "enc.transform(X_test)",
+      "fit_transform"
     ],
     "snippet": "enc.fit(X_train)"
   },
@@ -1482,7 +1609,11 @@
     "url": "Kapitel1/PageCheatsheet.html",
     "anchor": "#cs-selection",
     "tags": [
-      "Selection"
+      "Selection",
+      "feature_selection",
+      "fit_transform",
+      "load_digits",
+      "mutual_info_classif"
     ],
     "snippet": "from sklearn.feature_selection import VarianceThreshold # Varianz prüfen (vor dem Threshold) X.var(axis=0) # array([0.139, 0.222, 0.250]) # threshold=0.0 → nur konstante entfernen # threshold=.15 →…"
   },
@@ -1512,7 +1643,10 @@
     "url": "Kapitel1/PageCheatsheet.html",
     "anchor": "#cs-scaling",
     "tags": [
-      "Scaling"
+      "Scaling",
+      "feature_range",
+      "fit_transform",
+      "lambdas_"
     ],
     "snippet": "from sklearn.preprocessing import MinMaxScaler scaler = MinMaxScaler() # default: [0,1] scaler = MinMaxScaler( feature_range=(-3, 5)) # custom range X_train_s = scaler.fit_transform(X_train) X_test_s…"
   },
@@ -1535,6 +1669,7 @@
       "OneHotEncoder",
       "PowerTransformer(box-cox)",
       "RobustScaler",
+      "SelectKBest(mutual_info_classif)",
       "StandardScaler",
       "VarianceThreshold(0.0)"
     ],
@@ -1612,7 +1747,14 @@
     "type": "konzept",
     "url": "Kapitel2/Page01.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "6 Agenda-Punkte",
+      "Ausgangssituation",
+      "Navigation",
+      "Was dich erwartet",
+      "Was ist ML?",
+      "Wochenplan"
+    ]
   },
   {
     "id": "Kapitel2/Page01.html#wochenplan",
@@ -1708,7 +1850,15 @@
     "type": "konzept",
     "url": "Kapitel2/Page02.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Feature-Matrix X",
+      "Label-Vektor y",
+      "Reinforcement Learning",
+      "Supervised Learning",
+      "Trainingsdatensatz",
+      "Unsupervised Learning",
+      "des ML"
+    ]
   },
   {
     "id": "Kapitel2/Page02.html#drei-kategorien",
@@ -1848,7 +1998,16 @@
     "type": "konzept",
     "url": "Kapitel2/Page03.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Klassifikation",
+      "Kontinuierliche Labels",
+      "Modellparameter",
+      "Prediction",
+      "Regression",
+      "Scoring",
+      "Trainingsdatensatz",
+      "Trennlinie"
+    ]
   },
   {
     "id": "Kapitel2/Page03.html#klassifikation",
@@ -1976,7 +2135,17 @@
     "type": "konzept",
     "url": "Kapitel2/Page04.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Abstandsmaß",
+      "Clustering",
+      "Dichteschätzung",
+      "Dimensionsreduktion",
+      "Diskrete Gruppen",
+      "Latente Variable",
+      "Spirale",
+      "Unlabelled Data",
+      "latenten Variable"
+    ]
   },
   {
     "id": "Kapitel2/Page04.html#clustering",
@@ -2051,7 +2220,17 @@
     "type": "konzept",
     "url": "Kapitel2/Page05.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      ".fit()",
+      ".predict()",
+      ".transform()",
+      "6 Bereiche",
+      "6 Bereiche von sklearn",
+      "LinearRegression",
+      "NumPy · DataFrame",
+      "scikit-learn",
+      "sklearn API"
+    ]
   },
   {
     "id": "Kapitel2/Page05.html#sklearn-ueberblick",
@@ -2090,9 +2269,16 @@
       "Schritte",
       "cluster",
       "from sklearn.X import Y",
+      "from sklearn.cluster import KMeans",
       "importiere",
       "linear_model",
-      "max_depth=5"
+      "max_depth=5",
+      "model = Y(hyperparameter=wert)",
+      "model.fit(X)",
+      "model.fit(X, y)",
+      "n_clusters=3",
+      "svm",
+      "y_pred = model.predict(X_new)"
     ],
     "snippet": "from sklearn.X import Y"
   },
@@ -2118,7 +2304,10 @@
       "Pandas Series",
       "erwartet",
       "np.ndarray",
-      "pd.DataFrame"
+      "pd.DataFrame",
+      "pd.Series",
+      "reshape(-1, 1)",
+      "werden"
     ],
     "snippet": "(n_samples, n_features)"
   },
@@ -2144,7 +2333,15 @@
       "LinearRegression",
       "RandomState(42)",
       "Regression",
-      "linspace"
+      "coef_",
+      "intercept_",
+      "linear_model",
+      "linspace",
+      "model = LinearRegression()",
+      "model.coef_",
+      "model.fit(X, y)",
+      "model.intercept_",
+      "reshape(-1, 1)"
     ],
     "snippet": "y = 2 · X + Rauschen"
   },
@@ -2157,7 +2354,16 @@
     "type": "konzept",
     "url": "Kapitel2/Page06.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Generalisierung",
+      "Grundlagen",
+      "Holdout Sets",
+      "Not-So-Right Way",
+      "Warum validieren?",
+      "accuracy_score",
+      "model.score()",
+      "train_test_split"
+    ]
   },
   {
     "id": "Kapitel2/Page06.html#warum-validieren",
@@ -2177,6 +2383,7 @@
       "entscheidender Bedeutung",
       "objektiv",
       "validieren",
+      "zugrundeliegenden Daten gut repräsentieren",
       "① Modell wählen",
       "② Hyperparameter wählen"
     ],
@@ -2195,9 +2402,14 @@
     "tags": [
       "Iris-Datensatz",
       "Right",
+      "accuracy_score",
       "denselben Daten",
       "fundamental falsch",
+      "load_iris",
+      "n_neighbors",
       "n_neighbors=1",
+      "target_names",
+      "y_model",
       "❌ FAIL"
     ],
     "snippet": "# Iris-Datensatz laden from sklearn.datasets import load_iris iris = load_iris() X = iris.data # Feature-Matrix: (150, 4) y = iris.target # Labels: (150,) print(\"X.shape:\", X.shape) print(\"y.shape:\",…"
@@ -2222,9 +2434,17 @@
       "Score",
       "X_test",
       "X_train",
+      "accuracy_score",
       "accuracy_score()",
+      "accuracy_score(y_test, y_pred)",
+      "accuracy_score(y_test, y_predicted)",
       "accuracy_score(ytest, ypredicted)",
-      "model.score()"
+      "model.score()",
+      "model.score(X_test, y_test)",
+      "model.score(Xtest, ytest)",
+      "score_v1",
+      "score_v2",
+      "y_predicted"
     ],
     "snippet": "from sklearn.metrics import accuracy_score"
   },
@@ -2246,11 +2466,19 @@
       "X.shape",
       "X_test",
       "X_train",
+      "X_train, X_test, y_train, y_test",
+      "model_selection",
+      "n_neighbors",
       "random_state=42",
       "test_size=0.2",
+      "train_size",
       "train_size=0.5",
       "train_test_split",
-      "train_test_split()"
+      "train_test_split()",
+      "train_test_split(X, y, train_size=<ratio>)",
+      "y.shape",
+      "y_test",
+      "y_train"
     ],
     "snippet": "X.shape"
   },
@@ -2263,7 +2491,17 @@
     "type": "konzept",
     "url": "Kapitel2/Page07.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "& Splits",
+      "3-Way Split",
+      "Cross-Validation",
+      "K-Fold",
+      "Leave-One-Out",
+      "Repeated K-Fold",
+      "Two-Fold CV",
+      "Workflow",
+      "cross_val_score"
+    ]
   },
   {
     "id": "Kapitel2/Page07.html#two-fold",
@@ -2279,9 +2517,15 @@
       "Cross",
       "Two-Fold CV",
       "Validation",
+      "accuracy_score",
+      "mean_acc",
+      "model_selection",
+      "train_size",
       "train_size=0.5",
       "train_test_split",
-      "two-fold cross validation"
+      "two-fold cross validation",
+      "y1_model",
+      "y2_model"
     ],
     "snippet": "train_test_split"
   },
@@ -2302,10 +2546,12 @@
       "Leave",
       "Leave-One-Out",
       "Validation",
+      "cross_val_score",
       "cross_val_score()",
       "cross_val_score(model, X, y, cv=k)",
       "cv=5",
-      "cv=LeaveOneOut()"
+      "cv=LeaveOneOut()",
+      "model_selection"
     ],
     "snippet": "cross_val_score()"
   },
@@ -2372,8 +2618,14 @@
       "Repeated K-Fold",
       "RepeatedKFold",
       "Validation",
+      "cross_val_score",
+      "cross_val_score(model, X, y, cv=5)",
+      "model_selection",
+      "n_repeats",
+      "n_splits",
       "n_splits × n_repeats",
-      "n_splits=5 × n_repeats=3"
+      "n_splits=5 × n_repeats=3",
+      "random_state"
     ],
     "snippet": "RepeatedKFold"
   },
@@ -2386,7 +2638,19 @@
     "type": "konzept",
     "url": "Kapitel2/Page08.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Best Model",
+      "Bias",
+      "Dartscheibe",
+      "High-Bias",
+      "High-Variance",
+      "Hyperparameter",
+      "Overfitting",
+      "Parameter",
+      "Underfitting",
+      "Validierungskurven",
+      "Variance"
+    ]
   },
   {
     "id": "Kapitel2/Page08.html#hyperparameter-vs-parameter",
@@ -2410,7 +2674,13 @@
       "Hyperparameters",
       "Learning is finding parameters!",
       "Mehr Trainingsdaten",
-      "Modellkomplexität erhöhen"
+      "Modellkomplexität erhöhen",
+      "Modellkomplexität verringern",
+      "Parameter",
+      "Parameters",
+      "degree=3",
+      "max_depth=5",
+      "n_neighbors=1"
     ],
     "snippet": "n_neighbors=1"
   },
@@ -2493,7 +2763,16 @@
     "type": "konzept",
     "url": "Kapitel2/Page09.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Konvergenz",
+      "Learning Curves",
+      "PolynomialFeatures",
+      "Validierungskurven",
+      "degree=3 optimal",
+      "f(x) = aₙxⁿ+…+a₀",
+      "learning_curve",
+      "validation_curve"
+    ]
   },
   {
     "id": "Kapitel2/Page09.html#polynomiale-regression",
@@ -2517,7 +2796,8 @@
       "Vertreter",
       "degree=1",
       "degree=3",
-      "degree=5+"
+      "degree=5+",
+      "validation_curve()"
     ],
     "snippet": "validation_curve()"
   },
@@ -2535,8 +2815,12 @@
       "LinearRegression",
       "PolynomialFeatures",
       "PolynomialRegression()",
+      "linear_model",
+      "make_data",
       "make_data()",
       "make_data(N)",
+      "make_pipeline",
+      "param_name='polynomialfeatures__degree'",
       "sklearn"
     ],
     "snippet": "PolynomialRegression()"
@@ -2552,12 +2836,16 @@
     "url": "Kapitel2/Page09.html",
     "anchor": "#validation-curve",
     "tags": [
+      "model_selection",
       "np.mean(scores, 1)",
       "np.median(scores, 1)",
+      "param_name",
       "param_range",
       "polynomialfeatures__degree",
       "sklearn",
+      "train_score",
       "train_scores, val_scores",
+      "val_score",
       "validation_curve",
       "validation_curve()"
     ],
@@ -2597,7 +2885,16 @@
       "Datenmenge",
       "Konzept",
       "Learning",
-      "Learning Curves"
+      "Learning Curves",
+      "make_data",
+      "param_name",
+      "param_range",
+      "polynomialfeatures__degree",
+      "train_s",
+      "train_s2",
+      "val_s",
+      "val_s2",
+      "validation_curve"
     ],
     "snippet": "# 200 Datenpunkte generieren X2, y2 = make_data(200) plt.scatter(X2.ravel(), y2, color='blue', s=8) plt.title('Mehr Daten: N=200') plt.xlabel('x'); plt.ylabel('y') plt.show()"
   },
@@ -2643,11 +2940,19 @@
       "degree=2",
       "degree=9",
       "figsize=(6,8)",
+      "learning_curve",
       "learning_curve()",
       "mehr Daten",
+      "model_selection",
       "np.linspace(0.3, 1, 25)",
       "np.mean(scores, 1)",
-      "sklearn"
+      "set_title",
+      "set_xlabel",
+      "set_ylabel",
+      "set_ylim",
+      "sklearn",
+      "subplot(2,1)",
+      "tight_layout"
     ],
     "snippet": "learning_curve(model, X, y, cv=..., train_sizes=...)"
   },
@@ -2660,7 +2965,15 @@
     "type": "konzept",
     "url": "Kapitel2/Page10.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      ".best_estimator_",
+      ".best_params_",
+      "Abschluss",
+      "Fehlerfläche",
+      "GridSearchCV",
+      "Hyperparameter-Tuning",
+      "param_grid"
+    ]
   },
   {
     "id": "Kapitel2/Page10.html#grid-search-konzept",
@@ -2701,9 +3014,16 @@
       "PolynomialRegression()",
       "PolynomialRegression(degree)",
       "fit_intercept",
+      "grid_pipeline",
+      "linear_model",
+      "linearregression__fit_intercept",
+      "make_data",
       "make_data()",
       "make_data(50)",
+      "make_pipeline",
+      "model_selection",
       "param_grid",
+      "polynomialfeatures__degree",
       "stepname__param",
       "stufenname__parametername"
     ],
@@ -2730,8 +3050,15 @@
       "Anwendung",
       "Ergebnisse",
       "GridSearchCV",
+      "GridSearchCV(model, param_grid, cv=k)",
+      "best_estimator_",
+      "best_params_",
+      "best_score_",
       "grid.best_estimator_",
-      "grid.best_params_"
+      "grid.best_params_",
+      "grid.fit(X, y)",
+      "param_grid",
+      "y_new"
     ],
     "snippet": "grid.fit(X, y)"
   },
@@ -2768,7 +3095,9 @@
     "type": "konzept",
     "url": "Kapitel2/PageCheatsheet.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Cheatsheet"
+    ]
   },
   {
     "id": "Kapitel2/PageQuiz.html",
@@ -2779,7 +3108,13 @@
     "type": "konzept",
     "url": "Kapitel2/PageQuiz.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "15 Fragen",
+      "Einführung ML",
+      "Erklärungen",
+      "Multiple Choice",
+      "Sofortiges Feedback"
+    ]
   },
   {
     "id": "Kapitel3/Page01.html",
@@ -2790,7 +3125,17 @@
     "type": "konzept",
     "url": "Kapitel3/Page01.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "4 Agenda-Punkte",
+      "Diskriminativer Klassifikator",
+      "ML-Taxonomie",
+      "Navigation",
+      "SVC",
+      "SVC vs. SVR",
+      "SVR",
+      "Standard-Setup",
+      "Support Vector Machines"
+    ]
   },
   {
     "id": "Kapitel3/Page01.html#wo-befinden-wir-uns",
@@ -2814,7 +3159,9 @@
       "SVC vs. SVR",
       "SVR",
       "Standard-Setup",
-      "Support"
+      "Support",
+      "Support Vector Machines",
+      "Vector"
     ],
     "snippet": "03_core.ipynb"
   },
@@ -2871,10 +3218,18 @@
       "Regression",
       "SVC",
       "SVR",
+      "cluster_std",
       "cluster_std=0.60",
       "diskriminativ",
+      "make_blobs",
       "make_blobs()",
-      "random_state=0"
+      "n_samples",
+      "random_state",
+      "random_state=0",
+      "set_title",
+      "set_xlabel",
+      "set_ylabel",
+      "tight_layout"
     ],
     "snippet": "SVC"
   },
@@ -2898,9 +3253,17 @@
       "SVC",
       "Setup",
       "Standard",
+      "decision_function",
       "decision_function()",
       "dieses",
-      "kernel"
+      "get_xlim",
+      "get_ylim",
+      "kernel",
+      "levels=[-1, 0, 1]",
+      "linestyles=['--', '-', '--']",
+      "make_blobs",
+      "make_blobs / make_circles",
+      "make_circles"
     ],
     "snippet": "03_core.ipynb"
   },
@@ -2930,7 +3293,17 @@
     "type": "konzept",
     "url": "Kapitel3/Page02.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Hyperebene",
+      "Margin",
+      "Margin-Band",
+      "Maximum Margin Estimator",
+      "Mehrere Geraden",
+      "Robustheit",
+      "SVC.fit()",
+      "Support Vectors",
+      "support_vectors_"
+    ]
   },
   {
     "id": "Kapitel3/Page02.html#klassifikatoren",
@@ -2954,7 +3327,8 @@
       "SVC.fit()",
       "Support",
       "Support Vectors",
-      "Vectors"
+      "Vectors",
+      "support_vectors_"
     ],
     "snippet": "SVC"
   },
@@ -2989,8 +3363,15 @@
       "Problem",
       "Trenngeraden",
       "Unendlich",
+      "cluster_std",
+      "make_blobs",
+      "n_samples",
+      "random_state",
+      "set_title",
+      "tight_layout",
       "unterschiedlichen Konsequenzen",
-      "viele"
+      "viele",
+      "x_fit"
     ],
     "snippet": "import matplotlib.pyplot as plt import numpy as np from sklearn.datasets import make_blobs X, y = make_blobs(n_samples=50, centers=2, random_state=0, cluster_std=0.60) x_fit = np.linspace(-1, 3.5)…"
   },
@@ -3010,7 +3391,11 @@
       "Margin-Band",
       "Maximierung",
       "Maximum Margin Estimators",
-      "fill_between()"
+      "fill_between",
+      "fill_between()",
+      "set_title",
+      "tight_layout",
+      "x_fit"
     ],
     "snippet": "fig, ax = plt.subplots(figsize=(5, 4)) ax.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='autumn', edgecolors='gray') # (m, b, d) = Steigung, Achsenabschnitt, Margin-Breite for m, b, d in [(1, 0.65,…"
   },
@@ -3036,7 +3421,12 @@
       "Training",
       "drei Datenpunkte",
       "kernel",
-      "kernel='linear'"
+      "kernel='linear'",
+      "plot_svc_decision_function",
+      "plot_svc_decision_function()",
+      "set_title",
+      "support_vectors_",
+      "tight_layout"
     ],
     "snippet": "SVC()"
   },
@@ -3057,7 +3447,10 @@
       "Konzept",
       "Support",
       "Vectors",
-      "entscheidenden Datenpunkte"
+      "entscheidenden Datenpunkte",
+      "n_features",
+      "n_sv",
+      "support_vectors_"
     ],
     "snippet": ".support_vectors_"
   },
@@ -3077,7 +3470,17 @@
       "Robustheit",
       "Support",
       "Vectors",
-      "figsize=(5, 9)"
+      "cluster_std",
+      "figsize=(5, 9)",
+      "make_blobs",
+      "n_samples",
+      "plot_svc_decision_function",
+      "random_state",
+      "set_title",
+      "set_xlim",
+      "set_ylim",
+      "support_vectors_",
+      "tight_layout"
     ],
     "snippet": "N=60"
   },
@@ -3094,8 +3497,16 @@
     "tags": [
       "Klassifikatoren",
       "Margin-Maximierung",
+      "cluster_std",
       "cluster_std=1.2",
-      "std=1.2"
+      "make_blobs",
+      "n_samples",
+      "plot_svc_decision_function",
+      "random_state",
+      "set_title",
+      "std=1.2",
+      "support_vectors_",
+      "tight_layout"
     ],
     "snippet": "cluster_std=1.2"
   },
@@ -3108,7 +3519,17 @@
     "type": "konzept",
     "url": "Kapitel3/Page03.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Abstand r",
+      "Bias b",
+      "Hard-Margin",
+      "Hintergrund",
+      "Hyperebene",
+      "Normalenvektor w",
+      "Trainingsdatensatz",
+      "Vorzeichen & sgn()",
+      "min ½‖w‖²"
+    ]
   },
   {
     "id": "Kapitel3/Page03.html#grundlagen",
@@ -3149,10 +3570,16 @@
       "Datensatz",
       "Grundlagen",
       "Hyperebene",
+      "cluster_std",
+      "coef_",
+      "intercept_",
+      "make_blobs",
       "model.coef_",
       "model.coef_[0]",
       "model.intercept_",
-      "model.intercept_[0]"
+      "model.intercept_[0]",
+      "n_samples",
+      "random_state"
     ],
     "snippet": "0"
   },
@@ -3169,7 +3596,11 @@
     "tags": [
       "Hyperebene",
       "Vorzeichen",
-      "decision_function()"
+      "decision_function",
+      "decision_function()",
+      "set_title",
+      "tight_layout",
+      "y_signed"
     ],
     "snippet": "decision_function()"
   },
@@ -3203,7 +3634,11 @@
       "Herleitung",
       "Margin",
       "Soft-Margin auf Seite 04",
-      "min ½‖w‖²"
+      "decision_function",
+      "min ½‖w‖²",
+      "norm_w",
+      "support_vectors_",
+      "sv_vals"
     ],
     "snippet": "# Hard-Margin Mathematik verifizieren norm_w = np.linalg.norm(w) r = 1 / norm_w # Abstand Support Vector → Hyperebene print(f\"‖w‖ = {norm_w:.4f}\") print(f\"r = 1/‖w‖ = {r:.4f} (halber Margin)\")…"
   },
@@ -3216,7 +3651,17 @@
     "type": "konzept",
     "url": "Kapitel3/Page04.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "C-Parameter",
+      "Gradienten ∇w, ∇b",
+      "Hard-",
+      "Hard- vs. Soft-Margin",
+      "Hinge Loss",
+      "Optimierung",
+      "Regularisierung",
+      "Slack-Variable ξ",
+      "Soft-Margin"
+    ]
   },
   {
     "id": "Kapitel3/Page04.html#soft-margin-intro",
@@ -3295,10 +3740,19 @@
       "C=10",
       "GridSearchCV",
       "Vergleich",
+      "cluster_std",
       "cluster_std=0.8",
       "cross_val_score",
       "figsize=(5, 9)",
-      "std=0.8"
+      "make_blobs",
+      "n_samples",
+      "n_sv",
+      "plot_svc_decision_function",
+      "random_state",
+      "set_title",
+      "std=0.8",
+      "support_vectors_",
+      "tight_layout"
     ],
     "snippet": "cluster_std=0.8"
   },
@@ -3315,7 +3769,13 @@
     "tags": [
       "Function",
       "Hinge",
-      "Hinge Loss"
+      "Hinge Loss",
+      "set_title",
+      "set_xlabel",
+      "set_ylabel",
+      "set_ylim",
+      "tight_layout",
+      "zero_one"
     ],
     "snippet": "t = np.linspace(-0.5, 2.5, 300) # Hinge Loss: max(0, 1-t) hinge = np.maximum(0, 1 - t) # 0-1 Loss (vereinfacht) zero_one = (t < 1).astype(float) fig, ax = plt.subplots(figsize=(5, 4)) ax.plot(t,…"
   },
@@ -3334,7 +3794,10 @@
       "Gradienten",
       "SVM from Scratch auf Seite 05",
       "Slack-Variable ξ_i",
-      "abschnittsweise"
+      "abschnittsweise",
+      "compute_gradient",
+      "yi_signed",
+      "zeros_like"
     ],
     "snippet": "def compute_gradient(X, y, w, b, C): \"\"\"Abschnittsweise Gradienten des Hinge Loss.\"\"\" dw = np.zeros_like(w) db = 0.0 for xi, yi in zip(X, y): # yi ∈ {-1, +1}: intern umrechnen yi_signed = 1 if yi ==…"
   },
@@ -3347,7 +3810,16 @@
     "type": "konzept",
     "url": "Kapitel3/Page05.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Bonus: Animation",
+      "Gradientenabstieg-Algorithmus",
+      "Loss-Kurve",
+      "from Scratch",
+      "svm_gradients()",
+      "svm_loss()",
+      "svm_train()",
+      "visualize_svm_training()"
+    ]
   },
   {
     "id": "Kapitel3/Page05.html#loss-function",
@@ -3389,8 +3861,13 @@
       "Python",
       "Setup",
       "X @ w",
+      "cluster_std",
       "hinge.sum()",
+      "make_blobs",
+      "n_samples",
       "np.maximum(0, ...)",
+      "random_state",
+      "svm_loss",
       "svm_loss(X, y, w, b, C)",
       "y * (X @ w + b)"
     ],
@@ -3411,6 +3888,7 @@
       "Exercise",
       "Session",
       "mask = scores < 1",
+      "n_violated",
       "scores = y * (X@w+b)",
       "svm_gradients",
       "svm_gradients()",
@@ -3453,14 +3931,22 @@
       "C=1.0",
       "Exercise",
       "Session",
+      "b_trained",
       "epochs",
       "lr=0.001",
+      "set_title",
+      "set_xlabel",
+      "set_ylabel",
+      "set_yscale",
+      "svm_gradients",
       "svm_gradients()",
+      "svm_loss",
       "svm_loss()",
       "svm_train",
       "svm_train()",
-      "w -= lr * dw",
-      "w = np.zeros(...)"
+      "svm_train(X, y, C, lr, epochs)",
+      "tight_layout",
+      "w -= lr * dw"
     ],
     "snippet": "svm_train()"
   },
@@ -3480,13 +3966,21 @@
       "SVC",
       "Session",
       "animate_svm_training()",
+      "b_trained",
+      "coef_",
+      "history_b",
       "history_b = []",
       "history_b[i]",
+      "history_w",
       "history_w = []",
       "history_w.append(w.copy())",
       "history_w[i]",
       "history_w[k]",
-      "losses[k]"
+      "intercept_",
+      "losses[k]",
+      "matplotlib.animation.FuncAnimation",
+      "set_title",
+      "set_ylim"
     ],
     "snippet": "visualize_svm_training()"
   },
@@ -3499,7 +3993,18 @@
     "type": "konzept",
     "url": "Kapitel3/Page06.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "2D→3D Projektion",
+      "Daten in höhere Dimensionen projizieren",
+      "Elliptische Grenze",
+      "Kernel-Trick",
+      "Radial Basis Function",
+      "Radial Basis Functions (RBF)",
+      "kernel='rbf'",
+      "linear nicht trennbar",
+      "make_circles",
+      "r = exp(−‖x‖²)"
+    ]
   },
   {
     "id": "Kapitel3/Page06.html#nicht-linear-intro",
@@ -3523,7 +4028,10 @@
       "Radial Basis Functions (RBF)",
       "Trick",
       "kernel='rbf'",
-      "linear nicht trennbar"
+      "linear nicht trennbar",
+      "lineare",
+      "make_circles",
+      "r = exp(−‖x‖²)"
     ],
     "snippet": "kernel='rbf'"
   },
@@ -3540,12 +4048,18 @@
     "tags": [
       "Nicht",
       "Problem",
+      "clf_linear",
       "factor=0.1",
       "grundsätzlich unmöglich",
       "linear",
+      "make_circles",
       "make_circles()",
       "noise=0.1",
-      "separierbar"
+      "plot_support",
+      "plot_svc_decision_function",
+      "separierbar",
+      "set_title",
+      "tight_layout"
     ],
     "snippet": "make_circles()"
   },
@@ -3567,7 +4081,14 @@
       "X**2",
       "axis=1",
       "concatenate",
+      "dist_sq",
+      "mpl_toolkits",
       "reshape(-1, 1)",
+      "set_xlabel",
+      "set_ylabel",
+      "set_zlabel",
+      "tight_layout",
+      "view_init",
       "view_init()"
     ],
     "snippet": "print(\"X[:5] — Rohdaten (x₁, x₂):\") print(X[:5].round(3)) print(\"\\n(X**2)[:5] — Quadriert (x₁², x₂²):\") print((X**2)[:5].round(3))"
@@ -3585,11 +4106,18 @@
     "tags": [
       "C=1E6",
       "Kernel",
+      "Multi-Class SVMs & Praxis-Anwendungen → Seite 07",
       "SVC(kernel='rbf')",
       "Trick",
+      "classes_",
+      "clf_cmp",
       "figsize=(5, 9)",
       "gamma",
-      "kernel='rbf'"
+      "kernel='rbf'",
+      "plot_svc_decision_function",
+      "set_title",
+      "support_vectors_",
+      "tight_layout"
     ],
     "snippet": "kernel='rbf'"
   },
@@ -3602,7 +4130,19 @@
     "type": "konzept",
     "url": "Kapitel3/Page07.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "8×8 Arrays",
+      "Digits-Dataset",
+      "Kugellager-Diagnose",
+      "N(N−1)/2 SVMs",
+      "One-vs-One",
+      "One-vs-One-Ansatz",
+      "PCA",
+      "Praxis-Anwendungen",
+      "accuracy_score",
+      "fetch_lfw_people",
+      "make_pipeline"
+    ]
   },
   {
     "id": "Kapitel3/Page07.html#multi-class",
@@ -3626,7 +4166,10 @@
       "One-vs-One-Ansatz",
       "PCA",
       "Praxis",
-      "Praxis-Anwendungen"
+      "Praxis-Anwendungen",
+      "accuracy_score",
+      "fetch_lfw_people",
+      "make_pipeline"
     ],
     "snippet": "accuracy_score"
   },
@@ -3666,9 +4209,20 @@
       "Handschrifterkennung",
       "PIL.Image.resize((8,8))",
       "accuracy_score",
+      "digits.data.shape = (1797, 64)",
       "digits.target",
       "gamma=0.001",
-      "rbf"
+      "gray_r",
+      "load_digits",
+      "model.predict([array.flatten()])",
+      "model_selection",
+      "random_state",
+      "rbf",
+      "set_title",
+      "target_names",
+      "test_size",
+      "tight_layout",
+      "train_test_split"
     ],
     "snippet": "8 × 8 Pixel"
   },
@@ -3687,14 +4241,22 @@
       "Anwendung",
       "PCA(n_components=150)",
       "Recognition",
+      "SVC(kernel='rbf', C=10, gamma=0.001)",
       "accuracy_score",
       "fetch_lfw_people",
       "fit(X_tr, y_tr)",
       "make_pipeline",
       "make_pipeline(pca, svc)",
+      "min_faces",
+      "min_faces_per_person",
       "min_faces_per_person=60",
+      "model_selection",
+      "n_components",
       "predict(X_te)",
-      "sklearn.metrics"
+      "random_state",
+      "set_title",
+      "sklearn.metrics",
+      "target_names"
     ],
     "snippet": "make_pipeline(pca, svc)"
   },
@@ -3718,7 +4280,16 @@
       "OvO (N(N-1)/2 SVMs)",
       "SVR & Zusammenfassung → Seite 08",
       "StandardScaler",
-      "gamma"
+      "crest_factor",
+      "extract_features",
+      "fit_transform",
+      "gamma",
+      "model_selection",
+      "test_size",
+      "train_test_split",
+      "y_feat",
+      "y_te",
+      "y_tr"
     ],
     "snippet": "import numpy as np # 4 Fehlerklassen classes = { 0: 'Normal', 1: 'B021 (Ball Fault)', 2: 'IR021 (Inner Race)', 3: 'OR021@6 (Outer Race)' } # Features pro Zeitserien-Fenster features = ['mean', 'std',…"
   },
@@ -3731,7 +4302,20 @@
     "type": "konzept",
     "url": "Kapitel3/Page08.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "C=100 vs 0.01",
+      "LinearSVR",
+      "No-Free-Lunch",
+      "Pros & Cons",
+      "SVR",
+      "SVR – Konzept",
+      "SVR(kernel, C, epsilon)",
+      "Support Vector Regression (SVR)",
+      "Umgekehrte Optimierung",
+      "Zusammenfassung",
+      "ε-Tube",
+      "ε=1.5 vs 0.5"
+    ]
   },
   {
     "id": "Kapitel3/Page08.html#svr-konzept",
@@ -3755,7 +4339,8 @@
       "Support Vector Regression (SVR)",
       "Umgekehrte Optimierung",
       "Zusammenfassung",
-      "ε-Tube"
+      "ε-Tube",
+      "ε=1.5 vs 0.5"
     ],
     "snippet": "LinearSVR"
   },
@@ -3795,9 +4380,17 @@
       "SVR(kernel='poly')",
       "SVR(kernel='rbf')",
       "SVR(kernel=...)",
+      "SVR(kernel=..., C=..., epsilon=...)",
       "epsilon",
+      "fill_between",
       "find_support_vectors",
-      "from sklearn.svm import SVR"
+      "from sklearn.svm import LinearSVR",
+      "from sklearn.svm import SVR",
+      "gamma",
+      "kernel",
+      "np.random.randn()/10",
+      "off_margin",
+      "plot_svm_regression"
     ],
     "snippet": "03_core.ipynb"
   },
@@ -3823,7 +4416,13 @@
       "No-Free-Lunch Theorem",
       "SVC",
       "SVR",
-      "Vorteile"
+      "Vorteile",
+      "degree",
+      "epsilon",
+      "epsilon=0.1",
+      "gamma",
+      "gamma='scale'",
+      "kernel"
     ],
     "snippet": "C"
   },
@@ -3854,7 +4453,9 @@
     "type": "konzept",
     "url": "Kapitel3/PageCheatsheet.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Cheatsheet"
+    ]
   },
   {
     "id": "Kapitel3/PageCheatsheet.html#formeln",
@@ -3927,7 +4528,15 @@
       "PCA+SVC",
       "Referenz",
       "SVC",
-      "SVR"
+      "SVR",
+      "StandardScaler",
+      "X,y = make_circles(n, factor, noise)",
+      "accuracy_score",
+      "accuracy_score(y_true, y_pred)",
+      "cross_val_score",
+      "digits = load_digits()",
+      "epsilon, C, max_iter",
+      "fetch_lfw_people"
     ],
     "snippet": "SVC"
   },
@@ -3983,7 +4592,25 @@
     "anchor": "#code",
     "tags": [
       "Templates",
-      "kopierbereit"
+      "accuracy_score",
+      "cross_val_score",
+      "decision_function",
+      "fetch_lfw_people",
+      "kopierbereit",
+      "load_digits",
+      "make_blobs",
+      "make_circles",
+      "make_pipeline",
+      "min_faces_per_person",
+      "model_selection",
+      "n_components",
+      "n_samples",
+      "random_state",
+      "support_vectors_",
+      "svm_gradients",
+      "svm_loss",
+      "svm_train",
+      "test_size"
     ],
     "snippet": "from sklearn.svm import SVC from sklearn.datasets import make_blobs from sklearn.model_selection import train_test_split X, y = make_blobs(n_samples=100, centers=2, random_state=0) X_tr, X_te, y_tr,…"
   },
@@ -4074,7 +4701,13 @@
     "type": "konzept",
     "url": "Kapitel3/PageQuiz.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "6 Code-Fragen",
+      "6 Fallen",
+      "6 Formelfragen",
+      "8 Konzeptfragen",
+      "Quiz"
+    ]
   },
   {
     "id": "Kapitel4/Page01.html",
@@ -4085,7 +4718,15 @@
     "type": "konzept",
     "url": "Kapitel4/Page01.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Clustering-Arten",
+      "DBSCAN",
+      "Definition",
+      "Scaling",
+      "Validierung",
+      "k-means",
+      "Übersicht"
+    ]
   },
   {
     "id": "Kapitel4/Page01.html#clustering-definition",
@@ -4241,7 +4882,14 @@
     "type": "konzept",
     "url": "Kapitel4/Page02.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      ".fit() / .predict()",
+      "Algorithmus",
+      "Funktionsweise",
+      "Heuristik",
+      "KMeans in sklearn",
+      "cluster_centers_"
+    ]
   },
   {
     "id": "Kapitel4/Page02.html#funktionsweise",
@@ -4274,6 +4922,7 @@
       "Algorithmus",
       "Centroid = Arithmetisches Mittel",
       "Heuristik",
+      "Jeder Punkt liegt näher am eigenen Centroid",
       "means"
     ],
     "snippet": ""
@@ -4291,16 +4940,24 @@
     "tags": [
       "(n_clusters, n_features)",
       ".cluster_centers_",
+      ".cluster_centers_ – Die erlernten Centroids",
       ".fit(X)",
       ".fit_predict(X)",
       ".inertia_",
       ".predict()",
+      ".predict() – Zugehörigkeit von Datenpunkten",
       ".predict(X)",
       "API",
+      "Gleiche Struktur wie alle sklearn-Modelle",
       "KMeans(n_clusters=4)",
       "KMeans(n_clusters=k)",
       "Sklearn",
-      "attr"
+      "attr",
+      "kmeans.cluster_centers_",
+      "kmeans.fit(X)",
+      "kmeans.fit_predict(X)",
+      "kmeans.inertia_",
+      "kmeans.predict(X)"
     ],
     "snippet": "n_clusters"
   },
@@ -4319,9 +4976,12 @@
       "Problem",
       "Warum ungelabelt?",
       "centers=4",
+      "cluster_std",
       "cluster_std=0.60",
       "make_blobs",
+      "n_samples",
       "n_samples=300",
+      "random_state",
       "random_state=0",
       "y_true"
     ],
@@ -4343,11 +5003,17 @@
       "Was sehen wir?",
       "c=y_kmeans",
       "cluster_centers_",
+      "cluster_std",
       "cmap='viridis'",
       "kmeans.cluster_centers_",
+      "make_blobs",
       "means",
+      "n_clusters",
+      "n_samples",
       "plt.scatter()",
+      "random_state",
       "s=200",
+      "y_kmeans",
       "y_true"
     ],
     "snippet": "from sklearn.cluster import KMeans # Modell mit k=4 Clustern instanziieren kmeans = KMeans(n_clusters=4) # Modell auf die Daten fitten → Centroids lernen kmeans.fit(X) # Cluster-Labels für jeden…"
@@ -4361,7 +5027,15 @@
     "type": "konzept",
     "url": "Kapitel4/Page03.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "E-Schritt",
+      "EM-Algorithmus",
+      "From Scratch",
+      "Konvergenz",
+      "M-Schritt",
+      "Mathematik",
+      "in K-means"
+    ]
   },
   {
     "id": "Kapitel4/Page03.html#em-was",
@@ -4465,11 +5139,19 @@
       "Scratch",
       "X.shape",
       "cdist(X, centroids)",
+      "cluster_std",
       "deviation",
+      "find_clusters",
+      "find_clusters(X, num_clusters)",
+      "initial_centroid_indices",
+      "make_blobs",
+      "n_cluster",
+      "n_samples",
+      "new_centers",
       "np.argmin(..., axis=1)",
       "np.random.permutation",
-      "sklearn.KMeans",
-      "y_true"
+      "num_clusters",
+      "random_state"
     ],
     "snippet": "KMeans"
   },
@@ -4488,8 +5170,14 @@
       "Elbow Plot",
       "Nachteile",
       "Silhouette Score",
+      "cluster_std",
+      "fit_predict",
+      "make_blobs",
       "n_init",
       "n_init=10",
+      "n_samples",
+      "random_state",
+      "y_true",
       "⚠️ Kein globales Optimum",
       "⚠️ k muss vorgegeben werden"
     ],
@@ -4504,7 +5192,15 @@
     "type": "konzept",
     "url": "Kapitel4/Page04.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Clustering",
+      "Davies-Bouldin",
+      "Dunn-Index",
+      "Elbow Plot",
+      "Inertia",
+      "SSE",
+      "Silhouette Score"
+    ]
   },
   {
     "id": "Kapitel4/Page04.html#validierung-definition",
@@ -4523,7 +5219,10 @@
       "Inter-Cluster-Ähnlichkeit",
       "Intra-Cluster-Ähnlichkeit",
       "Validierung",
-      "bedeutet"
+      "bedeutet",
+      "fit_predict",
+      "inertia_",
+      "random_state"
     ],
     "snippet": "from sklearn.cluster import KMeans import matplotlib.pyplot as plt # k-means mit k=4 fitten kmeans = KMeans(4, random_state=0) labels = kmeans.fit_predict(X) # Clustering visualisieren…"
   },
@@ -4618,7 +5317,8 @@
       "Silhouette",
       "Silhouette Score für Datenpunkt o",
       "Um 0",
-      "a(o)"
+      "a(o)",
+      "b(o)"
     ],
     "snippet": ""
   },
@@ -4636,11 +5336,23 @@
       "Links:",
       "Rechts:",
       "Silhouette",
+      "center_box",
       "centers=4",
+      "cluster_centers_",
+      "cluster_labels",
+      "cluster_std",
       "cluster_std=1",
+      "fill_betweenx",
+      "fit_predict",
+      "ith_vals",
+      "make_blobs",
+      "n_clusters",
+      "n_features",
+      "n_samples",
       "n_samples=500",
-      "random_state=1",
-      "Übung"
+      "nipy_spectral",
+      "random_state",
+      "random_state=1"
     ],
     "snippet": "from sklearn.datasets import make_blobs import numpy as np import matplotlib.pyplot as plt import matplotlib.cm as cm from sklearn.cluster import KMeans from sklearn.metrics import silhouette_score,…"
   },
@@ -4679,8 +5391,16 @@
       "Elbow (Knick)",
       "Elbow Plot / Knee Plot",
       "SSE / Inertia",
+      "cluster_std",
+      "inertia_",
       "kmeans.inertia_",
-      "std=0.30"
+      "list_of_inertias",
+      "make_blobs",
+      "n_clusters",
+      "n_samples",
+      "random_state",
+      "std=0.30",
+      "y_true"
     ],
     "snippet": "kmeans.inertia_"
   },
@@ -4693,7 +5413,15 @@
     "type": "konzept",
     "url": "Kapitel4/Page05.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Kernel-Trick",
+      "Manhattan Distanz",
+      "Nicht-lineare Probleme",
+      "Spectral Clustering",
+      "Variationen",
+      "k-Median",
+      "k-means++"
+    ]
   },
   {
     "id": "Kapitel4/Page05.html#nichtlineare-probleme",
@@ -4711,9 +5439,11 @@
       "Probleme",
       "Spectral Clustering",
       "Warum versagt k-means?",
+      "fit_predict",
       "lineare",
       "make_moons",
-      "noise=0.05"
+      "noise=0.05",
+      "random_state"
     ],
     "snippet": "make_moons"
   },
@@ -4739,7 +5469,11 @@
       "affinity",
       "affinity='nearest_neighbors'",
       "assign_labels",
-      "assign_labels='kmeans'"
+      "assign_labels='kmeans'",
+      "fit_predict",
+      "make_moons",
+      "n_clusters",
+      "nearest_neighbors"
     ],
     "snippet": "affinity='nearest_neighbors'"
   },
@@ -4754,10 +5488,17 @@
     "url": "Kapitel4/Page05.html",
     "anchor": "#kmeans-plus",
     "tags": [
+      "Das Problem mit zufälliger Initialisierung",
       "K-means++ Lösung",
+      "inertia_",
       "init='k-means++'",
+      "kmeans_pp",
+      "kmeans_rand",
       "means",
-      "n_init"
+      "n_clusters",
+      "n_init",
+      "n_iter_",
+      "random_state"
     ],
     "snippet": "n_init"
   },
@@ -4793,7 +5534,16 @@
     "type": "konzept",
     "url": "Kapitel4/Page06.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Core Region",
+      "DBSCAN",
+      "Distanzmaß",
+      "Hyperparameter-Tuning",
+      "Noise",
+      "Scaling",
+      "eps",
+      "min_samples"
+    ]
   },
   {
     "id": "Kapitel4/Page06.html#skalierung",
@@ -4809,6 +5559,7 @@
       "Alle Features gleich gewichten?",
       "Die eigentliche Frage",
       "Entscheidungsregel",
+      "Größere Differenz = mehr Gewicht gewollt?",
       "MinMaxScaler",
       "Skalierung",
       "StandardScaler",
@@ -4874,7 +5625,11 @@
       "Noise (−1)",
       "eps",
       "eps=0.05",
+      "labels_",
       "make_moons",
+      "min_samples",
+      "n_samples",
+      "random_state",
       "sklearn"
     ],
     "snippet": "make_moons"
@@ -4899,6 +5654,7 @@
       "eps=0.05",
       "eps=0.20",
       "k-Nearest-Neighbors Classifier",
+      "labels_",
       "min_samples",
       "min_samples=5"
     ],
@@ -4913,7 +5669,19 @@
     "type": "konzept",
     "url": "Kapitel4/Page07.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "AffinityPropagation",
+      "BIRCH",
+      "Clustering-Verfahren",
+      "DBSCAN",
+      "GaussianMixture",
+      "HDBSCAN",
+      "MeanShift",
+      "MiniBatchKMeans",
+      "OPTICS",
+      "Spectral",
+      "Ward"
+    ]
   },
   {
     "id": "Kapitel4/Page07.html#datensaetze",
@@ -4937,7 +5705,12 @@
       "[[0.6, -0.6], [-0.4, 0.8]]",
       "cluster_std=[1.0, 2.5, 0.5]",
       "factor=0.5",
-      "make_blobs"
+      "make_blobs",
+      "make_blobs + Transformation",
+      "make_circles",
+      "make_moons",
+      "noise=0.05",
+      "np.random.rand"
     ],
     "snippet": "make_circles"
   },
@@ -4963,7 +5736,15 @@
       "HDBSCAN",
       "MeanShift",
       "MiniBatchKMeans",
-      "OPTICS"
+      "OPTICS",
+      "Spectral Clustering",
+      "Ward",
+      "Ward / Agglomerative",
+      "bandwidth",
+      "covariance_type='full'",
+      "damping",
+      "min_cluster_size",
+      "min_samples"
     ],
     "snippet": "damping"
   },
@@ -4989,7 +5770,15 @@
       "Implementierung",
       "MeanShift",
       "MiniBatchKMeans",
-      "Noise (−1)"
+      "Noise (−1)",
+      "OPTICS",
+      "Spectral",
+      "StandardScaler",
+      "Vergleich",
+      "Vollständige",
+      "Ward",
+      "algo_params",
+      "allow_single_cluster"
     ],
     "snippet": "import time import warnings from itertools import cycle, islice import matplotlib.pyplot as plt import numpy as np from sklearn import cluster, datasets, mixture from sklearn.neighbors import…"
   },
@@ -5002,7 +5791,14 @@
     "type": "konzept",
     "url": "Kapitel4/Page08.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Brownfield",
+      "DBSCAN",
+      "Maschinenzustände",
+      "Neue Punkte zuordnen",
+      "beispiele",
+      "kNN"
+    ]
   },
   {
     "id": "Kapitel4/Page08.html#beispiele-overview",
@@ -5025,7 +5821,8 @@
       "StandardScaler",
       "components_",
       "core_sample_indices_",
-      "k-means"
+      "k-means",
+      "k-meansElbow PlotSilhouetteStandardScaler"
     ],
     "snippet": ".predict()"
   },
@@ -5091,7 +5888,17 @@
     "type": "konzept",
     "url": "Kapitel4/Page08_1.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Brownfield",
+      "Elbow Plot",
+      "Maschinenzustände",
+      "Silhouette",
+      "StandardScaler",
+      "Sweep k",
+      "Weihenstephaner Standard",
+      "make_blobs",
+      "yellowbrick"
+    ]
   },
   {
     "id": "Kapitel4/Page08_1.html#weihenstephaner",
@@ -5130,8 +5937,14 @@
       "X[:, 0] = np.abs(...)",
       "X[:, 1] * 7",
       "centers=6",
+      "cluster_std",
       "generieren",
-      "np.save()"
+      "machine_state",
+      "make_blobs",
+      "n_features",
+      "n_samples",
+      "np.save()",
+      "random_state"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt from sklearn.datasets import make_blobs # 3000 Datenpunkte, 2 Features, 6 Cluster X, y = make_blobs( n_samples=3000, n_features=2, centers=6,…"
   },
@@ -5148,6 +5961,7 @@
     "tags": [
       "Daten",
       "laden",
+      "machine_state",
       "visualisieren"
     ],
     "snippet": "# Daten laden (kein y – unsupervised!) X = np.load('machine_state.npy') # Rohdaten visualisieren – ohne Labels plt.figure() plt.scatter(X[:, 0], X[:, 1], s=5, alpha=0.5) plt.xlabel(\"Vibration…"
@@ -5169,6 +5983,7 @@
       "Ohne Scaling",
       "Scaling",
       "X = X_scaled",
+      "fit_transform",
       "scaler"
     ],
     "snippet": "from sklearn.preprocessing import StandardScaler # StandardScaler anwenden scaler = StandardScaler() X_scaled = scaler.fit_transform(X) # Vergleich: Vor und nach dem Scaling print(\"=== Vor Scaling…"
@@ -5186,9 +6001,18 @@
     "tags": [
       "Blick",
       "Sweep",
+      "cluster_labels",
       "einen",
+      "fit_predict",
       "inertia_",
-      "list_of_inertias"
+      "list_of_inertias",
+      "list_of_k",
+      "n_clusters",
+      "random_state",
+      "set_title",
+      "set_xlabel",
+      "set_ylabel",
+      "tight_layout"
     ],
     "snippet": "inertia_"
   },
@@ -5204,7 +6028,11 @@
     "anchor": "#elbow-plot",
     "tags": [
       "Elbow",
-      "k=6"
+      "best_k",
+      "k=6",
+      "list_of_inertias",
+      "list_of_k",
+      "rel_diffs"
     ],
     "snippet": "# Elbow Plot plt.figure(figsize=(8, 5)) plt.plot(list_of_k, list_of_inertias, 'go--', linewidth=2, markersize=8) # Erwarteten Knick markieren plt.axvline(x=6, color='red', linestyle='--', alpha=0.6,…"
   },
@@ -5224,7 +6052,17 @@
       "Silhouette",
       "SilhouetteVisualizer",
       "Was wir suchen",
+      "best_k",
+      "cluster_labels",
+      "fit_predict",
+      "list_of_k",
+      "list_of_scores",
+      "n_clusters",
       "pip install yellowbrick",
+      "random_state",
+      "set_title",
+      "silhouette_score",
+      "tight_layout",
       "yellowbrick",
       "yellowbrick SilhouetteVisualizer",
       "⚠️ Grenzen",
@@ -5241,7 +6079,15 @@
     "type": "konzept",
     "url": "Kapitel4/Page08_2.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "DBSCAN",
+      "KNeighborsClassifier",
+      "Majoritätsvotum",
+      "components_",
+      "core_sample_indices_",
+      "k-Nearest-Neighbors",
+      "make_moons"
+    ]
   },
   {
     "id": "Kapitel4/Page08_2.html#problem",
@@ -5309,9 +6155,20 @@
       "[-0.5, 0.5]",
       "[2, -0.5]",
       "components_",
+      "core_sample_indices_",
       "dbscan.components_",
+      "labels_",
+      "make_moons",
+      "min_samples",
+      "n_neighbors",
       "n_neighbors=50",
-      "noise=0.05"
+      "n_samples",
+      "new_point_1",
+      "new_point_2",
+      "noise=0.05",
+      "pred_1",
+      "pred_2",
+      "random_state"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt from sklearn.datasets import make_moons from sklearn.cluster import DBSCAN from sklearn.neighbors import KNeighborsClassifier # Zwei Halbmonde –…"
   },
@@ -5347,7 +6204,13 @@
     "type": "konzept",
     "url": "Kapitel4/PageCheatsheet.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Cheatsheet",
+      "Entscheidungsregeln",
+      "Formeln",
+      "Typische Fallen",
+      "sklearn API"
+    ]
   },
   {
     "id": "Kapitel4/PageCheatsheet.html#formeln",
@@ -5393,8 +6256,19 @@
       "Scaling",
       "Spectral Clustering",
       "Validierungsmetriken",
-      "sklearn",
-      "wichtigen"
+      "assign_labels",
+      "cluster_centers_",
+      "components_",
+      "core_sample_indices_",
+      "davies_bouldin_score",
+      "fit_predict",
+      "fit_transform",
+      "inertia_",
+      "labels_",
+      "min_samples",
+      "n_clusters",
+      "n_init",
+      "n_iter_"
     ],
     "snippet": "from sklearn.cluster import KMeans km = KMeans( n_clusters=k, init='k-means++', # Default n_init=10, random_state=0 ) labels = km.fit_predict(X) km.inertia_ # SSE km.cluster_centers_ # Centroids…"
   },
@@ -5442,7 +6316,12 @@
       "SpectralClustering",
       "Typische",
       "components_",
-      "db.labels_"
+      "db.labels_",
+      "db.labels_[db.core_sample_indices_]",
+      "dbscan.components_",
+      "dbscan.labels_",
+      "n_clusters",
+      "np.unique()"
     ],
     "snippet": ".fit_transform()"
   },
@@ -5471,7 +6350,15 @@
     "type": "konzept",
     "url": "Kapitel4/PageQuiz.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "18 Fragen",
+      "18 FragenFormelnCodeKonzepteFallen",
+      "Code",
+      "Fallen",
+      "Formeln",
+      "Konzepte",
+      "Quiz"
+    ]
   },
   {
     "id": "Kapitel4/PageQuiz.html#konzept-fragen",
@@ -5521,7 +6408,13 @@
       "Fragen",
       "components_",
       "core_sample_indices_",
-      "fit_transform()"
+      "fit_transform",
+      "fit_transform()",
+      "inertia_",
+      "labels_",
+      "n_clusters",
+      "n_neighbors",
+      "random_state"
     ],
     "snippet": "knn = KNeighborsClassifier(n_neighbors=50) knn.fit( dbscan.components_, # Core-Punkte Koordinaten dbscan.labels_[dbscan.core_sample_indices_] # Labels der Core-Punkte )"
   },
@@ -5541,6 +6434,9 @@
       "Falle",
       "Prüfungsfallen",
       "Typische",
+      "components_",
+      "core_sample_indices_",
+      "labels_",
       "len(set(labels)) - 1 = 7"
     ],
     "snippet": "len(set(labels)) - 1 = 7"
@@ -5554,7 +6450,15 @@
     "type": "konzept",
     "url": "Kapitel5/Page01.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Überblick",
+      "⚡ Boosting",
+      "🌲 Random Forest",
+      "🌳 Entscheidungsbäume",
+      "📈 RF Regression",
+      "📐 Gini Impurity",
+      "🔍 Feature Importance"
+    ]
   },
   {
     "id": "Kapitel5/Page01.html#wo-befinden-wir-uns",
@@ -5643,7 +6547,14 @@
     "type": "konzept",
     "url": "Kapitel5/Page02.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "verstehen",
+      "⚠️ Overfitting",
+      "✂️ Splits im Feature-Raum",
+      "🌳 Basismodell",
+      "🎲 Ensemble-Idee",
+      "📐 Gini Impurity"
+    ]
   },
   {
     "id": "Kapitel5/Page02.html#entscheidungsbaeume-grundlagen",
@@ -5661,8 +6572,12 @@
       "Feature_i ≤ Schwellenwert?",
       "Grundlagen",
       "Kern-Idee: Fragen stellen",
+      "cluster_std",
       "geschickte Fragen stellen",
-      "make_blobs"
+      "make_blobs",
+      "n_samples",
+      "random_state",
+      "tight_layout"
     ],
     "snippet": "make_blobs"
   },
@@ -5683,11 +6598,20 @@
       "Overfitting-Gefahr!",
       "Quantitatives Qualitätskriterium",
       "Splits",
+      "cluster_std",
       "depth=1",
       "depth=2",
       "depth=3",
       "depth=3–4",
-      "depth=4"
+      "depth=4",
+      "get_xlim",
+      "get_ylim",
+      "make_blobs",
+      "max_depth",
+      "n_classes",
+      "n_samples",
+      "random_state",
+      "set_title"
     ],
     "snippet": "depth=1"
   },
@@ -5707,7 +6631,13 @@
       "Gini Impurity = 0.5",
       "Herleitung am Beispiel",
       "Impurity",
-      "quantitatives Gütekriterium"
+      "cluster_std",
+      "make_blobs",
+      "n_samples",
+      "quantitatives Gütekriterium",
+      "random_state",
+      "set_title",
+      "tight_layout"
     ],
     "snippet": "import matplotlib.pyplot as plt import numpy as np from sklearn.datasets import make_blobs # 10 Datenpunkte, 2 Klassen X, y = make_blobs(n_samples=10, centers=2, random_state=42, cluster_std=2.) fig,…"
   },
@@ -5731,7 +6661,17 @@
       "Randomisierung",
       "Trees",
       "Warum overfittet ein Decision Tree?",
-      "depth=6"
+      "cluster_std",
+      "depth=6",
+      "get_xlim",
+      "get_ylim",
+      "make_blobs",
+      "max_depth",
+      "n_classes",
+      "n_samples",
+      "random_state",
+      "set_title",
+      "subplots_adjust"
     ],
     "snippet": "import matplotlib.pyplot as plt import numpy as np from sklearn.datasets import make_blobs from sklearn.tree import DecisionTreeClassifier def visualize_tree(estimator, X, y, xlim=None, ylim=None,…"
   },
@@ -5744,7 +6684,15 @@
     "type": "konzept",
     "url": "Kapitel5/Page03.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Random Forest",
+      "🎒 Bagging",
+      "🎲 Feature Bagging",
+      "📊 OOB Error",
+      "📐 Random Subspace",
+      "🔁 Bootstrapping",
+      "🧩 Ensemble-Idee"
+    ]
   },
   {
     "id": "Kapitel5/Page03.html#ensemble-idee",
@@ -5764,7 +6712,19 @@
       "Randomisierung",
       "Strong Learner",
       "Weak Learner",
-      "klare, stabile Grenzen"
+      "cluster_std",
+      "klare, stabile Grenzen",
+      "make_blobs",
+      "max_depth",
+      "n_estimators",
+      "n_samples",
+      "plot_decision_boundary",
+      "random_state",
+      "set_title",
+      "tight_layout",
+      "x_max",
+      "x_min",
+      "y_max"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt from sklearn.datasets import make_blobs from sklearn.tree import DecisionTreeClassifier from sklearn.ensemble import RandomForestClassifier def…"
   },
@@ -5788,8 +6748,17 @@
       "Majoritätsvotum (Modus)",
       "Mittelwert",
       "Out-of-Bag Samples",
+      "boot_idx",
+      "cluster_std",
+      "in_bag",
+      "in_y",
       "künstliche Diversität",
-      "mit Zurücklegen"
+      "make_blobs",
+      "mit Zurücklegen",
+      "n_samples",
+      "oob_mask",
+      "out_bag",
+      "out_y"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt from sklearn.datasets import make_blobs # Datensatz X, y = make_blobs(n_samples=40, centers=2, random_state=42, cluster_std=1.5) n = len(X) fig,…"
   },
@@ -5813,8 +6782,17 @@
       "OOB-Samples",
       "RandomForestClassifier",
       "Test Accuracy",
+      "best_n",
+      "cluster_std",
+      "make_blobs",
+      "model_selection",
+      "n_estimators",
+      "n_samples",
+      "n_trees_range",
+      "oob_score",
       "oob_score=True",
-      "oob_score_"
+      "oob_score_",
+      "oob_scores"
     ],
     "snippet": "oob_score=True"
   },
@@ -5838,9 +6816,17 @@
       "Random Subspace Method",
       "Warum tut man das?",
       "Was ist Feature Bagging?",
+      "best_idx",
       "bootstrap=True",
       "dekorreliert",
-      "max_features"
+      "make_classification",
+      "max_features",
+      "max_features=",
+      "max_features='1/3'",
+      "max_features='log2'",
+      "max_features='sqrt'",
+      "max_features=1",
+      "max_features_options"
     ],
     "snippet": "max_features='sqrt'"
   },
@@ -5853,7 +6839,14 @@
     "type": "konzept",
     "url": "Kapitel5/Page04.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "in sklearn",
+      "⚡ Random Search",
+      "🌲 RandomForestClassifier",
+      "🎲 predict_proba()",
+      "🔍 Hyperparameter Sweep",
+      "🧠 Bayesian Optimization"
+    ]
   },
   {
     "id": "Kapitel5/Page04.html#random-forest-sklearn",
@@ -5877,7 +6870,15 @@
       "Sättigungspunkt",
       "True",
       "Wichtige Parameter",
-      "bootstrap"
+      "bootstrap",
+      "cluster_std",
+      "criterion",
+      "get_xlim",
+      "get_ylim",
+      "make_blobs",
+      "max_depth",
+      "max_features",
+      "n=1"
     ],
     "snippet": "RandomForestClassifier()"
   },
@@ -5903,7 +6904,15 @@
       "[0.51, 0.49]",
       "[0.98, 0.01, 0.01, 0.00]",
       "[0.99, 0.01]",
-      "[n_samples × n_classes]"
+      "[n_samples × n_classes]",
+      "[n_test × 4]",
+      "cluster_std",
+      "conf_grid",
+      "make_blobs",
+      "model_selection",
+      "n_estimators",
+      "n_samples",
+      "predict_proba"
     ],
     "snippet": ".predict_proba()"
   },
@@ -5947,12 +6956,20 @@
       "Search",
       "Wichtige Parameter",
       "[a, b)",
+      "best_estimator_",
+      "best_params_",
+      "best_score_",
+      "cv_results_",
       "estimator",
-      "n_iter",
-      "n_jobs=-1",
-      "param_distributions",
-      "random_state",
-      "scipy.stats.randint"
+      "make_classification",
+      "max_depth",
+      "max_features",
+      "mean_test_score",
+      "min_samples_split",
+      "model_selection",
+      "n_estimators",
+      "n_features",
+      "n_informative"
     ],
     "snippet": "RandomizedSearchCV"
   },
@@ -5978,7 +6995,15 @@
       "RandomizedSearchCV",
       "Surrogate-Modell",
       "Wie funktioniert es?",
-      "pip install scikit-optimize"
+      "all_bayes",
+      "all_rand",
+      "bayes_scores",
+      "bayes_search",
+      "best_params_",
+      "best_score_",
+      "cross_val_score",
+      "cv_results_",
+      "make_classification"
     ],
     "snippet": "scikit-optimize"
   },
@@ -5991,7 +7016,16 @@
     "type": "konzept",
     "url": "Kapitel5/Page05.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Feature Importance",
+      "Vertrauen",
+      "🌳 White-Box Beispiel",
+      "🎓 Eignungstest",
+      "📊 Bar Plot",
+      "📡 Sensoren auswählen",
+      "🔀 Permutation Importance",
+      "🔍 Feature Importance"
+    ]
   },
   {
     "id": "Kapitel5/Page05.html#feature-importance",
@@ -6058,10 +7092,18 @@
       "Tree-based",
       "Tree-based vs. Permutation",
       "X_test, y_test",
+      "estimators_",
       "feature_importances_",
+      "feature_names",
+      "importances_mean",
+      "importances_std",
+      "make_classification",
       "model",
       "model.feature_importances_",
-      "n_repeats"
+      "model_selection",
+      "n_classes",
+      "n_estimators",
+      "n_features"
     ],
     "snippet": "permutation_importance()"
   },
@@ -6080,14 +7122,22 @@
       "Beispiel",
       "Dekorrelation",
       "Eignungstest",
+      "RandomForestClassifier(n_estimators=5)",
       "Szenario",
       "Warum White-Box?",
       "White",
       "White-Box-Modell",
       "[1]",
+      "class_names",
       "creativity",
+      "estimators_",
       "estimators_[1]",
-      "language"
+      "feature_names",
+      "language",
+      "math",
+      "n_estimators",
+      "n_estimators=5",
+      "plot_tree"
     ],
     "snippet": "math"
   },
@@ -6109,7 +7159,19 @@
       "Praxisanwendung",
       "Sensor-Reduktion",
       "Sensoren",
-      "auswählen"
+      "acc_full",
+      "acc_red",
+      "auswählen",
+      "dropped_idx",
+      "get_height",
+      "get_width",
+      "get_x",
+      "importances_mean",
+      "importances_std",
+      "make_classification",
+      "model_full",
+      "model_red",
+      "model_selection"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt from sklearn.ensemble import RandomForestClassifier from sklearn.datasets import make_classification from sklearn.model_selection import…"
   },
@@ -6122,7 +7184,18 @@
     "type": "konzept",
     "url": "Kapitel5/Page06.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Baseline Models",
+      "RUL",
+      "RUL Prediction",
+      "TTF",
+      "✈️ NASA Turbofan",
+      "🌲 RF Regression",
+      "📉 RUL vs. TTF",
+      "📊 Baseline Models",
+      "📐 Crude Approximation",
+      "🔧 C-MAPSS"
+    ]
   },
   {
     "id": "Kapitel5/Page06.html#wiederholung",
@@ -6188,15 +7261,23 @@
       "Daten",
       "RUL = clip(TTF, max=125)",
       "TTF",
+      "col_names",
       "cycle",
+      "df_train",
       "engine_id",
       "erkunden",
       "kritische Degradationsphase",
       "laden",
+      "max_c",
+      "max_cycle",
+      "read_csv",
+      "reset_index",
+      "sensor_",
       "sensor_1–21",
       "sensor_7",
-      "setting_1–3",
-      "setting_2"
+      "set_title",
+      "set_xlabel",
+      "set_ylabel"
     ],
     "snippet": "import pandas as pd import numpy as np # Spalten: engine_id, cycle, 3 Betriebseinstellungen, # 21 Sensormessungen col_names = ( ['engine_id', 'cycle'] + [f'setting_{i}' for i in range(1, 4)] +…"
   },
@@ -6218,7 +7299,19 @@
       "RandomForestRegressor",
       "Regressor",
       "StandardScaler",
-      "trainieren"
+      "df_train",
+      "feature_cols",
+      "fit_transform",
+      "max_depth",
+      "mean_absolute_error",
+      "mean_squared_error",
+      "model_selection",
+      "n_estimators",
+      "n_jobs",
+      "non_const",
+      "random_state",
+      "sensor_",
+      "set_title"
     ],
     "snippet": "from sklearn.model_selection import train_test_split from sklearn.preprocessing import StandardScaler # Features: alle Sensor- und Setting-Spalten feature_cols = ( [f'setting_{i}' for i in range(1,…"
   },
@@ -6242,7 +7335,17 @@
       "Moving Average",
       "Random Forest",
       "Warum Baseline?",
-      "Was ist ein Baseline Model?"
+      "Was ist ein Baseline Model?",
+      "fill_value",
+      "full_like",
+      "linear_model",
+      "mae_const",
+      "mae_lr",
+      "mean_absolute_error",
+      "mean_squared_error",
+      "rmse_const",
+      "rmse_lr",
+      "set_title"
     ],
     "snippet": "import matplotlib.pyplot as plt import numpy as np from sklearn.linear_model import LinearRegression from sklearn.metrics import (mean_squared_error, mean_absolute_error) # ── Baseline 1: Konstante…"
   },
@@ -6255,7 +7358,15 @@
     "type": "konzept",
     "url": "Kapitel5/Page06_1.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      ".predict_proba()",
+      "Classification",
+      "⚙️ Servomotoren",
+      "❓ Unsicherheit",
+      "🌡️ Temperatur & Strom",
+      "🎲 predict_proba()",
+      "🔍 Experten-Review"
+    ]
   },
   {
     "id": "Kapitel5/Page06_1.html#szenario",
@@ -6302,8 +7413,17 @@
       "do_inspection",
       "erstellen",
       "healthy",
+      "make_blobs",
       "make_blobs()",
-      "speichern"
+      "n_features",
+      "n_samples",
+      "random_state",
+      "servo_engines",
+      "set_title",
+      "set_xlabel",
+      "set_ylabel",
+      "speichern",
+      "tight_layout"
     ],
     "snippet": "make_blobs()"
   },
@@ -6327,7 +7447,17 @@
       "Trainieren",
       "[0.40, 0.38, 0.22]",
       "[75 × 3]",
-      "max(axis=1)"
+      "classes_",
+      "do_insp",
+      "max(axis=1)",
+      "model_selection",
+      "n_estimators",
+      "predict_proba",
+      "prediction_probabilities",
+      "random_state",
+      "servo_engines",
+      "test_size",
+      "train_test_split"
     ],
     "snippet": "RandomForestClassifier"
   },
@@ -6348,8 +7478,20 @@
       "Unsicherheit",
       "Unsicherheits-Schwellenwert",
       "analysieren",
-      "uncertain = max_prob < 0.75",
-      "visualisieren"
+      "colors_map",
+      "labels_map",
+      "markers_map",
+      "max_prediction_probabilities",
+      "max_prob = predict_proba.max(axis=1)",
+      "model_selection",
+      "n_estimators",
+      "predict_proba",
+      "prediction_probabilities",
+      "random_state",
+      "servo_engines",
+      "set_title",
+      "set_xlabel",
+      "set_ylabel"
     ],
     "snippet": "max_prob = predict_proba.max(axis=1)"
   },
@@ -6368,7 +7510,22 @@
       "Mensch-Maschine-Zusammenspiel",
       "Schritt",
       "Vollständige",
-      "Übersicht"
+      "class_labels",
+      "cls_certain",
+      "cls_idx",
+      "cls_uncertain",
+      "colors_cls",
+      "conf_grid",
+      "do_inspection",
+      "grid_proba",
+      "max_proba",
+      "model_selection",
+      "n_estimators",
+      "pred_grid",
+      "predict_proba",
+      "random_state",
+      "servo_engines",
+      "set_title"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt from sklearn.ensemble import RandomForestClassifier from sklearn.model_selection import train_test_split X_y = np.load('servo_engines.npy') X_train,…"
   },
@@ -6381,7 +7538,16 @@
     "type": "konzept",
     "url": "Kapitel5/Page06_2.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Gini Impurity",
+      "MSE",
+      "Regression",
+      "🌲 DecisionTreeRegressor",
+      "🌲🌲 RandomForestRegressor",
+      "📈 Regression",
+      "📉 MSE als Gütemaß",
+      "🔢 max_depth Einfluss"
+    ]
   },
   {
     "id": "Kapitel5/Page06_2.html#regression-konzept",
@@ -6422,6 +7588,10 @@
       "Schritt",
       "generieren",
       "n_samples = 100",
+      "set_title",
+      "set_xlabel",
+      "set_ylabel",
+      "tight_layout",
       "verrauschte Parabel"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt np.random.seed(42) # Quadratische Daten mit Rauschen index = np.random.uniform(-1, 1, size=(100, 1)) data = index ** 2 + np.random.rand( len(index),…"
@@ -6440,11 +7610,19 @@
       "DecisionTreeRegressor",
       "Schritt",
       "Tiefere Farbe",
+      "feature_importances_",
+      "feature_names",
+      "get_depth",
+      "get_n_leaves",
       "max_depth",
       "max_depth=2",
       "mse",
+      "plot_tree",
       "plot_tree()",
+      "random_state",
       "samples",
+      "set_title",
+      "tight_layout",
       "trainieren",
       "value"
     ],
@@ -6465,11 +7643,21 @@
       "Stufenfunktion",
       "Stufenförmig",
       "Vorhersagekurve",
+      "axes_plot",
+      "index_predictions",
       "max_depth",
       "max_depth=2",
+      "plot_regression_predictions",
       "plot_regression_predictions()",
       "plotten",
-      "rote Vorhersagekurve"
+      "random_state",
+      "rote Vorhersagekurve",
+      "set_title",
+      "set_xlabel",
+      "set_ylabel",
+      "tight_layout",
+      "tree_reg",
+      "y_pred"
     ],
     "snippet": "index_predictions = np.linspace(-1, 1, 500).reshape(-1, 1)"
   },
@@ -6490,11 +7678,20 @@
       "Overfitting",
       "Schritt",
       "Underfitting",
+      "get_n_leaves",
+      "index_predictions",
       "max_depth",
+      "max_depth ∈ {1, 2, 3, 4, 5, 10}",
       "max_depth=1",
       "max_depth=10",
       "max_depth=2–3",
-      "max_depth=4–5"
+      "max_depth=4–5",
+      "max_depth_values",
+      "mean_squared_error",
+      "random_state",
+      "set_title",
+      "set_xlabel",
+      "set_xlim"
     ],
     "snippet": "max_depth"
   },
@@ -6509,16 +7706,26 @@
     "url": "Kapitel5/Page06_2.html",
     "anchor": "#rf-regressor",
     "tags": [
+      "DecisionTreeRegressor(max_depth=5)",
       "RandomForestClassifier()",
       "RandomForestRegressor",
       "RandomForestRegressor()",
+      "RandomForestRegressor(n_estimators=100)",
       "Schritt",
       "bootstrap",
       "kostenloser Validierungsindikator",
       "max_depth",
       "max_features",
+      "mean_squared_error",
+      "model_selection",
       "n_estimators",
-      "oob_score=True"
+      "oob_score",
+      "oob_score=True",
+      "oob_score_",
+      "r2_score",
+      "random_state",
+      "set_title",
+      "set_xlabel"
     ],
     "snippet": "RandomForestRegressor()"
   },
@@ -6531,7 +7738,15 @@
     "type": "konzept",
     "url": "Kapitel5/Page07.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "AdaBoost",
+      "Gegenkonzept",
+      "⚖️ Gewichtete Samples",
+      "⛓️ Serielles Training",
+      "🆚 Bagging vs. Boosting",
+      "🎯 AdaBoost",
+      "📐 Fehlergewichtung"
+    ]
   },
   {
     "id": "Kapitel5/Page07.html#bagging-vs-boosting",
@@ -6596,11 +7811,23 @@
       "'SAMME.R'",
       "AdaBoost",
       "AdaBoostClassifier()",
+      "alpha_m",
       "estimator_errors_",
       "estimator_weights_",
+      "learning_rate",
+      "make_classification",
+      "max_depth",
+      "model_selection",
+      "n_clusters_per_class",
+      "n_estimators",
+      "n_features",
+      "n_informative",
+      "n_redundant",
+      "n_samples",
       "predict_proba()",
+      "random_state",
       "schwierige Punkte",
-      "sklearn"
+      "set_title"
     ],
     "snippet": "AdaBoostClassifier()"
   },
@@ -6622,11 +7849,19 @@
       "Schritt",
       "Single-Split-Trees",
       "So what",
+      "ada_step",
+      "estimator_weights_",
+      "estimators_",
+      "learning_rate",
       "m=1",
       "m=15",
       "m=5",
       "m=50",
-      "visualisiert"
+      "m_idx",
+      "make_classification",
+      "max_depth",
+      "n_clusters_per_class",
+      "n_est"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt from sklearn.datasets import make_classification from sklearn.ensemble import AdaBoostClassifier from sklearn.tree import DecisionTreeClassifier…"
   },
@@ -6646,7 +7881,21 @@
       "Forest",
       "Random",
       "Random Forest",
-      "verglichen"
+      "acc_ada",
+      "acc_rf",
+      "make_classification",
+      "max_depth",
+      "model_name",
+      "model_selection",
+      "n_clusters_per_class",
+      "n_estimators",
+      "n_features",
+      "n_informative",
+      "n_redundant",
+      "n_samples",
+      "predict_proba",
+      "random_state",
+      "set_title"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt from sklearn.datasets import make_classification from sklearn.ensemble import (RandomForestClassifier, AdaBoostClassifier) from sklearn.tree import…"
   },
@@ -6659,7 +7908,10 @@
     "type": "konzept",
     "url": "Kapitel5/PageCheatsheet.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Boosting",
+      "Random Forest"
+    ]
   },
   {
     "id": "Kapitel5/PageCheatsheet.html#formeln",
@@ -6676,6 +7928,7 @@
       "Mehrheitsklasse",
       "Mittelwert",
       "Testdaten",
+      "df['RUL'] = df['TTF'].clip(upper=125)",
       "keine Lern-Information",
       "nichts bei",
       "result.importances",
@@ -6706,7 +7959,15 @@
       "MSE",
       "RandomForestClassifier",
       "RandomForestRegressor",
-      "estimator_errors_"
+      "estimator_errors_",
+      "estimator_weights_",
+      "filled=True",
+      "forest.estimators_[i]",
+      "max(axis=1)",
+      "max_depth=1",
+      "n_repeats",
+      "oob_score=True",
+      "permutation_importance()"
     ],
     "snippet": ".predict()"
   },
@@ -6756,7 +8017,15 @@
       "Mehr Diversität",
       "Overfitting",
       "Overfitting möglich",
-      "Stabiler, mehr Runden"
+      "Stabiler, mehr Runden",
+      "Stabilere PI",
+      "Underfitting",
+      "Weniger Diversität",
+      "algorithm",
+      "bootstrap",
+      "learning_rate",
+      "max_depth",
+      "max_features"
     ],
     "snippet": "n_estimators"
   },
@@ -6803,7 +8072,9 @@
       "Typische",
       "ValueError",
       "[0.34, 0.33, 0.33]",
+      "[c for c in cols if df[c].std() > 0.01]",
       "bootstrap=True",
+      "df['RUL'] = df['TTF'].clip(upper=125)",
       "oob_score=True",
       "permutation_importance()",
       "std ≈ 0"
@@ -6842,6 +8113,7 @@
       "Konzept",
       "Prüfungsfragen",
       "Typische",
+      "df['RUL'] = df['TTF'].clip(upper=125)",
       "importances_mean",
       "permutation_importance()"
     ],
@@ -6856,7 +8128,15 @@
     "type": "konzept",
     "url": "Kapitel5/PageQuiz.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "18 Fragen",
+      "18 FragenFormelnCodeKonzepteMultiple Choice",
+      "Code",
+      "Formeln",
+      "Konzepte",
+      "Multiple Choice",
+      "Quiz"
+    ]
   },
   {
     "id": "Kapitel5/PageQuiz.html#score-section",
@@ -6928,7 +8208,14 @@
     "type": "konzept",
     "url": "Kapitel6/Page01.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Elliptische Cluster",
+      "GaussianMixture",
+      "Hypersphären",
+      "Reinkommen",
+      "k-means Grenzen",
+      "predict()"
+    ]
   },
   {
     "id": "Kapitel6/Page01.html#wo-befinden-wir-uns",
@@ -6975,7 +8262,15 @@
       "Problem 1 – Non-Probabilistisch",
       "Wahrscheinlichkeitsaussage",
       "Was war bei DBSCAN?",
-      "X.shape = (400, 2)"
+      "X.shape = (400, 2)",
+      "cluster_std",
+      "cluster_std=0.60",
+      "fundamental versagt",
+      "make_blobs",
+      "means",
+      "n_samples",
+      "non-probabilistisch",
+      "random_state"
     ],
     "snippet": "import matplotlib.pyplot as plt import seaborn as sns; sns.set() import numpy as np from sklearn.datasets import make_blobs # Synthetischer Datensatz: 400 Punkte, 4 Cluster X, y_true =…"
   },
@@ -6999,9 +8294,17 @@
       "Problem 2 – Sphärische Annahme",
       "Starke Annahmen über Cluster-Strukturen",
       "Vermischung der Clusterzuordnung",
+      "add_patch",
+      "cluster_centers_",
       "elliptisch gestreckten",
       "elliptische",
-      "means"
+      "fit_predict",
+      "means",
+      "n_clusters",
+      "nicht-konvexe Strukturen",
+      "np.dot(X, rng.randn(2,2))",
+      "plot_kmeans",
+      "random_state"
     ],
     "snippet": "plot_kmeans"
   },
@@ -7027,7 +8330,11 @@
       "Towards",
       "Wahrscheinlichkeit",
       "Was ist ein GMM?",
-      "n_components"
+      "n_components",
+      "probabilistisches Modell",
+      "sklearn",
+      "sklearn API",
+      "sklearn.mixture"
     ],
     "snippet": "sklearn"
   },
@@ -7040,7 +8347,16 @@
     "type": "konzept",
     "url": "Kapitel6/Page02.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "E-Step / M-Step",
+      "EM-Algorithmus",
+      "Mechanik",
+      "Soft Assignment",
+      "covariance_type",
+      "diag · spherical · full",
+      "predict_proba()",
+      "weichen Wahrscheinlichkeit"
+    ]
   },
   {
     "id": "Kapitel6/Page02.html#predict-proba",
@@ -7083,12 +8399,20 @@
       "0.25",
       "1.0",
       "1/K",
+      "Array (n_samples, n_components)",
       "GMM",
       "Hart vs. Weich",
       "Konfidenz",
       "Was liefert predict_proba()?",
       "gmm",
-      "groß"
+      "groß",
+      "k-means",
+      "klein und grau",
+      "labels",
+      "labels[i] ∈ {0, 1, 2, 3}",
+      "n_components=4",
+      "predict_proba",
+      "predict_proba(X)"
     ],
     "snippet": ".predict_proba()"
   },
@@ -7114,7 +8438,15 @@
       "Hilfsvariable",
       "Kovarianz",
       "M-Step im Detail",
-      "Mechanische"
+      "Mechanische",
+      "Mittelwert",
+      "Responsibilities",
+      "Wahrscheinlichkeit der Cluster-Zugehörigkeit",
+      "Zufällige Initialisierung",
+      "konvergiert",
+      "predict_proba()",
+      "r_nk",
+      "w_k"
     ],
     "snippet": "μ"
   },
@@ -7151,7 +8483,22 @@
     "type": "konzept",
     "url": "Kapitel6/Page03.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "1D-Beispiel",
+      "Allgemeine Formulierung",
+      "EM-Updateformeln",
+      "Konvergenzverhalten",
+      "Likelihood",
+      "Likelihood & i.i.d.",
+      "Log-Likelihood",
+      "MLE",
+      "Mathematisch",
+      "Maximum Likelihood",
+      "Responsibilities r_nk",
+      "Satz von Bayes",
+      "allgemeinen Formulierung",
+      "gewichtete Linearkombination"
+    ]
   },
   {
     "id": "Kapitel6/Page03.html#gmm-mathematik",
@@ -7175,7 +8522,9 @@
       "Mathematisch",
       "Maximum Likelihood",
       "Responsibilities r_nk",
-      "Satz von Bayes"
+      "Satz von Bayes",
+      "allgemeinen Formulierung",
+      "gewichtete Linearkombination"
     ],
     "snippet": ""
   },
@@ -7227,7 +8576,10 @@
       "Parameter",
       "Produkt der Einzeldichten",
       "faktorisieren",
-      "i.i.d."
+      "gewichtete Summe aller K Gauß-Komponenten",
+      "i.i.d.",
+      "i.i.d.-Annahme",
+      "optimalen Parameter"
     ],
     "snippet": ""
   },
@@ -7246,6 +8598,7 @@
       "Likelihood",
       "Lösung: Logarithmieren",
       "Maximum Likelihood Schätzung (MLE)",
+      "Problem: Multiplikation vieler kleiner Zahlen",
       "Summe",
       "log",
       "logarithmieren",
@@ -7276,7 +8629,11 @@
       "hart",
       "k-means – harte Zuweisung",
       "labels[n] ∈ {0, 1, ..., K-1}",
-      "nicht instantan"
+      "nicht instantan",
+      "r_n = [0.02, 0.95, 0.01, 0.02]",
+      "stoppen",
+      "sukzessive",
+      "weiche Wahrscheinlichkeiten"
     ],
     "snippet": "labels[n] ∈ {0, 1, ..., K-1}"
   },
@@ -7302,7 +8659,11 @@
       "gmm.n_iter_",
       "konvergiert",
       "max_iter erhöhen!",
-      "negative Log-Likelihood"
+      "negative Log-Likelihood",
+      "① Start",
+      "② nach wenigen Iterationen",
+      "③ ca. Iteration 20",
+      "④ ca. Iteration 60"
     ],
     "snippet": "gmm.converged_"
   },
@@ -7315,7 +8676,22 @@
     "type": "konzept",
     "url": "Kapitel6/Page04.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      ".sample()",
+      "AIC",
+      "BIC",
+      "BIC & AIC",
+      "BIC / AIC",
+      "BIC und AIC",
+      "Dichteschätzung",
+      "Generatives Modell",
+      "Informationskriterien",
+      "Zwei Monde",
+      "diskriminativen",
+      "generativen",
+      "generatives Dichteschätzungs-Modell",
+      "plot_gmm"
+    ]
   },
   {
     "id": "Kapitel6/Page04.html#dichteschaetzung",
@@ -7339,7 +8715,9 @@
       "Informationskriterien",
       "Zwei Monde",
       "diskriminativen",
-      "generativen"
+      "generativen",
+      "generatives Dichteschätzungs-Modell",
+      "plot_gmm"
     ],
     "snippet": ".sample()"
   },
@@ -7365,7 +8743,8 @@
       "Modell",
       "SVM",
       "generativen Modellen",
-      "generatives"
+      "generatives",
+      "k-means"
     ],
     "snippet": ".sample()"
   },
@@ -7386,12 +8765,20 @@
       "Monde",
       "Problem",
       "Xmoon.shape = (200, 2)",
+      "add_patch",
+      "covariance_type",
+      "covariances_",
       "draw_ellipse",
       "elliptische",
       "elliptische Region",
       "label=False",
       "make_moons",
-      "mehr Komponenten die Lösung"
+      "means_",
+      "mehr Komponenten die Lösung",
+      "n_components",
+      "nicht-elliptisch",
+      "nicht-elliptische Struktur",
+      "plot_gmm"
     ],
     "snippet": "make_moons"
   },
@@ -7417,7 +8804,15 @@
       "Sampler",
       "Was macht.sample()?",
       "Xnew",
-      "Xnew.shape = (400, 2)"
+      "Xnew.shape = (400, 2)",
+      "covariance_type",
+      "generativer",
+      "generatives Modell",
+      "generieren",
+      "label=False",
+      "n_components",
+      "plot_gmm",
+      "random_state"
     ],
     "snippet": "label=False"
   },
@@ -7442,8 +8837,10 @@
       "\\(m \\ln(n)\\)",
       "covariance_type",
       "geschätzten Parameter",
+      "n_components",
       "n_components = 1..20",
-      "optimale Komponentenanzahl"
+      "optimale Komponentenanzahl",
+      "random_state"
     ],
     "snippet": "covariance_type"
   },
@@ -7468,6 +8865,7 @@
       "Penalty für die Parameterzahl",
       "\\(m \\ln(n)\\)",
       "bestrafen unnötige Komplexität",
+      "np.argmin([m.bic(X) for m in models])",
       "overfittten"
     ],
     "snippet": "np.argmin([m.bic(X) for m in models])"
@@ -7481,7 +8879,20 @@
     "type": "konzept",
     "url": "Kapitel6/Page05.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      ".converged_",
+      ".sample(100)",
+      "1797 Bilder",
+      "64-dimensional",
+      "AIC",
+      "AIC Modellwahl",
+      "Verteilung handschriftlicher Ziffern",
+      "Ziffern­generierung",
+      "hochdimensionalen Datensatz",
+      "load_digits",
+      "n_components=120",
+      "plot_digits"
+    ]
   },
   {
     "id": "Kapitel6/Page05.html#generate-numbers",
@@ -7505,7 +8916,12 @@
       "Verteilung handschriftlicher Ziffern",
       "Ziffern",
       "Ziffern­generierung",
-      "generierung"
+      "generierung",
+      "hochdimensionalen Datensatz",
+      "load_digits",
+      "n_components",
+      "n_components=120",
+      "plot_digits"
     ],
     "snippet": "load_digits"
   },
@@ -7531,7 +8947,15 @@
       "Datensatz",
       "Gaussian Mixture Models",
       "Warum so viele Komponenten (50–200)?",
-      "abgeflachten Bild-Vektoren"
+      "abgeflachten Bild-Vektoren",
+      "data.shape = (1797, 64)",
+      "kennenlernen",
+      "load_digits",
+      "load_digits – Datensatz",
+      "load_digits().data",
+      "plot_digits",
+      "probabilistisch bzw. generativ",
+      "set_clim"
     ],
     "snippet": "load_digits"
   },
@@ -7555,9 +8979,17 @@
       "Komplexität",
       "Komponentenanzahl",
       "List Comprehension",
+      "Minimum markiert die optimale Komponentenanzahl",
       "Modellgüte",
       "Modellwahl",
-      "Wahl von K = 120"
+      "Wahl von K = 120",
+      "aics",
+      "best_k",
+      "covariance_type",
+      "covariance_type='full'",
+      "n = 1797",
+      "n_components",
+      "n_components = 50"
     ],
     "snippet": "n = 1797"
   },
@@ -7583,7 +9015,15 @@
       "Original-Ziffern (Schritt 2)",
       "Sanity-Check",
       "Synthetisch",
-      "True"
+      "True",
+      "Ziffern",
+      "converged_",
+      "converged_ = True",
+      "covariance_type",
+      "data",
+      "data_new",
+      "generatives Lernen",
+      "generieren"
     ],
     "snippet": "gmm.converged_"
   },
@@ -7596,7 +9036,17 @@
     "type": "konzept",
     "url": "Kapitel6/PageCheatsheet.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "10 Prüfungsfragen",
+      "Code-Vorlagen",
+      "EM-Schritte",
+      "Fallen",
+      "Formeln",
+      "GMM",
+      "Merksätze",
+      "Vergleiche",
+      "sklearn API"
+    ]
   },
   {
     "id": "Kapitel6/PageCheatsheet.html#formeln",
@@ -7662,7 +9112,15 @@
       ".predict(X)",
       ".predict_proba(X)",
       ".sample(n)",
-      ".score(X)"
+      ".score(X)",
+      ".weights_",
+      "False",
+      "Harte",
+      "Neue Daten generieren",
+      "Referenz",
+      "True",
+      "Weiche",
+      "array (K, d)"
     ],
     "snippet": "GaussianMixture( n_components=K, covariance_type='full', random_state=0 )"
   },
@@ -7728,7 +9186,21 @@
       "3 · BIC/AIC Modellauswahl",
       "4 · Neue Daten generieren",
       "5 · Ziffern generieren (load_digits)",
-      "Vorlagen"
+      "6 · Konvergenzplot (neg. Log-Likelihood)",
+      "Vorlagen",
+      "best_k",
+      "converged_",
+      "covariance_type",
+      "data_new",
+      "load_digits",
+      "lower_bound_",
+      "max_iter",
+      "n_components",
+      "n_features",
+      "n_iter_",
+      "n_range",
+      "predict_proba",
+      "random_state"
     ],
     "snippet": "from sklearn.mixture import GaussianMixture gmm = GaussianMixture(n_components=4, covariance_type='full', random_state=0) gmm.fit(X) labels = gmm.predict(X) # harte Zuweisung probs =…"
   },
@@ -7793,7 +9265,15 @@
       ".sample()",
       "Antworten",
       "Code-Fragen",
-      "Formelfragen"
+      "Formelfragen",
+      "GaussianMixture(..., max_iter=200)",
+      "Konzeptfragen",
+      "Prüfungsfragen",
+      "X_new",
+      "X_new, _ = gmm.sample(100)",
+      "best_k = n_components[np.argmin(aics)]",
+      "covariance_type",
+      "covariance_type='spherical'"
     ],
     "snippet": ".predict()"
   },
@@ -7806,7 +9286,13 @@
     "type": "konzept",
     "url": "Kapitel6/PageQuiz.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "5 Code-Fragen",
+      "5 Formelfragen",
+      "5 Konzeptfragen",
+      "5 🪤 Fallen",
+      "Alles auf Prüfung"
+    ]
   },
   {
     "id": "Kapitel7/Einführung.html",
@@ -7817,7 +9303,14 @@
     "type": "konzept",
     "url": "Kapitel7/Einführung.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "AUC",
+      "Confusion Matrix",
+      "Decision Threshold",
+      "Evaluation",
+      "F1-Score",
+      "ROC Curves"
+    ]
   },
   {
     "id": "Kapitel7/Einführung.html#kontext",
@@ -7895,7 +9388,9 @@
       "confusion_matrix()",
       "label_binarize()",
       "precision_recall_curve()",
-      "roc_auc_score()"
+      "roc_auc_score()",
+      "roc_curve()",
+      "sns.heatmap"
     ],
     "snippet": "roc_curve()"
   },
@@ -7908,7 +9403,14 @@
     "type": "konzept",
     "url": "Kapitel7/Page01.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Accuracy-Falle",
+      "FPR",
+      "Grundlagen",
+      "Signalentdeckungstheorie",
+      "TP / FP / TN / FN",
+      "TPR"
+    ]
   },
   {
     "id": "Kapitel7/Page01.html#motivation",
@@ -8011,7 +9513,13 @@
     "type": "konzept",
     "url": "Kapitel7/Page02.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Diagonale",
+      "Idealer Klassifikator",
+      "ROC Koordinatensystem",
+      "Sensitivity-Specificity-Trade-off",
+      "Theorie"
+    ]
   },
   {
     "id": "Kapitel7/Page02.html#drei-szenarien",
@@ -8065,6 +9573,7 @@
       "Idealer",
       "Klassifikator",
       "Winkelhalbierende",
+      "↗ Winkelhalbierende – Zufalls-Klassifikator",
       "✅ Idealer Klassifikator"
     ],
     "snippet": ""
@@ -8110,7 +9619,14 @@
     "type": "konzept",
     "url": "Kapitel7/Page03.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "RocCurveDisplay",
+      "SVC.decision_function",
+      "Threshold-Integral",
+      "cluster_std variieren",
+      "in sklearn",
+      "roc_curve"
+    ]
   },
   {
     "id": "Kapitel7/Page03.html#api-uebersicht",
@@ -8126,6 +9642,7 @@
       ".decision_function()",
       ".predict_proba()",
       "fpr",
+      "from sklearn.metrics import roc_curve",
       "roc_curve(y_true, y_score)",
       "sklearn",
       "thresholds",
@@ -8149,10 +9666,20 @@
       "Beispiel",
       "Erstes",
       "RocCurveDisplay",
+      "cluster_std",
       "cluster_std=0.90",
+      "decision_function",
       "decision_function()",
+      "from_estimator",
       "make_blobs",
-      "roc_curve"
+      "model_selection",
+      "n_samples",
+      "random_state",
+      "roc_curve",
+      "train_test_split",
+      "y_score",
+      "y_test",
+      "y_train"
     ],
     "snippet": "from sklearn.datasets import make_blobs from sklearn.model_selection import train_test_split from sklearn.svm import SVC from sklearn.metrics import roc_curve, RocCurveDisplay import…"
   },
@@ -8170,8 +9697,17 @@
       "Gefühl",
       "Streuung",
       "cluster_std",
+      "decision_function",
       "entwickeln",
-      "variieren"
+      "from_estimator",
+      "make_blobs",
+      "n_samples",
+      "random_state",
+      "train_test_split",
+      "variieren",
+      "y_score",
+      "y_test",
+      "y_train"
     ],
     "snippet": "cluster_std"
   },
@@ -8222,7 +9758,14 @@
     "type": "konzept",
     "url": "Kapitel7/Page04.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "FPR-Ziel",
+      "Krankheitserkennung",
+      "Predictive Maintenance",
+      "TPR-Ziel",
+      "Threshold",
+      "adjusted_predict()"
+    ]
   },
   {
     "id": "Kapitel7/Page04.html#was-ist-threshold",
@@ -8277,12 +9820,17 @@
       "Funktion",
       "adjusted_predict",
       "adjusted_predict()",
+      "decision_function",
       "decision_function()",
+      "index_of_tpfp_value",
       "np.argmin(np.abs(...))",
+      "roc_curve",
       "roc_curve()",
       "thresholds[index]",
       "tp=False → FPR-Ziel",
       "tp=True → TPR-Ziel",
+      "tpfp_value",
+      "ypredicted_new",
       "yscore > threshold"
     ],
     "snippet": "adjusted_predict()"
@@ -8327,7 +9875,14 @@
     "type": "konzept",
     "url": "Kapitel7/Page05.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Youden-Index",
+      "confusion_matrix()",
+      "normalize",
+      "roc_auc_score",
+      "sklearn & AUC",
+      "sns.heatmap"
+    ]
   },
   {
     "id": "Kapitel7/Page05.html#confusion-matrix",
@@ -8343,13 +9898,19 @@
       "Confusion",
       "Heatmap-Visualisierung",
       "Matrix",
+      "allow_pickle",
       "cmap='Blues'",
       "cmap='viridis'",
+      "confusion_matrix",
       "confusion_matrix()",
+      "confusion_matrix(y_true, y_pred)",
       "normalize='all'",
       "normalize='pred'",
       "normalize='true'",
       "sklearn",
+      "spotify_svm_ypredicted",
+      "spotify_svm_ytest",
+      "tight_layout",
       "xticklabels",
       "yticklabels"
     ],
@@ -8369,7 +9930,14 @@
       "AUC in sklearn",
       "Curve",
       "Definition",
-      "Under"
+      "Under",
+      "decision_function",
+      "from_estimator",
+      "predict_proba",
+      "roc_auc_score",
+      "y_score",
+      "y_test",
+      "y_true"
     ],
     "snippet": "from sklearn.metrics import roc_auc_score # y_score = decision_function() oder predict_proba() auc = roc_auc_score(y_true, y_score) print(f\"AUC: {auc:.3f}\")"
   },
@@ -8391,8 +9959,18 @@
       "Optimaler",
       "Threshold",
       "Youden",
+      "adjusted_predict",
       "adjusted_predict()",
-      "np.argmax(J)"
+      "best_fpr",
+      "best_threshold",
+      "best_threshold_index",
+      "best_tpr",
+      "from_estimator",
+      "np.argmax(J)",
+      "roc_curve",
+      "y_score",
+      "y_test",
+      "ypredicted_new"
     ],
     "snippet": "from sklearn.metrics import roc_curve, RocCurveDisplay import numpy as np import matplotlib.pyplot as plt # ROC-Kurve berechnen fpr, tpr, thresholds = roc_curve(y_test, y_score) # ROC plotten (zeigt…"
   },
@@ -8408,8 +9986,22 @@
     "anchor": "#praxis-beispiele",
     "tags": [
       "Praxisbeispiel",
+      "allow_pickle",
+      "bearing_10classes_ypredicted",
+      "bearing_10classes_ytest",
       "confuses",
-      "models"
+      "confusion_matrix",
+      "face_recognition_ypredicted",
+      "face_recognition_ytest",
+      "models",
+      "models_data",
+      "spotify_rf_ypredicted",
+      "spotify_rf_ytest",
+      "spotify_svm_ypredicted",
+      "spotify_svm_ytest",
+      "tight_layout",
+      "ypred_path",
+      "ytest_path"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt import seaborn as sns from sklearn.metrics import confusion_matrix # Alle Modelle und ihre Klassen-Labels models_data = [ { 'name': 'Kugellager 10…"
   },
@@ -8437,7 +10029,14 @@
     "type": "konzept",
     "url": "Kapitel7/Page06.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "& F1-Score",
+      "F1-Score",
+      "Object Detection",
+      "Precision (PPV)",
+      "Recall (TPR)",
+      "precision_recall_curve"
+    ]
   },
   {
     "id": "Kapitel7/Page06.html#warum-nicht-roc",
@@ -8490,7 +10089,18 @@
       "Kurve",
       "Precision",
       "Recall",
-      "sklearn"
+      "cluster_std",
+      "decision_function",
+      "make_blobs",
+      "model_selection",
+      "n_samples",
+      "precision_recall_curve",
+      "random_state",
+      "sklearn",
+      "train_test_split",
+      "y_score",
+      "y_test",
+      "y_train"
     ],
     "snippet": "from sklearn.metrics import precision_recall_curve import matplotlib.pyplot as plt # Precisions und Recalls für alle Thresholds precisions, recalls, thresholds = precision_recall_curve(y_test,…"
   },
@@ -8511,11 +10121,17 @@
       "Recall",
       "Score",
       "einem",
+      "f1_macro",
+      "f1_score",
       "f1_score()",
+      "f1_weighted",
       "precision_score()",
       "recall_score()",
       "roc_auc_score()",
-      "roc_curve()"
+      "roc_curve()",
+      "y_pred",
+      "y_predicted",
+      "y_test"
     ],
     "snippet": "from sklearn.metrics import f1_score f1 = f1_score(y_test, y_predicted) print(f\"F1-Score: {f1:.3f}\")"
   },
@@ -8543,7 +10159,15 @@
     "type": "konzept",
     "url": "Kapitel7/Page07.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Macro-Avg",
+      "Micro-Avg",
+      "OneVsRestClassifier",
+      "OvO",
+      "OvR",
+      "ROC Curves",
+      "label_binarize"
+    ]
   },
   {
     "id": "Kapitel7/Page07.html#warum-schwieriger",
@@ -8601,10 +10225,22 @@
       "Beispiel",
       "Datensatz",
       "Vollständiges",
+      "all_fpr",
+      "decision_function",
+      "label_binarize",
       "label_binarize()",
+      "load_iris",
+      "mean_tpr",
+      "model_selection",
+      "n_classes",
+      "n_features",
+      "n_samples",
       "np.interp()",
+      "np.unique(np.concatenate(...))",
       "probability=True",
-      "y_score"
+      "random_state",
+      "roc_auc",
+      "roc_auc_score"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt from itertools import cycle from sklearn import svm, datasets from sklearn.metrics import roc_curve, auc from sklearn.model_selection import…"
   },
@@ -8623,10 +10259,12 @@
       "Multi",
       "Zusammenfassung",
       "average='macro'",
+      "label_binarize(y, classes=[0,1,2])",
       "multi_class='ovo'",
       "multi_class='ovr'",
       "roc_auc_score()",
-      "roc_curve()"
+      "roc_curve()",
+      "roc_curve(y_test[:,i], y_score[:,i])"
     ],
     "snippet": "label_binarize(y, classes=[0,1,2])"
   },
@@ -8654,7 +10292,10 @@
     "type": "konzept",
     "url": "Kapitel7/PageCheatsheet.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Evaluation",
+      "ROC Curves"
+    ]
   },
   {
     "id": "Kapitel7/PageCheatsheet.html#confusion-matrix",
@@ -8686,7 +10327,9 @@
     "anchor": "#formeln",
     "tags": [
       "Kernformeln",
-      "OneVsRestClassifier"
+      "OneVsRestClassifier",
+      "label_binarize(y, classes=[0,1,2])",
+      "np.interp(all_fpr, fpr[i], tpr[i])"
     ],
     "snippet": "roc_curve(y_test.ravel(), y_score.ravel())"
   },
@@ -8708,11 +10351,19 @@
       ".predict_proba()[:,1]",
       "Blick",
       "Funktionen",
+      "OneVsRestClassifier(estimator)",
       "Youden-Index",
+      "adjusted_predict",
       "adjusted_predict()",
       "auc(fpr, tpr)",
+      "average='binary'/'macro'/'micro'",
       "average='macro'",
-      "classes"
+      "best_fpr",
+      "best_idx",
+      "best_threshold",
+      "best_tpr",
+      "classes",
+      "cmap='viridis'"
     ],
     "snippet": "roc_curve(y_true, y_score)"
   },
@@ -8754,9 +10405,12 @@
       "True",
       "Typische",
       "label_binarize()",
+      "model.decision_function(X_test)",
+      "model.predict_proba(X_test)[:,1]",
       "multi_class='ovr'",
       "normalize",
-      "roc_auc_score()"
+      "roc_auc_score()",
+      "roc_curve()"
     ],
     "snippet": "roc_curve(y_test, model.predict(X_test))"
   },
@@ -8785,7 +10439,14 @@
     "type": "konzept",
     "url": "Kapitel7/PageQuiz.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "20 Prüfungsfragen",
+      "💻 Code",
+      "📐 Formeln",
+      "🧠 Konzept",
+      "🧠 Konzept📐 Formeln💻 Code🪤 Fallen",
+      "🪤 Fallen"
+    ]
   },
   {
     "id": "Kapitel7/PageQuiz.html#konzept-fragen",
@@ -8801,6 +10462,7 @@
       ".decision_function()",
       "Konzept",
       "Konzeptfragen",
+      "best_idx = np.argmax(tpr - fpr)",
       "roc_curve()"
     ],
     "snippet": ".decision_function()"
@@ -8836,14 +10498,23 @@
       "(fpr, tpr, thresholds)",
       "Code",
       "Fragen",
+      "adjusted_predict",
+      "all_fpr",
+      "best_fpr",
+      "best_idx",
+      "best_threshold",
+      "best_tpr",
+      "confusion_matrix",
+      "decision_function",
       "decision_function()",
       "fpr",
-      "normalize='true'",
-      "predict_proba()",
-      "roc_curve()",
-      "roc_curve(y_true, y_score)",
-      "thresholds",
-      "tpr"
+      "label_binarize",
+      "mean_tpr",
+      "model.decision_function(X_test)",
+      "model.predict_proba(X_test)[:,1]",
+      "n_classes",
+      "n_samples",
+      "normalize='true'"
     ],
     "snippet": "roc_curve(y_true, y_score)"
   },
@@ -8861,11 +10532,20 @@
       "'ovo'",
       "Fallen",
       "Fragen",
+      "decision_function",
+      "label_binarize",
       "label_binarize()",
       "model.predict(X_test)",
+      "multi_class",
       "multi_class='ovr'",
+      "predict_proba",
+      "roc_auc_score",
       "roc_auc_score()",
-      "roc_curve()"
+      "roc_curve",
+      "roc_curve()",
+      "y_score",
+      "y_score_matrix",
+      "y_test"
     ],
     "snippet": "fpr, tpr, _ = roc_curve(y_test, model.predict(X_test))"
   },
@@ -8878,7 +10558,14 @@
     "type": "konzept",
     "url": "Kapitel7/Pagebeispiel.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Bearings",
+      "ROC-Marker",
+      "adjusted_predict()",
+      "bearing_model.pkl",
+      "fpr ≈ 0.023",
+      "tpr ≈ 0.97"
+    ]
   },
   {
     "id": "Kapitel7/Pagebeispiel.html#aufgabe",
@@ -8894,11 +10581,14 @@
       "Aufgabenstellung",
       "Funktion-Signatur",
       "Was brauchen wir zusätzlich?",
+      "adjusted_predict",
       "bearing_model.pkl",
       "fpr ≈ 0.023",
       "tp=False",
       "tp=True",
-      "tpr ≈ 0.97"
+      "tpfp_value",
+      "tpr ≈ 0.97",
+      "ypredicted_new"
     ],
     "snippet": "bearing_model.pkl"
   },
@@ -8916,9 +10606,20 @@
       "Daten",
       "Modell",
       "Schritt",
+      "bearing_model",
+      "bearing_xtest",
+      "bearing_ytest",
+      "cluster_std",
       "cluster_std=1.5",
+      "cross_val_score",
       "generieren",
       "joblib.dump()",
+      "make_blobs",
+      "model_selection",
+      "n_samples",
+      "random_state",
+      "roc_curve",
+      "train_test_split",
       "trainieren"
     ],
     "snippet": "import numpy as np import matplotlib.pyplot as plt import joblib from sklearn.datasets import make_blobs from sklearn.model_selection import train_test_split, cross_val_score from sklearn.svm import…"
@@ -8938,10 +10639,17 @@
       "Schritt",
       "adjusted_predict",
       "adjusted_predict()",
+      "bearing_model",
+      "bearing_xtest",
+      "bearing_ytest",
+      "decision_function",
       "decision_function()",
       "if tp",
+      "index_of_tpfp_value",
       "np.argmin(np.abs(...))",
+      "roc_curve",
       "roc_curve()",
+      "tpfp_value",
       "yscore > threshold"
     ],
     "snippet": "adjusted_predict()"
@@ -8960,7 +10668,11 @@
       "Anwendung",
       "Lagerarten",
       "Schritt",
-      "beide"
+      "adjusted_predict",
+      "beide",
+      "tpfp_value",
+      "ypredicted_fpr",
+      "ypredicted_tpr"
     ],
     "snippet": "# Teure Lager: FPR ≤ 0.023 (max. 2.3% Fehlalarme bei Negativen) # tp=False bedeutet: Wir suchen nach einem FPR-Zielwert print(\"=== TEURE LAGER (FPR-Ziel: 0.023) ===\") ypredicted_fpr =…"
   },
@@ -8988,7 +10700,15 @@
     "type": "konzept",
     "url": "Python/Page01.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Grundlagen",
+      "boolesche Masken",
+      "linspace",
+      "meshgrid",
+      "np.array",
+      "np.arraylinspacemeshgridboolesche Maskennp.unique",
+      "np.unique"
+    ]
   },
   {
     "id": "Python/Page01.html#erzeugen",
@@ -9005,13 +10725,20 @@
       "_like",
       "arange",
       "arange(start, stop, step)",
+      "default_rng",
       "default_rng(seed)",
       "erzeugen",
       "linspace",
       "linspace(start, stop, n)",
       "ndarray",
       "normal(loc, scale, size)",
-      "uniform(low, high, size)"
+      "np.arange / np.linspace",
+      "np.array(liste)",
+      "np.random.default_rng / normal / uniform",
+      "np.zeros / ones / full / *_like",
+      "numpy",
+      "uniform(low, high, size)",
+      "zeros_like"
     ],
     "snippet": "ndarray"
   },
@@ -9026,14 +10753,19 @@
     "url": "Python/Page01.html",
     "anchor": "#indexing",
     "tags": [
+      "Boolesche Masken",
       "Indexing",
       "Masken",
       "Slicing",
+      "Slicing & Indexing",
       "True",
       "True/False",
       "X[y==k]",
       "X[zeile, spalte]",
-      "labels == -1"
+      "labels == -1",
+      "np.where(cond, a, b)",
+      "numpy",
+      "y_anom"
     ],
     "snippet": "X[zeile, spalte]"
   },
@@ -9049,12 +10781,18 @@
     "anchor": "#aggregation",
     "tags": [
       "Aggregationen",
+      "Aggregationen: mean, std, sum, median …",
       "Statistik",
+      "argmax / argmin / argsort / bincount",
       "argmax/argmin",
       "argsort",
       "axis=0",
+      "best_k",
       "bincount",
-      "noise·std(X)"
+      "noise·std(X)",
+      "np.unique(y, return_counts=True)",
+      "numpy",
+      "return_counts"
     ],
     "snippet": "klassen, anzahl = np.unique(y, return_counts=True) for k, a in zip(klassen, anzahl): print(f'Klasse {k}: {a} Samples')"
   },
@@ -9076,8 +10814,15 @@
       "dot",
       "interp",
       "linalg.norm",
+      "mean_fpr",
       "meshgrid",
       "np.c_",
+      "np.dot / np.linalg / np.interp",
+      "np.meshgrid + np.c_",
+      "np.save / np.load",
+      "np.vstack / np.concatenate",
+      "numpy",
+      "tpr_i",
       "vstack"
     ],
     "snippet": "meshgrid"
@@ -9091,7 +10836,15 @@
     "type": "konzept",
     "url": "Python/Page02.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Plotten",
+      "contourf",
+      "imshow",
+      "plt.plot",
+      "plt.scatter",
+      "plt.scatterplt.plotsubplotscontourfimshow",
+      "subplots"
+    ]
   },
   {
     "id": "Python/Page02.html#figur",
@@ -9108,9 +10861,12 @@
       "Figur",
       "close('all')",
       "figure(figsize=(b,h))",
-      "plt.tight_layout()\nplt.show()",
+      "matplotlib",
+      "plt.figure / plt.subplots",
+      "plt.show / tight_layout / close",
       "show()",
       "subplots(zeilen, spalten)",
+      "tight_layout",
       "tight_layout()"
     ],
     "snippet": "figure(figsize=(b,h))"
@@ -9134,7 +10890,12 @@
       "contourf",
       "hist",
       "imshow",
-      "s=..."
+      "matplotlib",
+      "plt.hist / imshow / contourf",
+      "plt.plot(x, y, fmt)",
+      "plt.scatter(x, y, c=..., cmap=...)",
+      "s=...",
+      "train_sc"
     ],
     "snippet": "c=labels"
   },
@@ -9150,11 +10911,16 @@
     "anchor": "#deko",
     "tags": [
       "Beschriftung",
+      "Titel & Achsen",
+      "ax.axis('off') / subplot-Grid",
       "axis('off')",
       "axvline(x)",
+      "best_k",
       "colorbar()",
       "grid()",
+      "legend / colorbar / grid / axvline",
       "legend()",
+      "matplotlib",
       "suptitle"
     ],
     "snippet": "suptitle"
@@ -9170,9 +10936,14 @@
     "url": "Python/Page02.html",
     "anchor": "#muster",
     "tags": [
+      "Muster: Elbow-Plot (One-Liner)",
+      "Muster: Entscheidungsfläche",
+      "Rezept",
       "Rezepte",
       "Wiederkehrende",
-      "contourf"
+      "contourf",
+      "inertia_",
+      "n_init"
     ],
     "snippet": "contourf"
   },
@@ -9185,7 +10956,14 @@
     "type": "konzept",
     "url": "Python/Page03.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "load_digits",
+      "make_blobs",
+      "make_classification",
+      "pandas",
+      "pd.DataFrame",
+      "sns.heatmap"
+    ]
   },
   {
     "id": "Python/Page03.html#synthetisch",
@@ -9202,11 +10980,20 @@
       "Synthetische",
       "centers",
       "cluster_std",
+      "make_blobs",
+      "make_circles",
+      "make_classification",
+      "make_moons",
+      "make_moons / make_circles",
+      "make_regression",
+      "n_classes",
       "n_clusters_per_class",
+      "n_features",
       "n_informative",
       "n_redundant",
       "n_samples",
-      "random_state"
+      "random_state",
+      "sklearn.datasets"
     ],
     "snippet": "n_samples"
   },
@@ -9222,7 +11009,13 @@
     "anchor": "#echt",
     "tags": [
       "Datensätze",
-      "Echte"
+      "Echte",
+      "fetch_lfw_people",
+      "fetch_lfw_people / fetch_olivetti_faces",
+      "load_digits",
+      "load_iris",
+      "min_faces_per_person",
+      "sklearn.datasets"
     ],
     "snippet": "from sklearn.datasets import load_digits X, y = load_digits(return_X_y=True) # X: (1797, 64) digits = load_digits() bild = digits.images[0] # 8x8"
   },
@@ -9240,6 +11033,8 @@
       "DataFrame",
       "Series",
       "pandas",
+      "pd.DataFrame / pd.Series",
+      "pd.read_csv / df.quantile",
       "quantile",
       "read_csv"
     ],
@@ -9257,8 +11052,12 @@
     "anchor": "#seaborn",
     "tags": [
       "clustermap",
+      "confusion_matrix",
       "pairplot",
+      "param_grid_scores",
       "seaborn",
+      "sns.heatmap / clustermap",
+      "sns.pairplot / sns.set",
       "sns.set()"
     ],
     "snippet": "clustermap"
@@ -9272,7 +11071,14 @@
     "type": "konzept",
     "url": "Python/Page04.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "OneHotEncoder",
+      "PCA",
+      "Pipelines",
+      "StandardScaler",
+      "fit/transform",
+      "make_pipeline"
+    ]
   },
   {
     "id": "Python/Page04.html#skalierung",
@@ -9285,9 +11091,14 @@
     "url": "Python/Page04.html",
     "anchor": "#skalierung",
     "tags": [
+      "MinMaxScaler",
       "PolynomialFeatures",
+      "PolynomialFeatures / PowerTransformer",
       "PowerTransformer",
-      "Skalierung"
+      "Skalierung",
+      "StandardScaler",
+      "fit_transform",
+      "sklearn.preprocessing"
     ],
     "snippet": "from sklearn.preprocessing import StandardScaler scaler = StandardScaler() X_train_s = scaler.fit_transform(X_train) X_test_s = scaler.transform(X_test) # nur transform!"
   },
@@ -9302,7 +11113,14 @@
     "url": "Python/Page04.html",
     "anchor": "#encoding",
     "tags": [
-      "Encoding"
+      "Encoding",
+      "LabelEncoder",
+      "OneHotEncoder",
+      "fit_transform",
+      "label_binarize",
+      "sklearn.preprocessing",
+      "sparse_output",
+      "y_enc"
     ],
     "snippet": "from sklearn.preprocessing import LabelEncoder enc = LabelEncoder() y_enc = enc.fit_transform(['a', 'b', 'a', 'c']) # [0 1 0 2]"
   },
@@ -9318,8 +11136,17 @@
     "anchor": "#auswahl",
     "tags": [
       "Auswahl",
+      "CountVectorizer / FeatureHasher",
       "Extraktion",
-      "Feature"
+      "Feature",
+      "SelectKBest + mutual_info_classif",
+      "VarianceThreshold",
+      "feature_extraction",
+      "feature_selection",
+      "fit_transform",
+      "mutual_info_classif",
+      "sklearn.feature_extraction",
+      "sklearn.feature_selection"
     ],
     "snippet": "from sklearn.feature_selection import VarianceThreshold X_sel = VarianceThreshold(threshold=0.01).fit_transform(X)"
   },
@@ -9335,6 +11162,14 @@
     "anchor": "#dimred",
     "tags": [
       "Dimensionsreduktion",
+      "PCA",
+      "TSNE",
+      "fit_transform",
+      "inverse_transform",
+      "n_components",
+      "n_components_",
+      "sklearn.decomposition",
+      "sklearn.manifold",
       "whiten=True"
     ],
     "snippet": "whiten=True"
@@ -9350,12 +11185,18 @@
     "url": "Python/Page04.html",
     "anchor": "#pipeline",
     "tags": [
+      "Konzept",
       "Pipelines",
       "Regel",
       "fit",
+      "fit vs. transform vs. fit_transform",
       "fit_transform",
+      "make_pipeline",
+      "make_pipeline / Pipeline",
+      "sklearn.pipeline",
       "svc__C",
-      "transform"
+      "transform",
+      "y_train"
     ],
     "snippet": "from sklearn.pipeline import make_pipeline from sklearn.preprocessing import StandardScaler from sklearn.svm import SVC pipe = make_pipeline(StandardScaler(), SVC()) pipe.fit(X_train, y_train) #…"
   },
@@ -9368,7 +11209,15 @@
     "type": "konzept",
     "url": "Python/Page05.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      ".fit / .predict",
+      "DecisionTree",
+      "KNN",
+      "Modelle",
+      "RandomForest",
+      "SVC",
+      "SVCRandomForestDecisionTreeKNN.fit / .predict"
+    ]
   },
   {
     "id": "Python/Page05.html#svm",
@@ -9382,10 +11231,15 @@
     "anchor": "#svm",
     "tags": [
       "Machines",
+      "SVC",
+      "SVR / LinearSVR",
       "Support",
       "Vector",
+      "decision_function",
       "gamma",
-      "kernel"
+      "kernel",
+      "sklearn.svm",
+      "y_train"
     ],
     "snippet": "C"
   },
@@ -9400,9 +11254,14 @@
     "url": "Python/Page05.html",
     "anchor": "#tree",
     "tags": [
+      "DecisionTreeClassifier / Regressor",
       "Entscheidungsbäume",
+      "feature_names",
       "max_depth",
-      "min_samples_leaf"
+      "min_samples_leaf",
+      "plot_tree",
+      "random_state",
+      "sklearn.tree"
     ],
     "snippet": "max_depth"
   },
@@ -9417,11 +11276,16 @@
     "url": "Python/Page05.html",
     "anchor": "#ensemble",
     "tags": [
+      "AdaBoostClassifier",
       "Ensemble",
       "Methoden",
+      "RandomForestClassifier / Regressor",
       "feature_importances_",
       "max_features",
-      "n_estimators"
+      "n_estimators",
+      "random_state",
+      "sklearn.ensemble",
+      "y_train"
     ],
     "snippet": "n_estimators"
   },
@@ -9436,8 +11300,19 @@
     "url": "Python/Page05.html",
     "anchor": "#weitere",
     "tags": [
+      "KNeighborsClassifier",
+      "LinearRegression",
       "Modelle",
-      "Weitere"
+      "OneVsRestClassifier",
+      "Weitere",
+      "coef_",
+      "intercept_",
+      "linear_model",
+      "n_neighbors",
+      "neuer_punkt",
+      "sklearn.linear_model",
+      "sklearn.multiclass",
+      "sklearn.neighbors"
     ],
     "snippet": "k"
   },
@@ -9455,7 +11330,14 @@
       ".fit()",
       ".predict()",
       ".score()",
-      "einheitliche"
+      "Die einheitliche sklearn-API",
+      "Konzept",
+      "decision_function",
+      "einheitliche",
+      "predict_proba",
+      "y_pred",
+      "y_test",
+      "y_train"
     ],
     "snippet": ".fit()"
   },
@@ -9468,7 +11350,15 @@
     "type": "konzept",
     "url": "Python/Page06.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "BIC / AIC",
+      "Clustering",
+      "DBSCAN",
+      "GaussianMixture",
+      "KMeans",
+      "KMeansDBSCANGaussianMixtureBIC / AICpredict_proba",
+      "predict_proba"
+    ]
   },
   {
     "id": "Python/Page06.html#kmeans",
@@ -9483,13 +11373,18 @@
     "tags": [
       "DBSCAN",
       "KMeans",
+      "SpectralClustering / kneighbors_graph",
+      "cluster_centers_",
       "eps",
+      "fit_predict",
       "inertia_",
       "labels_",
       "labels_ == -1",
       "min_samples",
       "n_clusters",
-      "n_init"
+      "n_init",
+      "random_state",
+      "sklearn.cluster"
     ],
     "snippet": "k"
   },
@@ -9505,12 +11400,19 @@
     "anchor": "#gmm",
     "tags": [
       "Gaussian",
+      "GaussianMixture",
       "Mixture",
+      "Modellwahl per BIC/AIC",
       "Models",
+      "Rezept",
+      "best_k",
       "bic(X) / aic(X)",
       "covariance_type",
       "n_components",
-      "sample(n)"
+      "predict_proba",
+      "random_state",
+      "sample(n)",
+      "sklearn.mixture"
     ],
     "snippet": "n_components"
   },
@@ -9526,7 +11428,11 @@
     "anchor": "#distanzen",
     "tags": [
       "Distanzen",
-      "Statistik"
+      "Statistik",
+      "scipy",
+      "scipy.spatial.distance.cdist",
+      "scipy.stats",
+      "scipy.stats: skew, kurtosis, norm"
     ],
     "snippet": "from scipy.spatial.distance import cdist D = cdist(punkte, zentren) # Distanzmatrix"
   },
@@ -9539,7 +11445,13 @@
     "type": "konzept",
     "url": "Python/Page07.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "GridSearchCV",
+      "Validierung",
+      "cross_val_score",
+      "learning_curve",
+      "train_test_split"
+    ]
   },
   {
     "id": "Python/Page07.html#split",
@@ -9554,12 +11466,21 @@
     "tags": [
       "Cross",
       "KFold",
+      "LeaveOneOut",
       "Splits",
       "Validation",
+      "cross_val_score",
+      "cross_val_score + KFold",
+      "model_selection",
+      "n_splits",
       "random_state",
+      "sklearn.model_selection",
       "stratify",
       "stratify=y",
-      "test_size"
+      "test_size",
+      "train_test_split",
+      "y_te",
+      "y_tr"
     ],
     "snippet": "stratify=y"
   },
@@ -9574,12 +11495,23 @@
     "url": "Python/Page07.html",
     "anchor": "#suche",
     "tags": [
+      "BayesSearchCV",
+      "GridSearchCV",
       "Hyperparameter",
+      "RandomizedSearchCV",
       "Suche",
       "best_params_",
+      "best_score_",
+      "model_selection",
+      "n_estimators",
+      "n_iter",
+      "n_jobs",
       "n_jobs=-1",
       "param_grid",
-      "scipy.stats"
+      "scipy.stats",
+      "sklearn.model_selection",
+      "skopt",
+      "y_train"
     ],
     "snippet": "param_grid"
   },
@@ -9595,7 +11527,14 @@
     "anchor": "#kurven",
     "tags": [
       "Lernkurven",
-      "Validierungs"
+      "Validierungs",
+      "learning_curve",
+      "model_selection",
+      "param_name",
+      "param_range",
+      "sklearn.model_selection",
+      "train_sizes",
+      "validation_curve"
     ],
     "snippet": "from sklearn.model_selection import validation_curve tr, val = validation_curve(SVC(), X, y, param_name='C', param_range=[0.1, 1, 10, 100], cv=5)"
   },
@@ -9608,7 +11547,14 @@
     "type": "konzept",
     "url": "Python/Page08.html",
     "anchor": "",
-    "tags": []
+    "tags": [
+      "Evaluation",
+      "accuracy_score",
+      "confusion_matrix",
+      "feature_importances_",
+      "roc_auc_score",
+      "silhouette_score"
+    ]
   },
   {
     "id": "Python/Page08.html#klassifikation",
@@ -9623,7 +11569,13 @@
     "tags": [
       "Klassifikations",
       "Metriken",
-      "accuracy"
+      "accuracy",
+      "accuracy_score",
+      "accuracy_score / f1_score",
+      "confusion_matrix",
+      "f1_score",
+      "sklearn.metrics",
+      "y_test"
     ],
     "snippet": "accuracy"
   },
@@ -9638,7 +11590,16 @@
     "url": "Python/Page08.html",
     "anchor": "#roc",
     "tags": [
-      "Regression"
+      "Regression",
+      "RocCurveDisplay / precision_recall_curve",
+      "from_estimator",
+      "mean_squared_error",
+      "precision_recall_curve",
+      "roc_auc_score",
+      "roc_curve",
+      "roc_curve / auc / roc_auc_score",
+      "sklearn.metrics",
+      "y_test"
     ],
     "snippet": "from sklearn.metrics import roc_curve, auc, roc_auc_score fpr, tpr, thr = roc_curve(y_test, scores) flaeche = auc(fpr, tpr) # kurz: roc_auc_score(y_test, scores)"
   },
@@ -9655,7 +11616,11 @@
     "tags": [
       "Clustering",
       "Metriken",
-      "samples"
+      "davies_bouldin_score",
+      "samples",
+      "silhouette_score",
+      "silhouette_score / silhouette_samples",
+      "sklearn.metrics"
     ],
     "snippet": "samples"
   },
@@ -9671,7 +11636,14 @@
     "anchor": "#importance",
     "tags": [
       "Feature",
-      "Importance"
+      "Importance",
+      "feature_importances_",
+      "importances_mean",
+      "n_repeats",
+      "permutation_importance",
+      "sklearn.ensemble",
+      "sklearn.inspection",
+      "y_test"
     ],
     "snippet": "rf.fit(X, y) wichtig = rf.feature_importances_ top3 = np.argsort(wichtig)[::-1][:3] plt.imshow(wichtig.reshape(8, 8), cmap='hot')"
   },

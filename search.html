@@ -535,14 +535,15 @@
           { name: 'tags',        weight: 4 },
           { name: 'snippet',     weight: 3 },
           { name: 'description', weight: 2 },
+          { name: 'text',        weight: 2 },
           { name: 'chapter',     weight: 1 },
           { name: 'page',        weight: 1 },
         ],
-        threshold:         0.38,
-        includeScore:      true,
+        threshold:          0.42,
+        includeScore:       true,
         minMatchCharLength: 2,
-        ignoreLocation:    true,
-        useExtendedSearch: false,
+        ignoreLocation:     true,
+        useExtendedSearch:  false,
       });
 
       // Ladeanzeige entfernen
