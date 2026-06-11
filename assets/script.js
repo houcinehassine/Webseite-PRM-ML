@@ -98,8 +98,33 @@ export function initSectionObserver(linkEls) {
 // ─────────────────────────────────────────────────────────
 //  RENDER  (bekommt chapter-Objekt von der jeweiligen Sidebar.js)
 // ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+//  LERNFORTSCHRITT (localStorage)
+// ─────────────────────────────────────────────────────────
+const VISITED_KEY = 'prm-visited';
+
+function getVisited() {
+  try { return new Set(JSON.parse(localStorage.getItem(VISITED_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+
+function markVisited(chapterTitle, pageHref) {
+  try {
+    const v = getVisited();
+    v.add(chapterTitle + '/' + pageHref);
+    localStorage.setItem(VISITED_KEY, JSON.stringify([...v]));
+  } catch {}
+}
+
+
 export function renderSidebar(chapter, activePage = 'page1') {
   loadStyles();
+
+  /* Aktuelle Seite als besucht speichern */
+  const curPage = chapter.pages.find(p => !p.divider && p.id === activePage);
+  if (curPage) markVisited(chapter.title, curPage.href);
+
+  const visited = getVisited();
 
   const aside = document.createElement('aside');
   aside.className = 'sidebar';
@@ -166,10 +191,13 @@ export function renderSidebar(chapter, activePage = 'page1') {
     const pageBlock = document.createElement('div');
     pageBlock.className = 'toc-page-group';
 
+    const isDone = !pageOpen && visited.has(chapter.title + '/' + page.href);
+
     const toggleClass = [
       'toc-page-toggle',
       pageOpen   ? 'active'            : '',
-      isPruefung ? 'toc-page-pruefung' : ''
+      isPruefung ? 'toc-page-pruefung' : '',
+      isDone     ? 'toc-page-done'     : ''
     ].filter(Boolean).join(' ');
 
     const sublistClass = [
@@ -181,9 +209,14 @@ export function renderSidebar(chapter, activePage = 'page1') {
       `<a href="${page.href}${s.href}" class="toc-link">${s.title}</a>`
     ).join('');
 
+    const doneIndicator = isDone
+      ? '<span class="toc-done-dot" aria-label="Besucht" title="Besucht">✓</span>'
+      : '';
+
     pageBlock.innerHTML = `
       <button class="${toggleClass}" type="button" aria-expanded="${pageOpen}">
         <span>${page.title}</span>
+        ${doneIndicator}
         <span class="toc-chevron">▸</span>
       </button>
       <div class="${sublistClass}" ${pageOpen ? '' : 'hidden'}>

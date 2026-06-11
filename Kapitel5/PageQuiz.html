@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="K5 · Quiz: Teste dein Wissen zu Ensemble-Methoden, Random Forests und AdaBoost.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Quiz Ensemble Methods</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="stylesheet" href="../assets/quiz.css">
+  <style>
+    /* ── Multiple-Choice Quiz System ─────────────────────────── */
+    .mc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: var(--space-4);
+      margin-top: var(--space-4);
+    }
+    .mc-question {
+      background: var(--color-surface-2);
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .mc-question.checked { border-color: var(--color-primary); }
+    .mc-q-header {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-5) var(--space-3);
+    }
+    .mc-q-header .quiz-q-num { flex-shrink: 0; margin-top: 2px; }
+    .mc-q-text {
+      flex: 1;
+      font-weight: 600;
+      font-size: var(--text-base);
+      line-height: 1.5;
+    }
+    .mc-q-header .badge { flex-shrink: 0; margin-top: 3px; }
+    .mc-options {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      padding: 0 var(--space-5) var(--space-3);
+    }
+    .mc-option {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--color-border);
+      background: var(--color-surface-1);
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      user-select: none;
+    }
+    .mc-option:hover { background: var(--color-surface-3); border-color: var(--color-primary-faint); }
+    .mc-option input[type="checkbox"] {
+      flex-shrink: 0;
+      margin-top: 3px;
+      accent-color: var(--color-primary);
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .mc-option span { font-size: var(--text-sm); line-height: 1.5; }
+    /* Feedback states */
+    .mc-option.correct-selected {
+      background: #d1fae5;
+      border-color: #059669;
+    }
+    .mc-option.wrong-selected {
+      background: #fee2e2;
+      border-color: #dc2626;
+    }
+    .mc-option.missed {
+      background: #fef9c3;
+      border-color: #ca8a04;
+    }
+    [data-theme="dark"] .mc-option.correct-selected { background: #064e3b; border-color: #10b981; }
+    [data-theme="dark"] .mc-option.wrong-selected    { background: #450a0a; border-color: #f87171; }
+    [data-theme="dark"] .mc-option.missed            { background: #422006; border-color: #f59e0b; }
+    .mc-option.disabled { pointer-events: none; }
+    .mc-actions {
+      padding: var(--space-3) var(--space-5) var(--space-4);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+    .mc-check-btn {
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .mc-check-btn:hover { opacity: .88; }
+    .mc-check-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .mc-feedback {
+      padding: var(--space-3) var(--space-5) var(--space-4);
+      border-top: 1px solid var(--color-border);
+      font-size: var(--text-sm);
+      display: none;
+    }
+    .mc-feedback.visible { display: block; }
+    .mc-feedback .fb-correct { color: #059669; font-weight: 700; }
+    .mc-feedback .fb-wrong   { color: #dc2626; font-weight: 700; }
+    .mc-feedback .fb-partial { color: #ca8a04; font-weight: 700; }
+    [data-theme="dark"] .mc-feedback .fb-correct { color: #34d399; }
+    [data-theme="dark"] .mc-feedback .fb-wrong   { color: #f87171; }
+    [data-theme="dark"] .mc-feedback .fb-partial { color: #fbbf24; }
+    .mc-feedback ul { margin: var(--space-2) 0 0; padding-left: var(--space-4); }
+    .mc-feedback li { margin-bottom: var(--space-1); line-height: 1.5; }
+    /* Score panel */
+    .score-panel {
+      display: flex;
+      gap: var(--space-6);
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .score-block { text-align: center; }
+    .score-count { font-size: var(--text-2xl); font-weight: 800; color: var(--color-primary); }
+    .score-label { font-size: var(--text-sm); color: var(--color-text-muted); }
+    .reset-btn {
+      margin-left: auto;
+      background: transparent;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-2) var(--space-4);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      color: var(--color-text-muted);
+      transition: border-color .15s, color .15s;
+    }
+    .reset-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    @media (max-width: 700px) {
+      .mc-q-header { padding: var(--space-3) var(--space-4) var(--space-2); }
+      .mc-options   { padding: 0 var(--space-4) var(--space-2); }
+      .mc-actions   { padding: var(--space-2) var(--space-4) var(--space-3); }
+      .mc-feedback  { padding: var(--space-2) var(--space-4) var(--space-3); }
+    }
+  </style>
+  <meta property="og:type"        content="website">
+  <meta property="og:site_name"   content="PRM Prüfungsvorbereitung">
+  <meta property="og:title"       content="K5 · Quiz – Ensemble Methods &amp; Random Forests">
+  <meta property="og:description" content="Teste dein Wissen zu Ensemble-Methoden, Random Forests und AdaBoost.">
+  <meta property="og:url"         content="https://houcinehassine.github.io/Webseite-PRM-ML/Kapitel5/PageQuiz.html">
+  <meta property="og:image"       content="https://houcinehassine.github.io/Webseite-PRM-ML/assets/og-image.png">
+  <meta name="twitter:card"       content="summary">
+  <meta name="twitter:title"      content="K5 · Quiz – Ensemble Methods &amp; Random Forests">
+  <meta name="twitter:description" content="Teste dein Wissen zu Ensemble-Methoden, Random Forests und AdaBoost.">
+  <link rel="canonical" href="https://houcinehassine.github.io/Webseite-PRM-ML/Kapitel5/PageQuiz.html">
+</head>
+<body>
+  <site-header active="page5" title="Kapitel 5 · Quiz"></site-header>
+  <div class="layout">
+    <site-sidebar active="quiz"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Kapitel 5 · Selbsttest</span>
+            <h1>Ensemble Methods <span class="key" style="--key-color:var(--color-primary)">Quiz</span></h1>
+            <p>
+              Wähle alle richtigen Antworten aus und prüfe dann deine Auswahl.
+              Manche Fragen haben nur eine, andere mehrere richtige Antworten.
+            </p>
+            <div class="pill-row">
+              <span class="pill">18 Fragen</span>
+              <span class="pill">Formeln</span>
+              <span class="pill">Code</span>
+              <span class="pill">Konzepte</span>
+              <span class="pill">Multiple Choice</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Anleitung</h2>
+            <p>
+              Wähle alle zutreffenden Antworten aus –
+              es können eine oder mehrere sein. Dann auf
+              <strong>„Antwort prüfen"</strong> klicken.
+              🟡 = richtige Antwort übersehen, 🔴 = falsch angekreuzt.
+            </p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- Score-Leiste -->
+      <section class="section" id="score-section">
+        <div class="score-panel">
+          <div class="score-block">
+            <div class="score-count" id="score-correct">0</div>
+            <div class="score-label">Richtig</div>
+          </div>
+          <div class="score-block">
+            <div class="score-count" id="score-total" style="color:var(--color-text-muted)">0 / 18</div>
+            <div class="score-label">Geprüft</div>
+          </div>
+          <button class="reset-btn" id="reset-all-btn">↺ Neu starten</button>
+        </div>
+      </section>
+
+      <!-- ── KONZEPT-FRAGEN ───────────────────────────────── -->
+      <section class="section" id="konzept-fragen">
+        <div class="section-head">
+          <h2>Konzeptfragen</h2>
+        </div>
+        <div class="mc-grid" id="grid-konzept"></div>
+      </section>
+
+      <!-- ── FORMEL-FRAGEN ────────────────────────────────── -->
+      <section class="section" id="formel-fragen">
+        <div class="section-head">
+          <h2>Formelfragen</h2>
+        </div>
+        <div class="mc-grid" id="grid-formel"></div>
+      </section>
+
+      <!-- ── CODE-FRAGEN ──────────────────────────────────── -->
+      <section class="section" id="code-fragen">
+        <div class="section-head">
+          <h2>Code &amp; Praxis</h2>
+        </div>
+        <div class="mc-grid" id="grid-code"></div>
+      </section>
+
+    </main>
+  </div>
+  <site-footer caption="Kapitel 5 · Ensemble Methods Quiz"></site-footer>
+
+  <script>
+  /* ── Quiz-Daten ──────────────────────────────────────────────
+     correct: true  = richtige Antwort
+     Reihenfolge wird bei jedem Laden per Fisher-Yates gemischt.
+  ──────────────────────────────────────────────────────────── */
+  const QUESTIONS = {
+    konzept: [
+      {
+        text: "Welche der folgenden Eigenschaften sind Vorteile von Random Forests gegenüber einem einzelnen Entscheidungsbaum?",
+        badge: "Konzept",
+        badgeClass: "badge-konzept",
+        explanation: "Random Forests benötigen kein Feature-Scaling, liefern <code>predict_proba()</code>, können parallelisiert werden und overfiten weniger dank Mittelung. Sie sind aber kein White-Box-Modell und benötigen mehr Speicher.",
+        options: [
+          { text: "Kein Feature-Scaling notwendig", correct: true },
+          { text: "Liefert Klassenwahrscheinlichkeiten via <code>predict_proba()</code>", correct: true },
+          { text: "Vollständig interpretierbar (White-Box-Modell)", correct: false },
+          { text: "Parallelisierbar – Bäume sind unabhängig voneinander trainierbar", correct: true },
+          { text: "Deutlich geringerer Speicherbedarf als ein einzelner tiefer Baum", correct: false },
+          { text: "Geringeres Overfitting durch Mittelung über viele Bäume", correct: true },
+        ]
+      },
+      {
+        text: "Was beschreibt den Begriff <em>Weak Learner</em> korrekt?",
+        badge: "Konzept",
+        badgeClass: "badge-konzept",
+        explanation: "Ein Weak Learner ist ein Modell, das nur marginal besser als zufälliges Raten klassifiziert (z. B. ein Decision Stump mit Tiefe 1). Er muss keine 50 % Genauigkeit haben – nur etwas besser als Zufall.",
+        options: [
+          { text: "Ein Modell, das nur geringfügig besser als zufälliges Raten klassifiziert", correct: true },
+          { text: "Ein Modell mit Trainingsgenauigkeit unter 50 %", correct: false },
+          { text: "Ein Entscheidungsbaum mit Tiefe 1 (Decision Stump)", correct: true },
+          { text: "Ein Modell, das auf weniger als der Hälfte der Trainingsdaten trainiert wurde", correct: false },
+        ]
+      },
+      {
+        text: "Welche Aussagen über <strong>Bootstrapping</strong> im Random Forest sind korrekt?",
+        badge: "Konzept",
+        badgeClass: "badge-konzept",
+        explanation: "Bootstrapping zieht mit Zurücklegen. Damit enthält jede Bootstrap-Stichprobe ca. 63,2 % einzigartige Originaldaten. Die verbleibenden ~36,8 % (nie gezogene Datenpunkte) heißen Out-of-Bag (OOB) und dienen als kostenloser Validierungsdatensatz.",
+        options: [
+          { text: "Jede Bootstrap-Stichprobe enthält ca. 63,2 % eindeutige Originaldaten", correct: true },
+          { text: "Ca. 36,8 % der Daten bleiben als Out-of-Bag (OOB) übrig", correct: true },
+          { text: "Jeder Datenpunkt wird genau einmal pro Stichprobe gezogen", correct: false },
+          { text: "Alle Bäume teilen sich denselben Bootstrap-Datensatz", correct: false },
+          { text: "Der OOB-Datensatz ersetzt einen separaten Validierungssplit", correct: true },
+        ]
+      },
+      {
+        text: "Was unterscheidet <strong>Bagging</strong> von <strong>Boosting</strong>?",
+        badge: "Konzept",
+        badgeClass: "badge-konzept",
+        explanation: "Bagging trainiert alle Bäume parallel auf Bootstrap-Samples → reduziert hauptsächlich Varianz. Boosting trainiert Modelle seriell, wobei jedes neue Modell die Fehler des Vorgängers korrigiert → reduziert hauptsächlich Bias.",
+        options: [
+          { text: "Bagging trainiert alle Modelle parallel, Boosting seriell", correct: true },
+          { text: "Beim Boosting lernt jedes neue Modell aus den Fehlern des vorherigen", correct: true },
+          { text: "Bagging reduziert primär Varianz, Boosting reduziert primär Bias", correct: true },
+          { text: "Bagging ist immer genauer als Boosting", correct: false },
+          { text: "Beim Bagging sind die Modelle voneinander unabhängig", correct: true },
+        ]
+      },
+      {
+        text: "Wie erreicht Random Forest <strong>Dekorrelation</strong> zwischen den einzelnen Bäumen?",
+        badge: "Konzept",
+        badgeClass: "badge-konzept",
+        explanation: "Dekorrelation wird durch zwei Mechanismen erreicht: verschiedene Bootstrap-Samples pro Baum und zufällige Feature-Auswahl beim Split (max_features ≈ √p). Dadurch sehen verschiedene Bäume verschiedene Daten und Features.",
+        options: [
+          { text: "Jeder Baum wird auf einem anderen Bootstrap-Sample trainiert", correct: true },
+          { text: "Beim Split darf jeder Baum nur eine zufällige Teilmenge der Features verwenden", correct: true },
+          { text: "Die Bäume teilen keine Gewichte und passen sich gegenseitig an", correct: false },
+          { text: "Alle Bäume werden auf exakt denselben Trainingsdaten trainiert", correct: false },
+        ]
+      },
+      {
+        text: "Welche Aussagen über <strong>Feature Importance vs. Permutation Importance</strong> sind korrekt?",
+        badge: "Konzept",
+        badgeClass: "badge-konzept",
+        explanation: "Permutation Importance misst den Leistungsabfall nach zufälligem Permutieren eines Features. Sie MUSS auf Testdaten berechnet werden, um echte Generalisierbarkeit zu messen. Die eingebaute RF Feature Importance überschätzt Importance für Features mit vielen Kategorien.",
+        options: [
+          { text: "Permutation Importance sollte immer auf den Testdaten berechnet werden", correct: true },
+          { text: "Permutation Importance misst den Leistungsabfall nach Permutieren eines Features", correct: true },
+          { text: "Permutation Importance ist identisch mit der eingebauten RF Feature Importance", correct: false },
+          { text: "Ein negativer Permutation-Importance-Wert bedeutet, das Feature ist schädlich", correct: false },
+          { text: "Die eingebaute RF Feature Importance kann Features mit vielen Kategorien überschätzen", correct: true },
+        ]
+      },
+      {
+        text: "Wie unterscheidet sich <strong>Random Forest Regression</strong> von der Klassifikation?",
+        badge: "Konzept",
+        badgeClass: "badge-konzept",
+        explanation: "Bei der Regression wird als Split-Kriterium MSE (statt Gini) verwendet. Der Blattknoten gibt den Mittelwert aller zugehörigen Trainingsbeispiele zurück. predict_proba() existiert bei Regression nicht.",
+        options: [
+          { text: "Als Split-Kriterium wird MSE statt Gini Impurity verwendet", correct: true },
+          { text: "Der Blattknoten gibt den Mittelwert aller zugehörigen Trainingsbeispiele zurück", correct: true },
+          { text: "<code>predict_proba()</code> ist auch bei Regression verfügbar", correct: false },
+          { text: "Regression-Wälder können nicht parallelisiert werden", correct: false },
+        ]
+      },
+      {
+        text: "Beim <strong>NASA Turbofan</strong>-Datensatz und der Crude Approximation – welche Aussagen stimmen?",
+        badge: "Konzept",
+        badgeClass: "badge-konzept",
+        explanation: "Die Crude Approximation nimmt an, dass eine Turbine in den ersten Zyklen noch nicht degradiert – der RUL bleibt konstant bei 125. Danach fällt er linear bis 0. Dies ist eine vereinfachte Schätzung des Remaining Useful Life.",
+        options: [
+          { text: "Der RUL-Wert bleibt zunächst konstant bei 125 Zyklen", correct: true },
+          { text: "Danach fällt der RUL linear bis auf 0 ab", correct: true },
+          { text: "Der RUL wird durch ein neuronales Netz approximiert", correct: false },
+          { text: "Die Crude Approximation ist die tatsächlich gemessene Lebensdauer", correct: false },
+          { text: "Das Ziel ist, den verbleibenden Nutzungszeitraum (Remaining Useful Life) vorherzusagen", correct: true },
+        ]
+      },
+    ],
+
+    formel: [
+      {
+        text: "Wie werden die Anfangsgewichte <strong>w_n^(1)</strong> in AdaBoost initialisiert?",
+        badge: "Formel",
+        badgeClass: "badge-formel",
+        explanation: "In AdaBoost startet jeder der N Datenpunkte mit gleichem Gewicht 1/N. Dadurch wird kein Datenpunkt bevorzugt.",
+        options: [
+          { text: "Gleichmäßig: 1/N für alle N Datenpunkte", correct: true },
+          { text: "Proportional zur Klassenwahrscheinlichkeit des jeweiligen Labels", correct: false },
+          { text: "Zufällig aus einer Normalverteilung gezogen", correct: false },
+          { text: "Basierend auf dem Fehler des ersten Weak Learners", correct: false },
+        ]
+      },
+      {
+        text: "Wie lautet die korrekte Formel für den Koeffizienten <strong>α_m</strong> in AdaBoost?",
+        badge: "Formel",
+        badgeClass: "badge-formel",
+        explanation: "α_m = ln((1 – ε_m) / ε_m). Bei kleinem Fehler ε_m ist α_m groß (Modell bekommt viel Gewicht), bei ε_m = 0,5 ist α_m = 0.",
+        options: [
+          { text: "α_m = ln((1 – ε_m) / ε_m)", correct: true },
+          { text: "α_m = ε_m / (1 – ε_m)", correct: false },
+          { text: "α_m = 1 / ε_m", correct: false },
+          { text: "α_m = ln(ε_m)", correct: false },
+          { text: "α_m = (1 – ε_m) / ε_m  (ohne ln)", correct: false },
+        ]
+      },
+      {
+        text: "Was passiert beim <strong>Gewichts-Update</strong> in AdaBoost nach jedem Weak Learner?",
+        badge: "Formel",
+        badgeClass: "badge-formel",
+        explanation: "Falsch klassifizierte Datenpunkte bekommen höhere Gewichte (×e^α_m), richtig klassifizierte niedrigere (×e^(-α_m)). Danach werden alle Gewichte renormiert, damit sie wieder zu 1 summieren.",
+        options: [
+          { text: "Falsch klassifizierte Datenpunkte bekommen höhere Gewichte", correct: true },
+          { text: "Richtig klassifizierte Datenpunkte bekommen niedrigere Gewichte", correct: true },
+          { text: "Alle Gewichte werden nach dem Update auf 1/N zurückgesetzt", correct: false },
+          { text: "Die Gewichte werden nach dem Update renormiert (Summe = 1)", correct: true },
+          { text: "Nur die Gewichte der Mehrheitsklasse werden angepasst", correct: false },
+        ]
+      },
+      {
+        text: "Wie lautet die <strong>finale Vorhersage Y_M(x)</strong> in AdaBoost?",
+        badge: "Formel",
+        badgeClass: "badge-formel",
+        explanation: "Y_M(x) = sign(Σ α_m · y_m(x)) – die Vorzeichenfunktion der gewichteten Summe aller M Weak Learner. Modelle mit kleineren Fehlern (größerem α_m) tragen mehr bei.",
+        options: [
+          { text: "Vorzeichenfunktion der gewichteten Summe: sign(Σ α_m · y_m(x))", correct: true },
+          { text: "Einfacher Durchschnitt aller Weak Learner ohne Gewichtung", correct: false },
+          { text: "Mehrheitsvotum ohne Berücksichtigung der α_m-Gewichte", correct: false },
+          { text: "Das Maximum der einzelnen Vorhersagen y_m(x)", correct: false },
+        ]
+      },
+      {
+        text: "Welche Aussagen über die <strong>Gini Impurity</strong> als Split-Kriterium sind korrekt?",
+        badge: "Formel",
+        badgeClass: "badge-formel",
+        explanation: "Gini Impurity ist 0 bei reinen Knoten (alle Beispiele einer Klasse) und maximal bei Gleichverteilung. Der beste Split minimiert die gewichtete Summe der Gini Impurities beider Kindknoten.",
+        options: [
+          { text: "Gini Impurity = 0 bedeutet: alle Beispiele gehören derselben Klasse (reiner Knoten)", correct: true },
+          { text: "Der Split minimiert die gewichtete Summe der Gini Impurities der Kindknoten", correct: true },
+          { text: "Entscheidungsbäume erzeugen dabei achsenparallele Schnitte im Feature-Raum", correct: true },
+          { text: "Gini Impurity ist maximal bei einer vollständig reinen Partition", correct: false },
+          { text: "Gini Impurity führt zu diagonalen Entscheidungsgrenzen", correct: false },
+        ]
+      },
+    ],
+
+    code: [
+      {
+        text: "Welche Parameter steuert <strong>RandomForestClassifier</strong> direkt?",
+        badge: "Code",
+        badgeClass: "badge-code",
+        explanation: "n_estimators (Anzahl Bäume), max_features (Features pro Split, default √p) und max_depth (Tiefe jedes Baums) sind RF-Parameter. learning_rate und alpha gehören zu Boosting-Modellen wie AdaBoost.",
+        options: [
+          { text: "<code>n_estimators</code> – Anzahl der Bäume im Forest", correct: true },
+          { text: "<code>max_features</code> – Anzahl zufälliger Features pro Split", correct: true },
+          { text: "<code>max_depth</code> – maximale Tiefe jedes Baumes", correct: true },
+          { text: "<code>learning_rate</code> – Schrittweite beim Gradient Descent", correct: false },
+          { text: "<code>alpha</code> – Regularisierungsparameter", correct: false },
+        ]
+      },
+      {
+        text: "Was gibt <code>predict_proba()</code> bei einem Random Forest zurück?",
+        badge: "Code",
+        badgeClass: "badge-code",
+        explanation: "predict_proba() gibt für jede Klasse den Anteil der Bäume zurück, die für diese Klasse gestimmt haben – also eine Wahrscheinlichkeitsschätzung basierend auf dem Ensemble-Votum.",
+        options: [
+          { text: "Den Anteil der Bäume, die für jede Klasse gestimmt haben", correct: true },
+          { text: "Den Confidence-Score des Baumes mit der höchsten Genauigkeit", correct: false },
+          { text: "Die Gini Impurity der Blattknoten", correct: false },
+          { text: "Die Feature-Importance-Werte aller Features", correct: false },
+        ]
+      },
+      {
+        text: "Welche Attribute hat das Ergebnis-Objekt von <code>permutation_importance(model, X_test, y_test)</code>?",
+        badge: "Code",
+        badgeClass: "badge-code",
+        explanation: "Das Ergebnis hat .importances_mean (Mittelwert über alle Permutationen) und .importances_std (Standardabweichung). .feature_names und .gini_scores existieren nicht im Ergebnisobjekt.",
+        options: [
+          { text: "<code>.importances_mean</code> – mittlere Wichtigkeit über alle Permutationen", correct: true },
+          { text: "<code>.importances_std</code> – Standardabweichung der Wichtigkeiten", correct: true },
+          { text: "<code>.feature_names</code> – Liste der Feature-Namen", correct: false },
+          { text: "<code>.gini_scores</code> – Gini-basierte Wichtigkeiten", correct: false },
+        ]
+      },
+      {
+        text: "Warum neigen Entscheidungsbäume mit hoher Tiefe (depth ≥ 5) zu <strong>Overfitting</strong>?",
+        badge: "Code",
+        badgeClass: "badge-code",
+        explanation: "Tiefe Bäume haben viele Knoten und lernen auch das Rauschen der Trainingsdaten. max_depth begrenzt die Tiefe und wirkt als Regularisierung. Ein Random Forest mit vielen Bäumen kompensiert das Overfitting einzelner tiefer Bäume.",
+        options: [
+          { text: "Tiefe Bäume lernen auch das Rauschen (Noise) der Trainingsdaten", correct: true },
+          { text: "<code>max_depth</code> begrenzt die Tiefe und wirkt als Regularisierung", correct: true },
+          { text: "Flache Bäume (depth = 1) haben keine Verzerrung (Bias = 0)", correct: false },
+          { text: "Ein Random Forest mit vielen tiefen Bäumen kompensiert das Overfitting durch Mittelung", correct: true },
+          { text: "Gini Impurity verhindert Overfitting automatisch unabhängig von der Tiefe", correct: false },
+        ]
+      },
+      {
+        text: "Auf welchen Daten <strong>muss</strong> Permutation Importance berechnet werden, und warum?",
+        badge: "Code",
+        badgeClass: "badge-code",
+        explanation: "Immer auf Testdaten, da auf Trainingsdaten jedes Feature scheinbar wichtig wirkt (das Modell hat sich darauf eingestellt). Nur auf ungesehenen Testdaten wird gemessen, ob das Feature zur Generalisierung beiträgt.",
+        options: [
+          { text: "Auf Testdaten – nur so wird echte Generalisierbarkeit gemessen", correct: true },
+          { text: "Auf Trainingsdaten – das Modell kennt diese Daten am besten", correct: false },
+          { text: "Auf einem separaten Validierungsdatensatz ist es optional", correct: false },
+          { text: "Auf Trainingsdaten würde die Importance für alle Features überschätzt werden", correct: true },
+        ]
+      },
+    ]
+  };
+
+  /* ── Hilfsfunktionen ─────────────────────────────────────── */
+  function shuffle(arr) {
+    // Fisher-Yates
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  let stats = { correct: 0, checked: 0 };
+
+  function updateScore() {
+    document.getElementById('score-correct').textContent = stats.correct;
+    document.getElementById('score-total').textContent   = `${stats.checked} / 18`;
+  }
+
+  /* ── Einzelne Frage rendern ─────────────────────────────── */
+  function renderQuestion(q, globalNum) {
+    // Optionen mischen
+    const shuffled = shuffle([...q.options]);
+
+    const card = document.createElement('div');
+    card.className = 'mc-question';
+    card.dataset.checked = 'false';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'mc-q-header';
+    header.innerHTML = `
+      <span class="quiz-q-num">${globalNum}</span>
+      <span class="mc-q-text">${q.text}</span>
+      <span class="badge ${q.badgeClass}">${q.badge}</span>`;
+    card.appendChild(header);
+
+    // Options
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'mc-options';
+    shuffled.forEach((opt, idx) => {
+      const label = document.createElement('label');
+      label.className = 'mc-option';
+      label.innerHTML = `<input type="checkbox" data-correct="${opt.correct}"><span>${opt.text}</span>`;
+      optionsDiv.appendChild(label);
+    });
+    card.appendChild(optionsDiv);
+
+    // Actions
+    const actions = document.createElement('div');
+    actions.className = 'mc-actions';
+    const btn = document.createElement('button');
+    btn.className = 'mc-check-btn';
+    btn.textContent = 'Antwort prüfen';
+    actions.appendChild(btn);
+    card.appendChild(actions);
+
+    // Feedback
+    const feedback = document.createElement('div');
+    feedback.className = 'mc-feedback';
+    card.appendChild(feedback);
+
+    // Check-Button Logik
+    btn.addEventListener('click', () => {
+      if (card.dataset.checked === 'true') return;
+      card.dataset.checked = 'true';
+      card.classList.add('checked');
+      btn.disabled = true;
+
+      const labels = optionsDiv.querySelectorAll('.mc-option');
+      let allCorrect = true;
+
+      labels.forEach(lbl => {
+        const cb = lbl.querySelector('input');
+        const isCorrect = cb.dataset.correct === 'true';
+        const isChecked = cb.checked;
+        lbl.classList.add('disabled');
+
+        if (isChecked && isCorrect)       { lbl.classList.add('correct-selected'); }
+        else if (isChecked && !isCorrect) { lbl.classList.add('wrong-selected'); allCorrect = false; }
+        else if (!isChecked && isCorrect) { lbl.classList.add('missed');          allCorrect = false; }
+      });
+
+      // Score
+      stats.checked++;
+      if (allCorrect) stats.correct++;
+      updateScore();
+
+      // Feedback-Text
+      feedback.classList.add('visible');
+      if (allCorrect) {
+        feedback.innerHTML = `<span class="fb-correct">✓ Richtig!</span> ${q.explanation}`;
+      } else {
+        const hasWrong  = [...labels].some(l => l.classList.contains('wrong-selected'));
+        const hasMissed = [...labels].some(l => l.classList.contains('missed'));
+        let msg = '';
+        if (hasWrong && hasMissed)     msg = '<span class="fb-partial">Nicht ganz –</span> falsche Antworten angekreuzt und richtige übersehen.';
+        else if (hasWrong)             msg = '<span class="fb-wrong">Leider falsch –</span> eine oder mehrere angekreuzte Antworten waren nicht korrekt.';
+        else if (hasMissed)            msg = '<span class="fb-partial">Fast! –</span> du hast eine oder mehrere richtige Antworten übersehen.';
+        feedback.innerHTML = `${msg}<br><br>${q.explanation}`;
+      }
+    });
+
+    return card;
+  }
+
+  /* ── Quiz aufbauen ──────────────────────────────────────── */
+  function buildQuiz() {
+    let num = 1;
+    const gridK = document.getElementById('grid-konzept');
+    const gridF = document.getElementById('grid-formel');
+    const gridC = document.getElementById('grid-code');
+
+    gridK.innerHTML = '';
+    gridF.innerHTML = '';
+    gridC.innerHTML = '';
+
+    QUESTIONS.konzept.forEach(q => { gridK.appendChild(renderQuestion(q, num++)); });
+    QUESTIONS.formel.forEach(q  => { gridF.appendChild(renderQuestion(q, num++)); });
+    QUESTIONS.code.forEach(q    => { gridC.appendChild(renderQuestion(q, num++)); });
+  }
+
+  /* ── Reset ──────────────────────────────────────────────── */
+  document.getElementById('reset-all-btn').addEventListener('click', () => {
+    stats = { correct: 0, checked: 0 };
+    updateScore();
+    buildQuiz();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  /* ── Start ──────────────────────────────────────────────── */
+  buildQuiz();
+  updateScore();
+  </script>
+</body>
+</html>

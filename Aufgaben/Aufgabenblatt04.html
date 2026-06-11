@@ -24,8 +24,6 @@
 <script src="../assets/vendor/codemirror-closebrackets.min.js"></script>
 
 <!-- Pyodide -->
-<script src="https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js"></script>
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 
@@ -805,56 +803,61 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('solpre-' + id).textContent = SOL[id];
   });
-  initPyodide();
+  initWorker();
 });
 
 /* ─── PYODIDE ─────────────────────────────────────────── */
-let pyodide = null;
+/* ─── PYODIDE (Web Worker – Haupt-Thread bleibt reaktionsfähig) ── */
 let pyodideReady = false;
+let _worker      = null;
+const _pending   = {};   // id → callback
 
 function setProgress(pct, msg) {
   document.getElementById('ov-fill').style.width = pct + '%';
   document.getElementById('ov-msg').textContent = msg;
 }
 
-async function initPyodide() {
-  try {
-    setProgress(10, 'Lade Pyodide-Runtime...');
-    pyodide = await loadPyodide();
-
-    setProgress(35, 'Lade numpy & matplotlib...');
-    await pyodide.loadPackage(['numpy', 'matplotlib']);
-
-    setProgress(60, 'Lade scikit-learn (dauert ~20s)...');
-    await pyodide.loadPackage(['scikit-learn']);
-
-    setProgress(90, 'Konfiguriere Python-Umgebung...');
-    pyodide.runPython(`import matplotlib\nmatplotlib.use('Agg')`);
-
-    setProgress(100, 'Bereit!');
-    await new Promise(r => setTimeout(r, 400));
-    document.getElementById('overlay').style.display = 'none';
-
-    pyodideReady = true;
-    TASK_IDS.forEach(id => {
-      const btn = document.getElementById('run-' + id);
-      if (btn) btn.disabled = false;
-    });
-  } catch(e) {
-    closeOverlay();
-    console.warn('Pyodide nicht geladen (offline?):', e.message);
-  }
-}
-
-/* Overlay schließen — Navigation/Lesen ist dann immer möglich */
 function closeOverlay() {
   const o = document.getElementById('overlay');
   if (o) o.style.display = 'none';
 }
 
-/* Fallback: Overlay nach 45s automatisch schließen (z.B. offline),
-   damit man nie blockiert ist. */
-setTimeout(() => { if (!pyodideReady) closeOverlay(); }, 45000);
+function initWorker() {
+  _worker = new Worker('./pyodide-worker.js');
+
+  _worker.onmessage = function(e) {
+    const d = e.data;
+    if (d.type === 'progress') {
+      setProgress(d.pct, d.msg);
+    } else if (d.type === 'ready') {
+      setProgress(100, 'Bereit!');
+      setTimeout(() => {
+        closeOverlay();
+        pyodideReady = true;
+        TASK_IDS.forEach(id => {
+          const btn = document.getElementById('run-' + id);
+          if (btn) btn.disabled = false;
+        });
+      }, 400);
+    } else if (d.type === 'init-error') {
+      closeOverlay();
+      console.warn('Pyodide Worker Fehler:', d.message);
+    } else if (d.type === 'result') {
+      const cb = _pending[d.id];
+      if (cb) { delete _pending[d.id]; cb(d); }
+    }
+  };
+
+  _worker.onerror = function(e) {
+    closeOverlay();
+    console.warn('Worker Fehler:', e.message);
+  };
+
+  _worker.postMessage({ type: 'init', packages: ['numpy', 'matplotlib', 'scikit-learn'] });
+}
+
+/* Fallback: Overlay nach 60s automatisch schließen */
+setTimeout(() => { if (!pyodideReady) closeOverlay(); }, 60000);
 
 /* ─── RUN CODE ────────────────────────────────────────── */
 function esc(s) {
@@ -862,87 +865,36 @@ function esc(s) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
-async function runCode(id) {
+function runCode(id) {
   if (!pyodideReady) { alert('Python lädt noch — bitte kurz warten.'); return; }
   const code = EDITORS[id].getValue().trim();
   if (!code || code === '# Dein Code hier') return;
 
-  const out   = document.getElementById('out-' + id);
+  const out    = document.getElementById('out-' + id);
   const runBtn = document.getElementById('run-' + id);
   out.innerHTML = '<span class="out-run">⏳ Code wird ausgeführt...</span>';
-  runBtn.disabled = true;
+  runBtn.disabled  = true;
   runBtn.textContent = '⏳ Läuft...';
 
-  pyodide.globals.set('_stu_code', code);
-
-  try {
-    await pyodide.runPythonAsync(`
-import sys, io, base64
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-
-_figs_out    = []
-_stdout_buf  = io.StringIO()
-_orig_stdout = sys.stdout
-
-def _cap_show(*a, **kw):
-    for fn in sorted(plt.get_fignums()):
-        fig = plt.figure(fn)
-        buf = io.BytesIO()
-        fig.savefig(buf, format='png', bbox_inches='tight', dpi=100)
-        buf.seek(0)
-        _figs_out.append(base64.b64encode(buf.read()).decode())
-    plt.close('all')
-
-_orig_show   = plt.show
-plt.show     = _cap_show
-sys.stdout   = _stdout_buf
-_run_error   = None
-
-try:
-    exec(compile(_stu_code, '<aufgabe>', 'exec'))
-    if plt.get_fignums():
-        _cap_show()
-except Exception as _e:
-    import traceback
-    _run_error = traceback.format_exc()
-finally:
-    sys.stdout = _orig_stdout
-    plt.show   = _orig_show
-
-_run_text = _stdout_buf.getvalue()
-`);
-
-    const txt   = pyodide.globals.get('_run_text') || '';
-    const fp    = pyodide.globals.get('_figs_out');
-    const figs  = fp ? fp.toJs() : [];
-    if (fp) fp.destroy();
-    const err   = pyodide.globals.get('_run_error');
-
+  _pending[id] = ({ text, figs, error }) => {
     let html = '';
-    if (txt.trim())
-      html += `<pre class="out-text">${esc(txt)}</pre>`;
-    figs.forEach(f => {
+    if (text && text.trim()) html += `<pre class="out-text">${esc(text)}</pre>`;
+    (figs || []).forEach(f => {
       html += `<div class="out-fig"><img src="data:image/png;base64,${f}" alt="Plot"></div>`;
     });
-    if (err)
-      html += `<pre class="out-err">${esc(err)}</pre>`;
-    if (!txt.trim() && !figs.length && !err)
-      html = '<span class="out-ok">✓ Code erfolgreich ausgeführt (keine Ausgabe)</span>';
+    if (error) html += `<pre class="out-err">${esc(error)}</pre>`;
+    if (!html)  html  = '<span class="out-ok">✓ Code erfolgreich ausgeführt (keine Ausgabe)</span>';
 
     out.innerHTML = html;
 
-    // Unlock solution button after first run
     const sb = document.getElementById('sol-btn-' + id);
     if (sb) sb.classList.remove('locked');
 
-  } catch(e) {
-    out.innerHTML = `<pre class="out-err">${esc(e.toString())}</pre>`;
-  } finally {
-    runBtn.disabled = false;
+    runBtn.disabled    = false;
     runBtn.textContent = '▶ Ausführen';
-  }
+  };
+
+  _worker.postMessage({ type: 'run', id, code });
 }
 
 /* ─── HELPERS ─────────────────────────────────────────── */

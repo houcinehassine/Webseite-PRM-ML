@@ -158,6 +158,7 @@ details.qa-item[open]{border-color:color-mix(in oklab,var(--color-primary) 30%,v
 .toc-page-toggle:hover{color:var(--color-text);background:var(--color-surface-2)}
 .toc-page-toggle.active{color:var(--color-primary);font-weight:700;background:color-mix(in oklab,var(--color-primary) 8%,transparent);border-left-color:var(--color-primary)}
 .toc-page-toggle[aria-expanded="true"] .toc-chevron{color:var(--color-primary)}
+.toc-page-done{color:var(--color-text-muted)}.toc-done-dot{font-size:.65rem;font-weight:800;color:var(--color-success);background:color-mix(in oklab,var(--color-success) 12%,transparent);border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:auto;margin-right:2px}
 .toc-page-pruefung{color:color-mix(in oklab,var(--color-warning) 70%,var(--color-text-muted)) !important}
 .toc-page-pruefung:hover{color:var(--color-warning) !important}
 .toc-page-pruefung.active{color:var(--color-warning) !important;background:color-mix(in oklab,var(--color-warning) 8%,transparent) !important;border-left-color:var(--color-warning) !important}

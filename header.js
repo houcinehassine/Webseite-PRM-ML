@@ -8,8 +8,17 @@ class SiteHeader extends HTMLElement {
     const title = this.getAttribute('title') ?? 'PRM';
 
     this.style.alignSelf = 'stretch';
-    
+
     document.title = title;
+
+    /* ── Favicon ── */
+    if (!document.querySelector('link[rel~="icon"]')) {
+      const fav = document.createElement('link');
+      fav.rel  = 'icon';
+      fav.type = 'image/svg+xml';
+      fav.href = new URL('./assets/favicon.svg', import.meta.url).href;
+      document.head.appendChild(fav);
+    }
 
     /* ── FONTS (lokal: Satoshi + Zodiak) ── */
     const fontsCss = document.createElement('link');
@@ -23,21 +32,32 @@ class SiteHeader extends HTMLElement {
     css.href = new URL('./assets/style.css', import.meta.url).href;
     document.head.appendChild(css);
 
-    /* ── Highlight.js (lokal) ── */
-    const hljsCss  = document.createElement('link');
-    hljsCss.rel    = 'stylesheet';
-    hljsCss.href   = new URL('./assets/vendor/highlight-github.min.css', import.meta.url).href;
-    document.head.appendChild(hljsCss);
-
-    const hljsScript    = document.createElement('script');
-    hljsScript.src      = new URL('./assets/vendor/highlight.min.js', import.meta.url).href;
-    hljsScript.onload   = () => {
-      document.querySelectorAll('pre code').forEach(block => {
-        block.classList.add('language-python');
-        window.hljs.highlightElement(block);
-      });
+    /* ── Highlight.js (lazy: nur wenn <pre> vorhanden) ── */
+    const loadHljs = () => {
+      if (window._hljsLoaded) return;
+      window._hljsLoaded = true;
+      const hljsCss = document.createElement('link');
+      hljsCss.rel   = 'stylesheet';
+      hljsCss.href  = new URL('./assets/vendor/highlight-github.min.css', import.meta.url).href;
+      document.head.appendChild(hljsCss);
+      const hljsScript = document.createElement('script');
+      hljsScript.src   = new URL('./assets/vendor/highlight.min.js', import.meta.url).href;
+      hljsScript.onload = () => {
+        document.querySelectorAll('pre code').forEach(block => {
+          block.classList.add('language-python');
+          window.hljs.highlightElement(block);
+        });
+      };
+      document.head.appendChild(hljsScript);
     };
-    document.head.appendChild(hljsScript);
+    // Sofort prüfen (falls <pre> bereits im DOM), sonst nach DOMContentLoaded
+    if (document.querySelector('pre')) {
+      loadHljs();
+    } else {
+      document.addEventListener('DOMContentLoaded', () => {
+        if (document.querySelector('pre')) loadHljs();
+      }, { once: true });
+    }
 
     /* ── Header HTML ── */
     this.innerHTML = `
@@ -114,9 +134,13 @@ class SiteHeader extends HTMLElement {
     const btn    = this.querySelector('[data-theme-toggle]');
     if (!btn) return;
 
-    /* Gespeichertes Theme laden */
+    /* Gespeichertes Theme laden – sonst OS-Präferenz erkennen */
     const saved = localStorage.getItem('prm-theme');
-    if (saved) html.dataset.theme = saved;
+    if (saved) {
+      html.dataset.theme = saved;
+    } else if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+      html.dataset.theme = 'dark';
+    }
 
     /* Icon je nach Theme setzen */
     const updateIcon = () => {

@@ -6848,6 +6848,78 @@ window.SEARCH_DATA = [
     "snippet": "df['RUL'] = df['TTF'].clip(upper=125)"
   },
   {
+    "id": "Kapitel5/PageQuiz.html",
+    "chapter": "K5 · Random Forest & Boosting",
+    "page": "Quiz",
+    "title": "Ensemble Methods Quiz",
+    "description": "K5 · Random Forest & Boosting · Quiz",
+    "type": "konzept",
+    "url": "Kapitel5/PageQuiz.html",
+    "anchor": "",
+    "tags": []
+  },
+  {
+    "id": "Kapitel5/PageQuiz.html#score-section",
+    "chapter": "K5 · Random Forest & Boosting",
+    "page": "Quiz",
+    "title": "Score Section",
+    "description": "",
+    "text": "0 Richtig 0 / 18 Geprüft ↺ Neu starten",
+    "type": "formel",
+    "url": "Kapitel5/PageQuiz.html",
+    "anchor": "#score-section",
+    "tags": [
+      "Score",
+      "Section"
+    ],
+    "snippet": ""
+  },
+  {
+    "id": "Kapitel5/PageQuiz.html#konzept-fragen",
+    "chapter": "K5 · Random Forest & Boosting",
+    "page": "Quiz",
+    "title": "Konzeptfragen",
+    "description": "",
+    "text": "Konzeptfragen",
+    "type": "konzept",
+    "url": "Kapitel5/PageQuiz.html",
+    "anchor": "#konzept-fragen",
+    "tags": [
+      "Konzeptfragen"
+    ],
+    "snippet": ""
+  },
+  {
+    "id": "Kapitel5/PageQuiz.html#formel-fragen",
+    "chapter": "K5 · Random Forest & Boosting",
+    "page": "Quiz",
+    "title": "Formelfragen",
+    "description": "",
+    "text": "Formelfragen",
+    "type": "konzept",
+    "url": "Kapitel5/PageQuiz.html",
+    "anchor": "#formel-fragen",
+    "tags": [
+      "Formelfragen"
+    ],
+    "snippet": ""
+  },
+  {
+    "id": "Kapitel5/PageQuiz.html#code-fragen",
+    "chapter": "K5 · Random Forest & Boosting",
+    "page": "Quiz",
+    "title": "Code & Praxis",
+    "description": "",
+    "text": "Code & Praxis",
+    "type": "konzept",
+    "url": "Kapitel5/PageQuiz.html",
+    "anchor": "#code-fragen",
+    "tags": [
+      "Praxis"
+    ],
+    "snippet": ""
+  },
+  {
     "id": "Kapitel6/Page01.html",
     "chapter": "K6 · Modellbewertung & Workflow",
     "page": "Seite 01",

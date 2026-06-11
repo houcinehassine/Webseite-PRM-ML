@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Seite nicht gefunden</title>
+  <script type="module" src="./header.js"></script>
+  <script type="module" src="./footer.js"></script>
+  <link rel="stylesheet" href="./assets/style.css">
+  <style>
+    .not-found-wrap {
+      min-height: 70vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: var(--space-10) var(--space-6);
+      gap: var(--space-6);
+    }
+    .not-found-code {
+      font-size: clamp(5rem, 20vw, 9rem);
+      font-weight: 900;
+      line-height: 1;
+      color: var(--color-primary);
+      opacity: .18;
+      font-family: var(--font-display);
+      user-select: none;
+      letter-spacing: -.04em;
+    }
+    .not-found-icon {
+      font-size: 3.5rem;
+      margin-bottom: calc(-1 * var(--space-4));
+    }
+    .not-found-wrap h1 {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      margin: 0;
+    }
+    .not-found-wrap p {
+      font-size: var(--text-base);
+      color: var(--color-text-muted);
+      max-width: 420px;
+      line-height: 1.6;
+      margin: 0;
+    }
+    .not-found-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-3);
+      justify-content: center;
+      margin-top: var(--space-2);
+    }
+    .not-found-links a {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-5);
+      border-radius: var(--radius-full);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+    .not-found-links a.primary {
+      background: var(--color-primary);
+      color: #fff;
+    }
+    .not-found-links a.primary:hover { opacity: .88; }
+    .not-found-links a.secondary {
+      background: var(--color-surface-2);
+      border: 1.5px solid var(--color-border);
+      color: var(--color-text);
+    }
+    .not-found-links a.secondary:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    .not-found-divider {
+      width: 60px;
+      height: 3px;
+      background: var(--color-primary);
+      border-radius: 2px;
+      opacity: .4;
+    }
+  </style>
+</head>
+<body>
+  <site-header active="" title="PRM – Seite nicht gefunden"></site-header>
+
+  <main class="content" id="main-content" style="max-width:100%">
+    <div class="not-found-wrap">
+      <div class="not-found-code" aria-hidden="true">404</div>
+      <div class="not-found-icon">🔍</div>
+      <h1>Seite nicht gefunden</h1>
+      <div class="not-found-divider"></div>
+      <p>
+        Diese Seite existiert leider nicht (mehr).<br>
+        Vielleicht wurde die URL falsch eingegeben,
+        oder der Inhalt wurde verschoben.
+      </p>
+      <div class="not-found-links">
+        <a href="./index.html" class="primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
+          Zur Startseite
+        </a>
+        <a href="./search.html" class="secondary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          Suche öffnen
+        </a>
+      </div>
+
+      <!-- Kapitel-Direktlinks -->
+      <div style="display:flex;flex-wrap:wrap;gap:var(--space-2);justify-content:center;margin-top:var(--space-4)">
+        <a href="./Kapitel1/Kapitel1.html" style="font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:none;padding:4px 10px;border:1px solid var(--color-border);border-radius:var(--radius-full)">K1 Data Prep</a>
+        <a href="./Kapitel2/Kapitel2.html" style="font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:none;padding:4px 10px;border:1px solid var(--color-border);border-radius:var(--radius-full)">K2 Intro ML</a>
+        <a href="./Kapitel3/Kapitel3.html" style="font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:none;padding:4px 10px;border:1px solid var(--color-border);border-radius:var(--radius-full)">K3 Klassifikation</a>
+        <a href="./Kapitel4/Kapitel4.html" style="font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:none;padding:4px 10px;border:1px solid var(--color-border);border-radius:var(--radius-full)">K4 Clustering</a>
+        <a href="./Kapitel5/Kapitel5.html" style="font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:none;padding:4px 10px;border:1px solid var(--color-border);border-radius:var(--radius-full)">K5 Random Forest</a>
+        <a href="./Kapitel6/Kapitel6.html" style="font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:none;padding:4px 10px;border:1px solid var(--color-border);border-radius:var(--radius-full)">K6 Deep Learning</a>
+        <a href="./Kapitel7/Kapitel7.html" style="font-size:var(--text-xs);color:var(--color-text-muted);text-decoration:none;padding:4px 10px;border:1px solid var(--color-border);border-radius:var(--radius-full)">K7 Reinforcement</a>
+      </div>
+    </div>
+  </main>
+
+  <site-footer caption="Seite nicht gefunden"></site-footer>
+</body>
+</html>
