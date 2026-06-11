@@ -564,4 +564,223 @@ html{overflow-x:hidden}
     border: 1px solid #ccc;
     font-size: 11pt;
   }
+  /* Übersetzer beim Drucken ausblenden */
+  #prm-translator, #prm-tr-tooltip { display: none !important; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   OFFLINE-ÜBERSETZER  –  schwebendes Widget
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Wrapper & FAB ─────────────────────────────────────────── */
+#prm-translator {
+  position: fixed;
+  /* leicht über dem Scroll-to-Top-Button */
+  bottom: calc(var(--space-10) + 52px);
+  right: var(--space-5);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+#prm-tr-fab {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: transform .15s, box-shadow .15s;
+  color: inherit;
+}
+#prm-tr-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px oklch(0.2 0.01 80 / .18);
+}
+
+/* ── Panel ─────────────────────────────────────────────────── */
+#prm-tr-panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  width: 268px;
+  overflow: hidden;
+  font-family: var(--font-body);
+}
+
+.prm-tr-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-offset);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-text);
+}
+.prm-tr-head button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-faint);
+  font-size: .9rem;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+  transition: color .12s, background .12s;
+}
+.prm-tr-head button:hover {
+  color: var(--color-text);
+  background: var(--color-surface-2);
+}
+
+/* ── Sections inside panel ─────────────────────────────────── */
+.prm-tr-section {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+.prm-tr-label {
+  font-size: .6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-2);
+}
+
+/* ── Language / Mode buttons ───────────────────────────────── */
+.prm-tr-langs,
+.prm-tr-modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.prm-tr-lang,
+.prm-tr-mode {
+  padding: 3px 11px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-offset);
+  border: 1px solid var(--color-border);
+  font-size: .7rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: all .12s;
+  white-space: nowrap;
+}
+.prm-tr-lang.active,
+.prm-tr-mode.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+.prm-tr-lang:hover:not(.active),
+.prm-tr-mode:hover:not(.active) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+/* ── Mode hint text ────────────────────────────────────────── */
+.prm-tr-hint {
+  margin-top: var(--space-2);
+  font-size: .65rem;
+  color: var(--color-text-faint);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* ── Status ────────────────────────────────────────────────── */
+.prm-tr-status-wrap {
+  padding: var(--space-2) var(--space-4) var(--space-3);
+}
+.prm-tr-status-text {
+  display: block;
+  font-size: .68rem;
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-1);
+  min-height: 1.1em;
+}
+.prm-tr-status-text.prm-tr-st-loading { color: var(--color-warning); }
+.prm-tr-status-text.prm-tr-st-ok      { color: var(--color-success); }
+.prm-tr-status-text.prm-tr-st-error   { color: #dc2626; }
+
+/* ── Download progress bar ─────────────────────────────────── */
+.prm-tr-progress {
+  height: 4px;
+  background: var(--color-surface-offset);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: var(--space-1);
+}
+.prm-tr-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  transition: width .35s ease;
+}
+
+/* ── Section translate button ──────────────────────────────── */
+.prm-tr-sec-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  margin: var(--space-1) 0 0 var(--space-3);
+  border-radius: var(--radius-full);
+  background: color-mix(in oklab, var(--color-primary) 8%, var(--color-surface));
+  border: 1px solid color-mix(in oklab, var(--color-primary) 30%, var(--color-border));
+  color: var(--color-primary);
+  font-size: .68rem;
+  font-weight: 700;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: background .12s, opacity .12s;
+  white-space: nowrap;
+}
+.prm-tr-sec-btn:hover {
+  background: color-mix(in oklab, var(--color-primary) 16%, var(--color-surface));
+}
+.prm-tr-sec-btn:disabled {
+  opacity: .45;
+  cursor: wait;
+}
+
+/* ── Selection tooltip ─────────────────────────────────────── */
+#prm-tr-tooltip {
+  background: var(--color-surface);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-2) var(--space-3);
+  max-width: 290px;
+  font-size: var(--text-xs);
+  line-height: 1.65;
+  color: var(--color-text);
+  pointer-events: none;
+  z-index: 99999;
+}
+
+/* ── RTL support (Arabisch) ────────────────────────────────── */
+[dir="rtl"] {
+  text-align: right;
+  font-family: 'Segoe UI', 'Noto Sans Arabic', 'Arial', sans-serif;
+}
+
+/* Mobile: Widget nach unten-links bei schmalen Screens */
+@media (max-width: 480px) {
+  #prm-translator {
+    right: auto;
+    left: var(--space-5);
+    bottom: calc(var(--space-10) + 52px);
+  }
+  #prm-tr-panel { width: calc(100vw - var(--space-10)); }
 }
