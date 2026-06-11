@@ -98,8 +98,33 @@ export function initSectionObserver(linkEls) {
 // ─────────────────────────────────────────────────────────
 //  RENDER  (bekommt chapter-Objekt von der jeweiligen Sidebar.js)
 // ─────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────
+//  LERNFORTSCHRITT (localStorage)
+// ─────────────────────────────────────────────────────────
+const VISITED_KEY = 'prm-visited';
+
+function getVisited() {
+  try { return new Set(JSON.parse(localStorage.getItem(VISITED_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+
+function markVisited(chapterTitle, pageHref) {
+  try {
+    const v = getVisited();
+    v.add(chapterTitle + '/' + pageHref);
+    localStorage.setItem(VISITED_KEY, JSON.stringify([...v]));
+  } catch {}
+}
+
+
 export function renderSidebar(chapter, activePage = 'page1') {
   loadStyles();
+
+  /* Aktuelle Seite als besucht speichern */
+  const curPage = chapter.pages.find(p => !p.divider && p.id === activePage);
+  if (curPage) markVisited(chapter.title, curPage.href);
+
+  const visited = getVisited();
 
   const aside = document.createElement('aside');
   aside.className = 'sidebar';
@@ -166,10 +191,13 @@ export function renderSidebar(chapter, activePage = 'page1') {
     const pageBlock = document.createElement('div');
     pageBlock.className = 'toc-page-group';
 
+    const isDone = !pageOpen && visited.has(chapter.title + '/' + page.href);
+
     const toggleClass = [
       'toc-page-toggle',
       pageOpen   ? 'active'            : '',
-      isPruefung ? 'toc-page-pruefung' : ''
+      isPruefung ? 'toc-page-pruefung' : '',
+      isDone     ? 'toc-page-done'     : ''
     ].filter(Boolean).join(' ');
 
     const sublistClass = [
@@ -181,9 +209,14 @@ export function renderSidebar(chapter, activePage = 'page1') {
       `<a href="${page.href}${s.href}" class="toc-link">${s.title}</a>`
     ).join('');
 
+    const doneIndicator = isDone
+      ? '<span class="toc-done-dot" aria-label="Besucht" title="Besucht">✓</span>'
+      : '';
+
     pageBlock.innerHTML = `
       <button class="${toggleClass}" type="button" aria-expanded="${pageOpen}">
         <span>${page.title}</span>
+        ${doneIndicator}
         <span class="toc-chevron">▸</span>
       </button>
       <div class="${sublistClass}" ${pageOpen ? '' : 'hidden'}>
@@ -408,35 +441,41 @@ export function registerSidebar(chapter) {
 
 /* ============================================================
    PRM – mathjax.js  |  Stand 30.05.2026
-   Lädt MathJax und rendert alle Formeln auf der Seite
+   Lädt MathJax NUR wenn die Seite LaTeX-Formeln enthält.
+   Spart ~1,1 MB auf Seiten ohne Formeln (Übersichten, Quizze …)
    ============================================================ */
 
-// Config MUSS vor dem Script-Tag gesetzt werden
-window.MathJax = {
-  tex: {
-    inlineMath:  [['\\(', '\\)']],
-    displayMath: [['\\[', '\\]']],
-    tags: 'ams'
-  },
-  options: {
-    skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
-  },
-  startup: {
-    ready() {
-      MathJax.startup.defaultReady();
-      // Nach vollständigem Laden alle Formeln rendern
-      MathJax.startup.promise.then(() => {
-        MathJax.typesetPromise();
-      });
-    }
-  }
-};
+(function initMathJaxIfNeeded() {
+  // Seiten ohne \( … \) oder \[ … \] brauchen kein MathJax
+  const html = document.body ? document.body.innerHTML : '';
+  if (!html.includes('\\(') && !html.includes('\\[')) return;
 
-// MathJax Script laden (lokal)
-const script = document.createElement('script');
-script.src = new URL('./vendor/mathjax-tex-chtml.js', import.meta.url).href;
-script.async = true;
-document.head.appendChild(script);
+  // Config MUSS vor dem Script-Tag gesetzt werden
+  window.MathJax = {
+    tex: {
+      inlineMath:  [['\\(', '\\)']],
+      displayMath: [['\\[', '\\]']],
+      tags: 'ams'
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    },
+    startup: {
+      ready() {
+        MathJax.startup.defaultReady();
+        MathJax.startup.promise.then(() => {
+          MathJax.typesetPromise();
+        });
+      }
+    }
+  };
+
+  // MathJax Script laden (lokal, 1,1 MB)
+  const mjScript = document.createElement('script');
+  mjScript.src   = new URL('./vendor/mathjax-tex-chtml.js', import.meta.url).href;
+  mjScript.async = true;
+  document.head.appendChild(mjScript);
+})();
 
 /* ============================================================
    PRM – copy.js (Kopieren & Ausführen)
