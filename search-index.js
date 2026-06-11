@@ -3166,7 +3166,7 @@ window.SEARCH_DATA = [
     "snippet": "03_core.ipynb"
   },
   {
-    "id": "Kapitel3/Page01.html#wo-befinden-wir-uns",
+    "id": "Kapitel3/Page01.html#wo-befinden-wir-uns-2",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 01",
     "title": "1.1 SVM: Wo befinden wir uns?",
@@ -3174,7 +3174,7 @@ window.SEARCH_DATA = [
     "text": "1.1 SVM: Wo befinden wir uns? SVMs sind ein Supervised-Learning-Verfahren – sie können sowohl für Klassifikation (SVC) als auch für Regression (SVR) eingesetzt werden. Das folgende Diagramm zeigt die Einordnung in die ML-Taxonomie. 🤖 Machine Learning └─ 📊 Supervised Learning Wir sind hier └─ 🔍 Unsupervised Learning └─ 🎮 Reinforcement Learning ├─ 🏷️ Klassifikation → SVC – Support Vector Classifier └─ 📈 Regression → SVR – Support Vector Regressor 💡 So what? SVMs sind flexibel: Dasselbe…",
     "type": "code",
     "url": "Kapitel3/Page01.html",
-    "anchor": "#wo-befinden-wir-uns",
+    "anchor": "#wo-befinden-wir-uns-2",
     "tags": [
       "Klassifikation",
       "Regression",
@@ -3234,7 +3234,7 @@ window.SEARCH_DATA = [
     "snippet": "SVC"
   },
   {
-    "id": "Kapitel3/Page01.html#svm-allgemein",
+    "id": "Kapitel3/Page01.html#svm-allgemein-2",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 01",
     "title": "1.4 Standard-Setup für dieses Kapitel",
@@ -3242,7 +3242,7 @@ window.SEARCH_DATA = [
     "text": "1.4 Standard-Setup für dieses Kapitel Diese Imports bilden die Grundlage aller Code-Beispiele – direkt aus 03_core.ipynb (Cell 1). Einmal ausführen, für das gesamte Notebook gültig. Python – Standard-Imports Kapitel 3 (Cell 1) # ── Standard-Imports für Kapitel 3 ────────────────────────── import matplotlib.pyplot as plt import numpy as np from sklearn.datasets import make_circles, make_blobs from sklearn.svm import SVC import seaborn as sns; sns.set() matplotlib.pyplot Visualisierung der…",
     "type": "code",
     "url": "Kapitel3/Page01.html",
-    "anchor": "#svm-allgemein",
+    "anchor": "#svm-allgemein-2",
     "tags": [
       "(N, 2)",
       ".fit(X, y)",
@@ -3333,7 +3333,7 @@ window.SEARCH_DATA = [
     "snippet": "SVC"
   },
   {
-    "id": "Kapitel3/Page02.html#klassifikatoren",
+    "id": "Kapitel3/Page02.html#klassifikatoren-2",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 02",
     "title": "2.1 Wir als Klassifikatoren",
@@ -3341,7 +3341,7 @@ window.SEARCH_DATA = [
     "text": "2.1 Wir als Klassifikatoren Bevor wir die Mathe sehen: Denke selbst wie ein Klassifikator. Gegeben ist ein Scatter-Plot mit zwei Klassen – wo würdest du die optimale Trennlinie einzeichnen? 🧠 Interaktive Frage — Folie 5 Stell dir vor, du siehst rote und gelbe Punkte auf einem Koordinatensystem. Wo würdest du – als Klassifikator – eine optimale Trennlinie einzeichnen? Was macht eine Linie besser als eine andere? 🎯 Die Ausgangssituation Zwei Klassen im 2D-Feature-Raum (rote / gelbe Punkte) Ziel:…",
     "type": "formel",
     "url": "Kapitel3/Page02.html",
-    "anchor": "#klassifikatoren",
+    "anchor": "#klassifikatoren-2",
     "tags": [
       "Klassifikatoren",
       "Margin Maximierung"
@@ -3485,7 +3485,7 @@ window.SEARCH_DATA = [
     "snippet": "N=60"
   },
   {
-    "id": "Kapitel3/Page02.html#klassifikatoren-2",
+    "id": "Kapitel3/Page02.html#klassifikatoren-3",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 02",
     "title": "2.7 Wir als Klassifikatoren 2.0",
@@ -3493,7 +3493,7 @@ window.SEARCH_DATA = [
     "text": "2.7 Wir als Klassifikatoren 2.0 Jetzt mit echtem SVM-Wissen: Ein neuer, etwas schwierigerer Datensatz – diesmal sehen wir auch die Lösung des Modells mit eingezeichneten Support Vectors. 🧠 Interaktive Frage — Folie 11 Du siehst jetzt rote und gelbe Punkte mit einer horizontalen Trennlinie und Margin-Grenzen. Welche Punkte sind die Support Vectors? Kannst du sie einzeichnen, bevor du den Code ausführst? Schritt 1 — Neuen, etwas schwierigeren Datensatz erstellen (cluster_std=1.2 statt 0.6 →…",
     "type": "code",
     "url": "Kapitel3/Page02.html",
-    "anchor": "#klassifikatoren-2",
+    "anchor": "#klassifikatoren-3",
     "tags": [
       "Klassifikatoren",
       "Margin-Maximierung",
@@ -3556,7 +3556,7 @@ window.SEARCH_DATA = [
     "snippet": ""
   },
   {
-    "id": "Kapitel3/Page03.html#grundlagen",
+    "id": "Kapitel3/Page03.html#grundlagen-2",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 03",
     "title": "3.1 Grundlagen: Datensatz & Hyperebene",
@@ -3564,7 +3564,7 @@ window.SEARCH_DATA = [
     "text": "3.1 Grundlagen: Datensatz & Hyperebene Wir formalisieren, womit wir arbeiten: ein historischer Trainingsdatensatz und eine Hyperebene, die wir durch zwei Parameter vollständig beschreiben können. Der Trainingsdatensatz Trainingsdatensatz (Folie 12) \\[ \\{(x_i,\\, y_i) \\mid i = 1,\\ldots,N,\\quad y_i \\in \\{-1,\\, +1\\}\\} \\] \\(x_i\\) Feature-Vektor des i-ten Datenpunkts (eine Zeile aus der Feature-Matrix X) \\(y_i \\in \\{-1,+1\\}\\) Label – nicht 0/1 wie sonst, sondern –1 und +1 (wichtig für die…",
     "type": "code",
     "url": "Kapitel3/Page03.html",
-    "anchor": "#grundlagen",
+    "anchor": "#grundlagen-2",
     "tags": [
       "(n_features,)",
       "Datensatz",
@@ -3688,7 +3688,7 @@ window.SEARCH_DATA = [
     "snippet": ""
   },
   {
-    "id": "Kapitel3/Page04.html#soft-margin-intro",
+    "id": "Kapitel3/Page04.html#soft-margin-intro-2",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 04",
     "title": "4.1 Hard- vs. Soft-Margin: Einführung",
@@ -3696,7 +3696,7 @@ window.SEARCH_DATA = [
     "text": "4.1 Hard- vs. Soft-Margin: Einführung Bei SVMs kann man den Margin entweder starr (hard) oder weich (soft) definieren – je nachdem, ob Datenpunkte innerhalb des Margins erlaubt sind. 😤 Das Problem mit Hard-Margin In der Praxis sind Klassen selten perfekt trennbar Bei Rauschen oder Überlappung: Hard-Margin schlägt fehl Sehr enger Margin → Overfitting-Risiko Kleine Störungen in den Daten → komplett andere Trennlinie → Hard-Margin ist zu rigide für reale Daten ✅ Die Lösung: Soft-Margin Soft-Margin…",
     "type": "code",
     "url": "Kapitel3/Page04.html",
-    "anchor": "#soft-margin-intro",
+    "anchor": "#soft-margin-intro-2",
     "tags": [
       "Cross-Validation",
       "Einführung",
@@ -3845,7 +3845,7 @@ window.SEARCH_DATA = [
     "snippet": "svm_gradients()"
   },
   {
-    "id": "Kapitel3/Page05.html#loss-function",
+    "id": "Kapitel3/Page05.html#loss-function-2",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 05",
     "title": "5.1 Setup & Loss Function in Python",
@@ -3853,7 +3853,7 @@ window.SEARCH_DATA = [
     "text": "5.1 Setup & Loss Function in Python Zuerst die Grundlage: Datensatz vorbereiten und die Kostenfunktion als Python-Funktion abbilden. (Folie 20) Kostenfunktion – Referenz (aus Seite 04) \\[ E(\\mathbf{w}, b) = \\tfrac{1}{2}\\|\\mathbf{w}\\|^2 + C \\cdot \\sum_{i=1}^{N} \\max\\{0,\\; 1 - y_i(\\langle\\mathbf{w}, x_i\\rangle + b)\\} \\] Schritt 1 — Imports, Datensatz erstellen und Labels auf {−1, +1} umrechnen. SVMs brauchen intern diese Konvention für die mathematischen Bedingungen. Python – Setup & Datensatz…",
     "type": "code",
     "url": "Kapitel3/Page05.html",
-    "anchor": "#loss-function",
+    "anchor": "#loss-function-2",
     "tags": [
       "(X, y, w, b, C)",
       "Function",
@@ -4036,7 +4036,7 @@ window.SEARCH_DATA = [
     "snippet": "kernel='rbf'"
   },
   {
-    "id": "Kapitel3/Page06.html#nicht-linear-intro",
+    "id": "Kapitel3/Page06.html#nicht-linear-intro-2",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 06",
     "title": "6.1 Das Problem: Nicht-linear separierbar",
@@ -4044,7 +4044,7 @@ window.SEARCH_DATA = [
     "text": "6.1 Das Problem: Nicht-linear separierbar Bisher haben wir angenommen, dass eine gerade Hyperebene die Klassen trennen kann. Was wenn das grundsätzlich unmöglich ist? Linear SVC ❌ Versagt! Klasse 1 (außen) Klasse 2 (innen) ❌ Das Problem — Folie 27 Konzentrische Ringe: Klasse 2 (gelb, innen) ist vollständig von Klasse 1 (rot, außen) umschlossen. Keine gerade Linie kann diese Klassen jemals trennen – egal wo wir sie ziehen. Das ist ein nicht-linear separierbares Problem. Schritt 1 — Datensatz…",
     "type": "code",
     "url": "Kapitel3/Page06.html",
-    "anchor": "#nicht-linear-intro",
+    "anchor": "#nicht-linear-intro-2",
     "tags": [
       "Nicht",
       "Problem",
@@ -4174,7 +4174,7 @@ window.SEARCH_DATA = [
     "snippet": "accuracy_score"
   },
   {
-    "id": "Kapitel3/Page07.html#multi-class",
+    "id": "Kapitel3/Page07.html#multi-class-2",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 07",
     "title": "7.1 Multi-Class SVMs: One-vs-One",
@@ -4182,7 +4182,7 @@ window.SEARCH_DATA = [
     "text": "7.1 Multi-Class SVMs: One-vs-One SVMs sind ursprünglich für binäre Klassifikation ausgelegt (2 Klassen). Bei mehreren Klassen: für jede Klassenpaarung einen eigenen SVC trainieren. 🧠 Folie 30 — Fragen Sie kennen jetzt eine SVM, die zwei Klassen unterscheiden kann: wie funktioniert das bei mehreren Klassen? Was bedeutet \"one-versus-rest\"? Sind die Entscheidungsgrenzen gleich? Wie viele SVMs müssen erzeugt werden? ⚔️ One-vs-One (OvO) Für jede Klassenpaarung (A vs. B) wird ein SVM trainiert N…",
     "type": "code",
     "url": "Kapitel3/Page07.html",
-    "anchor": "#multi-class",
+    "anchor": "#multi-class-2",
     "tags": [
       "Class",
       "Multi",
@@ -4345,7 +4345,7 @@ window.SEARCH_DATA = [
     "snippet": "LinearSVR"
   },
   {
-    "id": "Kapitel3/Page08.html#svr-konzept",
+    "id": "Kapitel3/Page08.html#svr-konzept-2",
     "chapter": "K3 · Support Vector Machines",
     "page": "Seite 08",
     "title": "8.1 SVR: Das Konzept",
@@ -4353,7 +4353,7 @@ window.SEARCH_DATA = [
     "text": "8.1 SVR: Das Konzept Support Vector Regression kehrt die SVC-Logik um: statt Punkte außerhalb des Margins zu fordern, wollen wir möglichst viele Punkte innerhalb eines ε-Tubes. 🪟 Whiteboard Time! — Folie 34 Warum benötigen wir nun ein Epsilon? Wie könnte nun unsere Kostenfunktion aussehen? Was ist der clevere Trick, der uns von einer Klassifikation zu einer Regression bringt? 🎯 SVC – Klassifikation Punkte sollen außerhalb des Margins sein Margin-Verletzungen = Punkte im Margin → Strafe Ziel:…",
     "type": "formel",
     "url": "Kapitel3/Page08.html",
-    "anchor": "#svr-konzept",
+    "anchor": "#svr-konzept-2",
     "tags": [
       "Konzept",
       "ε-Tubes"
@@ -8383,7 +8383,7 @@ window.SEARCH_DATA = [
     "snippet": ".predict_proba()"
   },
   {
-    "id": "Kapitel6/Page02.html#predict-proba",
+    "id": "Kapitel6/Page02.html#predict-proba-2",
     "chapter": "K6 · Modellbewertung & Workflow",
     "page": "Seite 02",
     "title": "GMM und .predict_proba()",
@@ -8391,7 +8391,7 @@ window.SEARCH_DATA = [
     "text": "GMM und .predict_proba() Neben der .predict()-Methode – die hart einem Cluster zuweist – gibt es bei probabilistischen Modellen wie GMM auch die .predict_proba()-Methode, die für jeden Datenpunkt die Wahrscheinlichkeit zu jedem Cluster berechnet. 📌 Kontext: Die Variablen gmm, X und labels stammen aus Seite 01 und werden hier direkt weiterverwendet. Das GMM ist bereits mit n_components=4 auf X gefittet. Schritt 1 · Wahrscheinlichkeiten berechnen & ausgeben predict_proba(X) gibt für jeden der 400…",
     "type": "code",
     "url": "Kapitel6/Page02.html",
-    "anchor": "#predict-proba",
+    "anchor": "#predict-proba-2",
     "tags": [
       "** 4",
       ".predict()",
@@ -8529,7 +8529,7 @@ window.SEARCH_DATA = [
     "snippet": ""
   },
   {
-    "id": "Kapitel6/Page03.html#gmm-mathematik",
+    "id": "Kapitel6/Page03.html#gmm-mathematik-2",
     "chapter": "K6 · Modellbewertung & Workflow",
     "page": "Seite 03",
     "title": "GMM – Allgemeine Formulierung",
@@ -8537,7 +8537,7 @@ window.SEARCH_DATA = [
     "text": "GMM – Allgemeine Formulierung Die Mechanik von GMMs kennen wir bereits – jetzt kommt die formale mathematische Beschreibung. Ein Gaussian Mixture Model beschreibt die Dichte als gewichtete Summe von K Komponenten. Allgemeine Formulierung \\[ p(\\mathbf{x} \\mid \\boldsymbol{\\theta}) = \\sum_{k=1}^{K} w_k \\, p_k(\\mathbf{x} \\mid \\boldsymbol{\\theta}) \\] Ersetzt man die allgemeinen Dichten \\(p_k\\) durch multivariate Normalverteilungen, erhält man die konkrete GMM-Gleichung: GMM mit Gauß-Komponenten \\[…",
     "type": "code",
     "url": "Kapitel6/Page03.html",
-    "anchor": "#gmm-mathematik",
+    "anchor": "#gmm-mathematik-2",
     "tags": [
       "0.2",
       "0.3",
@@ -8722,7 +8722,7 @@ window.SEARCH_DATA = [
     "snippet": ".sample()"
   },
   {
-    "id": "Kapitel6/Page04.html#dichteschaetzung",
+    "id": "Kapitel6/Page04.html#dichteschaetzung-2",
     "chapter": "K6 · Modellbewertung & Workflow",
     "page": "Seite 04",
     "title": "GMM als generatives Modell",
@@ -8730,7 +8730,7 @@ window.SEARCH_DATA = [
     "text": "GMM als generatives Modell GMMs werden häufig als Clustering-Algorithmen beschrieben – genauer gesagt handelt es sich jedoch um Dichteschätzung. Das Ergebnis eines GMMs ist kein Clustering-Modell, sondern ein Generative Probabilistic Model. Generative Modelle Modellieren die vollständige Datenverteilung \\(p(\\mathbf{x})\\) oder \\(p(\\mathbf{x}, y)\\) Können neue Daten generieren via .sample() → Antwort auf: „Wie sehen typische Datenpunkte aus?\" Beispiele: GMM, Naive Bayes, VAE, GAN Dichteschätzung…",
     "type": "code",
     "url": "Kapitel6/Page04.html",
-    "anchor": "#dichteschaetzung",
+    "anchor": "#dichteschaetzung-2",
     "tags": [
       ".predict()",
       ".predict_proba()",
@@ -8926,7 +8926,7 @@ window.SEARCH_DATA = [
     "snippet": "load_digits"
   },
   {
-    "id": "Kapitel6/Page05.html#generate-numbers",
+    "id": "Kapitel6/Page05.html#generate-numbers-2",
     "chapter": "K6 · Modellbewertung & Workflow",
     "page": "Seite 05",
     "title": "Aufgabe & Datensatz kennenlernen",
@@ -8934,7 +8934,7 @@ window.SEARCH_DATA = [
     "text": "Aufgabe & Datensatz kennenlernen Der load_digits-Datensatz aus sklearn.datasets enthält 1797 handschriftliche Ziffern (0–9) als 8×8-Pixel-Bilder. Jedes Bild ist ein 64-dimensionaler Vektor – das GMM lernt die Verteilung dieser hochdimensionalen Daten. 📋 Aufgabenstellung Nutze den load_digits-Datensatz aus sklearn.datasets, um mittels eines Gaussian Mixture Models eine Pipeline zu bauen, die neue – durch das Modell generierte – „handschriftliche\" Ziffern erzeugt. Wir nutzen die Eigenschaft von…",
     "type": "code",
     "url": "Kapitel6/Page05.html",
-    "anchor": "#generate-numbers",
+    "anchor": "#generate-numbers-2",
     "tags": [
       ".data",
       ".reshape(8, 8)",
