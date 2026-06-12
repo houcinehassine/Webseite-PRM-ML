@@ -13,6 +13,7 @@ const chapter = {
     { id: 'Page06', href: 'Page06.html', title: '6 · Modelle: Unsupervised', sections: [{ href: '#kmeans', title: 'KMeans & DBSCAN' }, { href: '#gmm', title: 'Gaussian Mixture' }, { href: '#distanzen', title: 'Distanzen & Statistik' }] },
     { id: 'Page07', href: 'Page07.html', title: '7 · Modellauswahl & Validierung', sections: [{ href: '#split', title: 'Splits & CV' }, { href: '#suche', title: 'Hyperparameter-Suche' }, { href: '#kurven', title: 'Validierungskurven' }] },
     { id: 'Page08', href: 'Page08.html', title: '8 · Metriken & Evaluation', sections: [{ href: '#klassifikation', title: 'Klassifikation' }, { href: '#roc', title: 'ROC & Regression' }, { href: '#clustering', title: 'Clustering-Metriken' }, { href: '#importance', title: 'Feature-Importance' }] },
+    { id: 'Page09', href: 'Page09.html', title: '9 · Built-ins & Stdlib', sections: [{ href: '#builtins', title: 'Eingebaute Funktionen' }, { href: '#datenstrukturen', title: 'Datenstrukturen' }, { href: '#itertools', title: 'itertools' }, { href: '#comprehensions', title: 'Comprehensions & Lambda' }, { href: '#strings', title: 'String-Methoden' }, { href: '#math-random', title: 'math & random' }, { href: '#collections', title: 'collections' }] },
   ]
 };
 
