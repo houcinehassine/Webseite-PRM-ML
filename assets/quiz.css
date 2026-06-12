@@ -463,6 +463,14 @@ details.frage[open] summary {
   site-header, site-sidebar { display: none !important; }
   .layout { display: block !important; }
   .content { padding: 0 !important; }
+  /* K4/K7 accordion (details.frage) */
   details.frage { break-inside: avoid; }
   details.frage .frage-answer { display: block !important; }
+  /* K3 accordion (.quiz-item details) */
+  .quiz-item { break-inside: avoid; }
+  .quiz-item details { display: block !important; }
+  .quiz-item details > * { display: block !important; }
+  /* Hide interactive chrome */
+  .quiz-item summary { display: none !important; }
+  #quiz-progress-hud, #quiz-ergebnis { display: none !important; }
 }

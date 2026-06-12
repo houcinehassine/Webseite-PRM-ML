@@ -52,6 +52,13 @@
               dann klappe die Antwort auf.
               Fragen mit 🪤 sind typische Prüfungsfallen.
             </p>
+            <!-- Sprung-Navigation -->
+            <div style="display:flex;gap:var(--space-2);flex-wrap:wrap;margin-top:var(--space-3)">
+              <a href="#konzept-fragen" style="padding:var(--space-1) var(--space-3);background:color-mix(in oklab,var(--color-primary) 10%,var(--color-surface));color:var(--color-primary);border:1px solid var(--color-primary);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700;text-decoration:none">🧠 Konzept</a>
+              <a href="#formel-fragen"  style="padding:var(--space-1) var(--space-3);background:color-mix(in oklab,var(--color-purple) 10%,var(--color-surface));color:var(--color-purple);border:1px solid var(--color-purple);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700;text-decoration:none">📐 Formeln</a>
+              <a href="#code-fragen"   style="padding:var(--space-1) var(--space-3);background:color-mix(in oklab,var(--color-success) 10%,var(--color-surface));color:var(--color-success);border:1px solid var(--color-success);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700;text-decoration:none">💻 Code</a>
+              <a href="#fallen-fragen" style="padding:var(--space-1) var(--space-3);background:color-mix(in oklab,var(--color-warning) 15%,var(--color-surface));color:color-mix(in oklab,var(--color-warning) 80%,#000);border:1px solid var(--color-warning);border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700;text-decoration:none">🪤 Fallen</a>
+            </div>
           </aside>
         </div>
       </section>
@@ -469,9 +476,122 @@ knn.fit(
         </div>
       </section>
 
+
+      <!-- ── FORTSCHRITTS-LEISTE (sticky, erscheint nach 1. geöffneter Frage) ── -->
+      <div id="quiz-progress-hud"
+           style="display:none;position:sticky;bottom:0;left:0;right:0;z-index:40;
+                  background:var(--color-surface);border-top:1px solid var(--color-border);
+                  padding:var(--space-2) var(--space-4);
+                  display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap">
+        <span style="font-size:var(--text-sm);font-weight:600;color:var(--color-text-muted);
+                     white-space:nowrap">Fortschritt:</span>
+        <div style="flex:1;min-width:80px;height:6px;background:var(--color-border);
+                    border-radius:3px;overflow:hidden">
+          <div id="quiz-progress-fill"
+               style="height:100%;background:var(--color-primary);border-radius:3px;
+                      width:0%;transition:width .35s ease"></div>
+        </div>
+        <span id="quiz-progress-label"
+              style="font-size:var(--text-sm);font-weight:700;color:var(--color-primary);
+                     white-space:nowrap">0 / ?</span>
+      </div>
+
+      <!-- ── ERGEBNIS-SCREEN ──────────────────────────────────────── -->
+      <section class="section" id="quiz-ergebnis" style="display:none;text-align:center">
+        <div style="padding:var(--space-12) var(--space-4)">
+          <div style="font-size:3.5rem;line-height:1;margin-bottom:var(--space-4)">🎓</div>
+          <h2 style="font-size:var(--text-xl);margin-bottom:var(--space-3)">
+            Alle Fragen durchgearbeitet!
+          </h2>
+          <p style="color:var(--color-text-muted);max-width:480px;margin:0 auto var(--space-6)">
+            Du hast jede Frage geöffnet und bearbeitet. Schau dir Unsicherheiten nochmal im Cheatsheet an.
+          </p>
+          <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;
+                      background:var(--color-surface-2);border:1px solid var(--color-border);
+                      border-radius:var(--radius-xl);padding:var(--space-5) var(--space-10);
+                      margin-bottom:var(--space-8)">
+            <span id="ergebnis-zahl"
+                  style="font-size:var(--text-2xl);font-weight:800;color:var(--color-primary)">
+              0 / 0
+            </span>
+            <span style="font-size:var(--text-sm);color:var(--color-text-muted)">
+              Fragen durchgearbeitet
+            </span>
+          </div>
+          <div style="display:flex;gap:var(--space-3);justify-content:center;flex-wrap:wrap">
+            <button onclick="window.scrollTo({top:0,behavior:'smooth'})"
+                    style="padding:var(--space-3) var(--space-6);background:var(--color-primary);
+                           color:#fff;border:none;border-radius:var(--radius-md);
+                           font-size:var(--text-sm);font-weight:700;cursor:pointer">
+              ↑ Zurück nach oben
+            </button>
+            <a href="PageCheatsheet.html"
+               style="display:inline-block;padding:var(--space-3) var(--space-6);
+                      background:var(--color-surface-2);border:1px solid var(--color-border);
+                      border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:700;
+                      text-decoration:none;color:var(--color-text)">
+              📋 Cheatsheet öffnen
+            </a>
+          </div>
+        </div>
+      </section>
+
     </main>
   </div>
 
   <site-footer caption="PRM Prüfungsvorbereitung · Kapitel 4 · Quiz · Stand Juni 2026"></site-footer>
+
+  <script>
+  /* ── Quiz-Fortschritt & Ergebnis-Screen (k4) ─── */
+  (function() {
+    const ALL    = Array.from(document.querySelectorAll('details.frage'));
+    const TOTAL  = ALL.length;
+    const SK     = 'prm-quiz-k4-progress';
+    const opened = new Set();
+
+    const hud   = document.getElementById('quiz-progress-hud');
+    const fill  = document.getElementById('quiz-progress-fill');
+    const label = document.getElementById('quiz-progress-label');
+    const res   = document.getElementById('quiz-ergebnis');
+    const zahl  = document.getElementById('ergebnis-zahl');
+
+    function update() {
+      const n   = opened.size;
+      const pct = TOTAL > 0 ? (n / TOTAL * 100) : 0;
+      fill.style.width      = pct + '%';
+      label.textContent     = n + ' / ' + TOTAL;
+      if (zahl) zahl.textContent = n + ' / ' + TOTAL;
+      hud.style.display     = n > 0 ? 'flex' : 'none';
+      localStorage.setItem(SK, n + '/' + TOTAL);
+      if (n >= TOTAL && TOTAL > 0 && res) {
+        res.style.display = 'block';
+        setTimeout(() => res.scrollIntoView({behavior:'smooth', block:'start'}), 400);
+      }
+    }
+
+    ALL.forEach((det, i) => {
+      det.addEventListener('toggle', () => {
+        if (det.open) opened.add(i);
+        update();
+      });
+    });
+
+    /* Letztes Ergebnis in der Hero anzeigen */
+    const saved = localStorage.getItem(SK);
+    if (saved && !saved.startsWith('0/')) {
+      const heroNote = document.querySelector('.hero .pill-row');
+      if (heroNote) {
+        const chip = document.createElement('span');
+        chip.className = 'pill';
+        chip.style.cssText = 'background:color-mix(in oklab,var(--color-primary) 12%,var(--color-surface));color:var(--color-primary);font-weight:700';
+        chip.textContent = '↩ Zuletzt: ' + saved + ' geöffnet';
+        heroNote.appendChild(chip);
+      }
+    }
+
+    update();
+  })();
+  </script>
+
 </body>
 </html>

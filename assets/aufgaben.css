@@ -441,3 +441,63 @@
 .mcq-exp code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary);}
 .frage-link{display:inline-flex;align-items:center;gap:.4rem;margin-top:var(--space-4);font-size:var(--text-xs);font-weight:700;color:var(--color-primary);text-decoration:none;background:var(--color-primary-highlight);border:1px solid color-mix(in oklab,var(--color-primary) 22%,transparent);padding:.4rem .85rem;border-radius:var(--radius-full);transition:background .15s,transform .15s;}
 .frage-link:hover{background:color-mix(in oklab,var(--color-primary) 16%,var(--color-surface));transform:translateX(2px);}
+
+/* ══════════════════════════════════════════════════════════════
+   DARK MODE – überschreibt :root-Variablen und hardcoded Farben
+   ══════════════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg: #171614;
+  --card: #1c1b19;
+  --border: #393836;
+  --text: #cdccca;
+  --muted: #9a9792;
+  --quiz-light: rgba(99,102,241,.13);
+  --warmup-light: rgba(5,150,105,.12);
+  --haupt-light: rgba(220,38,38,.12);
+  --schnk-light: rgba(217,119,6,.12);
+}
+
+/* Karten + Beschriftungen */
+[data-theme="dark"] .card { box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+[data-theme="dark"] .card-title { color: var(--text); }
+
+/* Aufgabentexte */
+[data-theme="dark"] .desc { color: #9a9792; }
+[data-theme="dark"] .desc code,
+[data-theme="dark"] .desc pre {
+  background: #22211f;
+  color: #a5b4fc;
+  border-color: #393836;
+}
+
+/* Hinweis-Box */
+[data-theme="dark"] .hint {
+  background: rgba(59,130,246,.1);
+  border-left-color: #60a5fa;
+  color: #93c5fd;
+}
+
+/* Quiz-Antwortpanel */
+[data-theme="dark"] .q-answer {
+  background: #22211f;
+  color: var(--text);
+  border-color: var(--border);
+}
+[data-theme="dark"] .q-ans-panel {
+  background: rgba(99,102,241,.1);
+  border-color: rgba(99,102,241,.3);
+}
+[data-theme="dark"] .q-ans-panel strong { color: #a5b4fc; }
+[data-theme="dark"] .q-ans-panel code {
+  background: rgba(99,102,241,.18);
+  color: #a5b4fc;
+}
+
+/* Nav-Bar erhält leicht dunklere Variante */
+[data-theme="dark"] #main-content > nav {
+  background: #0f0e0d;
+  border-bottom-color: #22211f;
+}
+[data-theme="dark"] #main-content > nav a:hover {
+  background: rgba(255,255,255,.04);
+}

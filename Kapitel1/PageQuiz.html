@@ -856,17 +856,27 @@ print(X_new.shape)</div>
            ERGEBNIS-SCREEN
       ═══════════════════════════════════════════════════ -->
       <div id="quiz-result">
-        <div class="quiz-result-emoji" id="result-emoji">🎉</div>
-        <div id="result-score">0 / 20 (0%)</div>
-        <div id="result-msg">Ergebnis wird berechnet...</div>
-        <div class="result-bar-wrap">
-          <div id="result-bar"></div>
-        </div>
-        <button id="btn-retry">↺ Nochmal versuchen</button>
-        <div style="margin-top:var(--space-5);font-size:var(--text-xs);color:var(--color-text-faint)">
-          Tipp: Schaue dir falsche Antworten nochmal im
-          <a href="PageCheatsheet.html" style="color:var(--color-primary);font-weight:700">Cheatsheet</a>
-          nach.
+        <div class="quiz-result-card">
+          <div class="quiz-result-emoji" id="result-emoji">🎉</div>
+          <div class="quiz-result-title" id="result-msg">Ergebnis wird berechnet…</div>
+          <div class="quiz-result-sub">Dein Ergebnis:</div>
+          <span class="quiz-result-score" id="result-score">–</span>
+          <div class="result-bar-wrap">
+            <div class="quiz-result-bar-track">
+              <div class="quiz-result-bar" id="result-bar"></div>
+            </div>
+          </div>
+          <div class="quiz-result-grades">
+            <span>≥ 90% 🏆 Sehr gut</span>
+            <span>≥ 70% 👍 Gut</span>
+            <span>≥ 50% 📚 Weiterüben</span>
+            <span>&lt; 50% 💪 Nochmal!</span>
+          </div>
+          <button id="btn-retry">↺ Nochmal versuchen</button>
+          <div style="margin-top:var(--space-5);font-size:var(--text-xs);color:var(--color-text-faint)">
+            Tipp: Schaue dir falsche Antworten nochmal im
+            <a href="PageCheatsheet.html" style="color:var(--color-primary);font-weight:700">Cheatsheet</a> nach.
+          </div>
         </div>
       </div>
 
