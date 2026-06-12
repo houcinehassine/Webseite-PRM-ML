@@ -645,49 +645,99 @@ print("Test-Mittelwert: ", X_test_b.mean(axis=0).round(3))
 print("\\nFehler in B: Scaler sieht Testdaten schon beim fit() -> Data Leakage!")`,
 
 task6:
-`import numpy as np
-from sklearn.datasets import make_classification
+`import numpy as np                          # NumPy importieren → für Arrays und Zufallsoperationen
+from sklearn.datasets import make_classification  # Funktion zum Erzeugen von künstlichen Klassifikationsdaten
 
+# Künstlichen Datensatz erzeugen
 X, y = make_classification(
-    n_samples=200, n_features=2, n_classes=3,
-    n_clusters_per_class=1, n_redundant=0, random_state=42
+    n_samples=200,          # 200 Datenpunkte (Zeilen) insgesamt
+    n_features=2,           # 2 Features (Spalten) → gut für 2D-Visualisierung
+    n_classes=3,            # 3 Klassen (Labels: 0, 1, 2)
+    n_clusters_per_class=1, # Jede Klasse hat genau 1 Cluster (kompakte Gruppen)
+    n_redundant=0,          # Keine redundanten (abgeleiteten) Features
+    random_state=42         # Zufalls-Seed → Ergebnis ist immer gleich (Reproduzierbarkeit)
 )
+# X hat Shape (200, 2) → 200 Datenpunkte mit je 2 Features
+# y hat Shape (200,)   → 200 Labels (0, 1 oder 2)
+
+# ─── Eigene Shuffle-Split Funktion (wie ShuffleSplit aus sklearn) ───────────────
 
 def shuffle_split(X, y, test_size, n_splits):
-    n      = len(X)
-    n_test = int(n * test_size)
-    for _ in range(n_splits):
-        idx       = np.random.permutation(n)
-        test_idx  = idx[:n_test]
-        train_idx = idx[n_test:]
+    n      = len(X)               # Gesamtanzahl der Datenpunkte → n = 200
+    n_test = int(n * test_size)   # Anzahl Test-Samples berechnen → z.B. 0.3 × 200 = 60
+
+    for _ in range(n_splits):                    # n_splits mal wiederholen (hier 5 Splits)
+        idx       = np.random.permutation(n)     # Zufällige Reihenfolge der Indizes 0..199
+        test_idx  = idx[:n_test]                 # Erste 60 Indizes → Testset
+        train_idx = idx[n_test:]                 # Restliche 140 Indizes → Trainingsset
+
         yield X[train_idx], X[test_idx], y[train_idx], y[test_idx]
+        # yield gibt die 4 Arrays zurück (wie return, aber für Generatoren)
+        # → X_train, X_test, y_train, y_test
+
+# ─── Schleife über alle 5 Splits ────────────────────────────────────────────────
 
 for i, (X_tr, X_te, y_tr, y_te) in enumerate(shuffle_split(X, y, 0.3, 5)):
-    print(f"Split {i+1}: X_train={X_tr.shape}, X_test={X_te.shape}")`,
+    # enumerate() → liefert Index i (0,1,2...) + die 4 Arrays aus yield
+    # X_tr = Trainings-Features, X_te = Test-Features
+    # y_tr = Trainings-Labels,   y_te = Test-Labels
+
+    print(f"Split {i+1}: X_train={X_tr.shape}, X_test={X_te.shape}")
+    # Gibt aus: Shape des Trainings- und Testsets pro Split
+    # Erwartete Ausgabe: X_train=(140, 2), X_test=(60, 2)`,
 
 task7:
-`import numpy as np
-from sklearn.model_selection import train_test_split
+`import numpy as np                                    # NumPy für Arrays und Zufallszahlen
+from sklearn.model_selection import train_test_split  # Funktion zum Aufteilen in Train/Test
+
+# ─── Datensatz erstellen ────────────────────────────────────────────────────────
 
 X = np.array(['BMW']*4 + ['Audi']*4 + ['VW']*4 + ['Tesla']*4 + ['Opel']*4)
-y = np.array(['Auto'] * 20)
+# ['BMW','BMW','BMW','BMW', 'Audi','Audi',..., 'Opel','Opel'] → 5 Marken × 4 = 20 Einträge
 
-iterations = 0
-while True:
-    iterations += 1
+y = np.array(['Auto'] * 20)
+# Labels → alle 20 Einträge haben die Klasse 'Auto' (nur Platzhalter hier)
+
+# ─── Zähler und Suchschleife ────────────────────────────────────────────────────
+
+iterations = 0          # Zähler: wie viele Versuche wurden gebraucht?
+
+while True:             # Endlosschleife → läuft bis break aufgerufen wird
+    iterations += 1     # Jeden Durchlauf um 1 erhöhen
+
     rs = np.random.randint(0, 100000)
+    # Zufälligen random_state (0 bis 99999) wählen → steuert wie train_test_split mischt
+
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.3, random_state=rs
+        X, y,            # Features und Labels übergeben
+        test_size=0.3,   # 30% → Testset  (6 Einträge), 70% → Trainingsset (14 Einträge)
+        random_state=rs  # Zufalls-Seed → jede Iteration mischt anders
     )
+
+    # ─── Bedingungen prüfen ─────────────────────────────────────────────────────
+
     cond1 = 'Tesla' in X_train
+    # True wenn mindestens 1 Tesla im Trainingsset ist
+
     cond2 = list(X_test).count('BMW') == 2
+    # True wenn genau 2 BMW im Testset landen
+
     cond3 = len(set(X_train)) == 5
-    if cond1 and cond2 and cond3:
-        break
+    # set(X_train) entfernt Duplikate → len==5 bedeutet alle 5 Marken sind im Trainingsset
+
+    if cond1 and cond2 and cond3:   # Alle 3 Bedingungen müssen gleichzeitig erfüllt sein
+        break                        # Schleife beenden → gesuchte Aufteilung gefunden!
+
+# ─── Ergebnis ausgeben ──────────────────────────────────────────────────────────
 
 print(f"Gefunden nach {iterations} Iteration(en)!")
+# Zeigt wie viele Versuche gebraucht wurden
+
 print(f"Trainingsset ({len(X_train)}): {sorted(X_train)}")
-print(f"Testset      ({len(X_test)}):  {sorted(X_test)}")`,
+# Trainingsset sortiert ausgeben → 14 Einträge, alle 5 Marken enthalten
+
+print(f"Testset      ({len(X_test)}):  {sorted(X_test)}")
+# Testset sortiert ausgeben → 6 Einträge, genau 2 davon sind BMW`,
 
 task8:
 `import numpy as np

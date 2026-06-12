@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="description" content="Python Built-ins & Standardbibliothek: len, range, zip, enumerate, sorted, itertools, Comprehensions – PRM Prüfungsvorbereitung." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRM – Python · Built-ins & Standardbibliothek</title>
+  <script type="module" src="../header.js"></script>
+  <script type="module" src="../footer.js"></script>
+  <script type="module" src="sidebar.js"></script>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .ref-intro{color:var(--color-text-muted);max-width:72ch;margin-bottom:var(--space-6);line-height:1.7}
+    .ref{border:1px solid var(--color-border);border-radius:var(--radius-lg);margin:var(--space-5) 0;overflow:hidden;background:var(--color-surface);box-shadow:var(--shadow-sm)}
+    .ref-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--color-surface-2);border-bottom:1px solid var(--color-border)}
+    .ref-name{font-family:var(--font-mono);font-weight:700;color:var(--color-primary);font-size:.95rem}
+    .ref-mod{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.12rem .5rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary)}
+    .ref-body{padding:1rem 1.1rem 1.15rem}
+    .ref-body > p{margin:0 0 .8rem;font-size:.9rem;line-height:1.7}
+    .ref-body code{font-family:var(--font-mono);font-size:.85em;background:var(--color-surface-2);padding:.08em .35em;border-radius:4px;color:var(--color-primary)}
+    .ref-body pre{margin:.4rem 0 0}
+    .ref-use{margin-top:.85rem;font-size:.84rem;line-height:1.6;border-left:3px solid var(--color-primary);padding:.5rem .85rem;background:var(--color-primary-highlight);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--color-text)}
+    .ref-use b{color:var(--color-primary)}
+    .ref-params{list-style:none;margin:.2rem 0 .6rem;padding:0;font-size:.85rem}
+    .ref-params li{padding:.15rem 0;border-bottom:1px dashed var(--color-border)}
+    .ref-params li:last-child{border-bottom:none}
+    .ref-params code{background:var(--color-surface-2)}
+  </style>
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="PRM Python · Built-ins & Standardbibliothek">
+  <meta property="og:description" content="Python Built-ins: len, range, zip, enumerate, sorted, itertools, Comprehensions für die PRM-Prüfung.">
+  <meta property="og:image"       content="https://houcinehassine.github.io/Webseite-PRM-ML/assets/og-image.png">
+  <meta name="twitter:card"       content="summary_large_image">
+  <meta name="twitter:title"      content="PRM Python · Built-ins & Standardbibliothek">
+  <meta name="twitter:description" content="Python Built-ins: len, range, zip, enumerate, sorted, itertools, Comprehensions für die PRM-Prüfung.">
+</head>
+<body>
+  <site-header active="pageP" title="Python · Built-ins &amp; Standardbibliothek"></site-header>
+  <div class="layout">
+    <site-sidebar active="Page09"></site-sidebar>
+    <main class="content" id="main-content">
+
+      <section class="hero">
+        <div class="hero-grid">
+          <div>
+            <span class="eyebrow">Python · Built-ins</span>
+            <h1>Built-ins &amp; <span class="key" style="--key-color:var(--color-primary)">Standardbibliothek</span></h1>
+            <p>Die eingebauten Python-Funktionen und wichtige Module der Standardbibliothek — von <code>len()</code> und <code>sorted()</code> über <code>itertools.permutations()</code> bis zu List Comprehensions. Alles, was du im Alltag und in der Prüfung brauchst.</p>
+            <div class="pill-row">
+              <span class="pill">len · range · sorted</span>
+              <span class="pill">zip · enumerate</span>
+              <span class="pill">itertools</span>
+              <span class="pill">Comprehensions</span>
+              <span class="pill">lambda · map · filter</span>
+            </div>
+          </div>
+          <aside class="hero-note">
+            <h2 style="font-size:var(--text-lg)">Worum geht's?</h2>
+            <p>Reines Python — kein NumPy, kein sklearn. Diese Bausteine bilden das Fundament: Sequenzen verarbeiten, Kombinationen erzeugen, Daten transformieren — alles ohne externe Bibliotheken.</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           1 · EINGEBAUTE FUNKTIONEN
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="builtins">
+        <div class="section-head">
+          <h2>9.1 Eingebaute Funktionen</h2>
+          <p>Keine Imports nötig — direkt verfügbar.</p>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">len(obj)</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Gibt die Anzahl der Elemente einer Sequenz, Liste, Menge, Dictionary oder eines Strings zurück.</p>
+            <pre><code>nums = [10, 20, 30, 40]
+print(len(nums))          # 4
+
+text = "Hallo"
+print(len(text))          # 5
+
+d = {'a': 1, 'b': 2}
+print(len(d))             # 2</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Anzahl Samples (<code>len(X)</code>), Anzahl Features (<code>len(X[0])</code> oder <code>X.shape[1]</code>), Länge von Ergebnislisten.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">range(start, stop, step)</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Erzeugt eine lazy Folge von Ganzzahlen. Nur <code>stop</code> ist Pflicht; <code>start</code> = 0, <code>step</code> = 1 sind Default. Das Stopp-Element ist <em>nicht</em> enthalten.</p>
+            <pre><code>list(range(5))             # [0, 1, 2, 3, 4]
+list(range(2, 10, 2))      # [2, 4, 6, 8]
+list(range(10, 0, -1))     # [10, 9, ..., 1]
+
+for i in range(3):
+    print(i)               # 0, 1, 2</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Schleifen über Indizes, <code>range(k_min, k_max+1)</code> für Hyperparameter-Sweeps beim Elbow-Plot.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">sorted(iterable, key=None, reverse=False)</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Gibt eine neue sortierte Liste zurück (das Original bleibt unverändert). Mit <code>key</code> kannst du eine Vergleichsfunktion angeben; <code>reverse=True</code> kehrt die Reihenfolge um.</p>
+            <pre><code>nums = [3, 1, 4, 1, 5, 9, 2]
+sorted(nums)               # [1, 1, 2, 3, 4, 5, 9]
+sorted(nums, reverse=True) # [9, 5, 4, 3, 2, 1, 1]
+
+# Nach zweitem Element sortieren
+paare = [(1, 'b'), (2, 'a'), (3, 'c')]
+sorted(paare, key=lambda x: x[1])
+# [(2, 'a'), (1, 'b'), (3, 'c')]</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Feature-Namen alphabetisch sortieren, Ergebnisse nach Score ordnen.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">enumerate(iterable, start=0)</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Liefert Tupel <code>(index, wert)</code>. Damit musst du keinen Zähler manuell führen. <code>start</code> legt den Anfangsindex fest.</p>
+            <pre><code>labels = ['Katze', 'Hund', 'Vogel']
+for i, name in enumerate(labels):
+    print(i, name)
+# 0 Katze
+# 1 Hund
+# 2 Vogel
+
+# Ab Index 1 zählen
+for i, name in enumerate(labels, start=1):
+    print(f"{i}. {name}")
+# 1. Katze  2. Hund  3. Vogel</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Über Cluster-Labels iterieren und dabei den Index für Plots behalten; Ergebnislisten mit Nummern ausgeben.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">zip(*iterables)</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Verbindet mehrere Iterables element-weise zu Tupeln. Bricht bei der kürzesten Sequenz ab.</p>
+            <pre><code>namen = ['Alice', 'Bob', 'Carol']
+scores = [0.92, 0.87, 0.95]
+
+for name, score in zip(namen, scores):
+    print(f"{name}: {score:.0%}")
+# Alice: 92%  Bob: 87%  Carol: 95%
+
+# Dict aus zwei Listen bauen
+d = dict(zip(namen, scores))
+# {'Alice': 0.92, 'Bob': 0.87, 'Carol': 0.95}
+
+# Unzip (transponieren)
+a, b = zip(*[(1,4),(2,5),(3,6)])
+# a=(1,2,3)  b=(4,5,6)</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Feature-Namen und Importances gemeinsam iterieren; zwei parallele Listen synchron verarbeiten.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">min() / max() / sum()</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Aggregationen auf beliebigen Iterables. <code>min</code>/<code>max</code> akzeptieren ein <code>key</code>-Argument; <code>sum</code> hat einen optionalen Startwert.</p>
+            <pre><code>werte = [4, 7, 2, 9, 1]
+min(werte)        # 1
+max(werte)        # 9
+sum(werte)        # 23
+sum(werte) / len(werte)   # 4.6  (Mittelwert)
+
+# min/max mit key
+woerter = ['Baum', 'Auto', 'Elefant']
+min(woerter, key=len)   # 'Baum'
+max(woerter, key=len)   # 'Elefant'</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Schnelle Statistik auf Ergebnislisten; <code>sum(y == label)</code> zählt Elemente mit einem Wert.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">any(iterable) / all(iterable)</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p><code>any()</code> gibt <code>True</code> zurück, wenn <em>mindestens ein</em> Element truthy ist. <code>all()</code> erfordert, dass <em>alle</em> Elemente truthy sind.</p>
+            <pre><code>any([0, 0, 1, 0])    # True
+all([1, 1, 1, 1])    # True
+all([1, 0, 1])       # False
+
+# Typisches Muster: Bedingung über Liste prüfen
+noten = [85, 92, 78, 61]
+all(n >= 50 for n in noten)   # True (alle bestanden)
+any(n >= 90 for n in noten)   # True (mind. eine ≥ 90)</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Validierungschecks auf Datensätzen; prüfen ob alle Klassen im Split vorhanden sind.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">abs() / round() / isinstance()</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p><code>abs(x)</code> — Betrag. <code>round(x, n)</code> — auf <code>n</code> Nachkommastellen runden. <code>isinstance(obj, Typ)</code> — Typprüfung.</p>
+            <pre><code>abs(-3.7)               # 3.7
+round(3.14159, 2)       # 3.14
+round(2.5)              # 2  (banker's rounding!)
+
+isinstance(42, int)        # True
+isinstance([1,2], list)    # True
+isinstance(3.0, (int, float))  # True
+
+# Typ ermitteln
+type([1, 2, 3])         # &lt;class 'list'&gt;</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Metriken runden für Ausgaben; <code>isinstance</code> für flexible Funktionsargumente.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           2 · DATENSTRUKTUREN
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="datenstrukturen">
+        <div class="section-head">
+          <h2>9.2 Datenstrukturen</h2>
+          <p>list, dict, set und tuple — die vier Grundtypen.</p>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">list – Methoden</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Geordnete, änderbare Sequenz. Wichtigste Methoden: <code>append</code>, <code>extend</code>, <code>insert</code>, <code>remove</code>, <code>pop</code>, <code>sort</code>, <code>reverse</code>, <code>index</code>, <code>count</code>.</p>
+            <pre><code>lst = [3, 1, 4]
+lst.append(5)       # [3, 1, 4, 5]
+lst.extend([9, 2])  # [3, 1, 4, 5, 9, 2]
+lst.insert(0, 0)    # [0, 3, 1, 4, 5, 9, 2]
+lst.remove(4)       # entfernt ersten Treffer
+val = lst.pop()     # entfernt + gibt letztes Element zurück
+lst.sort()          # in-place sortieren
+lst.reverse()       # in-place umkehren
+lst.index(3)        # Index des ersten Treffers
+lst.count(1)        # Anzahl Vorkommen</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Ergebnisse in Schleifen sammeln (<code>ergebnisse.append(score)</code>), Feature-Namen als Liste verwalten.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">dict – Methoden</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Schlüssel-Wert-Paare. Wichtigste Methoden: <code>keys()</code>, <code>values()</code>, <code>items()</code>, <code>get()</code>, <code>update()</code>, <code>pop()</code>, <code>setdefault()</code>.</p>
+            <pre><code>params = {'n_estimators': 100, 'max_depth': 5}
+params['criterion'] = 'gini'    # neues Paar
+params.get('lr', 0.01)          # 0.01 (Default falls fehlt)
+params.update({'max_depth': 8}) # überschreiben
+
+for k, v in params.items():
+    print(f"{k} = {v}")
+
+# Dict-Comprehension
+quadrate = {x: x**2 for x in range(1, 6)}
+# {1:1, 2:4, 3:9, 4:16, 5:25}</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Hyperparameter-Grids für <code>GridSearchCV</code>; Ergebnisse nach Modellname speichern.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">set – Mengenoperationen</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Ungeordnete Menge ohne Duplikate. Erzeugt mit <code>set()</code> oder <code>{...}</code>. Wichtige Operatoren: <code>|</code> (Vereinigung), <code>&amp;</code> (Schnittmenge), <code>-</code> (Differenz), <code>^</code> (sym. Differenz).</p>
+            <pre><code># Duplikate entfernen
+labels = [1, 2, 2, 3, 1, 3]
+unique = set(labels)     # {1, 2, 3}
+unique_list = list(set(labels))
+
+a = {1, 2, 3, 4}
+b = {3, 4, 5, 6}
+a | b    # {1,2,3,4,5,6}  Vereinigung
+a & b    # {3,4}           Schnittmenge
+a - b    # {1,2}           Differenz
+a ^ b    # {1,2,5,6}       sym. Differenz
+
+# Mitgliedschaft testen (O(1))
+3 in a   # True</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Eindeutige Klassen ermitteln (<code>set(y)</code>), Feature-Überschneidungen zweier Mengen prüfen.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">tuple</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Unveränderliche Sequenz. Schneller als Listen, als Dictionary-Key verwendbar. Tuple-Unpacking ist idiomatisches Python.</p>
+            <pre><code>punkt = (3.0, 7.5)
+x, y = punkt           # Unpacking
+print(x, y)            # 3.0  7.5
+
+# Mehrere Rückgabewerte (implizit Tuple)
+def stats(lst):
+    return min(lst), max(lst), sum(lst)/len(lst)
+
+lo, hi, avg = stats([4, 7, 2, 9])
+
+# Named Tuple
+from collections import namedtuple
+Punkt = namedtuple('Punkt', ['x', 'y'])
+p = Punkt(1.0, 2.5)
+print(p.x, p.y)        # 1.0  2.5</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> <code>train_test_split</code> gibt ein Tuple zurück; <code>X.shape</code> ist ein Tuple; Rückgabewerte von sklearn-Methoden.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           3 · ITERTOOLS
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="itertools">
+        <div class="section-head">
+          <h2>9.3 itertools – Kombinatorik &amp; Iteratoren</h2>
+          <p>Effiziente Kombinationen, Permutationen und Iterator-Werkzeuge.</p>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">itertools.permutations(iterable, r)</span>
+            <span class="ref-mod">itertools</span>
+          </div>
+          <div class="ref-body">
+            <p>Erzeugt alle Permutationen der Länge <code>r</code> aus den Elementen des Iterables. Ohne <code>r</code> werden alle Elemente verwendet. Die Anzahl beträgt <code>n! / (n-r)!</code>.</p>
+            <pre><code>from itertools import permutations
+
+items = ['A', 'B', 'C']
+list(permutations(items))
+# [('A','B','C'),('A','C','B'),('B','A','C'),
+#  ('B','C','A'),('C','A','B'),('C','B','A')]
+
+# Nur Paare (r=2) → 3!/(3-2)! = 6
+list(permutations(items, 2))
+# [('A','B'),('A','C'),('B','A'),('B','C'),('C','A'),('C','B')]
+
+# Anzahl ohne Auflisten
+import math
+math.factorial(3)   # 6</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Alle Reihenfolgen von Schritten prüfen; Distanzmatrizen manuell berechnen.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">itertools.combinations(iterable, r)</span>
+            <span class="ref-mod">itertools</span>
+          </div>
+          <div class="ref-body">
+            <p>Erzeugt alle <strong>geordneten</strong> Kombinationen (ohne Wiederholung, Reihenfolge egal) der Länge <code>r</code>. Anzahl: <code>n! / (r! · (n-r)!)</code> = Binomialkoeffizient.</p>
+            <pre><code>from itertools import combinations
+
+merkmale = ['F1', 'F2', 'F3', 'F4']
+
+# Alle Paare (2 aus 4)
+list(combinations(merkmale, 2))
+# [('F1','F2'),('F1','F3'),('F1','F4'),
+#  ('F2','F3'),('F2','F4'),('F3','F4')]
+
+# Anzahl = C(4,2) = 6
+from math import comb
+comb(4, 2)   # 6
+
+# Alle Dreier-Teilmengen
+list(combinations(merkmale, 3))  # 4 Stück</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Feature-Subset-Selektion; alle Hyperparameter-Paare für pairwise Tests.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">itertools.product(*iterables, repeat=1)</span>
+            <span class="ref-mod">itertools</span>
+          </div>
+          <div class="ref-body">
+            <p>Kartesisches Produkt — entspricht verschachtelten <code>for</code>-Schleifen. Nützlich für manuelle Grid-Suchen.</p>
+            <pre><code>from itertools import product
+
+lernraten = [0.01, 0.1]
+schichten = [1, 2, 3]
+
+for lr, n in product(lernraten, schichten):
+    print(f"lr={lr}, layers={n}")
+# lr=0.01, layers=1
+# lr=0.01, layers=2
+# lr=0.01, layers=3
+# lr=0.1,  layers=1  ...
+
+# repeat: jede Kombination von 2 Münzwürfen
+list(product('HT', repeat=2))
+# [('H','H'),('H','T'),('T','H'),('T','T')]</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Manuelles Grid-Search, bevor man <code>GridSearchCV</code> verwendet; kombinatorische Tests.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">itertools.chain / islice / groupby</span>
+            <span class="ref-mod">itertools</span>
+          </div>
+          <div class="ref-body">
+            <p>Weitere nützliche Iterator-Werkzeuge: <code>chain</code> verbindet Iterables, <code>islice</code> schneidet einen Iterator, <code>groupby</code> gruppiert konsekutive Elemente.</p>
+            <pre><code>from itertools import chain, islice, groupby
+
+# chain: mehrere Listen hintereinander
+liste = list(chain([1,2], [3,4], [5]))
+# [1, 2, 3, 4, 5]
+
+# islice: erste N Elemente eines Iterators
+from itertools import count
+first5 = list(islice(count(10), 5))  # [10,11,12,13,14]
+
+# groupby: konsekutive gleiche Elemente
+daten = sorted([('A',1),('B',2),('A',3)], key=lambda x: x[0])
+for key, gruppe in groupby(daten, key=lambda x: x[0]):
+    print(key, list(gruppe))</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Flache Liste aus Liste von Listen erzeugen; Daten nach Label gruppieren.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           4 · COMPREHENSIONS & LAMBDA
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="comprehensions">
+        <div class="section-head">
+          <h2>9.4 Comprehensions &amp; Lambda</h2>
+          <p>Kompakter, idiomatischer Python-Stil.</p>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">List / Dict / Set Comprehension</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Kompakte Syntax zum Erzeugen von Listen, Dicts und Mengen. Optional mit <code>if</code>-Filter.</p>
+            <pre><code># List Comprehension
+quadrate = [x**2 for x in range(1, 6)]
+# [1, 4, 9, 16, 25]
+
+# Mit Filter
+gerade = [x for x in range(10) if x % 2 == 0]
+# [0, 2, 4, 6, 8]
+
+# Dict Comprehension
+d = {k: v*2 for k, v in {'a':1, 'b':2}.items()}
+# {'a': 2, 'b': 4}
+
+# Set Comprehension
+buchstaben = {c.lower() for c in "HalloWelt"}
+# {'h', 'a', 'l', 'o', 'w', 'e', 't'}
+
+# Verschachtelt (flach machen)
+matrix = [[1,2],[3,4],[5,6]]
+flach = [x for zeile in matrix for x in zeile]
+# [1, 2, 3, 4, 5, 6]</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Feature-Transformation in einer Zeile; Filtern von Datenpunkten nach Bedingung.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">Generator Expression</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Wie List Comprehension, aber mit runden Klammern — lazy: wertet Elemente erst bei Bedarf aus. Spart Speicher bei großen Datenmengen.</p>
+            <pre><code># Generator (lazy)
+gen = (x**2 for x in range(1_000_000))
+next(gen)   # 0
+next(gen)   # 1
+
+# Direkt in Funktionen übergeben
+total = sum(x**2 for x in range(10))  # kein extra []
+# 285
+
+any(x > 50 for x in [10, 30, 60])    # True</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Speichereffiziente Aggregationen; <code>sum()</code> und <code>any()</code> ohne Zwischenliste.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">lambda / map() / filter()</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p><code>lambda</code> erstellt anonyme Einzeiler-Funktionen. <code>map(f, iterable)</code> wendet <code>f</code> auf jedes Element an. <code>filter(f, iterable)</code> behält nur Elemente, für die <code>f</code> True liefert.</p>
+            <pre><code># lambda
+verdoppeln = lambda x: x * 2
+verdoppeln(5)    # 10
+
+# Häufig als key-Argument
+paare = [(1, 3), (2, 1), (3, 2)]
+sorted(paare, key=lambda p: p[1])
+# [(2,1),(3,2),(1,3)]
+
+# map – wie List Comprehension, aber lazy
+list(map(lambda x: x**2, [1, 2, 3, 4]))
+# [1, 4, 9, 16]
+
+# filter
+list(filter(lambda x: x > 2, [1, 2, 3, 4]))
+# [3, 4]</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Kurze Transformationsfunktionen für <code>sorted()</code> und <code>max()</code>; <code>map</code> für schnelle Konvertierungen.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           5 · STRING-METHODEN
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="strings">
+        <div class="section-head">
+          <h2>9.5 String-Methoden &amp; f-Strings</h2>
+          <p>Texte verarbeiten und formatieren.</p>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">f-Strings &amp; format()</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>f-Strings (ab Python 3.6) sind die modernste und lesbarste Art zur String-Interpolation. Vollständige Formatierungsoptionen mit <code>:</code>-Syntax.</p>
+            <pre><code>name = "Alice"
+score = 0.9234
+
+# Einfach
+print(f"Name: {name}, Score: {score}")
+
+# Formatierung
+print(f"Genauigkeit: {score:.2%}")   # 92.34%
+print(f"Wert: {score:.4f}")          # 0.9234
+print(f"Spalte: {42:>10}")           # rechtsbündig
+
+# Ausdruck im f-String
+print(f"Quadrat: {3**2}")            # 9
+
+# Alte Variante (immer noch gültig)
+"{:.2f}".format(3.14159)             # '3.14'</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Metriken lesbar ausgeben; Diagramm-Titel und Achsenbeschriftungen.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">split() / join() / strip() / replace()</span>
+            <span class="ref-mod">builtin</span>
+          </div>
+          <div class="ref-body">
+            <p>Die meistgenutzten String-Methoden für Datenvorbereitung und Textverarbeitung.</p>
+            <pre><code>text = "  Hallo, Welt!  "
+text.strip()                  # "Hallo, Welt!"
+text.strip().lower()           # "hallo, welt!"
+
+# split: String → Liste
+"a,b,c".split(',')            # ['a', 'b', 'c']
+"ein satz".split()            # ['ein', 'satz']
+
+# join: Liste → String (Umkehrung von split)
+", ".join(['Alpha', 'Beta', 'Gamma'])
+# 'Alpha, Beta, Gamma'
+
+# replace
+"Hello World".replace("World", "Python")
+# 'Hello Python'
+
+# startswith / endswith / in
+"feature_01".startswith("feature")  # True
+".csv" in "daten.csv"               # True</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Spaltennamen bereinigen; CSV-Zeilen manuell parsen; Feature-Namen filtern.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           6 · MATH & RANDOM
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="math-random">
+        <div class="section-head">
+          <h2>9.6 math &amp; random</h2>
+          <p>Mathematische Funktionen und kontrollierte Zufälligkeit.</p>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">math – Grundfunktionen</span>
+            <span class="ref-mod">math</span>
+          </div>
+          <div class="ref-body">
+            <p>Das <code>math</code>-Modul liefert Gleitkomma-Implementierungen der üblichen mathematischen Funktionen. Für Vektoren/Matrizen besser NumPy verwenden.</p>
+            <pre><code>import math
+
+math.sqrt(16)        # 4.0
+math.log(math.e)     # 1.0
+math.log2(8)         # 3.0
+math.log10(1000)     # 3.0
+math.exp(1)          # 2.718...  (e^1)
+
+math.ceil(3.2)       # 4  (aufrunden)
+math.floor(3.9)      # 3  (abrunden)
+
+math.factorial(5)    # 120
+math.comb(5, 2)      # 10  (Binomialkoeffizient n über k)
+math.perm(5, 2)      # 20  (Permutationen P(n,r))
+
+math.pi              # 3.14159...
+math.inf             # Unendlich
+math.isnan(float('nan'))  # True</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> <code>math.log</code> für Informationsgewinn; <code>math.comb</code> / <code>math.perm</code> statt itertools für reine Zählung.</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">random – Zufallszahlen</span>
+            <span class="ref-mod">random</span>
+          </div>
+          <div class="ref-body">
+            <p>Pseudo-Zufallszahlen für reines Python. Für reproduzierbare ML-Experimente immer <code>random.seed()</code> setzen. Für Arrays lieber <code>numpy.random</code> verwenden.</p>
+            <pre><code>import random
+
+random.seed(42)             # Reproduzierbarkeit
+
+random.random()             # float in [0.0, 1.0)
+random.uniform(1, 10)       # float in [1, 10]
+random.randint(1, 6)        # int in [1, 6]  (inklusive!)
+
+# Zufällig aus einer Sequenz
+random.choice([1, 2, 3, 4, 5])     # ein Element
+random.sample([1,2,3,4,5], k=3)    # 3 ohne Wiederholung
+random.choices([1,2,3], k=3)       # 3 MIT Wiederholung
+
+# Mischen (in-place)
+lst = [1, 2, 3, 4, 5]
+random.shuffle(lst)
+print(lst)   # z.B. [3, 1, 5, 2, 4]</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Zufällige Trainings-/Test-Splits ohne sklearn; Shuffle vor Batches in einfachen Demos.</div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ════════════════════════════════════════════════════
+           7 · COLLECTIONS
+      ════════════════════════════════════════════════════ -->
+      <section class="section" id="collections">
+        <div class="section-head">
+          <h2>9.7 collections – Spezial-Container</h2>
+          <p>Counter, defaultdict und deque für häufige Muster.</p>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">Counter</span>
+            <span class="ref-mod">collections</span>
+          </div>
+          <div class="ref-body">
+            <p>Zählt Vorkommen in einem Iterable. Subklasse von <code>dict</code>. <code>most_common(n)</code> liefert die <code>n</code> häufigsten Elemente.</p>
+            <pre><code>from collections import Counter
+
+labels = [0, 1, 1, 2, 0, 1, 2, 2, 2]
+c = Counter(labels)
+# Counter({2: 4, 1: 3, 0: 2})
+
+c.most_common(2)    # [(2, 4), (1, 3)]
+c[0]                # 2
+c[99]               # 0  (kein KeyError!)
+
+# Wörter zählen
+text = "der der die das die"
+Counter(text.split())
+# Counter({'der':2, 'die':2, 'das':1})</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Klassenverteilung prüfen; Class-Imbalance erkennen (<code>Counter(y_train)</code>).</div>
+          </div>
+        </div>
+
+        <div class="ref">
+          <div class="ref-head">
+            <span class="ref-name">defaultdict</span>
+            <span class="ref-mod">collections</span>
+          </div>
+          <div class="ref-body">
+            <p>Wie <code>dict</code>, aber für fehlende Schlüssel wird automatisch ein Default-Wert erzeugt. Spart das manuelle <code>if key not in d</code>-Muster.</p>
+            <pre><code>from collections import defaultdict
+
+# Elemente nach Klasse gruppieren
+gruppen = defaultdict(list)
+daten = [('A', 1), ('B', 2), ('A', 3), ('B', 4)]
+
+for label, wert in daten:
+    gruppen[label].append(wert)
+
+# defaultdict(&lt;class 'list'&gt;, {'A': [1, 3], 'B': [2, 4]})
+
+# Zählen mit defaultdict(int)
+zaehler = defaultdict(int)
+for x in [1, 2, 1, 3, 2, 1]:
+    zaehler[x] += 1
+# defaultdict(int, {1:3, 2:2, 3:1})</code></pre>
+            <div class="ref-use"><b>Im Kurs:</b> Datenpunkte nach Cluster-Label gruppieren; Metriken pro Klasse akkumulieren.</div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+  <site-footer caption="Python-Referenz · PRM Prüfungsvorbereitung"></site-footer>
+</body>
+</html>
