@@ -5,7 +5,7 @@
 class SiteHeader extends HTMLElement {
   connectedCallback() {
     const page  = this.getAttribute('active');
-    const title = this.getAttribute('title') ?? 'PRM';
+    const title = this.getAttribute('title') ?? 'PRM · V4';
 
     this.style.alignSelf = 'stretch';
 
@@ -93,7 +93,7 @@ class SiteHeader extends HTMLElement {
             </div>
             <div class="brand-text">
               <small>Prüfungsvorbereitung</small>
-              <strong>PRM</strong>
+              <strong>PRM · V4</strong>
             </div>
           </a>
 
