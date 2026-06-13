@@ -1,1 +1,1 @@
-{ "version":"0.0.1","configurations":[{"name":"PRM Web 3007","runtimeExecutable":"python3","runtimeArgs":["/tmp/prm-test/serve.py"],"port":3007}] }
+{ "version":"0.0.1","configurations":[{"name":"PRM Web 3007","runtimeExecutable":"python3","runtimeArgs":["/tmp/serve_v6.py"],"port":3007}] }
